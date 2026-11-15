@@ -1,0 +1,94 @@
+name: AlderVale Graphify
+
+on:
+  push:
+    branches: [main, 'ops/agent-graphify']
+    tags: ['v[0-9]*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aldervale-graphify-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type == 'branch' }}
+
+jobs:
+  graph:
+    name: Build graph and verify MCP
+    if: github.event.repository.private == false && github.event.deleted != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      snapshot_0: ${{ steps.pack.outputs.snapshot_0 }}
+      snapshot_1: ${{ steps.pack.outputs.snapshot_1 }}
+      snapshot_2: ${{ steps.pack.outputs.snapshot_2 }}
+      snapshot_3: ${{ steps.pack.outputs.snapshot_3 }}
+    env:
+      PYTHONHASHSEED: '0'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Install locked Graphify and MCP packages
+        run: >-
+          python -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
+      - name: Index and query the checkout
+        run: |
+          graphify extract . --code-only --max-workers 2 --out "$RUNNER_TEMP/aldervale"
+          python tools/graphify/snapshot.py "$RUNNER_TEMP/aldervale/graphify-out/graph.json"
+          cat "$RUNNER_TEMP/aldervale/graphify-out/receipt.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify copy and query against a local Git remote
+        run: bash tools/graphify/check-publish.sh "$RUNNER_TEMP/aldervale/graphify-out"
+      - name: Pack verified graph for the next job
+        id: pack
+        run: python tools/graphify/transfer.py pack "$RUNNER_TEMP/aldervale/graphify-out"
+
+  verify-transfer:
+    name: Read back the graph on a separate runner
+    needs: graph
+    if: github.event.repository.private == false && github.ref == 'refs/heads/ops/agent-graphify'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Restore and verify both files
+        env:
+          SNAPSHOT_0: ${{ needs.graph.outputs.snapshot_0 }}
+          SNAPSHOT_1: ${{ needs.graph.outputs.snapshot_1 }}
+          SNAPSHOT_2: ${{ needs.graph.outputs.snapshot_2 }}
+          SNAPSHOT_3: ${{ needs.graph.outputs.snapshot_3 }}
+        run: |
+          python3 tools/graphify/transfer.py unpack "$RUNNER_TEMP/snapshot"
+          cat "$RUNNER_TEMP/snapshot/receipt.json" >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    name: Publish verified graph to Git
+    needs: graph
+    if: github.event.repository.private == false && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Restore graph and receipt without storing an Actions artifact
+        env:
+          SNAPSHOT_0: ${{ needs.graph.outputs.snapshot_0 }}
+          SNAPSHOT_1: ${{ needs.graph.outputs.snapshot_1 }}
+          SNAPSHOT_2: ${{ needs.graph.outputs.snapshot_2 }}
+          SNAPSHOT_3: ${{ needs.graph.outputs.snapshot_3 }}
+        run: python3 tools/graphify/transfer.py unpack "$RUNNER_TEMP/snapshot"
+      - name: Publish without replacing history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tools/graphify/publish.sh "$RUNNER_TEMP/snapshot"
