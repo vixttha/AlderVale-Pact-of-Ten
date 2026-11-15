@@ -3,6 +3,9 @@
 Google AI Studio remains the main builder. Codex maintains focused tooling and
 tests. GitHub Actions runs the checks against the commit shown on each run.
 
+Follow the owner's [project rules](../PROJECT_RULES.md): the repository stays
+public, Notion stays private, and project work must add no unapproved spending.
+
 ## Runner coverage
 
 The validation workflow runs seven independent jobs:
@@ -48,6 +51,8 @@ Firestore emulator; no Firebase login, production account, or secret is needed.
 Pushes to main/codex branches and pull requests run automatically while public.
 If the repository becomes private, all jobs skip automatically; use Actions >
 AlderVale validation > Run workflow deliberately to consume private allowances.
+The project rules additionally require establishing that a private dispatch fits
+free allowances without paid overage, or obtaining explicit spending authorization.
 There is no schedule, background agent, automatic deployment, or self-hosted
 runner requirement. Standard hosted public runner compute is free under GitHub's
 current terms; larger runners, excess storage, and external APIs are separate.
