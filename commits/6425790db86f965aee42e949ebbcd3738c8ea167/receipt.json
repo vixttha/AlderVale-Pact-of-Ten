@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "repository": "vixttha/AlderVale-Pact-of-Ten",
+  "source_ref": "refs/heads/cursor/graphify-rerun-6052",
+  "source_commit": "6425790db86f965aee42e949ebbcd3738c8ea167",
+  "graphify_version": "0.9.109",
+  "extraction": "code-only",
+  "graph_sha256": "0bc4e4f27bb00a2fecfcabd98925b2078dc0450934ff98ba9c5fdc5402660826",
+  "nodes": 604,
+  "edges": 1420,
+  "mcp_verified": true,
+  "mcp_source_lookup": "src/App.tsx",
+  "workflow_run": "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43734566406"
+}
