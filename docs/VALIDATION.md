@@ -1,7 +1,6 @@
 # AlderVale validation
 
-Google AI Studio remains the main builder. Codex maintains focused tooling and
-tests. GitHub Actions runs the checks against the commit shown on each run.
+The project owner is the sole project lead and final acceptance authority. ChatGPT.com is the main developer and project manager within its available repository access. Codex CLI is reserved for rare, especially complex work; Grokbot / Glitchwarden and Muse provide on-request issue reviews and independent AI audits, with Muse also implementing fixes when directed. Google AI Studio is optional when the owner chooses, not the assumed lead. GitHub Actions runs checks against the exact commit shown on each run.
 
 Follow the owner's [project rules](../PROJECT_RULES.md): the repository stays
 public, Notion stays private, and project work must add no unapproved spending.
@@ -58,9 +57,7 @@ There is no schedule, background agent, automatic deployment, or self-hosted
 runner requirement. Standard hosted public runner compute is free under GitHub's
 current terms; larger runners, excess storage, and external APIs are separate.
 
-GitHub Issues and pull requests own engineering work. The private Notion project
-home holds the brief, proposals, and AI Studio/Codex handoff. After a code change,
-push it, inspect the exact-SHA Actions run, then pull accepted changes into AI Studio.
+GitHub Issues and pull requests own engineering work. The private Notion project holds briefs, proposals, decisions, and cross-tool handoffs. After a code change, push a scoped working branch/PR, inspect the exact-SHA Actions run, and leave merge/release decisions to the owner. The owner chooses where accepted main changes are synchronized (AI Studio, Cursor, Muse, or another available environment).
 
 ## Evidence limits
 
