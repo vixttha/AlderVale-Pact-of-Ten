@@ -2,7 +2,13 @@
 
 The Test Vault is the project's catalog of executable regression tests and the player or system risks they protect. Keep tests close to the lowest layer that can prove the behavior; add a browser or emulator test when the defect crosses a real UI, storage, network, or authorization boundary.
 
-This README describes the test surface integrated into the PR #27 candidate. A test being listed or implemented does not by itself mean it has passed. Record verification against the exact commit and GitHub Actions run that executed it.
+The Vault builds on the gameplay candidate in PR #27. The catalogs describe broader coverage, including cases that still need fixtures, deployments, or manual playthroughs.
+
+- [Game and player journeys](game-catalog.md)
+- [Engineering and release](engineering-catalog.md)
+- [Languages, formats, and tools](languages.md)
+
+Record each verified result against the exact commit and GitHub Actions run that executed it.
 
 ## Evidence labels
 
@@ -36,6 +42,7 @@ The Vault test exercises the gameplay and guest-storage boundary with isolated l
 | tests/rowanHuman.test.ts | Human scale/grounding, skeleton and material ownership, authored animation clips, and safe resource release. | Core Vitest |
 | tests/rowanLifecycle.test.ts | Asynchronous model loading, disposed-avatar protection, shared source requests, fallback, and user-driven retry. | Core Vitest |
 | tests/rowanResourceOwnership.test.ts | Shared versus instance-owned rendering resource cleanup. | Core Vitest |
+| tests/vault/gameData.test.ts | Catalog IDs, starter deck references, spell inputs, creature cards, quest givers and rewards, NPCs and spawn points, and Term cosmetics. | Core Vitest |
 | tests/vault/guestQuestSave.test.ts | First Spark guest quest payout, level rollover, persistence, idempotency, and realm isolation (G13-001). | Core Vitest |
 | tests/firestore.integration.test.ts | Owner transactions, lineage, multi-hatch saves, Term claims, guest migration, settings, private wallets/galleries, Bazaar/trades, and House membership. | Firestore emulator |
 
