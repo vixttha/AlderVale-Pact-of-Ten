@@ -98,6 +98,7 @@ export interface WizardDocument {
     almanacDay: number;
     lastAlmanacClaim: string;
     completedQuests: string[];
+    questWins?: Record<string, number>;
     bestiarySeen: string[];
     titleBadge: string;
     loadouts: WizardLoadout[];

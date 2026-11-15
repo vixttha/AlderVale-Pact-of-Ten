@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FastForward,
   Flag,
@@ -107,11 +107,14 @@ interface DuelArenaModalProps {
   wizard: WizardDocument;
   creatures: OwnedCreature[];
   liveDuelState: DuelState | null;
+  spectating: boolean;
+  turnDeadline: number | null;
+  worldConnected: boolean;
   activeLiveDuels: { duelId: string; mode: string; round: number; title: string }[];
   solo2xDefault: boolean;
   onStartLocalDuel: (state: DuelState) => void;
   onUpdateLocalDuel: (state: DuelState | null) => void;
-  onSubmitLiveAction: (action: TurnActionInput) => void;
+  onSubmitLiveAction: (action: TurnActionInput) => boolean;
   onQueuePvp: () => void;
   onQueueCoop: () => void;
   onSpectateDuel: (duelId: string) => void;
@@ -120,6 +123,7 @@ interface DuelArenaModalProps {
     mode: DuelState['mode'];
     spireFloor?: number;
     trialElement?: ElementId;
+    completed?: boolean;
   }) => void;
   onClose: () => void;
 }
@@ -128,6 +132,9 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   wizard,
   creatures,
   liveDuelState,
+  spectating,
+  turnDeadline,
+  worldConnected,
   activeLiveDuels,
   solo2xDefault,
   onStartLocalDuel,
@@ -154,18 +161,29 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   const [pvpSecondsLeft, setPvpSecondsLeft] = useState<number | null>(null);
 
   const duel = liveDuelState ?? localDuel;
+  const turnInFlight = useRef(false);
+  const localTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [turnPending, setTurnPending] = useState(false);
+  useEffect(() => {
+    turnInFlight.current = false;
+    setTurnPending(false);
+  }, [duel?.duelId, duel?.round, duel?.phase, worldConnected]);
+
+  useEffect(() => () => {
+    if (localTimer.current) clearTimeout(localTimer.current);
+  }, []);
 
   useEffect(() => {
     if (!duel || !duel.turnTimerSeconds || duel.phase !== 'planning') {
       setPvpSecondsLeft(null);
       return;
     }
-    setPvpSecondsLeft(duel.turnTimerSeconds);
-    const id = setInterval(() => {
-      setPvpSecondsLeft((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
-    }, 1000);
+    const deadline = turnDeadline ?? Date.now() + duel.turnTimerSeconds * 1000;
+    const update = () => setPvpSecondsLeft(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+    update();
+    const id = setInterval(update, 250);
     return () => clearInterval(id);
-  }, [duel?.duelId, duel?.round, duel?.phase]);
+  }, [duel?.duelId, duel?.round, duel?.phase, turnDeadline]);
 
   function buildPlayerCombatant(gearlessSpire = false): CombatantState {
     const activeTalents = creatures.find((c) => c.id === wizard.activeCreatureId)?.talents ?? [];
@@ -309,8 +327,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   }
 
   const handleCastOrPass = (pass = false) => {
-    if (!duel || duel.phase !== 'planning') return;
-    const me = duel.playerTeam.find((p) => p.id === wizard.id) ?? duel.playerTeam[0];
+    if (!duel || duel.phase !== 'planning' || spectating || turnInFlight.current) return;
+    const me = duel.playerTeam[0];
     if (!me) return;
 
     const action: TurnActionInput = {
@@ -324,6 +342,9 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
       archmasteryElement: archmastery,
     };
 
+    if (liveDuelState && !onSubmitLiveAction(action)) return;
+    turnInFlight.current = true;
+    setTurnPending(true);
     academyAudio.playChime('cast');
     setSelectedCardIdx(null);
     setSelectedSideIdx(null);
@@ -331,10 +352,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     setDiscardMode(false);
     setCreatureMode('skill');
 
-    if (liveDuelState) {
-      onSubmitLiveAction(action);
-      return;
-    }
+    if (liveDuelState) return;
 
     const actions: TurnActionInput[] = [action];
     for (const foe of duel.enemyTeam) {
@@ -342,7 +360,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     }
 
     const delayMs = speed2x ? 160 : 380;
-    setTimeout(() => {
+    localTimer.current = setTimeout(() => {
+      localTimer.current = null;
       const next = resolveDuelRound(duel, actions);
       setLocalDuel(next);
       onUpdateLocalDuel(next);
@@ -357,7 +376,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     const me = duel.playerTeam[0];
     const enchId = me.hand[enchantModeIdx];
     const tgtId = me.hand[targetIdx];
-    if (!enchId || !tgtId || targetIdx === enchantModeIdx || tgtId.endsWith('+keen')) {
+    if (!enchId || !tgtId || targetIdx === enchantModeIdx || !['attack', 'drain', 'aoe'].includes(SPELL_BY_ID[tgtId]?.kind)) {
       setEnchantModeIdx(null);
       return;
     }
@@ -370,13 +389,14 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   };
 
   const handleClaimExit = (won: boolean) => {
-    if (!rewardClaimed && duel) {
+    if (!rewardClaimed && duel && !spectating) {
       setRewardClaimed(true);
       onDuelFinished({
         won,
         mode: duel.mode,
         spireFloor: duel.spireFloor,
         trialElement: trialTargetElement,
+        completed: duel.phase === 'victory' || duel.phase === 'defeat',
       });
     }
     setLocalDuel(null);
@@ -480,12 +500,14 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
               <div className="flex gap-2">
                 <button
                   onClick={onQueuePvp}
+                  disabled={!worldConnected}
                   className="flex-1 rounded-xl bg-[#256fa8] py-2 text-xs font-bold text-white hover:bg-[#2f80bd]"
                 >
                   Queue 1v1 PvP
                 </button>
                 <button
                   onClick={onQueueCoop}
+                  disabled={!worldConnected}
                   className="flex-1 rounded-xl bg-[#6d597a] py-2 text-xs font-bold text-white hover:bg-[#7d668c]"
                 >
                   Queue Co-op Trial
@@ -513,7 +535,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     );
   }
 
-  const me = duel.playerTeam.find((p) => p.id === wizard.id) ?? duel.playerTeam[0];
+  const me = duel.playerTeam[0];
   const foe = duel.enemyTeam[0];
   const myPet = me?.creatures[me.activeCreatureIdx];
 
@@ -560,7 +582,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
             onClick={() => handleClaimExit(false)}
             className="inline-flex items-center gap-1 rounded-xl border border-red-400/40 bg-red-950/50 px-3 py-1.5 text-xs font-bold text-red-200 hover:bg-red-900/60"
           >
-            <Flag className="h-3.5 w-3.5" /> Flee
+            <Flag className="h-3.5 w-3.5" /> {spectating ? 'Leave Spectator View' : 'Flee'}
           </button>
         </div>
       </div>
@@ -678,7 +700,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                 onClick={() => handleClaimExit(duel.phase === 'victory')}
                 className="mt-2 rounded-xl bg-[#f4c98b] px-5 py-2 text-xs font-bold text-[#241b16]"
               >
-                {duel.phase === 'victory' ? 'Claim Rewards & Return' : 'Return to Sanctuary'}
+                {duel.phase === 'victory' && !liveDuelState ? 'Claim Rewards & Return' : 'Return to Campus'}
               </button>
             </div>
           )}
@@ -732,7 +754,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
       </div>
 
       {/* Bottom Hand, Sideboard, Discard Cycling & Actions */}
-      {me && duel.phase === 'planning' && (
+      {me && !spectating && duel.phase === 'planning' && (
         <div className="mx-auto w-full max-w-6xl rounded-2xl border border-[#d7c7a9]/30 bg-[#1e263d]/95 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2 text-xs">
             <div className="flex items-center gap-2">
@@ -868,16 +890,17 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
             <div className="flex flex-col gap-2 shrink-0">
               <button
                 onClick={() => handleCastOrPass(false)}
-                disabled={selectedCardIdx === null && selectedSideIdx === null && discardSet.length === 0}
+                disabled={turnPending || Boolean(liveDuelState && !worldConnected) || (selectedCardIdx === null && selectedSideIdx === null && discardSet.length === 0)}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#f4c98b] px-5 py-2.5 text-xs font-bold text-[#241b16] disabled:opacity-45"
               >
                 <Wand2 className="h-4 w-4" /> Cast Turn
               </button>
               <button
                 onClick={() => handleCastOrPass(true)}
+                disabled={turnPending || Boolean(liveDuelState && !worldConnected)}
                 className="rounded-xl border border-white/25 bg-[#27314d] px-4 py-1.5 text-xs font-semibold hover:bg-[#334063]"
               >
-                Pass (+Gain Pip)
+                {turnPending ? 'Waiting for turn…' : 'Pass (+Gain Pip)'}
               </button>
             </div>
           </div>

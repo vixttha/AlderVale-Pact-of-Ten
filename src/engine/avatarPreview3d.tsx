@@ -1,17 +1,22 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { clearSceneGroup, disposeScene } from './disposeScene.ts';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { buildWizardGroup, type WizardMeshConfig } from './avatarMesh.ts';
+import { mountRowanModel, type RowanModelKind } from './rowanModel.ts';
 import { addOutlineToGroup, makeAnimeToonMaterial } from './animeShaders.ts';
 
 interface AvatarPreview3DProps {
   config: WizardMeshConfig;
   className?: string;
+  rowanModel?: RowanModelKind;
 }
 
-export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, className = '' }) => {
+export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, className = '', rowanModel }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const avatarSlotRef = useRef<THREE.Group | null>(null);
+  const fallbackRef = useRef<THREE.Group | null>(null);
+  const updateModelRef = useRef<((delta: number) => void) | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -33,7 +38,8 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     const scene = new THREE.Scene();
     const pmrem = new THREE.PMREMGenerator(renderer);
     const roomEnv = new RoomEnvironment();
-    scene.environment = pmrem.fromScene(roomEnv, 0.04).texture;
+    const environmentTarget = pmrem.fromScene(roomEnv, 0.04);
+    scene.environment = environmentTarget.texture;
     roomEnv.dispose();
 
     const sun = new THREE.DirectionalLight('#fff2d6', 2.05);
@@ -57,7 +63,9 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     scene.add(pedestal);
 
     const avatarSlot = new THREE.Group();
-    avatarSlot.add(buildWizardGroup(config));
+    const fallback = new THREE.Group();
+    avatarSlot.add(fallback);
+    fallbackRef.current = fallback;
     scene.add(avatarSlot);
     avatarSlotRef.current = avatarSlot;
 
@@ -68,14 +76,18 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     let disposed = false;
     let rafId = 0;
     let timeoutId = 0;
+    let pendingFence: WebGLSync | null = null;
     let angle = 0.25;
+    let lastDraw = performance.now();
 
     function afterDraw(cb: () => void) {
       const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      pendingFence = sync;
       gl.flush();
       const poll = () => {
         if (disposed) {
           if (sync) gl.deleteSync(sync);
+          pendingFence = null;
           return;
         }
         const state = sync ? gl.getSyncParameter(sync, gl.SYNC_STATUS) : gl.SIGNALED;
@@ -83,6 +95,7 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
           timeoutId = window.setTimeout(poll, 5);
         } else {
           if (sync) gl.deleteSync(sync);
+          pendingFence = null;
           timeoutId = window.setTimeout(cb, 80);
         }
       };
@@ -91,7 +104,11 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
 
     function renderLoop() {
       if (disposed) return;
-      angle += 0.014;
+      const now = performance.now();
+      const delta = Math.min(0.12, (now - lastDraw) / 1000);
+      lastDraw = now;
+      updateModelRef.current?.(delta);
+      angle += delta * 0.84;
       avatarSlot.rotation.y = Math.sin(angle) * 0.65;
       renderer.render(scene, camera);
       if (isSoftwareGl) afterDraw(renderLoop);
@@ -115,8 +132,13 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
       disposed = true;
       cancelAnimationFrame(rafId);
       clearTimeout(timeoutId);
+      if (pendingFence) gl.deleteSync(pendingFence);
+      pendingFence = null;
       ro.disconnect();
       avatarSlotRef.current = null;
+      fallbackRef.current = null;
+      disposeScene(scene);
+      environmentTarget.dispose();
       pmrem.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode === el) el.removeChild(renderer.domElement);
@@ -124,11 +146,21 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
   }, []);
 
   useEffect(() => {
-    const slot = avatarSlotRef.current;
-    if (!slot) return;
-    slot.clear();
-    slot.add(buildWizardGroup(config));
+    const fallback = fallbackRef.current;
+    if (!fallback) return;
+    clearSceneGroup(fallback);
+    fallback.add(buildWizardGroup(config));
   }, [config]);
+
+  useEffect(() => {
+    const slot = avatarSlotRef.current;
+    const fallback = fallbackRef.current;
+    const el = containerRef.current;
+    if (!rowanModel || !slot || !fallback || !el) return;
+    return mountRowanModel(slot, fallback, el, rowanModel, (model) => {
+      updateModelRef.current = model?.update ?? null;
+    });
+  }, [rowanModel]);
 
   return <div ref={containerRef} className={`w-full h-full ${className}`} />;
 };

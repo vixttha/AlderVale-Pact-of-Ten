@@ -67,7 +67,11 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
           goal,
         }),
       });
-      const data = (await resp.json()) as { advice?: string };
+      const data = (await resp.json()) as { advice?: string; error?: string };
+      if (!resp.ok) {
+        setAdvice(data.error ?? 'Unable to reach Archivist Lyra right now.');
+        return;
+      }
       setAdvice(data.advice ?? 'Balance 2 Blades, 1 Prism, and 1 Heal in your 26-card opening cycle.');
     } catch {
       setAdvice('Unable to reach Archivist Lyra right now.');
@@ -190,7 +194,7 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
               Optional strategy desk powered by free-tier Gemini 4 Hydrogen for deck ratios, School Pip combos, and Hybrid breeding tips.
             </p>
             <textarea
-              value={goal}
+              value={goal} maxLength={400}
               onChange={(e) => setGoal(e.target.value)}
               rows={2}
               className="w-full rounded-xl border border-[#d7c7a9] bg-[#fbf6ec] p-3 text-sm"

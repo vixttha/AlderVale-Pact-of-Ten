@@ -180,7 +180,7 @@ export const CAMPUS_QUESTS: QuestDef[] = [
     title: 'Trial of the Hidden Crown',
     giverNpc: 'Marshal Zephyr',
     description: 'Reach Rank 4 and challenge a Rare Trial Guardian (Umbra, Sol, Verdigris, or Chronos).',
-    targetWins: 3,
+    targetWins: 1,
     rewardFlorins: 320,
     rewardXp: 260,
     rewardShards: 8,

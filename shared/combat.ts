@@ -374,33 +374,40 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
   }
   const findActor = (id: string) => allCombatants.find((c) => c.id === id);
 
+  const selectedHandIndices = new Map<TurnActionInput, number>();
   // 1. Pre-resolution hand cycling, archmastery shift, enchant fusion & creature swap
   for (const act of actions) {
     const actor = findActor(act.actorId);
     if (!actor || actor.hp <= 0) continue;
     if (act.archmasteryElement) actor.archmasteryElement = act.archmasteryElement;
 
+    const originalIndices = actor.hand.map((_, index) => index);
     if (act.enchantPair) {
       const { enchantCardIdx, targetCardIdx } = act.enchantPair;
       const enchId = actor.hand[enchantCardIdx];
       const tgtId = actor.hand[targetCardIdx];
-      if (enchId && tgtId && !tgtId.endsWith('+keen') && SPELL_BY_ID[enchId]?.kind === 'enchant') {
+      if (enchantCardIdx !== targetCardIdx && enchId && tgtId && SPELL_BY_ID[enchId]?.kind === 'enchant' &&
+          ['attack', 'drain', 'aoe'].includes(SPELL_BY_ID[tgtId]?.kind)) {
         actor.hand[targetCardIdx] = `${tgtId}+keen`;
         actor.hand.splice(enchantCardIdx, 1);
-        roundLogs.push(`${actor.name} fused Keen Ink onto ${SPELL_BY_ID[tgtId]?.name}!`);
+        originalIndices.splice(enchantCardIdx, 1);
+        roundLogs.push(`${actor.name} fused Keen Ink onto ${SPELL_BY_ID[tgtId].name}!`);
       }
     }
 
-    if (act.discardIndices && act.discardIndices.length > 0) {
-      const sorted = [...act.discardIndices].sort((a, b) => b - a);
-      for (const idx of sorted) {
-        if (idx >= 0 && idx < actor.hand.length) {
-          const [removed] = actor.hand.splice(idx, 1);
-          actor.discard.push(removed);
-        }
+    const discard = new Set(act.discardIndices ?? []);
+    for (let index = actor.hand.length - 1; index >= 0; index--) {
+      if (discard.has(originalIndices[index])) {
+        const [removed] = actor.hand.splice(index, 1);
+        actor.discard.push(removed);
+        originalIndices.splice(index, 1);
       }
-      drawUpToSeven(actor);
     }
+    if (act.cardIndex !== null) {
+      const selected = originalIndices.indexOf(act.cardIndex);
+      if (selected >= 0) selectedHandIndices.set(act, selected);
+    }
+    if (discard.size) drawUpToSeven(actor);
 
     if (act.creatureAction === 'swap' && typeof act.swapCreatureIdx === 'number') {
       const targetSlot = actor.creatures[act.swapCreatureIdx];
@@ -483,13 +490,14 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
     }
 
     // Wizard Spell
+    const chosenHandIndex = selectedHandIndices.get(act);
     let rawCardId: string | null = null;
     let fromSideboard = false;
     if (typeof act.useSideboardIndex === 'number' && act.useSideboardIndex >= 0 && act.useSideboardIndex < actor.sideboard.length) {
       rawCardId = actor.sideboard[act.useSideboardIndex];
       fromSideboard = true;
-    } else if (act.cardIndex !== null && act.cardIndex >= 0 && act.cardIndex < actor.hand.length) {
-      rawCardId = actor.hand[act.cardIndex];
+    } else if (chosenHandIndex !== undefined) {
+      rawCardId = actor.hand[chosenHandIndex];
     }
 
     if (rawCardId) {
@@ -520,8 +528,8 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
             spendPipsForSpell(actor, spell.pipCost, spell.element);
             if (fromSideboard && typeof act.useSideboardIndex === 'number') {
               actor.sideboard.splice(act.useSideboardIndex, 1);
-            } else if (act.cardIndex !== null) {
-              actor.hand.splice(act.cardIndex, 1);
+            } else if (chosenHandIndex !== undefined) {
+              actor.hand.splice(chosenHandIndex, 1);
               actor.discard.push(baseId);
             }
 

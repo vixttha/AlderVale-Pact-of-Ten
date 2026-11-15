@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { clearSceneGroup, disposeScene } from './disposeScene.ts';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -11,6 +12,7 @@ import { ELEMENTS } from '../../shared/elements.ts';
 import type { WizardSculpt } from '../../shared/wardrobe.ts';
 import type { OwnedCreature, PlacedDormItem } from '../lib/storage.ts';
 import type { EmoteId, LivePlayerPresence } from '../../server/wsHub.ts';
+import { mountRowanModel, usesRowanModel, type RowanModel } from './rowanModel.ts';
 import { buildWizardGroup } from './avatarMesh.ts';
 import { buildCreatureGroup, buildMountGroup } from './creatureMesh.ts';
 import { buildDormItemsGroup, buildZoneScene, type InteractiveHitTarget } from './zoneBuilders.ts';
@@ -128,6 +130,9 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
   onRegisterCaptureFn,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const fallbackAvatarRef = useRef<THREE.Group | null>(null);
+  const rowanUpdateRef = useRef<RowanModel['update'] | null>(null);
+  const showRowanModel = usesRowanModel(wizard);
   const nameplatesLayerRef = useRef<HTMLDivElement | null>(null);
   const [contextLost, setContextLost] = useState(false);
   const [hoverLabel, setHoverLabel] = useState<{ label: string; sub?: string } | null>(null);
@@ -227,7 +232,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
     renderer.shadowMap.enabled = !isSoftwareGl;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     container.appendChild(renderer.domElement);
 
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
@@ -241,7 +246,8 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
 
     const pmrem = new THREE.PMREMGenerator(renderer);
     const roomEnv = new RoomEnvironment();
-    scene.environment = pmrem.fromScene(roomEnv, 0.04).texture;
+    const environmentTarget = pmrem.fromScene(roomEnv, 0.04);
+    scene.environment = environmentTarget.texture;
     roomEnv.dispose();
 
     // Anime Warm Key + Cool Hemisphere Sky/Ground Rig
@@ -309,7 +315,10 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       equipped: wizard.wardrobe.equipped,
       stitching: wizard.stitching,
     });
-    avatarSlot.add(initAvatar);
+    const fallbackAvatar = new THREE.Group();
+    fallbackAvatar.add(initAvatar);
+    avatarSlot.add(fallbackAvatar);
+    fallbackAvatarRef.current = fallbackAvatar;
     if (wizard.progression.equippedMountId) {
       mountSlot.add(buildMountGroup(wizard.progression.equippedMountId));
       avatarSlot.position.y = 0.36;
@@ -536,6 +545,8 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       targetZoomDist = Math.max(4.5, Math.min(19, targetZoomDist + e.deltaY * 0.008));
     };
 
+    const releaseKeys = () => keys.clear();
+    window.addEventListener('blur', releaseKeys);
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
@@ -559,14 +570,17 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     let disposed = false;
     let rafId = 0;
     let timeoutId = 0;
+    let pendingFence: WebGLSync | null = null;
     let lastTime = performance.now();
 
     function afterDraw(cb: () => void) {
       const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      pendingFence = sync;
       gl.flush();
       const poll = () => {
         if (disposed) {
           if (sync) gl.deleteSync(sync);
+          pendingFence = null;
           return;
         }
         const state = sync ? gl.getSyncParameter(sync, gl.SYNC_STATUS) : gl.SIGNALED;
@@ -574,6 +588,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
           timeoutId = window.setTimeout(poll, 5);
         } else {
           if (sync) gl.deleteSync(sync);
+          pendingFence = null;
           timeoutId = window.setTimeout(cb, 80);
         }
       };
@@ -592,6 +607,8 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       const activeIds = new Set(remotePlayersRef.current.map((p) => p.sessionId));
       for (const [sid, entry] of remoteMeshes.entries()) {
         if (!activeIds.has(sid)) {
+          disposeScene(entry.root);
+          disposeScene(entry.creatureSlot);
           scene.remove(entry.root);
           scene.remove(entry.creatureSlot);
           remoteMeshes.delete(sid);
@@ -632,7 +649,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         }
 
         if (entry.appearanceKey !== appKey) {
-          entry.avatarSlot.clear();
+          clearSceneGroup(entry.avatarSlot);
           entry.avatarSlot.add(
             buildWizardGroup({
               raceId: rp.raceId,
@@ -647,7 +664,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         }
 
         if (entry.mountKey !== mKey) {
-          entry.mountSlot.clear();
+          clearSceneGroup(entry.mountSlot);
           if (rp.mountId) {
             entry.mountSlot.add(buildMountGroup(rp.mountId));
             entry.avatarSlot.position.y = 0.36;
@@ -658,7 +675,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         }
 
         if (entry.creatureKey !== cKey) {
-          entry.creatureSlot.clear();
+          clearSceneGroup(entry.creatureSlot);
           entry.creatureSlot.add(
             buildCreatureGroup({
               speciesId: rp.activeCreatureSpeciesId,
@@ -754,9 +771,12 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       // Animate Wizard Stride / Breathing / Cloak / Wings / Emote
       const activeLocalEmote =
         localEmoteRef.current && now < localEmoteRef.current.until ? localEmoteRef.current.emote : null;
-      const localAvatar = avatarSlot.children[0];
-      if (localAvatar) {
-        animateWizardRig(localAvatar, moving && playerY <= 0.02, t, sprinting ? 1.35 : 1.0, activeLocalEmote);
+      const animateRowan = rowanUpdateRef.current;
+      if (animateRowan) {
+        const motion = playerY > 0.02 ? 'airborne' : !moving || isMounted ? 'idle' : sprinting ? 'sprint' : 'walk';
+        animateRowan(dt, motion);
+      } else if (fallbackAvatar.children[0]) {
+        animateWizardRig(fallbackAvatar.children[0], moving && playerY <= 0.02, t, sprinting ? 1.35 : 1.0, activeLocalEmote);
       }
 
       // Animate Lead Creature Follow + Wings / Tail / Gear / Halo
@@ -1030,7 +1050,10 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       disposed = true;
       cancelAnimationFrame(rafId);
       clearTimeout(timeoutId);
+      if (pendingFence) gl.deleteSync(pendingFence);
+      pendingFence = null;
       resizeObserver.disconnect();
+      window.removeEventListener('blur', releaseKeys);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
@@ -1040,6 +1063,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       renderer.domElement.removeEventListener('webglcontextlost', handleLost);
       renderer.domElement.removeEventListener('webglcontextrestored', handleRestored);
       avatarSlotRef.current = null;
+      fallbackAvatarRef.current = null;
       mountSlotRef.current = null;
       creatureSlotRef.current = null;
       dormSlotRef.current = null;
@@ -1047,7 +1071,11 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       nearbyHitRef.current = null;
       setNearbyPrompt(null);
       if (nameplatesLayer) nameplatesLayer.innerHTML = '';
+      bloomPass?.dispose();
       composer?.dispose();
+      sun.shadow.dispose();
+      disposeScene(scene);
+      environmentTarget.dispose();
       pmrem.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode === container) {
@@ -1056,11 +1084,21 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     };
   }, [zone, dormThemeId]);
 
-  // Seamless Hot-Swap 1: Wizard Avatar Wardrobe / Tailor / Race updates (ZERO scene teardown!)
   useEffect(() => {
     const slot = avatarSlotRef.current;
+    const fallback = fallbackAvatarRef.current;
+    const container = containerRef.current;
+    if (!showRowanModel || !slot || !fallback || !container) return;
+    return mountRowanModel(slot, fallback, container, 'rigged', (model) => {
+      rowanUpdateRef.current = model?.update ?? null;
+    });
+  }, [showRowanModel, zone, dormThemeId]);
+
+  // Seamless Hot-Swap 1: Wizard Avatar Wardrobe / Tailor / Race updates (ZERO scene teardown!)
+  useEffect(() => {
+    const slot = fallbackAvatarRef.current;
     if (!slot) return;
-    slot.clear();
+    clearSceneGroup(slot);
     slot.add(
       buildWizardGroup({
         raceId: wizard.raceId,
@@ -1078,7 +1116,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     const mSlot = mountSlotRef.current;
     const aSlot = avatarSlotRef.current;
     if (!mSlot || !aSlot) return;
-    mSlot.clear();
+    clearSceneGroup(mSlot);
     if (wizard.progression.equippedMountId) {
       mSlot.add(buildMountGroup(wizard.progression.equippedMountId));
       aSlot.position.y = 0.36;
@@ -1091,7 +1129,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
   useEffect(() => {
     const cSlot = creatureSlotRef.current;
     if (!cSlot) return;
-    cSlot.clear();
+    clearSceneGroup(cSlot);
     if (activeCreature) {
       cSlot.add(
         buildCreatureGroup({
@@ -1107,7 +1145,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
   useEffect(() => {
     const dSlot = dormSlotRef.current;
     if (!dSlot) return;
-    dSlot.clear();
+    clearSceneGroup(dSlot);
     if (zone === 'sanctuary' && dormItems.length > 0) {
       const built = buildDormItemsGroup(dormItems, maxAnisoRef.current);
       dSlot.add(built.group);

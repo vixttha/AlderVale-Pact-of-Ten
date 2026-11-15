@@ -19,21 +19,24 @@ import {
   Trophy,
   Flame,
 } from 'lucide-react';
-import { REALMS, rankFromLevel, xpRequiredForLevel, type RealmId } from '../shared/realms.ts';
+import { applySagaEvent, applyWizardXp } from '../shared/quests.ts';
+import { REALMS, type RealmId } from '../shared/realms.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { CAMPUS_NPCS, CAMPUS_QUESTS, MOUNTS, ZONES, type CampusNpc, type ZoneId } from '../shared/world.ts';
 import { computeWizardDerivedStats, type DuelState, type TurnActionInput } from '../shared/combat.ts';
 import { SPECIES_BY_ID } from '../shared/creatures.ts';
 import type { WizardDocument } from '../shared/economy.ts';
 import { RACES } from '../shared/wardrobe.ts';
-import { auth, signInWithGooglePopup } from './lib/firebase.ts';
+import { auth, signInWithGooglePopup, signOutFirebase } from './lib/firebase.ts';
 import {
   ensureCloudAccountAndRealm,
   loadCloudCreatures,
+  createCloudWizards,
+  ensureCloudWizardStarter,
   loadCloudSanctuary,
   loadCloudWizardsForRealm,
   loadGuestRealm,
-  saveCloudCreature,
+  saveCloudCreatures,
   saveCloudRealmAccount,
   saveCloudSanctuary,
   saveCloudWizard,
@@ -54,6 +57,7 @@ import { SanctuaryPanel } from './features/sanctuary/SanctuaryPanel.tsx';
 import { AcademyModalHub, type HubModalTab } from './features/shops/AcademyModalHub.tsx';
 import { academyAudio } from './engine/audioSynth.ts';
 import { MmoMinimap } from './features/world/MmoMinimap.tsx';
+import type { MarketAccount } from '../shared/market.ts';
 import type { EmoteId, LivePlayerPresence } from '../server/wsHub.ts';
 
 type ActiveOverlay =
@@ -64,6 +68,23 @@ type ActiveOverlay =
   | { type: 'deck' }
   | { type: 'sanctuary' }
   | { type: 'hub'; tab: HubModalTab };
+
+function wizardStarter(wizard: WizardDocument): { pet: OwnedCreature; dorm: SanctuaryState } {
+  const byElement: Partial<Record<ElementId, string>> = {
+    ember: 'cinder_kitsune', frost: 'rime_stag', gale: 'zephyr_owl',
+    bramble: 'bramble_sprig', tide: 'harbor_kelpie', spark: 'spark_lynx_cub',
+  };
+  const species = SPECIES_BY_ID[byElement[wizard.elementId] ?? 'cinder_kitsune'];
+  const owner = { ownerId: wizard.ownerId, wizardId: wizard.id, realmId: wizard.realmId };
+  return {
+    pet: {
+      ...owner, id: wizard.activeCreatureId, speciesId: species.id, nickname: species.stageNames[0],
+      elementId: species.element, stage: 1, chromatic: 'none', branchChoice: 'A',
+      bondXp: 0, wins: 0, talents: ['tal_sturdy'],
+    },
+    dorm: { ...owner, themeId: 'sunlit_loft', weatherId: 'clear_breeze', isPublic: false, items: [], gardens: [] },
+  };
+}
 
 export function App() {
   const [fbUser, setFbUser] = useState<User | null>(null);
@@ -110,6 +131,23 @@ export function App() {
   const seqRef = useRef(0);
   const [activeLiveDuels, setActiveLiveDuels] = useState<{ duelId: string; mode: string; round: number; title: string }[]>([]);
   const [liveDuelState, setLiveDuelState] = useState<DuelState | null>(null);
+  const [spectating, setSpectating] = useState(false);
+  const [turnDeadline, setTurnDeadline] = useState<number | null>(null);
+  const [worldConnected, setWorldConnected] = useState(false);
+  const [wallet, setWallet] = useState<MarketAccount | null>(null);
+  const updateWallet = useCallback((next: MarketAccount) => {
+    setWallet((current) => !current || (next.revision ?? 0) >= (current.revision ?? 0) ? next : current);
+  }, []);
+  const currentPresence = useRef({ activeWizard, creatures, zone });
+  currentPresence.current = { activeWizard, creatures, zone };
+  const realmLoad = useRef(0);
+  const [realmReady, setRealmReady] = useState(true);
+  const wizardSaves = useRef(Promise.resolve());
+  const wizardCreation = useRef(false);
+  const previousUser = useRef<string | null>(null);
+  const joined = useRef(false);
+  const ignoredDuel = useRef<string | null>(null);
+  const worldEntry = useRef(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<{ senderName: string; text: string; elementId: ElementId }[]>([]);
@@ -119,6 +157,7 @@ export function App() {
   const [tradeSession, setTradeSession] = useState<{
     tradeId: string;
     partnerName: string;
+    isA: boolean;
     aOfferFlorins: number;
     bOfferFlorins: number;
     aLocked: boolean;
@@ -142,7 +181,7 @@ export function App() {
   }, [settings.harpVolume, settings.sfxVolume]);
 
   // Load realm state (Cloud if signed in, else Guest localStorage)
-  const loadRealmData = useCallback(async (user: User | null, realm: RealmId) => {
+  const loadRealmData = useCallback(async (user: User | null, realm: RealmId, version: number) => {
     if (!user) {
       const guest = loadGuestRealm(realm);
       setRealmAccount(guest.account);
@@ -155,44 +194,62 @@ export function App() {
     // Guest-to-Google automatic migration if cloud realm has 0 wizards
     const guest = loadGuestRealm(realm);
     if (cloudWizards.length === 0 && guest.wizards.length > 0) {
-      const migrated: WizardDocument[] = [];
-      for (const gw of guest.wizards) {
-        const ownedWiz: WizardDocument = { ...gw, ownerId: user.uid };
-        await saveCloudWizard(ownedWiz, true);
-        migrated.push(ownedWiz);
-        for (const pet of guest.creatures[gw.id] ?? []) {
-          await saveCloudCreature({ ...pet, ownerId: user.uid }, true);
-        }
-        const gSanc = guest.sanctuaries[gw.id];
-        if (gSanc) await saveCloudSanctuary({ ...gSanc, ownerId: user.uid }, true);
-      }
+      const entries = guest.wizards.slice(0, 3).map((gw) => ({
+        wizard: { ...gw, ownerId: user.uid },
+        pets: (guest.creatures[gw.id] ?? []).map((pet) => ({ ...pet, ownerId: user.uid })),
+        sanctuary: guest.sanctuaries[gw.id] ? { ...guest.sanctuaries[gw.id], ownerId: user.uid } : null,
+      }));
+      const migrated = entries.map(({ wizard }) => wizard);
       const mergedAcc: RealmAccountState = {
-        ...cloudAcc,
-        wizardIds: migrated.map((w) => w.id),
+        ...cloudAcc, wizardIds: migrated.map((w) => w.id),
         unlockedRaces: Array.from(new Set([...cloudAcc.unlockedRaces, ...guest.account.unlockedRaces])),
         termXp: Math.max(cloudAcc.termXp, guest.account.termXp),
       };
-      await saveCloudRealmAccount(user.uid, mergedAcc);
+      if (version !== realmLoad.current) return;
+      await createCloudWizards(mergedAcc, entries);
+      if (version !== realmLoad.current) return;
       setRealmAccount(mergedAcc);
       setWizards(migrated);
       showToast('Guest progress migrated to your Google Cloud account!');
       return;
     }
 
+    if (version !== realmLoad.current) return;
     setRealmAccount(cloudAcc);
     setWizards(cloudWizards);
   }, [showToast]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
+      const version = ++realmLoad.current;
+      const uid = user?.uid ?? null;
+      if (uid !== previousUser.current) {
+        previousUser.current = uid;
+        ++worldEntry.current;
+        setActiveWizard(null);
+        setLiveDuelState(null);
+        setOverlay({ type: 'none' });
+      }
       setFbUser(user);
-      void loadRealmData(user, selectedRealm);
+      setRealmReady(!user);
+      if (user) {
+        setWizards([]);
+        setRealmAccount({ ...loadGuestRealm(selectedRealm).account, uid: user.uid, wizardIds: [] });
+      }
+      void loadRealmData(user, selectedRealm, version).then(() => {
+        if (version === realmLoad.current) setRealmReady(true);
+      }).catch(() => {
+        if (version === realmLoad.current) showToast('Cloud saves could not be loaded. Check your connection or sign out to play as a guest.');
+      });
     });
-    return () => unsub();
-  }, [selectedRealm, loadRealmData]);
+    return () => {
+      ++realmLoad.current;
+      unsub();
+    };
+  }, [selectedRealm, loadRealmData, showToast]);
 
   const persistWizard = useCallback(
-    (next: WizardDocument, isNew = false) => {
+    (next: WizardDocument, pets: OwnedCreature[] = [], account?: RealmAccountState, updatedPets: OwnedCreature[] = []) => {
       setActiveWizard(next);
       setWizards((prev) => {
         const idx = prev.findIndex((w) => w.id === next.id);
@@ -200,29 +257,36 @@ export function App() {
         if (!fbUser) {
           const guest = loadGuestRealm(next.realmId);
           guest.wizards = list;
+          if (account) guest.account = account;
+          if (pets.length || updatedPets.length) {
+            const byId = new Map((guest.creatures[next.id] ?? []).map((pet) => [pet.id, pet]));
+            for (const pet of [...pets, ...updatedPets]) byId.set(pet.id, pet);
+            guest.creatures[next.id] = [...byId.values()];
+          }
           saveGuestRealm(next.realmId, guest);
         }
         return list;
       });
-      if (fbUser) {
-        void saveCloudWizard(next, isNew);
-      }
+      if (fbUser) wizardSaves.current = wizardSaves.current.then(
+        () => saveCloudWizard(next, pets, account, updatedPets),
+      ).catch(() => showToast('Cloud save failed. Your latest changes may need to be retried.'));
     },
-    [fbUser],
+    [fbUser, showToast],
   );
 
   const persistRealmAccount = useCallback(
     (next: RealmAccountState) => {
       setRealmAccount(next);
       if (fbUser) {
-        void saveCloudRealmAccount(fbUser.uid, next);
+        wizardSaves.current = wizardSaves.current.then(() => saveCloudRealmAccount(fbUser.uid, next))
+          .catch(() => showToast('Realm progress could not be saved.'));
       } else {
         const guest = loadGuestRealm(next.realmId);
         guest.account = next;
         saveGuestRealm(next.realmId, guest);
       }
     },
-    [fbUser],
+    [fbUser, showToast],
   );
 
   const persistCreatures = useCallback(
@@ -230,22 +294,22 @@ export function App() {
       setCreatures(nextList);
       if (!activeWizard) return;
       if (fbUser) {
-        if (newCreature) void saveCloudCreature(newCreature, true);
-        else nextList.forEach((c) => void saveCloudCreature(c, false));
+        const pending = newCreature ? saveCloudCreatures([newCreature], new Set([newCreature.id])) : saveCloudCreatures(nextList);
+        void pending.catch(() => showToast('Creature progress could not be saved.'));
       } else {
         const guest = loadGuestRealm(activeWizard.realmId);
         guest.creatures[activeWizard.id] = nextList;
         saveGuestRealm(activeWizard.realmId, guest);
       }
     },
-    [fbUser, activeWizard],
+    [fbUser, activeWizard, showToast],
   );
 
   const persistSanctuary = useCallback(
     (nextSanc: SanctuaryState, isNew = false) => {
       setSanctuary(nextSanc);
       if (fbUser) {
-        void saveCloudSanctuary(nextSanc, isNew);
+        void saveCloudSanctuary(nextSanc, isNew).catch(() => showToast('Your Dorm changes could not be saved.'));
       } else {
         const guest = loadGuestRealm(nextSanc.realmId);
         guest.sanctuaries[nextSanc.wizardId] = nextSanc;
@@ -255,224 +319,280 @@ export function App() {
     [fbUser],
   );
 
-  const enterWorld = async (wiz: WizardDocument) => {
+  const enterWorld = async (wiz: WizardDocument, prepared?: { pet: OwnedCreature; dorm: SanctuaryState }) => {
+    const entry = ++worldEntry.current;
     academyAudio.unlock();
-    setActiveWizard(wiz);
-    setZone('hub');
-
-    let loadedPets: OwnedCreature[] = [];
-    let loadedSanc: SanctuaryState | null = null;
-    if (fbUser) {
-      loadedPets = await loadCloudCreatures(wiz.id);
-      loadedSanc = await loadCloudSanctuary(wiz.id, wiz.realmId);
-    } else {
-      const guest = loadGuestRealm(wiz.realmId);
-      loadedPets = guest.creatures[wiz.id] ?? [];
-      loadedSanc = guest.sanctuaries[wiz.id] ?? null;
-    }
-
-    if (loadedPets.length === 0) {
-      const starterMap: Record<string, string> = {
-        ember: 'cinder_kitsune',
-        frost: 'rime_stag',
-        gale: 'zephyr_owl',
-        bramble: 'bramble_sprig',
-        tide: 'harbor_kelpie',
-        spark: 'spark_lynx_cub',
-      };
-      const spId = starterMap[wiz.elementId] ?? 'cinder_kitsune';
-      const sp = SPECIES_BY_ID[spId];
-      const pet: OwnedCreature = {
-        id: wiz.activeCreatureId,
-        ownerId: wiz.ownerId,
-        wizardId: wiz.id,
-        realmId: wiz.realmId,
-        speciesId: spId,
-        nickname: sp.stageNames[0],
-        elementId: sp.element,
-        stage: 1,
-        chromatic: 'none',
-        branchChoice: 'A',
-        bondXp: 0,
-        wins: 0,
-        talents: ['tal_sturdy'],
-      };
-      loadedPets = [pet];
-      if (fbUser) void saveCloudCreature(pet, true);
-      else {
-        const guest = loadGuestRealm(wiz.realmId);
-        guest.creatures[wiz.id] = loadedPets;
-        saveGuestRealm(wiz.realmId, guest);
+    try {
+      let loadedPets: OwnedCreature[];
+      let loadedSanc: SanctuaryState;
+      if (prepared) {
+        loadedPets = [prepared.pet];
+        loadedSanc = prepared.dorm;
+      } else {
+        const defaults = wizardStarter(wiz);
+        if (fbUser) {
+          const [pets, dorm] = await Promise.all([
+            loadCloudCreatures(wiz.id), loadCloudSanctuary(wiz.id, wiz.realmId),
+          ]);
+          await ensureCloudWizardStarter(wiz, pets.length ? null : defaults.pet, dorm ? null : defaults.dorm);
+          loadedPets = pets.length ? pets : await loadCloudCreatures(wiz.id);
+          loadedSanc = dorm ?? await loadCloudSanctuary(wiz.id, wiz.realmId) ?? defaults.dorm;
+        } else {
+          const guest = loadGuestRealm(wiz.realmId);
+          loadedPets = guest.creatures[wiz.id]?.length ? guest.creatures[wiz.id] : [defaults.pet];
+          loadedSanc = guest.sanctuaries[wiz.id] ?? defaults.dorm;
+          guest.creatures[wiz.id] = loadedPets;
+          guest.sanctuaries[wiz.id] = loadedSanc;
+          saveGuestRealm(wiz.realmId, guest);
+        }
       }
+      if (worldEntry.current !== entry || (fbUser?.uid ?? null) !== (auth.currentUser?.uid ?? null)) return;
+      setCreatures(loadedPets);
+      setSanctuary(loadedSanc);
+      setZone('hub');
+      setOverlay({ type: 'none' });
+      setActiveWizard(wiz);
+    } catch {
+      showToast('Could not load this wizard’s save. Please try again.');
     }
-
-    if (!loadedSanc) {
-      loadedSanc = {
-        ownerId: wiz.ownerId,
-        wizardId: wiz.id,
-        realmId: wiz.realmId,
-        themeId: 'sunlit_loft',
-        weatherId: 'clear_breeze',
-        isPublic: false,
-        items: [],
-        gardens: [],
-      };
-      if (fbUser) void saveCloudSanctuary(loadedSanc, true);
-      else {
-        const guest = loadGuestRealm(wiz.realmId);
-        guest.sanctuaries[wiz.id] = loadedSanc;
-        saveGuestRealm(wiz.realmId, guest);
-      }
-    }
-
-    setCreatures(loadedPets);
-    setSanctuary(loadedSanc);
   };
 
-  const handleCreateWizard = async (wiz: WizardDocument) => {
-    persistWizard(wiz, true);
-    const nextAcc = { ...realmAccount, wizardIds: [...realmAccount.wizardIds, wiz.id].slice(0, 3) };
-    persistRealmAccount(nextAcc);
-    await enterWorld(wiz);
+  const handleCreateWizard = async (wiz: WizardDocument): Promise<boolean> => {
+    if (wizardCreation.current || !realmReady || wizards.length >= 3) return false;
+    wizardCreation.current = true;
+    try {
+      const nextAcc = { ...realmAccount, wizardIds: [...realmAccount.wizardIds, wiz.id].slice(0, 3) };
+      if (fbUser) {
+        const owned = { ...wiz, ownerId: fbUser.uid };
+        const prepared = wizardStarter(owned);
+        await createCloudWizards(nextAcc, [{ wizard: owned, pets: [prepared.pet], sanctuary: prepared.dorm }]);
+        setRealmAccount(nextAcc);
+        setWizards((current) => [...current, owned]);
+        await enterWorld(owned, prepared);
+      } else {
+        const prepared = wizardStarter(wiz);
+        const guest = loadGuestRealm(wiz.realmId);
+        saveGuestRealm(wiz.realmId, {
+          ...guest, account: nextAcc, wizards: [...guest.wizards, wiz],
+          creatures: { ...guest.creatures, [wiz.id]: [prepared.pet] },
+          sanctuaries: { ...guest.sanctuaries, [wiz.id]: prepared.dorm },
+        });
+        setRealmAccount(nextAcc);
+        setWizards((current) => [...current, wiz]);
+        await enterWorld(wiz, prepared);
+      }
+      return true;
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Could not save the new wizard.');
+      return false;
+    } finally {
+      wizardCreation.current = false;
+    }
   };
 
-  // WebSocket Live Realm Sync
+  function sendWorld(message: Record<string, unknown>): boolean {
+    const socket = wsRef.current;
+    if (!joined.current || socket?.readyState !== WebSocket.OPEN) {
+      showToast('The live realm is reconnecting. Try again shortly.');
+      return false;
+    }
+    socket.send(JSON.stringify(message));
+    return true;
+  }
+
   useEffect(() => {
     if (!activeWizard) return;
-    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${proto}//${window.location.host}/ws`);
-    wsRef.current = ws;
-    const activePet = creatures.find((c) => c.id === activeWizard.activeCreatureId) ?? creatures[0];
+    const initialWizard = activeWizard;
+    if (fbUser && activeWizard.ownerId !== fbUser.uid) return;
+    let socket: WebSocket | null = null;
+    let retry: ReturnType<typeof setTimeout>;
+    let stopped = false;
+    let delay = 500;
+    ignoredDuel.current = null;
+    const ticketKey = `aldervale-live:${initialWizard.realmId}:${initialWizard.id}`;
+    let guestTicket: string | null = null;
+    let serverSession: string | null = null;
 
-    ws.onopen = () => {
-      const spawn = ZONES[zone].spawnPos;
-      ws.send(
-        JSON.stringify({
-          type: 'join_world',
-          presence: {
-            wizardId: activeWizard.id,
-            ownerId: activeWizard.ownerId,
-            name: activeWizard.name,
-            realmId: activeWizard.realmId,
-            zone,
-            raceId: activeWizard.raceId,
-            beastClan: activeWizard.beastClan,
-            elementId: activeWizard.elementId,
-            level: activeWizard.level,
-            rank: activeWizard.rank,
-            titleBadge: activeWizard.progression.titleBadge,
-            x: spawn[0],
-            y: spawn[1],
-            z: spawn[2],
-            rotY: 0,
-            mountId: activeWizard.progression.equippedMountId,
-            activeCreatureSpeciesId: activePet?.speciesId ?? 'cinder_kitsune',
-            activeCreatureStage: activePet?.stage ?? 1,
-            activeCreatureChromatic: activePet?.chromatic ?? 'none',
-            sculpt: activeWizard.sculpt,
-            equipped: activeWizard.wardrobe.equipped,
-            stitching: activeWizard.stitching,
-          },
-        }),
-      );
-    };
-
-    ws.onmessage = (ev) => {
-      try {
-        const data = JSON.parse(String(ev.data)) as Record<string, unknown>;
-        if (data.type === 'welcome') {
-          setLocalSessionId(String(data.sessionId ?? ''));
-        } else if (data.type === 'zone_snapshot') {
-          setRemotePlayers((data.players as LivePlayerPresence[]).filter((p) => p.wizardId !== activeWizard.id));
-          setActiveLiveDuels((data.activeDuels as typeof activeLiveDuels) ?? []);
-        } else if (data.type === 'player_joined') {
-          const p = data.player as LivePlayerPresence;
-          if (p.wizardId !== activeWizard.id) {
-            setRemotePlayers((prev) => [...prev.filter((x) => x.sessionId !== p.sessionId), p]);
+    const connect = () => {
+      if (stopped) return;
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${proto}//${window.location.host}/ws`);
+      socket = ws;
+      wsRef.current = ws;
+      ws.onopen = async () => {
+        try {
+          const user = fbUser ? auth.currentUser : null;
+          if (fbUser && user?.uid !== fbUser.uid) throw new Error('Sign-in changed');
+          const idToken = await user?.getIdToken();
+          if (stopped || ws.readyState !== WebSocket.OPEN) return;
+          const current = currentPresence.current;
+          const wizard = current.activeWizard;
+          if (!wizard || wizard.id !== initialWizard.id) return;
+          const pet = current.creatures.find((creature) => creature.id === wizard.activeCreatureId);
+          if (!idToken && !guestTicket) {
+            try { guestTicket = sessionStorage.getItem(ticketKey); } catch { /* optional reconnect storage */ }
           }
-        } else if (data.type === 'player_updated') {
-          const p = data.player as LivePlayerPresence;
-          if (p.wizardId !== activeWizard.id) {
-            setRemotePlayers((prev) => prev.map((x) => (x.sessionId === p.sessionId ? p : x)));
-          }
-        } else if (data.type === 'player_left') {
-          setRemotePlayers((prev) => prev.filter((x) => x.sessionId !== data.sessionId));
-        } else if (data.type === 'player_moved') {
-          setRemotePlayers((prev) =>
-            prev.map((x) =>
-              x.sessionId === data.sessionId
-                ? {
-                    ...x,
-                    x: Number(data.x),
-                    y: Number(data.y),
-                    z: Number(data.z),
-                    rotY: Number(data.rotY),
-                    mountId: (data.mountId as string | null) ?? x.mountId,
-                  }
-                : x,
-            ),
-          );
-        } else if (data.type === 'player_emote') {
-          const emote = String(data.emote ?? 'wave') as EmoteId;
-          const sid = String(data.sessionId ?? '');
-          if (sid) {
-            seqRef.current += 1;
-            setRemoteEmoteEvent({
-              sessionId: sid,
-              emote,
-              until: performance.now() + (emote === 'meditate' ? 4000 : 2800),
-              seq: seqRef.current,
-            });
-          }
-        } else if (data.type === 'chat_message') {
-          const sender = String(data.senderName ?? 'Wizard');
-          const text = String(data.text ?? '');
-          const sid = String(data.senderSessionId ?? '');
-          setChatMessages((prev) => [...prev.slice(-30), { senderName: sender, text, elementId: (data.elementId as ElementId) ?? 'ember' }]);
-          if (sid && !blockedNamesRef.current.includes(sender)) {
-            seqRef.current += 1;
-            setChatBubbleEvent({
-              sessionId: sid,
-              senderName: sender,
-              text,
-              until: performance.now() + 5000,
-              seq: seqRef.current,
-            });
-          }
-        } else if (data.type === 'duel_state') {
-          setLiveDuelState(data.state as DuelState);
-          setOverlay({ type: 'duel' });
-        } else if (data.type === 'queue_status') {
-          showToast(`Joined ${String(data.queue).toUpperCase()} queue (${String(data.count)} waiting in ${activeWizard.realmId})…`);
-        } else if (data.type === 'trade_update') {
-          const tr = data.trade as { tradeId: string; aOfferFlorins: number; bOfferFlorins: number; aLocked: boolean; bLocked: boolean };
-          setTradeSession({ ...tr, partnerName: String(data.partnerName ?? 'Wizard') });
-        } else if (data.type === 'trade_complete') {
-          const delta = Number(data.deltaFlorins ?? 0);
-          setTradeSession(null);
-          setActiveWizard((curr) =>
-            curr ? { ...curr, currencies: { ...curr.currencies, florins: Math.max(0, curr.currencies.florins + delta) } } : curr,
-          );
-          showToast(`Trade finalized! (${delta >= 0 ? `+${delta}` : delta} Florins)`);
+          ws.send(JSON.stringify({
+            type: 'join_world', idToken, guestTicket,
+            presence: {
+              wizardId: wizard.id, name: wizard.name, realmId: wizard.realmId, zone: current.zone,
+              raceId: wizard.raceId, beastClan: wizard.beastClan, elementId: wizard.elementId,
+              level: wizard.level, rank: wizard.rank, titleBadge: wizard.progression.titleBadge,
+              mountId: wizard.progression.equippedMountId, activeCreatureSpeciesId: pet?.speciesId,
+              activeCreatureStage: pet?.stage, activeCreatureChromatic: pet?.chromatic,
+              sculpt: wizard.sculpt, equipped: wizard.wardrobe.equipped, stitching: wizard.stitching,
+            },
+          }));
+        } catch {
+          showToast('Could not connect to the live realm. Check your sign-in.');
+          ws.close();
         }
-      } catch {
-        // ignore bad frames
-      }
-    };
+      };
 
-    return () => {
-      ws.close();
-      wsRef.current = null;
-      setLocalSessionId(null);
+      ws.onmessage = (ev) => {
+        try {
+          const data = JSON.parse(String(ev.data)) as Record<string, unknown>;
+          if (data.type === 'world_joined') {
+            delay = 500;
+            joined.current = true;
+            setWorldConnected(true);
+          } else if (data.type === 'guest_ticket' && typeof data.ticket === 'string') {
+            guestTicket = data.ticket;
+            try { sessionStorage.setItem(ticketKey, data.ticket); } catch { /* optional reconnect storage */ }
+          } else if (data.type === 'world_notice') {
+            showToast(String(data.text ?? 'Live realm unavailable'));
+          } else if (data.type === 'welcome') {
+            serverSession = String(data.sessionId ?? '');
+            setLocalSessionId(serverSession);
+          } else if (data.type === 'zone_snapshot') {
+            setRemotePlayers((data.players as LivePlayerPresence[]).filter((p) => p.sessionId !== serverSession));
+            setActiveLiveDuels((data.activeDuels as typeof activeLiveDuels) ?? []);
+          } else if (data.type === 'player_joined') {
+            const p = data.player as LivePlayerPresence;
+            if (p.sessionId !== serverSession) {
+              setRemotePlayers((prev) => [...prev.filter((x) => x.sessionId !== p.sessionId), p]);
+            }
+          } else if (data.type === 'player_updated') {
+            const p = data.player as LivePlayerPresence;
+            if (p.sessionId !== serverSession) {
+              setRemotePlayers((prev) => prev.map((x) => (x.sessionId === p.sessionId ? p : x)));
+            }
+          } else if (data.type === 'player_left') {
+            setRemotePlayers((prev) => prev.filter((x) => x.sessionId !== data.sessionId));
+          } else if (data.type === 'player_moved') {
+            setRemotePlayers((prev) =>
+              prev.map((x) =>
+                x.sessionId === data.sessionId
+                  ? {
+                      ...x,
+                      x: Number(data.x),
+                      y: Number(data.y),
+                      z: Number(data.z),
+                      rotY: Number(data.rotY),
+                      mountId: data.mountId === null || typeof data.mountId === 'string' ? data.mountId : x.mountId,
+                    }
+                  : x,
+              ),
+            );
+          } else if (data.type === 'player_emote') {
+            const emote = String(data.emote ?? 'wave') as EmoteId;
+            const sid = String(data.sessionId ?? '');
+            if (sid) {
+              seqRef.current += 1;
+              setRemoteEmoteEvent({
+                sessionId: sid,
+                emote,
+                until: performance.now() + (emote === 'meditate' ? 4000 : 2800),
+                seq: seqRef.current,
+              });
+            }
+          } else if (data.type === 'chat_message') {
+            const sender = String(data.senderName ?? 'Wizard');
+            const text = String(data.text ?? '');
+            const sid = String(data.senderSessionId ?? '');
+            setChatMessages((prev) => [...prev.slice(-30), { senderName: sender, text, elementId: (data.elementId as ElementId) ?? 'ember' }]);
+            if (sid && !blockedNamesRef.current.includes(sender)) {
+              seqRef.current += 1;
+              setChatBubbleEvent({
+                sessionId: sid,
+                senderName: sender,
+                text,
+                until: performance.now() + 5000,
+                seq: seqRef.current,
+              });
+            }
+          } else if (data.type === 'duel_state') {
+            const next = data.state as DuelState;
+            if (ignoredDuel.current === next.duelId) return;
+            setLiveDuelState(next);
+            setSpectating(data.spectator === true);
+            setTurnDeadline(typeof data.turnDeadline === 'number' ? data.turnDeadline : null);
+            setOverlay({ type: 'duel' });
+          } else if (data.type === 'queue_status') {
+            showToast(`Joined ${String(data.queue).toUpperCase()} queue (${String(data.count)} waiting in ${activeWizard.realmId})…`);
+          } else if (data.type === 'trade_update') {
+            const tr = data.trade as { tradeId: string; aOfferFlorins: number; bOfferFlorins: number; aLocked: boolean; bLocked: boolean };
+            setTradeSession({ ...tr, partnerName: String(data.partnerName ?? 'Wizard'), isA: data.isA === true });
+          } else if (data.type === 'trade_complete' || data.type === 'market_wallet') {
+            updateWallet(data.wallet as MarketAccount);
+            if (data.type === 'trade_complete') {
+              setTradeSession(null);
+              showToast('Trade completed. Your Bazaar wallet was updated.');
+            }
+          } else if (data.type === 'trade_cancelled') {
+            setTradeSession(null);
+            showToast(String(data.message ?? 'Trade cancelled.'));
+          }
+        } catch {
+          // ignore bad frames
+        }
+      };
+
+      ws.onclose = () => {
+        if (stopped) return;
+        joined.current = false;
+        setWorldConnected(false);
+        setLocalSessionId(null);
+        setRemotePlayers([]);
+        setTradeSession(null);
+        retry = setTimeout(connect, delay);
+        delay = Math.min(4000, delay * 2);
+      };
+      ws.onerror = () => ws.close();
     };
-  }, [activeWizard?.id, activeWizard?.realmId]);
+    connect();
+    return () => {
+      stopped = true;
+      joined.current = false;
+      clearTimeout(retry);
+      socket?.close();
+      wsRef.current = null;
+      setWorldConnected(false);
+      setLocalSessionId(null);
+      setWallet(null);
+    };
+  }, [activeWizard?.id, activeWizard?.realmId, fbUser?.uid]);
+
+  useEffect(() => {
+    if (!activeWizard || !fbUser || !worldConnected || activeWizard.ownerId !== fbUser.uid) return;
+    let cancelled = false;
+    void fbUser.getIdToken().then((token) => fetch(`/api/bazaar/${activeWizard.realmId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })).then(async (response) => {
+      if (response.ok && !cancelled) {
+        const data = await response.json() as { wallet: MarketAccount };
+        if (!cancelled) updateWallet(data.wallet);
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [activeWizard?.id, fbUser?.uid, worldConnected]);
 
   // Broadcast live appearance, mount, race, or companion updates to zone peers
   const activePetForSync = activeWizard
     ? creatures.find((c) => c.id === activeWizard.activeCreatureId) ?? creatures[0]
     : undefined;
   useEffect(() => {
-    if (!activeWizard || wsRef.current?.readyState !== WebSocket.OPEN) return;
+    if (!activeWizard || !worldConnected || wsRef.current?.readyState !== WebSocket.OPEN) return;
     wsRef.current.send(
       JSON.stringify({
         type: 'update_appearance',
@@ -494,6 +614,7 @@ export function App() {
       }),
     );
   }, [
+    worldConnected,
     activeWizard?.raceId,
     activeWizard?.beastClan,
     activeWizard?.level,
@@ -595,31 +716,25 @@ export function App() {
     }
   };
 
-  const handleDuelFinished = (res: { won: boolean; mode: DuelState['mode']; spireFloor?: number; trialElement?: ElementId }) => {
+  const handleDuelFinished = (res: { won: boolean; mode: DuelState['mode']; spireFloor?: number; trialElement?: ElementId; completed?: boolean }) => {
     setLiveDuelState(null);
-    if (!activeWizard) return;
+    if (!activeWizard || spectating) return;
+    const live = res.mode === 'pvp' || res.mode === 'coop';
+    if (live) {
+      if (res.won) showToast(fbUser ? 'Victory! Shared rewards go to your Bazaar account.' : 'Victory in guest practice!');
+      return;
+    }
     if (!res.won) {
+      if (res.mode === 'trial' && res.completed) persistWizard(applySagaEvent(activeWizard, 'rare-trial-attempt'));
       showToast('Visit the Commons Fountain to top off your Flasks and try again!');
       return;
     }
 
     const rCfg = REALMS[activeWizard.realmId];
-    const baseXp =
-      res.mode === 'trial' ? 180 : res.mode === 'coop' ? 160 : res.mode === 'pvp' ? 140 : 85;
-    const gainedXp = Math.round(baseXp * rCfg.xpMultiplier);
-    let nextXp = activeWizard.xp + gainedXp;
-    let nextLevel = activeWizard.level;
-    while (nextXp >= xpRequiredForLevel(nextLevel) && nextLevel < 50) {
-      nextXp -= xpRequiredForLevel(nextLevel);
-      nextLevel += 1;
-    }
-    const nextRank = rankFromLevel(nextLevel);
-
-    // Progress Campus Saga Quests cleanly on wins
-    const nextCompletedQuests = new Set(activeWizard.progression.completedQuests);
-    if (!nextCompletedQuests.has('q_first_duel')) nextCompletedQuests.add('q_first_duel');
-    if (res.mode === 'trial' && !nextCompletedQuests.has('q_rare_trial')) nextCompletedQuests.add('q_rare_trial');
-    if (res.mode === 'coop' && !nextCompletedQuests.has('q_bond_arbor')) nextCompletedQuests.add('q_bond_arbor');
+    const gainedXp = Math.round((res.mode === 'trial' ? 180 : 85) * rCfg.xpMultiplier);
+    const nextStats = applyWizardXp(activeWizard, gainedXp);
+    const nextRank = nextStats.rank;
+    const lead = creatures.find((pet) => pet.id === activeWizard.activeCreatureId) ?? creatures[0];
 
     // Charge 2-win Hybrid Eggs
     const hatchedPets: OwnedCreature[] = [];
@@ -670,29 +785,22 @@ export function App() {
       nextUnlockedRaces.add('astral_kin');
     }
 
-    persistRealmAccount({
-      ...realmAccount,
-      unlockedRaces: Array.from(nextUnlockedRaces),
-      termXp: realmAccount.termXp + Math.round(65 * rCfg.xpMultiplier),
-    });
+    const nextAccount = { ...realmAccount, unlockedRaces: Array.from(nextUnlockedRaces), termXp: realmAccount.termXp + Math.round(65 * rCfg.xpMultiplier) };
 
     const florinWin = Math.round(
-      (res.mode === 'trial' ? 140 : res.mode === 'coop' ? 120 : 65) * rCfg.dropMultiplier,
+      (res.mode === 'trial' ? 140 : 65) * rCfg.dropMultiplier,
     );
-    const updatedWiz: WizardDocument = {
+    let updatedWiz: WizardDocument = {
       ...activeWizard,
-      level: nextLevel,
-      xp: nextXp,
-      rank: nextRank,
+      ...nextStats,
       currencies: {
         florins: activeWizard.currencies.florins + florinWin,
-        honorMarks: activeWizard.currencies.honorMarks + (res.mode === 'pvp' ? 15 : res.mode === 'coop' ? 8 : 4),
-        bondingSeals: activeWizard.currencies.bondingSeals + (res.mode === 'trial' || res.mode === 'coop' ? 1 : 0),
+        honorMarks: activeWizard.currencies.honorMarks + 4,
+        bondingSeals: activeWizard.currencies.bondingSeals + (res.mode === 'trial' ? 1 : 0),
         spellShards: activeWizard.currencies.spellShards + 2,
       },
       progression: {
         ...activeWizard.progression,
-        completedQuests: Array.from(nextCompletedQuests),
         unlockedElements: nextUnlockedElements,
         spireBestFloor: res.spireFloor ? Math.max(activeWizard.progression.spireBestFloor, res.spireFloor) : activeWizard.progression.spireBestFloor,
         eggs: nextEggs,
@@ -700,9 +808,14 @@ export function App() {
       },
     };
 
-    persistWizard(updatedWiz);
+    if (res.mode === 'solo') updatedWiz = applySagaEvent(updatedWiz, 'solo-win');
+    if (res.mode === 'trial') updatedWiz = applySagaEvent(updatedWiz, 'rare-trial-win');
+    if (lead) updatedWiz = applySagaEvent(updatedWiz, 'lead-creature-win');
+    const updatedLead = lead ? { ...lead, wins: (lead.wins ?? 0) + 1 } : null;
+    setRealmAccount(nextAccount);
+    setCreatures([...creatures.map((pet) => pet.id === updatedLead?.id ? updatedLead : pet), ...hatchedPets]);
+    persistWizard(updatedWiz, hatchedPets, nextAccount, updatedLead ? [updatedLead] : []);
     if (hatchedPets.length > 0) {
-      persistCreatures([...creatures, ...hatchedPets], hatchedPets[0]);
       showToast(`Victory! +${gainedXp} XP, +${florinWin}F & Hatched ${hatchedPets[0].nickname}!`);
     } else {
       showToast(`Victory! +${gainedXp} XP, +${florinWin} Florins, +2 Spell Shards!`);
@@ -717,10 +830,13 @@ export function App() {
         selectedRealm={selectedRealm}
         realmAccount={realmAccount}
         wizards={wizards}
-        onSignInGoogle={() => void signInWithGooglePopup()}
+        onSignInGoogle={() => void signInWithGooglePopup().catch(() => showToast('Google sign-in could not complete. Try again.'))}
+        onSignOut={() => void signOutFirebase().catch(() => showToast('Could not sign out. Try again.'))}
         onSelectRealm={setSelectedRealm}
         onEnterWorld={(w) => void enterWorld(w)}
-        onCreateWizard={(w) => void handleCreateWizard(w)}
+        onCreateWizard={handleCreateWizard}
+        notice={toast}
+        realmReady={realmReady}
       />
     );
   }
@@ -925,7 +1041,7 @@ export function App() {
           <div className="mt-3 flex gap-2">
             <button
               onClick={() => {
-                wsRef.current?.send(JSON.stringify({ type: 'trade_propose', targetSessionId: inspectedPlayer.sessionId }));
+                sendWorld({ type: 'trade_propose', targetSessionId: inspectedPlayer.sessionId });
                 setInspectedPlayer(null);
               }}
               className="flex-1 rounded-lg bg-[#38a3a5] py-1.5 font-bold text-white"
@@ -952,30 +1068,32 @@ export function App() {
         <div className="absolute top-20 left-4 w-80 storybook-panel rounded-2xl p-4 text-xs shadow-2xl space-y-2">
           <div className="font-display text-base font-bold">Live Trade: {tradeSession.partnerName}</div>
           <div className="flex items-center justify-between">
-            <span>Offer Florins:</span>
+            <span>Offer Bazaar Florins ({wallet?.florins ?? 0} available):</span>
             <input
               type="number"
               min={0}
-              max={activeWizard.currencies.florins}
-              defaultValue={tradeSession.aOfferFlorins}
-              onChange={(e) => wsRef.current?.send(JSON.stringify({ type: 'trade_step', tradeId: tradeSession.tradeId, florins: Number(e.target.value) }))}
+              max={wallet?.florins ?? 0}
+              value={tradeSession.isA ? tradeSession.aOfferFlorins : tradeSession.bOfferFlorins}
+              onChange={(e) => sendWorld({ type: 'trade_step', tradeId: tradeSession.tradeId, florins: Number(e.target.value) })}
               className="w-24 rounded border px-2 py-1"
             />
           </div>
+          <p>Partner offer: {tradeSession.isA ? tradeSession.bOfferFlorins : tradeSession.aOfferFlorins} Bazaar Florins</p>
           <div className="flex gap-2">
             <button
-              onClick={() => wsRef.current?.send(JSON.stringify({ type: 'trade_step', tradeId: tradeSession.tradeId, lock: true }))}
+              onClick={() => sendWorld({ type: 'trade_step', tradeId: tradeSession.tradeId, lock: true })}
               className="flex-1 rounded-lg bg-[#241b16] py-1.5 font-bold text-[#f4c98b]"
             >
               1. Lock Offer
             </button>
             <button
               disabled={!tradeSession.aLocked || !tradeSession.bLocked}
-              onClick={() => wsRef.current?.send(JSON.stringify({ type: 'trade_step', tradeId: tradeSession.tradeId, confirm: true }))}
+              onClick={() => sendWorld({ type: 'trade_step', tradeId: tradeSession.tradeId, confirm: true })}
               className="flex-1 rounded-lg bg-[#2f8a73] py-1.5 font-bold text-white disabled:opacity-45"
             >
               2. Final Confirm
             </button>
+            <button onClick={() => sendWorld({ type: 'trade_cancel', tradeId: tradeSession.tradeId })}>Cancel</button>
           </div>
         </div>
       )}
@@ -1080,24 +1198,34 @@ export function App() {
           wizard={activeWizard}
           creatures={creatures}
           liveDuelState={liveDuelState}
+          spectating={spectating}
+          turnDeadline={turnDeadline}
+          worldConnected={worldConnected}
           activeLiveDuels={activeLiveDuels}
           solo2xDefault={settings.solo2xDefault}
           onStartLocalDuel={() => {}}
           onUpdateLocalDuel={() => {}}
           onSubmitLiveAction={(action: TurnActionInput) => {
-            wsRef.current?.send(JSON.stringify({ type: 'duel_action', action }));
+            return sendWorld({ type: 'duel_action', action, duelId: liveDuelState?.duelId, round: liveDuelState?.round });
           }}
-          onQueuePvp={() => wsRef.current?.send(JSON.stringify({ type: 'queue_pvp' }))}
-          onQueueCoop={() => wsRef.current?.send(JSON.stringify({ type: 'queue_coop' }))}
-          onSpectateDuel={(duelId) => wsRef.current?.send(JSON.stringify({ type: 'spectate_duel', duelId }))}
+          onQueuePvp={() => sendWorld({ type: 'queue_pvp' })}
+          onQueueCoop={() => sendWorld({ type: 'queue_coop' })}
+          onSpectateDuel={(duelId) => sendWorld({ type: 'spectate_duel', duelId })}
           onDuelFinished={handleDuelFinished}
-          onClose={() => setOverlay({ type: 'none' })}
+          onClose={() => {
+            ignoredDuel.current = liveDuelState?.duelId ?? null;
+            if (spectating || liveDuelState?.phase === 'planning') sendWorld({ type: 'duel_leave' });
+            setSpectating(false);
+            setLiveDuelState(null);
+            setOverlay({ type: 'none' });
+          }}
         />
       )}
 
       {overlay.type === 'tailor' && (
         <TailorStudioPanel
           wizard={activeWizard}
+          bazaarGear={wallet?.gear}
           realmAccount={realmAccount}
           onUpdateWizard={(w) => persistWizard(w)}
           onUpdateRealmAccount={(acc) => persistRealmAccount(acc)}
@@ -1111,6 +1239,11 @@ export function App() {
           creatures={creatures}
           onUpdateWizard={(w) => persistWizard(w)}
           onUpdateCreatures={(list, created) => persistCreatures(list, created)}
+          onRuneCatch={(pet) => {
+            const updated = applySagaEvent(activeWizard, 'rune-catch');
+            setCreatures((list) => list.map((entry) => entry.id === pet.id ? pet : entry));
+            persistWizard(updated, [], undefined, [pet]);
+          }}
           onClose={() => setOverlay({ type: 'none' })}
         />
       )}
@@ -1131,6 +1264,7 @@ export function App() {
           galleryImages={galleryImages}
           onUpdateWizard={(w) => persistWizard(w)}
           onUpdateSanctuary={(s) => persistSanctuary(s)}
+          onTourPublished={() => setSanctuary((value) => value ? { ...value, isPublic: true } : value)}
           onCaptureSkyLens={() => {
             const img = captureFnRef.current();
             if (img) {
@@ -1148,13 +1282,15 @@ export function App() {
           wizard={activeWizard}
           realmAccount={realmAccount}
           isSignedIn={Boolean(fbUser)}
+          wallet={wallet}
+          onWallet={updateWallet}
           settings={settings}
           onUpdateSettings={(patch) => setSettings((s) => ({ ...s, ...patch }))}
           onUpdateWizard={(w) => persistWizard(w)}
           onUpdateRealmAccount={(acc) => persistRealmAccount(acc)}
           onTravelZone={handleZoneChange}
-          onSwitchWizardOrRealm={() => setActiveWizard(null)}
-          onLinkGoogle={() => void signInWithGooglePopup()}
+          onSwitchWizardOrRealm={() => { ++worldEntry.current; setActiveWizard(null); setLiveDuelState(null); }}
+          onLinkGoogle={() => void signInWithGooglePopup().catch(() => showToast('Google sign-in could not complete. Try again.'))}
           onClose={() => setOverlay({ type: 'none' })}
         />
       )}

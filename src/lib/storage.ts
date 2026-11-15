@@ -1,12 +1,15 @@
 import {
   collection,
   doc,
+  deleteField,
   getDoc,
   getDocs,
   query,
   serverTimestamp,
   setDoc,
   where,
+  runTransaction,
+  writeBatch,
 } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from './firebase.ts';
 import type { RealmId } from '../../shared/realms.ts';
@@ -125,55 +128,39 @@ export function saveGuestRealm(realmId: RealmId, bundle: GuestRealmBundle) {
 }
 
 export async function ensureCloudAccountAndRealm(uid: string, displayName: string, email: string | null, realmId: RealmId): Promise<RealmAccountState> {
-  const accPath = `accounts/${uid}`;
-  try {
-    const accRef = doc(db, 'accounts', uid);
-    const accSnap = await getDoc(accRef);
-    if (!accSnap.exists()) {
-      await setDoc(accRef, {
-        uid,
-        displayName: (displayName || 'Alder Wizard').slice(0, 40),
-        ...(email ? { email: email.slice(0, 160) } : {}),
-        settings: { harpVolume: 0.4, sfxVolume: 0.65, solo2xDefault: false },
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-    }
-  } catch (err) {
-    handleFirestoreError(err, OperationType.WRITE, accPath);
-  }
-
   const realmPath = `accounts/${uid}/realms/${realmId}`;
   try {
+    const accRef = doc(db, 'accounts', uid);
     const realmRef = doc(db, 'accounts', uid, 'realms', realmId);
-    const snap = await getDoc(realmRef);
-    if (!snap.exists()) {
-      const fresh: RealmAccountState = {
+    return await runTransaction(db, async (tx) => {
+      const [account, snap] = await Promise.all([tx.get(accRef), tx.get(realmRef)]);
+      if (!account.exists()) {
+        tx.set(accRef, {
+          uid, displayName: (displayName || 'Alder Wizard').slice(0, 40),
+          ...(email ? { email: email.slice(0, 160) } : {}),
+          settings: { harpVolume: 0.4, sfxVolume: 0.65, solo2xDefault: false },
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+        });
+      }
+      if (!snap.exists()) {
+        const fresh: RealmAccountState = {
+          uid, realmId, wizardIds: [], unlockedRaces: [...STARTER_UNLOCKED_RACES],
+          sharedVault: [], termXp: 0, claimedTermTiers: [],
+        };
+        tx.set(realmRef, { ...fresh, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        return fresh;
+      }
+      const d = snap.data();
+      return {
         uid,
         realmId,
-        wizardIds: [],
-        unlockedRaces: [...STARTER_UNLOCKED_RACES],
-        sharedVault: [],
-        termXp: 0,
-        claimedTermTiers: [],
+        wizardIds: Array.isArray(d.wizardIds) ? d.wizardIds : [],
+        unlockedRaces: Array.isArray(d.unlockedRaces) ? d.unlockedRaces : [...STARTER_UNLOCKED_RACES],
+        sharedVault: Array.isArray(d.sharedVault) ? d.sharedVault : [],
+        termXp: Number(d.termXp ?? 0),
+        claimedTermTiers: Array.isArray(d.claimedTermTiers) ? d.claimedTermTiers : [],
       };
-      await setDoc(realmRef, {
-        ...fresh,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      return fresh;
-    }
-    const d = snap.data();
-    return {
-      uid,
-      realmId,
-      wizardIds: Array.isArray(d.wizardIds) ? d.wizardIds : [],
-      unlockedRaces: Array.isArray(d.unlockedRaces) ? d.unlockedRaces : [...STARTER_UNLOCKED_RACES],
-      sharedVault: Array.isArray(d.sharedVault) ? d.sharedVault : [],
-      termXp: Number(d.termXp ?? 0),
-      claimedTermTiers: Array.isArray(d.claimedTermTiers) ? d.claimedTermTiers : [],
-    };
+    });
   } catch (err) {
     handleFirestoreError(err, OperationType.GET, realmPath);
   }
@@ -188,7 +175,6 @@ export async function saveCloudRealmAccount(uid: string, realmAccount: RealmAcco
       {
         uid,
         realmId: realmAccount.realmId,
-        wizardIds: realmAccount.wizardIds.slice(0, 3),
         unlockedRaces: realmAccount.unlockedRaces.slice(0, 20),
         sharedVault: realmAccount.sharedVault.slice(0, 60),
         termXp: Math.max(0, Math.floor(realmAccount.termXp)),
@@ -223,83 +209,129 @@ export async function loadCloudWizardsForRealm(uid: string, realmId: RealmId): P
   }
 }
 
-export async function saveCloudWizard(wizard: WizardDocument, isNew = false) {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-  const wizPath = `wizards/${wizard.id}`;
-  try {
-    const ref = doc(db, 'wizards', wizard.id);
-    const payload = {
-      ownerId: uid,
-      realmId: wizard.realmId,
-      name: wizard.name.slice(0, 24),
-      raceId: wizard.raceId,
-      ...(wizard.beastClan ? { beastClan: wizard.beastClan } : {}),
-      elementId: wizard.elementId,
-      level: wizard.level,
-      xp: wizard.xp,
-      rank: wizard.rank,
-      sculpt: wizard.sculpt,
-      wardrobe: wizard.wardrobe,
-      stitching: wizard.stitching,
-      currencies: wizard.currencies,
-      resources: wizard.resources,
-      progression: wizard.progression,
-      activeCreatureId: wizard.activeCreatureId,
-      updatedAt: serverTimestamp(),
-      ...(isNew ? { createdAt: serverTimestamp() } : {}),
-    };
-    await setDoc(ref, payload, { merge: !isNew });
-
-    await setDoc(
-      doc(db, 'publicWizards', wizard.id),
-      {
-        ownerId: uid,
-        realmId: wizard.realmId,
-        name: wizard.name.slice(0, 24),
-        raceId: wizard.raceId,
-        elementId: wizard.elementId,
-        level: wizard.level,
-        rank: wizard.rank,
-        titleBadge: wizard.progression.titleBadge.slice(0, 40),
-        updatedAt: serverTimestamp(),
-        ...(isNew ? { createdAt: serverTimestamp() } : {}),
-      },
-      { merge: !isNew },
-    );
-  } catch (err) {
-    handleFirestoreError(err, isNew ? OperationType.CREATE : OperationType.UPDATE, wizPath);
-  }
+function wizardPayload(wizard: WizardDocument) {
+  const { ownerId, realmId, name, raceId, beastClan, elementId, level, xp, rank, sculpt,
+    wardrobe, stitching, currencies, resources, progression, activeCreatureId } = wizard;
+  return { ownerId, realmId, name: name.slice(0, 24), raceId, ...(beastClan ? { beastClan } : {}),
+    elementId, level, xp, rank, sculpt, wardrobe, stitching, currencies, resources, progression,
+    activeCreatureId, updatedAt: serverTimestamp() };
 }
 
-export async function saveCloudCreature(creature: OwnedCreature, isNew = false) {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-  const path = `wizards/${creature.wizardId}/creatures/${creature.id}`;
-  try {
-    await setDoc(
-      doc(db, 'wizards', creature.wizardId, 'creatures', creature.id),
-      {
-        ownerId: uid,
-        wizardId: creature.wizardId,
-        realmId: creature.realmId,
-        speciesId: creature.speciesId,
-        nickname: creature.nickname.slice(0, 24),
-        elementId: creature.elementId,
-        stage: creature.stage,
-        chromatic: creature.chromatic,
-        branchChoice: creature.branchChoice,
-        bondXp: creature.bondXp,
-        wins: creature.wins,
-        talents: creature.talents.slice(0, 12),
-        updatedAt: serverTimestamp(),
-        ...(isNew ? { createdAt: serverTimestamp() } : {}),
-      },
-      { merge: !isNew },
-    );
-  } catch (err) {
-    handleFirestoreError(err, isNew ? OperationType.CREATE : OperationType.UPDATE, path);
+function publicWizardPayload(wizard: WizardDocument) {
+  const { ownerId, realmId, raceId, elementId, level, rank } = wizard;
+  return { ownerId, realmId, name: wizard.name.slice(0, 24), raceId, elementId, level, rank, titleBadge: wizard.progression.titleBadge.slice(0, 40), updatedAt: serverTimestamp() };
+}
+
+function creaturePayload(creature: OwnedCreature) {
+  const { ownerId, wizardId, realmId, speciesId, nickname, elementId, stage, chromatic, branchChoice, bondXp, wins, talents } = creature;
+  return { ownerId, wizardId, realmId, speciesId, nickname: nickname.slice(0, 24), elementId, stage, chromatic,
+    branchChoice: branchChoice ?? 'A', bondXp, wins, talents: (talents ?? []).slice(0, 12), updatedAt: serverTimestamp() };
+}
+
+function sanctuaryPayload(sanctuary: SanctuaryState) {
+  const { ownerId, wizardId, realmId, themeId, weatherId, items, gardens } = sanctuary;
+  return { ownerId, wizardId, realmId, themeId, weatherId,
+    items: items.slice(0, 120).map(({ triggerKind, ...item }) => ({ ...item, ...(triggerKind ? { triggerKind } : {}) })),
+    gardens: gardens.slice(0, 12), updatedAt: serverTimestamp() };
+}
+
+function requireCloudOwner(uid: string) {
+  if (auth.currentUser?.uid !== uid) throw new Error('Your sign-in changed. Sign in again and retry.');
+}
+
+function realmPayload(realmAccount: RealmAccountState) {
+  return {
+    ...realmAccount,
+    unlockedRaces: realmAccount.unlockedRaces.slice(0, 20),
+    sharedVault: realmAccount.sharedVault.slice(0, 60),
+    termXp: Math.max(0, Math.floor(realmAccount.termXp)),
+    claimedTermTiers: realmAccount.claimedTermTiers.slice(0, 50),
+    updatedAt: serverTimestamp(),
+  };
+}
+
+export async function createCloudWizards(account: RealmAccountState, entries: {
+  wizard: WizardDocument;
+  pets: OwnedCreature[];
+  sanctuary: SanctuaryState | null;
+}[]) {
+  requireCloudOwner(account.uid);
+  const realmRef = doc(db, 'accounts', account.uid, 'realms', account.realmId);
+  await runTransaction(db, async (tx) => {
+    const existing = await tx.get(realmRef);
+    const previousIds: string[] = existing.get('wizardIds') ?? [];
+    if (entries.some(({ wizard }) => previousIds.includes(wizard.id))) {
+      throw new Error('This wizard is already saved. Reopen the realm to refresh your wizard list.');
+    }
+    const wizardIds = [...new Set([...previousIds, ...entries.map(({ wizard }) => wizard.id)])];
+    if (wizardIds.length > 3) throw new Error('All three wizard slots are in use.');
+    for (const { wizard, pets, sanctuary } of entries) {
+      const wizardRef = doc(db, 'wizards', wizard.id);
+      tx.set(wizardRef, { ...wizardPayload(wizard), createdAt: serverTimestamp() });
+      tx.set(doc(db, 'publicWizards', wizard.id), { ...publicWizardPayload(wizard), createdAt: serverTimestamp() });
+      for (const pet of pets) {
+        tx.set(doc(wizardRef, 'creatures', pet.id), { ...creaturePayload(pet), createdAt: serverTimestamp() });
+      }
+      if (sanctuary) {
+        tx.set(doc(wizardRef, 'sanctuary', 'layout'), { ...sanctuaryPayload(sanctuary), isPublic: false, createdAt: serverTimestamp() });
+      }
+    }
+    tx.set(realmRef, realmPayload({ ...account, wizardIds }), { merge: true });
+  });
+}
+
+export async function ensureCloudWizardStarter(wizard: WizardDocument, starter: OwnedCreature | null, dorm: SanctuaryState | null) {
+  requireCloudOwner(wizard.ownerId);
+  if (!starter && !dorm) return;
+  const ref = doc(db, 'wizards', wizard.id);
+  await runTransaction(db, async (tx) => {
+    const creatureRef = starter ? doc(ref, 'creatures', starter.id) : null;
+    const dormRef = dorm ? doc(ref, 'sanctuary', 'layout') : null;
+    const [creature, layout] = await Promise.all([
+      creatureRef ? tx.get(creatureRef) : null,
+      dormRef ? tx.get(dormRef) : null,
+    ]);
+    if (creatureRef && !creature?.exists() && starter) {
+      tx.set(creatureRef, { ...creaturePayload(starter), createdAt: serverTimestamp() });
+    }
+    if (dormRef && !layout?.exists() && dorm) {
+      tx.set(dormRef, { ...sanctuaryPayload(dorm), isPublic: false, createdAt: serverTimestamp() });
+    }
+  });
+}
+
+export async function saveCloudWizard(wizard: WizardDocument, pets: OwnedCreature[] = [], realmAccount?: RealmAccountState, updatedPets: OwnedCreature[] = []) {
+  requireCloudOwner(wizard.ownerId);
+  const wizardRef = doc(db, 'wizards', wizard.id);
+  const profileRef = doc(db, 'publicWizards', wizard.id);
+  await runTransaction(db, async (batch) => {
+    const profile = await batch.get(profileRef);
+    batch.update(wizardRef, { ...wizardPayload(wizard), ...(wizard.beastClan ? {} : { beastClan: deleteField() }) });
+    batch.set(profileRef, { ...publicWizardPayload(wizard), ...(profile.exists() ? {} : { createdAt: serverTimestamp() }) }, { merge: true });
+    for (const pet of pets) {
+      const payload = creaturePayload(pet);
+      batch.set(doc(wizardRef, 'creatures', pet.id), { ...payload, createdAt: serverTimestamp() });
+    }
+    for (const pet of updatedPets) batch.update(doc(wizardRef, 'creatures', pet.id), creaturePayload(pet));
+    if (realmAccount) {
+      const accountRef = doc(db, 'accounts', realmAccount.uid, 'realms', realmAccount.realmId);
+      const { wizardIds: _ids, ...fields } = realmPayload(realmAccount);
+      batch.update(accountRef, fields);
+    }
+  });
+}
+
+export async function saveCloudCreatures(creatures: OwnedCreature[], createdIds: ReadonlySet<string> = new Set()) {
+  if (!creatures.length) return;
+  requireCloudOwner(creatures[0].ownerId);
+  const batch = writeBatch(db);
+  for (const creature of creatures) {
+    const ref = doc(db, 'wizards', creature.wizardId, 'creatures', creature.id);
+    const payload = creaturePayload(creature);
+    if (createdIds.has(creature.id)) batch.set(ref, { ...payload, createdAt: serverTimestamp() });
+    else batch.update(ref, payload);
   }
+  await batch.commit();
 }
 
 export async function loadCloudCreatures(wizardId: string): Promise<OwnedCreature[]> {
@@ -318,29 +350,12 @@ export async function loadCloudCreatures(wizardId: string): Promise<OwnedCreatur
 }
 
 export async function saveCloudSanctuary(sanctuary: SanctuaryState, isNew = false) {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-  const path = `wizards/${sanctuary.wizardId}/sanctuary/layout`;
-  try {
-    await setDoc(
-      doc(db, 'wizards', sanctuary.wizardId, 'sanctuary', 'layout'),
-      {
-        ownerId: uid,
-        wizardId: sanctuary.wizardId,
-        realmId: sanctuary.realmId,
-        themeId: sanctuary.themeId,
-        weatherId: sanctuary.weatherId,
-        isPublic: sanctuary.isPublic,
-        items: sanctuary.items.slice(0, 120),
-        gardens: sanctuary.gardens.slice(0, 12),
-        updatedAt: serverTimestamp(),
-        ...(isNew ? { createdAt: serverTimestamp() } : {}),
-      },
-      { merge: !isNew },
-    );
-  } catch (err) {
-    handleFirestoreError(err, isNew ? OperationType.CREATE : OperationType.UPDATE, path);
-  }
+  requireCloudOwner(sanctuary.ownerId);
+  await setDoc(
+    doc(db, 'wizards', sanctuary.wizardId, 'sanctuary', 'layout'),
+    { ...sanctuaryPayload(sanctuary), ...(isNew ? { isPublic: false, createdAt: serverTimestamp() } : {}) },
+    { merge: !isNew },
+  );
 }
 
 export async function loadCloudSanctuary(wizardId: string, realmId: RealmId): Promise<SanctuaryState | null> {

@@ -82,6 +82,7 @@ function getInkOutlineMaterial(hex = '#241921'): THREE.MeshBasicMaterial {
     color: hex,
     side: THREE.BackSide,
   });
+  mat.userData.sharedSceneMaterial = true;
   outlineMatCache.set(hex, mat);
   return mat;
 }
