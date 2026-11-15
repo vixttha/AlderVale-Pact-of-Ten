@@ -4,6 +4,7 @@ import { MODULAR_GEAR, GEAR_BY_ID, RUNESTONES, RACES, type RaceId } from '../../
 import type { WizardDocument } from '../../../shared/economy.ts';
 import type { RealmAccountState } from '../../lib/storage.ts';
 import { AvatarPreview3D } from '../../engine/avatarPreview3d.tsx';
+import { HumanAppearanceChoice } from '../auth/HumanAppearanceChoice.tsx';
 
 interface TailorStudioPanelProps {
   wizard: WizardDocument;
@@ -24,6 +25,7 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   const [slotFilter, setSlotFilter] = useState<'headgear' | 'torso' | 'back' | 'footwear' | 'staff'>('torso');
 
   const ownedGear = MODULAR_GEAR.filter((g) => wizard.wardrobe.ownedGearIds.includes(g.id));
+  const rowanHuman = wizard.raceId === 'human' && wizard.sculpt.humanModel !== 'classic';
   const slotOwned = ownedGear.filter((g) => g.slot === slotFilter);
 
   const equipGear = (itemId: string) => {
@@ -96,6 +98,14 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
         {/* Live 3D Turntable */}
         <div className="flex flex-col justify-between rounded-2xl bg-[#182033] p-4 text-[#f7f0e2]">
           <div>
+            {wizard.raceId === 'human' && (
+              <div className="mb-3">
+                <HumanAppearanceChoice
+                  value={wizard.sculpt.humanModel}
+                  onChange={(humanModel) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, humanModel } })}
+                />
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <span className="font-display text-lg font-bold">{wizard.name}</span>
               <span className="text-xs text-[#f4c98b] font-mono-num">{wizard.currencies.florins} Florins</span>
@@ -117,15 +127,15 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
           <div className="mt-3 flex flex-wrap gap-3 text-xs">
             <label className="flex items-center gap-1.5">
               <span>Primary</span>
-              <input type="color" value={wizard.sculpt.primaryDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, primaryDye: e.target.value } })} />
+              <input disabled={rowanHuman} type="color" value={wizard.sculpt.primaryDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, primaryDye: e.target.value } })} />
             </label>
             <label className="flex items-center gap-1.5">
               <span>Trim</span>
-              <input type="color" value={wizard.sculpt.trimDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, trimDye: e.target.value } })} />
+              <input disabled={rowanHuman} type="color" value={wizard.sculpt.trimDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, trimDye: e.target.value } })} />
             </label>
             <label className="flex items-center gap-1.5">
               <span>Accent</span>
-              <input type="color" value={wizard.sculpt.accentDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, accentDye: e.target.value } })} />
+              <input disabled={rowanHuman} type="color" value={wizard.sculpt.accentDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, accentDye: e.target.value } })} />
             </label>
           </div>
         </div>

@@ -12,6 +12,7 @@ import type { WizardSculpt } from '../../shared/wardrobe.ts';
 import type { OwnedCreature, PlacedDormItem } from '../lib/storage.ts';
 import type { EmoteId, LivePlayerPresence } from '../../server/wsHub.ts';
 import { buildWizardGroup } from './avatarMesh.ts';
+import { clearWizardAvatarSlot, updateRowanHuman } from './races/rowanHuman.ts';
 import { buildCreatureGroup, buildMountGroup } from './creatureMesh.ts';
 import { buildDormItemsGroup, buildZoneScene, type InteractiveHitTarget } from './zoneBuilders.ts';
 import { buildAnimeSkyAndClouds } from './animeShaders.ts';
@@ -581,7 +582,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     }
 
     function step() {
-      if (disposed) return;
+      if (disposed || !container) return;
       const now = performance.now();
       const dt = Math.min(0.08, (now - lastTime) / 1000);
       lastTime = now;
@@ -592,6 +593,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       const activeIds = new Set(remotePlayersRef.current.map((p) => p.sessionId));
       for (const [sid, entry] of remoteMeshes.entries()) {
         if (!activeIds.has(sid)) {
+          clearWizardAvatarSlot(entry.avatarSlot);
           scene.remove(entry.root);
           scene.remove(entry.creatureSlot);
           remoteMeshes.delete(sid);
@@ -632,7 +634,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         }
 
         if (entry.appearanceKey !== appKey) {
-          entry.avatarSlot.clear();
+          clearWizardAvatarSlot(entry.avatarSlot);
           entry.avatarSlot.add(
             buildWizardGroup({
               raceId: rp.raceId,
@@ -681,7 +683,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         const rEmoteInfo = remoteEmotesRef.current.get(rp.sessionId);
         const rEmote = rEmoteInfo && now < rEmoteInfo.until ? rEmoteInfo.emote : null;
         if (entry.avatarSlot.children[0]) {
-          animateWizardRig(entry.avatarSlot.children[0], distMoved > 0.015, t, 1.0, rEmote);
+          animateWizardRig(entry.avatarSlot.children[0], distMoved > 0.015, t, 1.0, rEmote, dt, rp.y > 0.02);
         }
 
         // Remote companion follow + animation
@@ -756,7 +758,9 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         localEmoteRef.current && now < localEmoteRef.current.until ? localEmoteRef.current.emote : null;
       const localAvatar = avatarSlot.children[0];
       if (localAvatar) {
-        animateWizardRig(localAvatar, moving && playerY <= 0.02, t, sprinting ? 1.35 : 1.0, activeLocalEmote);
+        animateWizardRig(localAvatar, moving && playerY <= 0.02, t, sprinting ? 1.35 : 1.0, activeLocalEmote, dt, playerY > 0.02);
+        container.dataset.worldAvatarModel = String(localAvatar.userData.humanModel ?? 'procedural');
+        container.dataset.worldAvatarClip = String(localAvatar.userData.humanClip ?? '');
       }
 
       // Animate Lead Creature Follow + Wings / Tail / Gear / Halo
@@ -1046,6 +1050,8 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       playerContainerRef.current = null;
       nearbyHitRef.current = null;
       setNearbyPrompt(null);
+      clearWizardAvatarSlot(avatarSlot);
+      for (const entry of remoteMeshes.values()) clearWizardAvatarSlot(entry.avatarSlot);
       if (nameplatesLayer) nameplatesLayer.innerHTML = '';
       composer?.dispose();
       pmrem.dispose();
@@ -1060,7 +1066,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
   useEffect(() => {
     const slot = avatarSlotRef.current;
     if (!slot) return;
-    slot.clear();
+    clearWizardAvatarSlot(slot);
     slot.add(
       buildWizardGroup({
         raceId: wizard.raceId,
@@ -1181,7 +1187,10 @@ function animateWizardRig(
   t: number,
   speedScalar: number,
   emote?: EmoteId | null,
+  dt = 0,
+  jumping = false,
 ) {
+  if (updateRowanHuman(avatar, dt, { moving, speedScalar, emote, jumping })) return;
   const bodyRig = avatar.getObjectByName('bodyRig');
   if (!bodyRig) return;
 

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { buildWizardGroup, type WizardMeshConfig } from './avatarMesh.ts';
+import { clearWizardAvatarSlot, updateRowanHuman } from './races/rowanHuman.ts';
 import { addOutlineToGroup, makeAnimeToonMaterial } from './animeShaders.ts';
 
 interface AvatarPreview3DProps {
@@ -12,6 +13,7 @@ interface AvatarPreview3DProps {
 export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, className = '' }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const avatarSlotRef = useRef<THREE.Group | null>(null);
+  const statusRef = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -69,6 +71,7 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     let rafId = 0;
     let timeoutId = 0;
     let angle = 0.25;
+    let previousTime = performance.now();
 
     function afterDraw(cb: () => void) {
       const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
@@ -90,7 +93,20 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     }
 
     function renderLoop() {
-      if (disposed) return;
+      if (disposed || !el) return;
+      const now = performance.now();
+      const dt = (now - previousTime) / 1000;
+      previousTime = now;
+      const avatar = avatarSlot.children[0];
+      if (avatar) {
+        updateRowanHuman(avatar, dt, { moving: false });
+        const model = String(avatar.userData.humanModel ?? 'procedural');
+        el.dataset.avatarModel = model;
+        el.dataset.avatarClip = String(avatar.userData.humanClip ?? '');
+        const status = model === 'loading' ? 'Loading Rowan appearance…'
+          : model === 'fallback' ? 'Rowan unavailable. Showing Classic human.' : '';
+        if (statusRef.current && statusRef.current.textContent !== status) statusRef.current.textContent = status;
+      }
       angle += 0.014;
       avatarSlot.rotation.y = Math.sin(angle) * 0.65;
       renderer.render(scene, camera);
@@ -116,6 +132,7 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
       cancelAnimationFrame(rafId);
       clearTimeout(timeoutId);
       ro.disconnect();
+      clearWizardAvatarSlot(avatarSlot);
       avatarSlotRef.current = null;
       pmrem.dispose();
       renderer.dispose();
@@ -126,9 +143,13 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
   useEffect(() => {
     const slot = avatarSlotRef.current;
     if (!slot) return;
-    slot.clear();
+    clearWizardAvatarSlot(slot);
     slot.add(buildWizardGroup(config));
   }, [config]);
 
-  return <div ref={containerRef} className={`w-full h-full ${className}`} />;
+  return (
+    <div ref={containerRef} aria-label="Wizard appearance preview" className={`relative w-full h-full ${className}`}>
+      <p ref={statusRef} role="status" className="pointer-events-none absolute bottom-2 left-2 right-2 text-center text-xs text-white" />
+    </div>
+  );
 };

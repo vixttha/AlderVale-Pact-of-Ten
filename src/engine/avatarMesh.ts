@@ -9,6 +9,7 @@ import {
 } from '../../shared/wardrobe.ts';
 import { addOutlineToGroup, createContactShadow, makeAnimeToonMaterial } from './animeShaders.ts';
 import { buildAlderHumanV2 } from './races/alderHumanV2.ts';
+import { buildRowanHuman } from './races/rowanHuman.ts';
 
 export interface WizardMeshConfig {
   raceId: RaceId;
@@ -26,7 +27,10 @@ export interface WizardMeshConfig {
  */
 export function buildWizardGroup(cfg: WizardMeshConfig): THREE.Group {
   if (cfg.raceId === 'human') {
-    return buildAlderHumanV2(cfg);
+    if (cfg.sculpt.humanModel !== 'classic') return buildRowanHuman(cfg);
+    const classic = buildAlderHumanV2(cfg);
+    classic.userData.humanModel = 'classic';
+    return classic;
   }
   const root = new THREE.Group();
   const el = ELEMENTS[cfg.elementId];
