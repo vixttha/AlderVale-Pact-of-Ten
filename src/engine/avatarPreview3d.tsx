@@ -5,6 +5,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { buildWizardGroup, type WizardMeshConfig } from './avatarMesh.ts';
 import { clearWizardAvatarSlot, updateRowanHuman } from './races/rowanHuman.ts';
 import { addOutlineToGroup, makeAnimeToonMaterial } from './animeShaders.ts';
+import { probeSoftwareGl } from './softwareGl.ts';
 
 interface AvatarPreview3DProps {
   config: WizardMeshConfig;
@@ -21,31 +22,37 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     const el = containerRef.current;
     if (!el) return;
 
+    const isSoftwareGl = probeSoftwareGl();
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({
+        antialias: !isSoftwareGl,
+        alpha: true,
+        powerPreference: isSoftwareGl ? 'low-power' : 'high-performance',
+      });
     } catch {
       setUnavailable(true);
       return;
     }
     const gl = renderer.getContext() as WebGL2RenderingContext;
-    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-    const rendererStr = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '';
-    const isSoftwareGl = /SwiftShader|llvmpipe|softpipe|Software|Basic Render|Paravirtual/i.test(rendererStr);
+    renderer.domElement.dataset.softwareGl = isSoftwareGl ? '1' : '0';
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.setSize(el.clientWidth || 280, el.clientHeight || 340);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMapping = isSoftwareGl ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const roomEnv = new RoomEnvironment();
-    const environmentTarget = pmrem.fromScene(roomEnv, 0.04);
-    scene.environment = environmentTarget.texture;
-    roomEnv.dispose();
+    const pmrem = isSoftwareGl ? null : new THREE.PMREMGenerator(renderer);
+    let environmentTarget: THREE.WebGLRenderTarget | undefined;
+    if (pmrem) {
+      const roomEnv = new RoomEnvironment();
+      environmentTarget = pmrem.fromScene(roomEnv, 0.04);
+      scene.environment = environmentTarget.texture;
+      roomEnv.dispose();
+    }
 
     const sun = new THREE.DirectionalLight('#fff2d6', 2.05);
     sun.position.set(3, 5, 4);
@@ -149,8 +156,8 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
       clearWizardAvatarSlot(avatarSlot);
       avatarSlotRef.current = null;
       disposeScene(scene);
-      environmentTarget.dispose();
-      pmrem.dispose();
+      environmentTarget?.dispose();
+      pmrem?.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode === el) el.removeChild(renderer.domElement);
     };

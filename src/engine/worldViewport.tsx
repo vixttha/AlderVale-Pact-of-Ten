@@ -20,6 +20,7 @@ import { buildDormItemsGroup, buildZoneScene, type InteractiveHitTarget } from '
 import { buildAnimeSkyAndClouds } from './animeShaders.ts';
 import { createDormWeather } from './dormWeather.ts';
 import { academyAudio } from './audioSynth.ts';
+import { probeSoftwareGl } from './softwareGl.ts';
 
 export interface WorldViewportProps {
   wizard: WizardDocument;
@@ -222,11 +223,12 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     const nameplatesLayer = nameplatesLayerRef.current;
     if (!container) return;
 
+    const isSoftwareGl = probeSoftwareGl();
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        powerPreference: 'high-performance',
+        antialias: !isSoftwareGl,
+        powerPreference: isSoftwareGl ? 'low-power' : 'high-performance',
         preserveDrawingBuffer: true,
       });
     } catch {
@@ -237,14 +239,12 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     setUnavailable(false);
     setContextLost(false);
     const gl = renderer.getContext() as WebGL2RenderingContext;
-    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-    const rendererStr = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '';
-    const isSoftwareGl = /SwiftShader|llvmpipe|softpipe|Software|Basic Render|Paravirtual/i.test(rendererStr);
+    renderer.domElement.dataset.softwareGl = isSoftwareGl ? '1' : '0';
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMapping = isSoftwareGl ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
     renderer.shadowMap.enabled = !isSoftwareGl;
     renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -259,11 +259,14 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(fogColor, 0.0085);
 
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const roomEnv = new RoomEnvironment();
-    const environmentTarget = pmrem.fromScene(roomEnv, 0.04);
-    scene.environment = environmentTarget.texture;
-    roomEnv.dispose();
+    const pmrem = isSoftwareGl ? null : new THREE.PMREMGenerator(renderer);
+    let environmentTarget: THREE.WebGLRenderTarget | undefined;
+    if (pmrem) {
+      const roomEnv = new RoomEnvironment();
+      environmentTarget = pmrem.fromScene(roomEnv, 0.04);
+      scene.environment = environmentTarget.texture;
+      roomEnv.dispose();
+    }
 
     // Anime Warm Key + Cool Hemisphere Sky/Ground Rig
     const sun = new THREE.DirectionalLight(isNight ? '#b5c8ff' : '#fff3db', isNight ? 1.45 : 2.05);
@@ -1090,8 +1093,8 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       composer?.dispose();
       sun.shadow.dispose();
       disposeScene(scene);
-      environmentTarget.dispose();
-      pmrem.dispose();
+      environmentTarget?.dispose();
+      pmrem?.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode === container) {
         container.removeChild(renderer.domElement);

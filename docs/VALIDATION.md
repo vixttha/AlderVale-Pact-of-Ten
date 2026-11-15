@@ -1,10 +1,12 @@
 # AlderVale validation
 
-Google AI Studio remains the main builder. Codex maintains focused tooling and
-tests. GitHub Actions runs the checks against the commit shown on each run.
+ChatGPT.com leads development and project management under the owner's direction.
+GitHub Actions runs the checks against the commit shown on each run. The owner
+decides whether to accept the result.
 
 Follow the owner's [project rules](../PROJECT_RULES.md): the repository stays
-public, Notion stays private, and project work must add no unapproved spending.
+public, Notion stays private, project work must add no unapproved spending, and
+the three-day window is 2026-11-15 through 2026-11-18 America/New_York.
 
 ## Runner coverage
 
@@ -14,7 +16,8 @@ The validation workflow runs seven independent jobs:
   checking; Firestore rules lint; existing unit/structural tests; production build;
   real HTTP and three-client WebSocket integration.
 - Chromium, Firefox, and WebKit on Linux: title/creation controls, guest wizard
-  persistence and realm separation, and narrow viewport controls. External web
+  persistence and realm separation, First Spark rewards after reload, and
+  narrow viewport controls. External web
   requests are blocked so tests cannot touch production Firebase or paid APIs.
   Linux browser jobs use a virtual display and software graphics; Firefox's
   native headless mode on the runner could not create the required WebGL2 context.
@@ -52,13 +55,17 @@ Firestore emulator; no Firebase login, production account, or secret is needed.
 
 Pushes to `main`, `codex/**`, and `ci/**` branches and pull requests run
 automatically while public. The hosted validation workflow skips private repositories.
-There is no schedule, background agent, automatic deployment, or self-hosted
-runner requirement. Standard hosted public runner compute is free under GitHub's
-current terms; larger runners, excess storage, and external APIs are separate.
+Run `node scripts/horizon-check.mjs` for the November milestone status.
 
-GitHub Issues and pull requests own engineering work. The private Notion project
-home holds the brief, proposals, and AI Studio/Codex handoff. After a code change,
-push it, inspect the exact-SHA Actions run, then pull accepted changes into AI Studio.
+The weekly Semgrep Community Edition workflow runs on the public repository using
+standard hosted runners. See [agent operations](AGENT_OPERATIONS.md) for Graphify
+snapshots. The workflows require neither automatic deployment nor self-hosted
+runners. Larger runners, excess storage, and external APIs are separate.
+
+Use GitHub Issues and pull requests for engineering work and evidence. Use the
+private Notion project for planning and handoffs. After a code change, push it,
+inspect the Actions run for that exact commit, and bring accepted changes into the
+active development tool before its next edit.
 
 ## Evidence limits
 
