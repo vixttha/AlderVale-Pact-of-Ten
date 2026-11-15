@@ -39,7 +39,7 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
   };
 
   const applySpellwrighting = (spellId: string, branch: 'A' | 'B') => {
-    if (wizard.currencies.spellShards < 2) return;
+    if (wizard.currencies.spellShards < 2 || wizard.progression.spellwrighting[spellId] === branch) return;
     onUpdateWizard({
       ...wizard,
       currencies: { ...wizard.currencies, spellShards: wizard.currencies.spellShards - 2 },
@@ -67,7 +67,11 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
           goal,
         }),
       });
-      const data = (await resp.json()) as { advice?: string };
+      const data = (await resp.json()) as { advice?: string; error?: string };
+      if (!resp.ok) {
+        setAdvice(data.error ?? 'Unable to reach Archivist Lyra right now.');
+        return;
+      }
       setAdvice(data.advice ?? 'Balance 2 Blades, 1 Prism, and 1 Heal in your 26-card opening cycle.');
     } catch {
       setAdvice('Unable to reach Archivist Lyra right now.');
@@ -156,7 +160,7 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
                   <div className="flex flex-wrap gap-2">
                     {sp.wrightA && (
                       <button
-                        disabled={wizard.currencies.spellShards < 2 && chosen !== 'A'}
+                        disabled={wizard.currencies.spellShards < 2 || chosen === 'A'}
                         onClick={() => applySpellwrighting(sp.id, 'A')}
                         className={`rounded-xl px-3 py-1.5 font-bold border ${
                           chosen === 'A' ? 'border-[#2f8a73] bg-[#2f8a73] text-white' : 'border-[#d7c7a9] bg-[#fbf6ec]'
@@ -167,7 +171,7 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
                     )}
                     {sp.wrightB && (
                       <button
-                        disabled={wizard.currencies.spellShards < 2 && chosen !== 'B'}
+                        disabled={wizard.currencies.spellShards < 2 || chosen === 'B'}
                         onClick={() => applySpellwrighting(sp.id, 'B')}
                         className={`rounded-xl px-3 py-1.5 font-bold border ${
                           chosen === 'B' ? 'border-[#8a52c7] bg-[#8a52c7] text-white' : 'border-[#d7c7a9] bg-[#fbf6ec]'
@@ -190,7 +194,7 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
               Optional strategy desk powered by free-tier Gemini 4 Hydrogen for deck ratios, School Pip combos, and Hybrid breeding tips.
             </p>
             <textarea
-              value={goal}
+              value={goal} maxLength={400}
               onChange={(e) => setGoal(e.target.value)}
               rows={2}
               className="w-full rounded-xl border border-[#d7c7a9] bg-[#fbf6ec] p-3 text-sm"

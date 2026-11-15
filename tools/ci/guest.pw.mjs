@@ -43,3 +43,24 @@ test('mobile creation controls remain reachable', async ({ page }) => {
   await expect(begin).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
+
+test('title and world remain usable with WebGL unavailable', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
+      return kind.includes('webgl') ? null : getContext.call(this, kind, ...args);
+    };
+  });
+  await page.goto('/');
+  await expect(page.getByText('3D preview unavailable').first()).toBeVisible();
+  await page.getByRole('textbox').first().fill('Fallback Rowan');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+  await page.getByRole('button', { name: 'Retry 3D' }).click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await expect(page.getByRole('button', { name: 'Settings', exact: true }).last()).toBeVisible();
+  expect(errors).toEqual([]);
+});

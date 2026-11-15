@@ -15,6 +15,7 @@ import {
 import { createStarterWizard, type WizardDocument } from '../../../shared/economy.ts';
 import type { RealmAccountState } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
+import { usesRowanModel } from '../../engine/rowanModel.ts';
 import { AvatarPreview3D } from '../../engine/avatarPreview3d.tsx';
 
 interface TitleWizardStudioProps {
@@ -26,7 +27,10 @@ interface TitleWizardStudioProps {
   onSignInGoogle: () => void;
   onSelectRealm: (realmId: RealmId) => void;
   onEnterWorld: (wizard: WizardDocument) => void;
-  onCreateWizard: (wizard: WizardDocument) => void;
+  onCreateWizard: (wizard: WizardDocument) => Promise<boolean>;
+  onSignOut: () => void;
+  notice: string | null;
+  realmReady: boolean;
 }
 
 const STRATA_ORDER: { id: StratumId; label: string }[] = [
@@ -46,7 +50,11 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   onSelectRealm,
   onEnterWorld,
   onCreateWizard,
+  onSignOut,
+  notice,
+  realmReady,
 }) => {
+  const [submitting, setSubmitting] = useState(false);
   const [creating, setCreating] = useState(wizards.length === 0);
   const [name, setName] = useState('Rowan Skyweaver');
   const [raceId, setRaceId] = useState<RaceId>('human');
@@ -99,9 +107,11 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
     }));
   };
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
+  const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanName = name.trim().slice(0, 24) || 'Alder Initiate';
+    if (submitting || !realmReady) return;
+    const trimmedName = name.trim().slice(0, 24);
+    const cleanName = trimmedName.length >= 2 ? trimmedName : 'Alder Initiate';
     const wiz = createStarterWizard({
       id: `wiz_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       ownerId: realmAccount.uid,
@@ -112,12 +122,19 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
       elementId,
       sculpt,
     });
-    onCreateWizard(wiz);
+    setSubmitting(true);
+    try {
+      if (await onCreateWizard(wiz)) setCreating(false);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="h-full w-full overflow-y-auto bg-[radial-gradient(circle_at_top,#2a3b5c_0%,#182033_65%,#111624_100%)] text-[#f7f0e2] p-4 md:p-6">
       <div className="mx-auto max-w-6xl space-y-5">
+        {notice && <p role="status" className="rounded-xl bg-[#202942] p-3">{notice}</p>}
+        {isSignedIn && <button onClick={onSignOut} className="text-sm underline">Sign out</button>}
         {/* Header Bar */}
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#d7c7a9]/25 bg-[#202942]/95 px-6 py-4 shadow-xl">
           <div>
@@ -221,6 +238,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     </div>
                     <div className="mt-3 h-48 rounded-xl bg-[#111726]/70 overflow-hidden">
                       <AvatarPreview3D
+                        rowanModel={usesRowanModel(w) ? 'rigged' : undefined}
                         config={{
                           raceId: w.raceId,
                           beastClan: w.beastClan,
@@ -537,10 +555,10 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> Live Multiplayer</span>
                 </div>
                 <button
-                  type="submit"
+                  type="submit" disabled={submitting || !realmReady}
                   className="w-full rounded-xl bg-[#f4c98b] py-3 font-display text-base font-bold text-[#241b16] shadow-lg hover:bg-[#ffd9a3] transition"
                 >
-                  Begin Academy Journey
+                  {submitting ? 'Saving wizard…' : 'Begin Academy Journey'}
                 </button>
               </div>
             </div>

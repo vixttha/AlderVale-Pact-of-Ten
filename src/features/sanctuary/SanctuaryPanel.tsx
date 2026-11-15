@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { auth } from '../../lib/firebase.ts';
 import { Home, Sprout, Camera, Globe, Move } from 'lucide-react';
 import { DORM_CATALOG, DORM_THEMES, DORM_WEATHERS } from '../../../shared/world.ts';
 import { STARTER_ELEMENTS } from '../../../shared/elements.ts';
@@ -13,6 +14,7 @@ interface SanctuaryPanelProps {
   onUpdateSanctuary: (next: SanctuaryState) => void;
   onCaptureSkyLens: () => void;
   onClose: () => void;
+  onTourPublished: () => void;
 }
 
 export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
@@ -21,11 +23,21 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
   galleryImages,
   onUpdateWizard,
   onUpdateSanctuary,
+  onTourPublished,
   onCaptureSkyLens,
   onClose,
 }) => {
   const [tab, setTab] = useState<'build' | 'garden' | 'tours' | 'skylens'>('build');
+  const [publishing, setPublishing] = useState(false);
+  const [tourNotice, setTourNotice] = useState('');
+  const [now, setNow] = useState(Date.now);
   const [tours, setTours] = useState<{ wizardId: string; wizardName: string; themeId: string; ratingAvg: number; ratingCount: number }[]>([]);
+
+  useEffect(() => {
+    if (tab !== 'garden') return;
+    const timer = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(timer);
+  }, [tab]);
 
   useEffect(() => {
     if (tab !== 'tours') return;
@@ -88,12 +100,29 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
   };
 
   const publishDormTour = async () => {
-    onUpdateSanctuary({ ...sanctuary, isPublic: true });
-    await fetch(`/api/tours/${wizard.realmId}/publish`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wizardId: wizard.id, wizardName: `${wizard.name}'s Loft`, themeId: sanctuary.themeId }),
-    }).catch(() => {});
+    if (publishing) return;
+    setPublishing(true);
+    setTourNotice('');
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) throw new Error('Sign in with Google to publish your Dorm.');
+      const response = await fetch(`/api/tours/${wizard.realmId}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ wizardId: wizard.id }),
+      });
+      const result = await response.json();
+      if (!response.ok || result.isPublic !== true) throw new Error(result.error ?? 'Your Dorm could not be published.');
+      onTourPublished();
+      setTourNotice('Your Dorm is listed in Public Dorm Tours.');
+      void fetch(`/api/tours/${wizard.realmId}`).then(async (listing) => {
+        if (listing.ok) setTours((await listing.json()).tours);
+      }).catch(() => {});
+    } catch (error) {
+      setTourNotice(error instanceof Error ? error.message : 'Could not publish your Dorm.');
+    } finally {
+      setPublishing(false);
+    }
   };
 
   return (
@@ -202,7 +231,7 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
           <div className="mt-4 grid gap-3 sm:grid-cols-3 text-xs">
             {[0, 1, 2].map((idx) => {
               const plot = sanctuary.gardens[idx];
-              const ready = plot?.seedElement && Date.now() >= plot.readyAt;
+              const ready = plot?.seedElement && now >= plot.readyAt;
               return (
                 <div key={idx} className="rounded-2xl border border-[#d7c7a9] bg-white/85 p-4 space-y-2">
                   <div className="font-display text-base font-bold">Sky-Soil Plot #{idx + 1}</div>
@@ -258,10 +287,11 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
           <div className="mt-4 space-y-3 text-xs">
             <div className="flex items-center justify-between">
               <span>Showcase your Dorm publicly inside the {wizard.realmId.toUpperCase()} Realm.</span>
-              <button onClick={publishDormTour} className="rounded-xl bg-[#38a3a5] px-4 py-2 font-bold text-white">
-                {sanctuary.isPublic ? 'Published to Tours' : 'Publish My Dorm'}
+              <button onClick={publishDormTour} disabled={publishing} className="rounded-xl bg-[#38a3a5] px-4 py-2 font-bold text-white">
+                {publishing ? 'Publishing…' : sanctuary.isPublic ? 'Refresh Tour Listing' : 'Publish My Dorm'}
               </button>
             </div>
+            {tourNotice && <p role="status">{tourNotice}</p>}
             <div className="grid gap-3 sm:grid-cols-2">
               {tours.map((t) => (
                 <div key={t.wizardId} className="rounded-xl border border-[#d7c7a9] bg-white/85 p-3 flex items-center justify-between">

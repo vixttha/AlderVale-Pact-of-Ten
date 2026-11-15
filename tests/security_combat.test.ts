@@ -203,6 +203,23 @@ describe('Aldervale Combat & Breeding Domain Rules', () => {
     return c;
   }
 
+  it('keeps the selected spell when an earlier card is discarded and replaced', () => {
+    const p = makeTestCombatant('wizard', 'ember', true);
+    const e = makeTestCombatant('enemy', 'frost', false);
+    p.hand = ['ember_hearth_blade', 'ember_cinder_dart'];
+    p.deck = ['frost_tower_ward'];
+    const state: DuelState = {
+      duelId: 'cycle-check', mode: 'solo', round: 1, turnTimerSeconds: null, arenaBubble: null,
+      playerTeam: [p], enemyTeam: [e], firstTeam: 'player', phase: 'planning', logs: [], telegraphedCheat: null,
+    };
+    const result = resolveDuelRound(state, [{
+      actorId: p.id, targetId: e.id, creatureAction: 'none', cardIndex: 1, discardIndices: [0],
+    }], () => 0.1);
+    expect(result.enemyTeam[0].hp).toBeLessThan(e.hp);
+    expect(result.playerTeam[0].hand).toEqual(['frost_tower_ward']);
+    expect(result.playerTeam[0].discard).toEqual(['ember_hearth_blade', 'ember_cinder_dart']);
+  });
+
   it('refunds full Pips when a spell fizzles', () => {
     const p = makeTestCombatant('wiz', 'ember', true);
     const e = makeTestCombatant('foe', 'frost', false);

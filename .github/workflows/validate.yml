@@ -15,8 +15,8 @@ concurrency:
 
 jobs:
   core:
-    # Public runs use standard free hosted runners. Private runs require a manual dispatch.
-    if: github.event.repository.private == false || github.event_name == 'workflow_dispatch'
+    # Public runs use standard free hosted runners.
+    if: github.event.repository.private == false
     name: Core (${{ matrix.os }})
     strategy:
       fail-fast: false
@@ -52,7 +52,7 @@ jobs:
         run: node scripts/asset-report.mjs >> "$GITHUB_STEP_SUMMARY"
 
   browser:
-    if: github.event.repository.private == false || github.event_name == 'workflow_dispatch'
+    if: github.event.repository.private == false
     name: Guest browser (${{ matrix.browser }})
     strategy:
       fail-fast: false
@@ -94,7 +94,7 @@ jobs:
           if-no-files-found: ignore
 
   firestore:
-    if: github.event.repository.private == false || github.event_name == 'workflow_dispatch'
+    if: github.event.repository.private == false
     name: Firestore emulator permissions
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -113,6 +113,13 @@ jobs:
           distribution: temurin
           java-version: '21'
       - run: npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
-      - name: Test actual rules using a demo project
-        working-directory: tools/ci
-        run: npm run test:rules
+      - name: Install locked application dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Test actual rules and transaction behavior in a demo project
+        env:
+          GOOGLE_CLOUD_PROJECT: demo-aldervale-ci
+          FIRESTORE_DATABASE_ID: '(default)'
+        run: >-
+          tools/ci/node_modules/.bin/firebase emulators:exec
+          --config firebase.ci.json --project demo-aldervale-ci --only firestore
+          "node --test tools/ci/firestore.check.mjs && npm test -- tests/firestore.integration.test.ts"

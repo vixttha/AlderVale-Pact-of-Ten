@@ -128,38 +128,6 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
-    function isValidBazaarListing(data, realmId) {
-      return data.keys().hasAll(['sellerId', 'sellerWizardId', 'sellerName', 'realmId', 'itemType', 'itemId', 'itemName', 'priceFlorins', 'status', 'createdAt', 'updatedAt'])
-        && data.keys().hasOnly(['sellerId', 'sellerWizardId', 'sellerName', 'realmId', 'itemType', 'itemId', 'itemName', 'priceFlorins', 'status', 'buyerId', 'createdAt', 'updatedAt'])
-        && isValidId(data.sellerId)
-        && isValidId(data.sellerWizardId)
-        && data.sellerName is string && data.sellerName.size() >= 1 && data.sellerName.size() <= 24
-        && isValidRealm(data.realmId)
-        && data.realmId == realmId
-        && data.itemType in ['gear', 'card', 'runestone', 'furniture', 'reagent']
-        && data.itemId is string && data.itemId.size() >= 1 && data.itemId.size() <= 64
-        && data.itemName is string && data.itemName.size() >= 1 && data.itemName.size() <= 48
-        && data.priceFlorins is number && data.priceFlorins >= 1 && data.priceFlorins <= 1000000
-        && data.status in ['open', 'sold', 'cancelled']
-        && (!('buyerId' in data) || (data.buyerId is string && data.buyerId.size() <= 128))
-        && data.createdAt is timestamp
-        && data.updatedAt is timestamp;
-    }
-
-    function isValidHouse(data, realmId) {
-      return data.keys().hasAll(['leaderId', 'realmId', 'name', 'crestElement', 'motto', 'memberCount', 'createdAt', 'updatedAt'])
-        && data.keys().hasOnly(['leaderId', 'realmId', 'name', 'crestElement', 'motto', 'memberCount', 'createdAt', 'updatedAt'])
-        && isValidId(data.leaderId)
-        && isValidRealm(data.realmId)
-        && data.realmId == realmId
-        && data.name is string && data.name.size() >= 2 && data.name.size() <= 32
-        && data.crestElement is string && data.crestElement.size() >= 2 && data.crestElement.size() <= 24
-        && data.motto is string && data.motto.size() <= 120
-        && data.memberCount is number && data.memberCount >= 1 && data.memberCount <= 100
-        && data.createdAt is timestamp
-        && data.updatedAt is timestamp;
-    }
-
     function isValidPublicWizard(data) {
       return data.keys().hasAll(['ownerId', 'realmId', 'name', 'raceId', 'elementId', 'level', 'rank', 'createdAt', 'updatedAt'])
         && data.keys().hasOnly(['ownerId', 'realmId', 'name', 'raceId', 'elementId', 'level', 'rank', 'titleBadge', 'createdAt', 'updatedAt'])
@@ -231,21 +199,20 @@ service cloud.firestore {
         && incoming().realmId == existing().realmId
         && incoming().createdAt == existing().createdAt
         && incoming().updatedAt == request.time
-        && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['sculpt', 'wardrobe', 'stitching', 'activeCreatureId', 'updatedAt'])
-          || incoming().diff(existing()).affectedKeys().hasOnly(['name', 'raceId', 'beastClan', 'elementId', 'level', 'xp', 'rank', 'currencies', 'resources', 'progression', 'wardrobe', 'stitching', 'activeCreatureId', 'updatedAt'])
-        );
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'raceId', 'beastClan', 'elementId', 'level', 'xp', 'rank', 'currencies', 'resources', 'progression', 'sculpt', 'wardrobe', 'stitching', 'activeCreatureId', 'updatedAt']);
       allow delete: if isVerifiedUser() && isValidId(wizardId) && existing().ownerId == request.auth.uid;
 
       match /creatures/{creatureId} {
-        allow get: if isSignedIn() && isValidId(wizardId) && isValidId(creatureId) && existing().ownerId == request.auth.uid;
+        allow get: if isSignedIn() && isValidId(wizardId) && isValidId(creatureId)
+          && get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid;
         allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
         allow create: if isVerifiedUser()
           && isValidId(wizardId)
           && isValidId(creatureId)
           && isValidCreature(incoming(), wizardId)
-          && exists(/databases/$(database)/documents/wizards/$(wizardId))
-          && get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && existsAfter(/databases/$(database)/documents/wizards/$(wizardId))
+          && getAfter(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && getAfter(/databases/$(database)/documents/wizards/$(wizardId)).data.realmId == incoming().realmId
           && incoming().createdAt == request.time
           && incoming().updatedAt == request.time;
         allow update: if isVerifiedUser()
@@ -263,15 +230,27 @@ service cloud.firestore {
         allow delete: if isVerifiedUser() && isValidId(wizardId) && isValidId(creatureId) && existing().ownerId == request.auth.uid;
       }
 
+      match /private/gallery {
+        allow get: if isSignedIn() && get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid;
+        allow create, update: if isVerifiedUser()
+          && getAfter(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && incoming().keys().hasOnly(['images'])
+          && incoming().images is list && incoming().images.size() <= 9;
+      }
+
       match /sanctuary/{docId} {
-        allow get: if isSignedIn() && isValidId(wizardId) && isValidId(docId) && (existing().ownerId == request.auth.uid || existing().isPublic == true);
-        allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || resource.data.isPublic == true);
+        allow get: if isSignedIn() && isValidId(wizardId) && isValidId(docId)
+          && (get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+            || (existing().isPublic == true && exists(/databases/$(database)/documents/worldRealms/$(existing().realmId)/dormTours/$(wizardId))));
+        allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
         allow create: if isVerifiedUser()
           && isValidId(wizardId)
           && isValidId(docId)
           && isValidSanctuary(incoming(), wizardId)
-          && exists(/databases/$(database)/documents/wizards/$(wizardId))
-          && get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && incoming().isPublic == false
+          && existsAfter(/databases/$(database)/documents/wizards/$(wizardId))
+          && getAfter(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && getAfter(/databases/$(database)/documents/wizards/$(wizardId)).data.realmId == incoming().realmId
           && incoming().createdAt == request.time
           && incoming().updatedAt == request.time;
         allow update: if isVerifiedUser()
@@ -285,62 +264,23 @@ service cloud.firestore {
           && incoming().realmId == existing().realmId
           && incoming().createdAt == existing().createdAt
           && incoming().updatedAt == request.time
-          && incoming().diff(existing()).affectedKeys().hasOnly(['themeId', 'weatherId', 'isPublic', 'items', 'gardens', 'updatedAt']);
+          && incoming().diff(existing()).affectedKeys().hasOnly(['themeId', 'weatherId', 'items', 'gardens', 'updatedAt']);
       }
     }
 
     match /bazaar/{realmId}/listings/{listingId} {
-      allow get: if isSignedIn() && isValidId(realmId) && isValidRealm(realmId) && isValidId(listingId);
+      allow get: if isSignedIn() && isValidRealm(realmId) && isValidId(listingId);
       allow list: if isSignedIn() && resource.data.realmId == realmId;
-      allow create: if isVerifiedUser()
-        && isValidId(realmId)
-        && isValidRealm(realmId)
-        && isValidId(listingId)
-        && isValidBazaarListing(incoming(), realmId)
-        && incoming().sellerId == request.auth.uid
-        && incoming().status == 'open'
-        && incoming().createdAt == request.time
-        && incoming().updatedAt == request.time;
-      allow update: if isVerifiedUser()
-        && isValidId(realmId)
-        && isValidRealm(realmId)
-        && isValidId(listingId)
-        && existing().status == 'open'
-        && isValidBazaarListing(incoming(), realmId)
-        && incoming().sellerId == existing().sellerId
-        && incoming().sellerWizardId == existing().sellerWizardId
-        && incoming().realmId == existing().realmId
-        && incoming().priceFlorins == existing().priceFlorins
-        && incoming().createdAt == existing().createdAt
-        && incoming().updatedAt == request.time
-        && (
-          (existing().sellerId == request.auth.uid && incoming().status == 'cancelled' && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
-          || (existing().sellerId != request.auth.uid && incoming().status == 'sold' && incoming().buyerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'buyerId', 'updatedAt']))
-        );
     }
 
     match /houses/{realmId}/clubs/{houseId} {
-      allow get: if isSignedIn() && isValidId(realmId) && isValidRealm(realmId) && isValidId(houseId);
+      allow get: if isSignedIn() && isValidRealm(realmId) && isValidId(houseId);
       allow list: if isSignedIn() && resource.data.realmId == realmId;
-      allow create: if isVerifiedUser()
-        && isValidId(realmId)
-        && isValidRealm(realmId)
-        && isValidId(houseId)
-        && isValidHouse(incoming(), realmId)
-        && incoming().leaderId == request.auth.uid
-        && incoming().createdAt == request.time
-        && incoming().updatedAt == request.time;
-      allow update: if isVerifiedUser()
-        && isValidId(realmId)
-        && isValidRealm(realmId)
-        && isValidId(houseId)
-        && existing().leaderId == request.auth.uid
-        && isValidHouse(incoming(), realmId)
-        && incoming().leaderId == existing().leaderId
-        && incoming().realmId == existing().realmId
-        && incoming().createdAt == existing().createdAt
-        && incoming().updatedAt == request.time
-        && incoming().diff(existing()).affectedKeys().hasOnly(['motto', 'crestElement', 'memberCount', 'updatedAt']);
+    }
+
+    // Wallets, listing escrow, duel receipts and tour indexes are written by the server.
+    match /worldRealms/{path=**} {
+      allow read, write: if false;
     }
 
     match /publicWizards/{wizardId} {
@@ -349,6 +289,8 @@ service cloud.firestore {
       allow create: if isVerifiedUser()
         && isValidId(wizardId)
         && isValidPublicWizard(incoming())
+        && getAfter(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+        && getAfter(/databases/$(database)/documents/wizards/$(wizardId)).data.realmId == incoming().realmId
         && incoming().createdAt == request.time
         && incoming().updatedAt == request.time;
       allow update: if isVerifiedUser()

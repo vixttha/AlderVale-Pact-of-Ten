@@ -63,7 +63,11 @@ async function join(peer, wizardId, realmId) {
     wizardId, ownerId: `guest_${wizardId}`, name: wizardId, realmId, zone: 'hub',
     raceId: 'human', elementId: 'ember', level: 1, rank: 1, x: 0, y: 0, z: 0,
   } }));
-  return waitFor(peer, 'zone_snapshot');
+  await waitFor(peer, 'world_joined');
+  const snapshot = await waitFor(peer, 'zone_snapshot');
+  peer.wizardId = snapshot.players.find((player) => player.name === wizardId)?.wizardId;
+  assert.ok(peer.wizardId);
+  return snapshot;
 }
 
 test('production server serves its health endpoint and built HTML', async () => {
@@ -97,9 +101,9 @@ test('three real sockets exchange same-realm chat without crossing realms', asyn
   const outsider = await connect();
   await join(alice, 'alice', 'breeze');
   const snapshot = await join(bob, 'bob', 'breeze');
-  assert.ok(snapshot.players.some((player) => player.wizardId === 'alice'));
+  assert.ok(snapshot.players.some((player) => player.wizardId === alice.wizardId));
   const otherSnapshot = await join(outsider, 'outsider', 'everpeak');
-  assert.deepEqual(otherSnapshot.players.map((player) => player.wizardId), ['outsider']);
+  assert.deepEqual(otherSnapshot.players.map((player) => player.wizardId), [outsider.wizardId]);
   alice.socket.send(JSON.stringify({ type: 'chat', text: 'Realm scoped hello' }));
   assert.equal((await waitFor(bob, 'chat_message')).text, 'Realm scoped hello');
   await delay(200);

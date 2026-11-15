@@ -19,7 +19,9 @@ The validation workflow runs seven independent jobs:
   Linux browser jobs use a virtual display and software graphics; Firefox's
   native headless mode on the runner could not create the required WebGL2 context.
 - Firestore emulator on Java 21: permitted operations plus ownership, identity,
-  PII, realm, timestamp, ID-length, and bazaar state/price rejection scenarios.
+  PII, realm, timestamp, ID-length, and Bazaar state/price rejection scenarios.
+  The same emulator job also checks multi-hatch saves, Term rewards, private
+  Sky-Lens galleries, and server-side Bazaar and trade settlement.
 
 The Linux core job writes built asset sizes, SHA-256 hashes, and GLB header checks
 to the job summary. Browser failures retain reports/traces for one day. The test
@@ -49,10 +51,7 @@ Firestore emulator; no Firebase login, production account, or secret is needed.
 ## Public and private operation
 
 Pushes to main/codex branches and pull requests run automatically while public.
-If the repository becomes private, all jobs skip automatically; use Actions >
-AlderVale validation > Run workflow deliberately to consume private allowances.
-The project rules additionally require establishing that a private dispatch fits
-free allowances without paid overage, or obtaining explicit spending authorization.
+The hosted validation workflow skips private repositories.
 There is no schedule, background agent, automatic deployment, or self-hosted
 runner requirement. Standard hosted public runner compute is free under GitHub's
 current terms; larger runners, excess storage, and external APIs are separate.
@@ -65,9 +64,8 @@ push it, inspect the exact-SHA Actions run, then pull accepted changes into AI S
 
 Structural rules tests do not execute Firebase rules; the emulator job does.
 Guest browser tests do not prove Google sign-in, cloud saves, deployment behavior,
-GPU performance, gameplay quality, authenticated WebSocket identity, or security
-of every multiplayer route. Realm chat tests cover routing of declared realms,
-not trusted identity. Purchases tested in Firestore cover rule transitions, not
-an atomic inventory/currency settlement. No release acceptance is inferred.
+GPU performance, gameplay quality, production WebSocket identity, or security
+of every multiplayer route. Firebase and multiplayer integration tests use local
+fixtures and a demo project. No release acceptance is inferred.
 
 Making a public repository private later does not recall copies already fetched.
