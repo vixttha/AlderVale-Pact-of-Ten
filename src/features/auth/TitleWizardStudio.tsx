@@ -15,6 +15,7 @@ import {
 import { createStarterWizard, type WizardDocument } from '../../../shared/economy.ts';
 import type { RealmAccountState } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
+import { usesRowanModel } from '../../engine/rowanModel.ts';
 import { AvatarPreview3D } from '../../engine/avatarPreview3d.tsx';
 
 interface TitleWizardStudioProps {
@@ -221,6 +222,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     </div>
                     <div className="mt-3 h-48 rounded-xl bg-[#111726]/70 overflow-hidden">
                       <AvatarPreview3D
+                        rowanModel={usesRowanModel(w) ? 'rigged' : undefined}
                         config={{
                           raceId: w.raceId,
                           beastClan: w.beastClan,

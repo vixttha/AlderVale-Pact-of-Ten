@@ -3,6 +3,7 @@ import { Scissors, Gem, RefreshCcw, Archive } from 'lucide-react';
 import { MODULAR_GEAR, GEAR_BY_ID, RUNESTONES, RACES, type RaceId } from '../../../shared/wardrobe.ts';
 import type { WizardDocument } from '../../../shared/economy.ts';
 import type { RealmAccountState } from '../../lib/storage.ts';
+import { usesRowanModel, type RowanModelKind } from '../../engine/rowanModel.ts';
 import { AvatarPreview3D } from '../../engine/avatarPreview3d.tsx';
 
 interface TailorStudioPanelProps {
@@ -20,6 +21,9 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   onUpdateRealmAccount,
   onClose,
 }) => {
+  const [previewModel, setPreviewModel] = useState<RowanModelKind | 'procedural'>('procedural');
+  const canPreviewRowan = usesRowanModel(wizard);
+  const rowanPreview = canPreviewRowan && previewModel !== 'procedural' ? previewModel : undefined;
   const [tab, setTab] = useState<'wardrobe' | 'stitching' | 'sockets' | 'lineage' | 'vault'>('wardrobe');
   const [slotFilter, setSlotFilter] = useState<'headgear' | 'torso' | 'back' | 'footwear' | 'staff'>('torso');
 
@@ -102,6 +106,7 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
             </div>
             <div className="mt-2 h-80 rounded-xl bg-[radial-gradient(circle_at_center,#273657_0%,#111626_100%)] overflow-hidden">
               <AvatarPreview3D
+                rowanModel={rowanPreview}
                 config={{
                   raceId: wizard.raceId,
                   beastClan: wizard.beastClan,
@@ -114,6 +119,21 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
             </div>
           </div>
 
+          {canPreviewRowan && (
+            <label className="mt-3 flex items-center gap-2 text-xs">
+              Model preview
+              <select
+                value={previewModel}
+                onChange={(event) => setPreviewModel(event.target.value as typeof previewModel)}
+                className="rounded-md bg-[#273657] p-1"
+              >
+                <option value="procedural">Wardrobe preview</option>
+                <option value="rigged">Rowan (animated)</option>
+                <option value="prototype">Rowan (static prototype)</option>
+              </select>
+            </label>
+          )}
+          {rowanPreview && <p className="mt-2 text-xs">This model uses its own outfit and colors.</p>}
           <div className="mt-3 flex flex-wrap gap-3 text-xs">
             <label className="flex items-center gap-1.5">
               <span>Primary</span>
