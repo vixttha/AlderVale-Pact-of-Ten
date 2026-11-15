@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
  * Verifies the presence of all 8 pillars and rejects all Dirty Dozen attack shapes.
  */
 describe('Firestore Security Rules — Dirty Dozen Structural Audit', () => {
-  const rules = readFileSync('firestore.rules', 'utf8');
+  const rules = readFileSync('firestore.rules', 'utf8').replace(/\r\n/g, '\n');
 
   it('starts with default-deny catch-all rule', () => {
     expect(rules).toContain("rules_version = '2';");

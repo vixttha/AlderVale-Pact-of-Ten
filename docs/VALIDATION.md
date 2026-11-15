@@ -1,0 +1,66 @@
+# AlderVale validation
+
+Google AI Studio remains the main builder. Codex maintains focused tooling and
+tests. GitHub Actions runs the checks against the commit shown on each run.
+
+## Runner coverage
+
+The validation workflow runs seven independent jobs:
+
+- Linux, Windows, and macOS: frozen application install with Bun 1.4.4; type
+  checking; Firestore rules lint; existing unit/structural tests; production build;
+  real HTTP and three-client WebSocket integration.
+- Chromium, Firefox, and WebKit on Linux: title/creation controls, guest wizard
+  persistence and realm separation, and narrow viewport controls. External web
+  requests are blocked so tests cannot touch production Firebase or paid APIs.
+- Firestore emulator on Java 21: permitted operations plus ownership, identity,
+  PII, realm, timestamp, ID-length, and bazaar state/price rejection scenarios.
+
+The Linux core job writes built asset sizes, SHA-256 hashes, and GLB header checks
+to the job summary. Browser failures retain reports/traces for one day. The test
+tool dependencies live separately in tools/ci so AI Studio's application manifest
+and Bun lockfile are unchanged.
+
+## Run locally
+
+Use Node 24 and Bun 1.4.4 (older Bun cannot read this lockfile). From the repo root:
+
+```powershell
+bun install --frozen-lockfile
+bun run lint
+bun run lint:rules
+bun run test
+bun run build
+node --test tools/ci/server.check.mjs
+node scripts/asset-report.mjs
+npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
+```
+
+From tools/ci, run `npx playwright install chromium`, then
+`npm run test:browser -- --project=chromium`. For rules, install Java 21 and run
+`npm run test:rules`. This uses only the demo-aldervale-ci project and local
+Firestore emulator; no Firebase login, production account, or secret is needed.
+
+## Public and private operation
+
+Pushes to main/codex branches and pull requests run automatically while public.
+If the repository becomes private, all jobs skip automatically; use Actions >
+AlderVale validation > Run workflow deliberately to consume private allowances.
+There is no schedule, background agent, automatic deployment, or self-hosted
+runner requirement. Standard hosted public runner compute is free under GitHub's
+current terms; larger runners, excess storage, and external APIs are separate.
+
+GitHub Issues and pull requests own engineering work. The private Notion project
+home holds the brief, proposals, and AI Studio/Codex handoff. After a code change,
+push it, inspect the exact-SHA Actions run, then pull accepted changes into AI Studio.
+
+## Evidence limits
+
+Structural rules tests do not execute Firebase rules; the emulator job does.
+Guest browser tests do not prove Google sign-in, cloud saves, deployment behavior,
+GPU performance, gameplay quality, authenticated WebSocket identity, or security
+of every multiplayer route. Realm chat tests cover routing of declared realms,
+not trusted identity. Purchases tested in Firestore cover rule transitions, not
+an atomic inventory/currency settlement. No release acceptance is inferred.
+
+Making a public repository private later does not recall copies already fetched.
