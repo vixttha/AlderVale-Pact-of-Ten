@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test:browser": "playwright test",
-    "test:rules": "firebase emulators:exec --config firebase.json --project demo-aldervale-ci --only firestore \"node --test firestore.check.mjs\"",
+    "test:rules": "firebase emulators:exec --config ../../firebase.ci.json --project demo-aldervale-ci --only firestore \"node --test firestore.check.mjs\"",
     "test:server": "node --test server.check.mjs"
   },
   "devDependencies": {
