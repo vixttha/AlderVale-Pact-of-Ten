@@ -1,0 +1,6 @@
+{
+  "name": "Aldervale: Pact of Ten",
+  "description": "A free-to-play, multiplayer 3D creature-collecting and turn-based spellcasting RPG set in a storybook sky-island academy.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

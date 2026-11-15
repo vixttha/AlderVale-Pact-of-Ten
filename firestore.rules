@@ -1,0 +1,365 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidRealm(realmId) {
+      return realmId in ['breeze', 'horizon', 'everpeak'];
+    }
+
+    function isValidAccountProfile(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'displayName', 'email', 'settings', 'createdAt', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 40
+        && (!('email' in data) || (data.email is string && data.email.size() <= 160))
+        && (!('settings' in data) || data.settings is map)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidRealmAccount(data, realmId) {
+      return data.keys().hasAll(['uid', 'realmId', 'wizardIds', 'unlockedRaces', 'termXp', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'realmId', 'wizardIds', 'unlockedRaces', 'sharedVault', 'termXp', 'claimedTermTiers', 'createdAt', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && isValidRealm(data.realmId)
+        && data.realmId == realmId
+        && data.wizardIds is list && data.wizardIds.size() <= 3
+        && (data.wizardIds.size() == 0 || data.wizardIds[0] is string)
+        && data.unlockedRaces is list && data.unlockedRaces.size() <= 20
+        && (data.unlockedRaces.size() == 0 || data.unlockedRaces[0] is string)
+        && (!('sharedVault' in data) || (data.sharedVault is list && data.sharedVault.size() <= 60))
+        && data.termXp is number && data.termXp >= 0 && data.termXp <= 1000000
+        && (!('claimedTermTiers' in data) || (data.claimedTermTiers is list && data.claimedTermTiers.size() <= 50))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidWizard(data) {
+      return data.keys().hasAll(['ownerId', 'realmId', 'name', 'raceId', 'elementId', 'level', 'xp', 'rank', 'sculpt', 'wardrobe', 'currencies', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly([
+          'ownerId', 'realmId', 'name', 'raceId', 'beastClan', 'elementId',
+          'level', 'xp', 'rank', 'sculpt', 'wardrobe', 'stitching',
+          'currencies', 'resources', 'progression', 'activeCreatureId',
+          'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && isValidRealm(data.realmId)
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 24
+        && data.raceId is string && data.raceId.size() >= 2 && data.raceId.size() <= 32
+        && (!('beastClan' in data) || (data.beastClan is string && data.beastClan.size() <= 24))
+        && data.elementId is string && data.elementId.size() >= 2 && data.elementId.size() <= 24
+        && data.level is number && data.level >= 1 && data.level <= 50
+        && data.xp is number && data.xp >= 0 && data.xp <= 10000000
+        && data.rank is number && data.rank >= 1 && data.rank <= 20
+        && data.sculpt is map
+        && data.wardrobe is map
+        && (!('stitching' in data) || data.stitching is map)
+        && data.currencies is map
+        && (!('resources' in data) || data.resources is map)
+        && (!('progression' in data) || data.progression is map)
+        && (!('activeCreatureId' in data) || (data.activeCreatureId is string && data.activeCreatureId.size() <= 128))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidCreature(data, wizardId) {
+      return data.keys().hasAll(['ownerId', 'wizardId', 'realmId', 'speciesId', 'nickname', 'elementId', 'stage', 'chromatic', 'bondXp', 'wins', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'wizardId', 'realmId', 'speciesId', 'nickname', 'elementId', 'stage', 'chromatic', 'branchChoice', 'bondXp', 'wins', 'talents', 'createdAt', 'updatedAt'])
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && isValidId(data.wizardId)
+        && data.wizardId == wizardId
+        && isValidRealm(data.realmId)
+        && data.speciesId is string && data.speciesId.size() >= 2 && data.speciesId.size() <= 40
+        && data.nickname is string && data.nickname.size() >= 1 && data.nickname.size() <= 24
+        && data.elementId is string && data.elementId.size() >= 2 && data.elementId.size() <= 24
+        && data.stage is number && data.stage >= 1 && data.stage <= 3
+        && data.chromatic in ['none', 'dawn', 'dusk']
+        && (!('branchChoice' in data) || data.branchChoice in ['A', 'B'])
+        && data.bondXp is number && data.bondXp >= 0 && data.bondXp <= 1000000
+        && data.wins is number && data.wins >= 0 && data.wins <= 100000
+        && (!('talents' in data) || (data.talents is list && data.talents.size() <= 12 && (data.talents.size() == 0 || data.talents[0] is string)))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidSanctuary(data, wizardId) {
+      return data.keys().hasAll(['ownerId', 'wizardId', 'realmId', 'themeId', 'weatherId', 'isPublic', 'items', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'wizardId', 'realmId', 'themeId', 'weatherId', 'isPublic', 'ratingSum', 'ratingCount', 'items', 'gardens', 'createdAt', 'updatedAt'])
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && isValidId(data.wizardId)
+        && data.wizardId == wizardId
+        && isValidRealm(data.realmId)
+        && data.themeId is string && data.themeId.size() >= 2 && data.themeId.size() <= 32
+        && data.weatherId is string && data.weatherId.size() >= 2 && data.weatherId.size() <= 32
+        && data.isPublic is bool
+        && (!('ratingSum' in data) || (data.ratingSum is number && data.ratingSum >= 0))
+        && (!('ratingCount' in data) || (data.ratingCount is number && data.ratingCount >= 0))
+        && data.items is list && data.items.size() <= 120
+        && (!('gardens' in data) || (data.gardens is list && data.gardens.size() <= 12))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBazaarListing(data, realmId) {
+      return data.keys().hasAll(['sellerId', 'sellerWizardId', 'sellerName', 'realmId', 'itemType', 'itemId', 'itemName', 'priceFlorins', 'status', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['sellerId', 'sellerWizardId', 'sellerName', 'realmId', 'itemType', 'itemId', 'itemName', 'priceFlorins', 'status', 'buyerId', 'createdAt', 'updatedAt'])
+        && isValidId(data.sellerId)
+        && isValidId(data.sellerWizardId)
+        && data.sellerName is string && data.sellerName.size() >= 1 && data.sellerName.size() <= 24
+        && isValidRealm(data.realmId)
+        && data.realmId == realmId
+        && data.itemType in ['gear', 'card', 'runestone', 'furniture', 'reagent']
+        && data.itemId is string && data.itemId.size() >= 1 && data.itemId.size() <= 64
+        && data.itemName is string && data.itemName.size() >= 1 && data.itemName.size() <= 48
+        && data.priceFlorins is number && data.priceFlorins >= 1 && data.priceFlorins <= 1000000
+        && data.status in ['open', 'sold', 'cancelled']
+        && (!('buyerId' in data) || (data.buyerId is string && data.buyerId.size() <= 128))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidHouse(data, realmId) {
+      return data.keys().hasAll(['leaderId', 'realmId', 'name', 'crestElement', 'motto', 'memberCount', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['leaderId', 'realmId', 'name', 'crestElement', 'motto', 'memberCount', 'createdAt', 'updatedAt'])
+        && isValidId(data.leaderId)
+        && isValidRealm(data.realmId)
+        && data.realmId == realmId
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 32
+        && data.crestElement is string && data.crestElement.size() >= 2 && data.crestElement.size() <= 24
+        && data.motto is string && data.motto.size() <= 120
+        && data.memberCount is number && data.memberCount >= 1 && data.memberCount <= 100
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidPublicWizard(data) {
+      return data.keys().hasAll(['ownerId', 'realmId', 'name', 'raceId', 'elementId', 'level', 'rank', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'realmId', 'name', 'raceId', 'elementId', 'level', 'rank', 'titleBadge', 'createdAt', 'updatedAt'])
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && isValidRealm(data.realmId)
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 24
+        && data.raceId is string && data.raceId.size() >= 2 && data.raceId.size() <= 32
+        && data.elementId is string && data.elementId.size() >= 2 && data.elementId.size() <= 24
+        && data.level is number && data.level >= 1 && data.level <= 50
+        && data.rank is number && data.rank >= 1 && data.rank <= 20
+        && (!('titleBadge' in data) || (data.titleBadge is string && data.titleBadge.size() <= 40))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /accounts/{uid} {
+      allow get: if isSignedIn() && isValidId(uid) && uid == request.auth.uid;
+      allow create: if isVerifiedUser()
+        && isValidId(uid)
+        && uid == request.auth.uid
+        && isValidAccountProfile(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser()
+        && isValidId(uid)
+        && uid == request.auth.uid
+        && isValidAccountProfile(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'settings', 'updatedAt']);
+
+      match /realms/{realmId} {
+        allow get: if isSignedIn() && isValidId(uid) && isValidId(realmId) && isValidRealm(realmId) && uid == request.auth.uid;
+        allow create: if isVerifiedUser()
+          && isValidId(uid)
+          && isValidId(realmId)
+          && uid == request.auth.uid
+          && isValidRealmAccount(incoming(), realmId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time;
+        allow update: if isVerifiedUser()
+          && isValidId(uid)
+          && isValidId(realmId)
+          && uid == request.auth.uid
+          && isValidRealmAccount(incoming(), realmId)
+          && incoming().uid == existing().uid
+          && incoming().realmId == existing().realmId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly(['wizardIds', 'unlockedRaces', 'sharedVault', 'termXp', 'claimedTermTiers', 'updatedAt']);
+      }
+    }
+
+    match /wizards/{wizardId} {
+      allow get: if isSignedIn() && isValidId(wizardId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isVerifiedUser()
+        && isValidId(wizardId)
+        && isValidWizard(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser()
+        && isValidId(wizardId)
+        && existing().ownerId == request.auth.uid
+        && isValidWizard(incoming())
+        && incoming().ownerId == existing().ownerId
+        && incoming().realmId == existing().realmId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['sculpt', 'wardrobe', 'stitching', 'activeCreatureId', 'updatedAt'])
+          || incoming().diff(existing()).affectedKeys().hasOnly(['name', 'raceId', 'beastClan', 'elementId', 'level', 'xp', 'rank', 'currencies', 'resources', 'progression', 'wardrobe', 'stitching', 'activeCreatureId', 'updatedAt'])
+        );
+      allow delete: if isVerifiedUser() && isValidId(wizardId) && existing().ownerId == request.auth.uid;
+
+      match /creatures/{creatureId} {
+        allow get: if isSignedIn() && isValidId(wizardId) && isValidId(creatureId) && existing().ownerId == request.auth.uid;
+        allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+        allow create: if isVerifiedUser()
+          && isValidId(wizardId)
+          && isValidId(creatureId)
+          && isValidCreature(incoming(), wizardId)
+          && exists(/databases/$(database)/documents/wizards/$(wizardId))
+          && get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time;
+        allow update: if isVerifiedUser()
+          && isValidId(wizardId)
+          && isValidId(creatureId)
+          && existing().ownerId == request.auth.uid
+          && isValidCreature(incoming(), wizardId)
+          && get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && incoming().ownerId == existing().ownerId
+          && incoming().wizardId == existing().wizardId
+          && incoming().realmId == existing().realmId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly(['nickname', 'stage', 'branchChoice', 'bondXp', 'wins', 'talents', 'updatedAt']);
+        allow delete: if isVerifiedUser() && isValidId(wizardId) && isValidId(creatureId) && existing().ownerId == request.auth.uid;
+      }
+
+      match /sanctuary/{docId} {
+        allow get: if isSignedIn() && isValidId(wizardId) && isValidId(docId) && (existing().ownerId == request.auth.uid || existing().isPublic == true);
+        allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || resource.data.isPublic == true);
+        allow create: if isVerifiedUser()
+          && isValidId(wizardId)
+          && isValidId(docId)
+          && isValidSanctuary(incoming(), wizardId)
+          && exists(/databases/$(database)/documents/wizards/$(wizardId))
+          && get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time;
+        allow update: if isVerifiedUser()
+          && isValidId(wizardId)
+          && isValidId(docId)
+          && existing().ownerId == request.auth.uid
+          && isValidSanctuary(incoming(), wizardId)
+          && get(/databases/$(database)/documents/wizards/$(wizardId)).data.ownerId == request.auth.uid
+          && incoming().ownerId == existing().ownerId
+          && incoming().wizardId == existing().wizardId
+          && incoming().realmId == existing().realmId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly(['themeId', 'weatherId', 'isPublic', 'items', 'gardens', 'updatedAt']);
+      }
+    }
+
+    match /bazaar/{realmId}/listings/{listingId} {
+      allow get: if isSignedIn() && isValidId(realmId) && isValidRealm(realmId) && isValidId(listingId);
+      allow list: if isSignedIn() && resource.data.realmId == realmId;
+      allow create: if isVerifiedUser()
+        && isValidId(realmId)
+        && isValidRealm(realmId)
+        && isValidId(listingId)
+        && isValidBazaarListing(incoming(), realmId)
+        && incoming().sellerId == request.auth.uid
+        && incoming().status == 'open'
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser()
+        && isValidId(realmId)
+        && isValidRealm(realmId)
+        && isValidId(listingId)
+        && existing().status == 'open'
+        && isValidBazaarListing(incoming(), realmId)
+        && incoming().sellerId == existing().sellerId
+        && incoming().sellerWizardId == existing().sellerWizardId
+        && incoming().realmId == existing().realmId
+        && incoming().priceFlorins == existing().priceFlorins
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          (existing().sellerId == request.auth.uid && incoming().status == 'cancelled' && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+          || (existing().sellerId != request.auth.uid && incoming().status == 'sold' && incoming().buyerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'buyerId', 'updatedAt']))
+        );
+    }
+
+    match /houses/{realmId}/clubs/{houseId} {
+      allow get: if isSignedIn() && isValidId(realmId) && isValidRealm(realmId) && isValidId(houseId);
+      allow list: if isSignedIn() && resource.data.realmId == realmId;
+      allow create: if isVerifiedUser()
+        && isValidId(realmId)
+        && isValidRealm(realmId)
+        && isValidId(houseId)
+        && isValidHouse(incoming(), realmId)
+        && incoming().leaderId == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser()
+        && isValidId(realmId)
+        && isValidRealm(realmId)
+        && isValidId(houseId)
+        && existing().leaderId == request.auth.uid
+        && isValidHouse(incoming(), realmId)
+        && incoming().leaderId == existing().leaderId
+        && incoming().realmId == existing().realmId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['motto', 'crestElement', 'memberCount', 'updatedAt']);
+    }
+
+    match /publicWizards/{wizardId} {
+      allow get: if isSignedIn() && isValidId(wizardId);
+      allow list: if isSignedIn() && resource.data.realmId in ['breeze', 'horizon', 'everpeak'];
+      allow create: if isVerifiedUser()
+        && isValidId(wizardId)
+        && isValidPublicWizard(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser()
+        && isValidId(wizardId)
+        && existing().ownerId == request.auth.uid
+        && isValidPublicWizard(incoming())
+        && incoming().ownerId == existing().ownerId
+        && incoming().realmId == existing().realmId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'raceId', 'elementId', 'level', 'rank', 'titleBadge', 'updatedAt']);
+    }
+  }
+}
