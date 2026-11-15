@@ -1,8 +1,17 @@
 import { beforeAll, afterAll, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
-import { Box3, Bone, Group, SkinnedMesh } from 'three';
+import { Box3, Bone } from 'three';
 import type { AddressInfo } from 'node:net';
+
+vi.mock('../src/engine/animeShaders.ts', async (importOriginal) => {
+  const shaders = await importOriginal<typeof import('../src/engine/animeShaders.ts')>();
+  const { Mesh, PlaneGeometry, MeshBasicMaterial } = await import('three');
+  return {
+    ...shaders,
+    createContactShadow: () => new Mesh(new PlaneGeometry(), new MeshBasicMaterial()),
+  };
+});
 
 let server: Server;
 let url: string;
@@ -18,9 +27,8 @@ beforeAll(async () => {
   });
   server = createServer((request, response) => {
     requests++;
-    const path = /^\/models\/([^/?]+)$/.exec(request.url ?? '')?.[1];
-    if (path === 'rowan-prototype.glb' || path === 'exported-model.glb') {
-      response.end(readFileSync('public/models/' + path));
+    if (request.url === '/models/exported-model.glb') {
+      response.end(readFileSync('public/models/exported-model.glb'));
     } else response.writeHead(404).end();
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -32,82 +40,47 @@ afterAll(() => {
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
 });
-it('loads the actual rig, animates independently and selects only Rowan', async () => {
-  const { loadRowanModel, usesRowanModel } = await import('../src/engine/rowanModel.ts');
-  expect(usesRowanModel({ name: ' Rowan Skyweaver ', raceId: 'human' })).toBe(true);
-  expect(usesRowanModel({ name: 'Rowan Skyweaver', raceId: 'dwarf' })).toBe(false);
-  expect(usesRowanModel({ name: 'Someone Else', raceId: 'human' })).toBe(false);
-  const [a, b] = await Promise.all([loadRowanModel('rigged'), loadRowanModel('rigged')]);
-  expect(requests).toBe(1);
-  const pelvis = a.object.getObjectByName('pelvis') as Bone;
-  const otherPelvis = b.object.getObjectByName('pelvis') as Bone;
-  expect(pelvis).toBeInstanceOf(Bone);
-  expect(pelvis).not.toBe(otherPelvis);
-  const prior = pelvis.quaternion.clone();
-  const otherPrior = otherPelvis.quaternion.clone();
-  for (let i = 0; i < 12; i++) a.update(.05, 'walk');
-  expect(prior.angleTo(pelvis.quaternion)).toBeGreaterThan(.01);
-  expect(otherPrior.angleTo(otherPelvis.quaternion)).toBeLessThan(.00001);
-  const bounds = new Box3().setFromObject(a.object);
-  expect(bounds.max.y - bounds.min.y).toBeGreaterThan(1.2);
-  a.dispose();
-  b.dispose();
-});
-it('centers the exact static prototype on the floor', async () => {
-  const { loadRowanModel } = await import('../src/engine/rowanModel.ts');
-  const model = await loadRowanModel('prototype');
-  const bounds = new Box3().setFromObject(model.object);
-  expect(bounds.min.y).toBeCloseTo(0);
-  expect(bounds.max.y).toBeCloseTo(1.65);
-  let skin = false;
-  model.object.traverse(node => { if (node instanceof SkinnedMesh) skin = true; });
-  expect(skin).toBe(false);
-  model.dispose();
-});
-it('keeps the built-in avatar until the external model mounts and restores it on cleanup', async () => {
-  const { mountRowanModel } = await import('../src/engine/rowanModel.ts');
-  const slot = new Group();
-  const fallback = new Group();
-  slot.add(fallback);
-  const container = { dataset: {} } as HTMLElement;
-  let dispose = () => {};
-  const mounted = new Promise<void>((resolve) => {
-    dispose = mountRowanModel(slot, fallback, container, 'rigged', (model) => {
-      if (model) resolve();
-    });
-  });
-  expect(fallback.visible).toBe(true);
-  await mounted;
-  expect(fallback.visible).toBe(false);
-  expect(container.dataset.avatarModel).toBe('rigged');
-  expect(slot.children).toHaveLength(2);
-  dispose();
-  expect(fallback.visible).toBe(true);
-  expect(slot.children).toEqual([fallback]);
-});
-
-it('keeps the procedural avatar after a fetch failure and can retry', async () => {
-  vi.resetModules();
-  const { mountRowanModel, loadRowanModel } = await import('../src/engine/rowanModel.ts');
-  const slot = new Group();
-  const fallback = new Group();
-  slot.add(fallback);
-  const container = { dataset: {} } as HTMLElement;
-  vi.stubEnv('BASE_URL', url + 'missing/');
-  const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  const dispose = mountRowanModel(slot, fallback, container, 'rigged', () => {});
+it('loads the real Rowan asset once and animates two independent player avatars', async () => {
+  const { buildRowanHuman, disposeWizardAvatar, updateRowanHuman } = await import('../src/engine/races/rowanHuman.ts');
+  const config = {
+    raceId: 'human',
+    elementId: 'ember',
+    sculpt: {
+      height: 1, build: 'balanced', skinHex: '#e6bda0', hairStyle: 'Windblown Shag',
+      hairHex: '#332822', hairTipHex: '#ff8a4c', eyeShape: 'bright', eyeLeftHex: '#3b82c4',
+      eyeRightHex: '#3b82c4', browStyle: 'arched', marking: 'none', primaryDye: '#2f4569',
+      trimDye: '#d4a13e', accentDye: '#d9532f', castPose: 'duelist',
+    },
+    equipped: { headgear: 'hat_academy_cap', torso: 'torso_bomber', back: 'back_satchel', footwear: 'boots_sneakers', staff: 'staff_oak_wand' },
+  } satisfies Parameters<typeof buildRowanHuman>[0];
+  const first = buildRowanHuman(config);
+  const second = buildRowanHuman(config);
   try {
-    await vi.waitFor(() => expect(container.dataset.avatarModel).toBe('procedural'));
-    expect(fallback.visible).toBe(true);
-    expect(slot.children).toEqual([fallback]);
+    await vi.waitFor(() => expect(second.userData.humanModel).toBe('rowan'), { timeout: 4000 });
+    expect(first.userData.humanModel).toBe('rowan');
+    expect(requests).toBe(1);
+
+    const pelvis = first.getObjectByName('pelvis') as Bone;
+    const otherPelvis = second.getObjectByName('pelvis') as Bone;
+    expect(pelvis).toBeInstanceOf(Bone);
+    expect(pelvis).not.toBe(otherPelvis);
+    const firstPose = pelvis.quaternion.clone();
+    const secondPose = otherPelvis.quaternion.clone();
+    for (let frame = 0; frame < 12; frame++) updateRowanHuman(first, 0.05, { moving: true });
+    expect(first.userData.humanClip).toBe('Walk');
+    expect(pelvis.quaternion.angleTo(firstPose)).toBeGreaterThan(0.01);
+    expect(otherPelvis.quaternion.angleTo(secondPose)).toBeLessThan(0.00001);
+
+    const bounds = new Box3().setFromObject(second.getObjectByName('bodyRig')!, true);
+    expect(bounds.min.y).toBeCloseTo(0);
+    expect(bounds.max.y).toBeCloseTo(1.8);
+    disposeWizardAvatar(first);
+    expect(updateRowanHuman(second, 0.05, { moving: false, jumping: true })).toBe(true);
+    expect(second.userData.humanClip).toBe('Jump_air');
   } finally {
-    dispose();
-    warning.mockRestore();
-    vi.stubEnv('BASE_URL', url);
+    disposeWizardAvatar(first);
+    disposeWizardAvatar(second);
   }
-  const model = await loadRowanModel('rigged');
-  expect(model.object.getObjectByName('pelvis')).toBeDefined();
-  model.dispose();
 });
 
 it('changes Dorm weather without rebuilding the particle geometry', async () => {

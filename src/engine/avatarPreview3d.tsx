@@ -1,23 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { clearSceneGroup, disposeScene } from './disposeScene.ts';
+import { disposeScene } from './disposeScene.ts';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { buildWizardGroup, type WizardMeshConfig } from './avatarMesh.ts';
-import { mountRowanModel, type RowanModelKind } from './rowanModel.ts';
+import { clearWizardAvatarSlot, updateRowanHuman } from './races/rowanHuman.ts';
 import { addOutlineToGroup, makeAnimeToonMaterial } from './animeShaders.ts';
 
 interface AvatarPreview3DProps {
   config: WizardMeshConfig;
   className?: string;
-  rowanModel?: RowanModelKind;
 }
 
-export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, className = '', rowanModel }) => {
+export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, className = '' }) => {
   const [unavailable, setUnavailable] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const avatarSlotRef = useRef<THREE.Group | null>(null);
-  const fallbackRef = useRef<THREE.Group | null>(null);
-  const updateModelRef = useRef<((delta: number) => void) | null>(null);
+  const statusRef = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -70,9 +68,6 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     scene.add(pedestal);
 
     const avatarSlot = new THREE.Group();
-    const fallback = new THREE.Group();
-    avatarSlot.add(fallback);
-    fallbackRef.current = fallback;
     scene.add(avatarSlot);
     avatarSlotRef.current = avatarSlot;
 
@@ -110,12 +105,21 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     }
 
     function renderLoop() {
-      if (disposed) return;
+      if (disposed || !el) return;
       const now = performance.now();
-      const delta = Math.min(0.12, (now - lastDraw) / 1000);
+      const dt = Math.min(0.12, (now - lastDraw) / 1000);
       lastDraw = now;
-      updateModelRef.current?.(delta);
-      angle += delta * 0.84;
+      const avatar = avatarSlot.children[0];
+      if (avatar) {
+        updateRowanHuman(avatar, dt, { moving: false });
+        const model = String(avatar.userData.humanModel ?? 'procedural');
+        el.dataset.avatarModel = model;
+        el.dataset.avatarClip = String(avatar.userData.humanClip ?? '');
+        const status = model === 'loading' ? 'Loading Rowan appearance…'
+          : model === 'fallback' ? 'Rowan unavailable. Showing Classic human.' : '';
+        if (statusRef.current && statusRef.current.textContent !== status) statusRef.current.textContent = status;
+      }
+      angle += dt * 0.84;
       avatarSlot.rotation.y = Math.sin(angle) * 0.65;
       renderer.render(scene, camera);
       if (isSoftwareGl) afterDraw(renderLoop);
@@ -142,8 +146,8 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
       if (pendingFence) gl.deleteSync(pendingFence);
       pendingFence = null;
       ro.disconnect();
+      clearWizardAvatarSlot(avatarSlot);
       avatarSlotRef.current = null;
-      fallbackRef.current = null;
       disposeScene(scene);
       environmentTarget.dispose();
       pmrem.dispose();
@@ -153,25 +157,17 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
   }, []);
 
   useEffect(() => {
-    const fallback = fallbackRef.current;
-    if (!fallback) return;
-    clearSceneGroup(fallback);
-    fallback.add(buildWizardGroup(config));
+    const slot = avatarSlotRef.current;
+    if (!slot) return;
+    clearWizardAvatarSlot(slot);
+    slot.add(buildWizardGroup(config));
   }, [config]);
 
-  useEffect(() => {
-    const slot = avatarSlotRef.current;
-    const fallback = fallbackRef.current;
-    const el = containerRef.current;
-    if (!rowanModel || !slot || !fallback || !el) return;
-    return mountRowanModel(slot, fallback, el, rowanModel, (model) => {
-      updateModelRef.current = model?.update ?? null;
-    });
-  }, [rowanModel]);
-
   return (
-    <div ref={containerRef} className={`w-full h-full ${className}`}>
-      {unavailable && <div role="status" className="flex h-full min-h-24 items-center justify-center px-4 text-center text-sm">3D preview unavailable</div>}
+    <div ref={containerRef} aria-label="Wizard appearance preview" className={`relative w-full h-full ${className}`}>
+      {unavailable
+        ? <div role="status" className="flex h-full min-h-24 items-center justify-center px-4 text-center text-sm">3D preview unavailable</div>
+        : <p ref={statusRef} role="status" className="pointer-events-none absolute bottom-2 left-2 right-2 text-center text-xs text-white" />}
     </div>
   );
 };

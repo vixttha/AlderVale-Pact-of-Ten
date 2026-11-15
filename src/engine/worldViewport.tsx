@@ -12,8 +12,8 @@ import { ELEMENTS } from '../../shared/elements.ts';
 import type { WizardSculpt } from '../../shared/wardrobe.ts';
 import type { OwnedCreature, PlacedDormItem } from '../lib/storage.ts';
 import type { EmoteId, LivePlayerPresence } from '../../server/wsHub.ts';
-import { mountRowanModel, usesRowanModel, type RowanModel } from './rowanModel.ts';
 import { buildWizardGroup } from './avatarMesh.ts';
+import { clearWizardAvatarSlot, updateRowanHuman } from './races/rowanHuman.ts';
 import { buildCreatureGroup, buildMountGroup } from './creatureMesh.ts';
 import { buildDormItemsGroup, buildZoneScene, type InteractiveHitTarget } from './zoneBuilders.ts';
 import { buildAnimeSkyAndClouds } from './animeShaders.ts';
@@ -133,9 +133,6 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
   onRegisterCaptureFn,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const fallbackAvatarRef = useRef<THREE.Group | null>(null);
-  const rowanUpdateRef = useRef<RowanModel['update'] | null>(null);
-  const showRowanModel = usesRowanModel(wizard);
   const nameplatesLayerRef = useRef<HTMLDivElement | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [graphicsAttempt, setGraphicsAttempt] = useState(0);
@@ -325,19 +322,6 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     scene.add(creatureSlot);
     creatureSlotRef.current = creatureSlot;
 
-    // Populate initial avatar/mount/creature immediately on mount
-    const initAvatar = buildWizardGroup({
-      raceId: wizard.raceId,
-      beastClan: wizard.beastClan,
-      elementId: wizard.elementId,
-      sculpt: wizard.sculpt,
-      equipped: wizard.wardrobe.equipped,
-      stitching: wizard.stitching,
-    });
-    const fallbackAvatar = new THREE.Group();
-    fallbackAvatar.add(initAvatar);
-    avatarSlot.add(fallbackAvatar);
-    fallbackAvatarRef.current = fallbackAvatar;
     if (wizard.progression.equippedMountId) {
       mountSlot.add(buildMountGroup(wizard.progression.equippedMountId));
       avatarSlot.position.y = 0.36;
@@ -624,7 +608,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     }
 
     function step() {
-      if (disposed) return;
+      if (disposed || !container) return;
       const now = performance.now();
       const dt = Math.min(0.08, (now - lastTime) / 1000);
       lastTime = now;
@@ -636,6 +620,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       const activeIds = new Set(remotePlayersRef.current.map((p) => p.sessionId));
       for (const [sid, entry] of remoteMeshes.entries()) {
         if (!activeIds.has(sid)) {
+          clearWizardAvatarSlot(entry.avatarSlot);
           disposeScene(entry.root);
           disposeScene(entry.creatureSlot);
           scene.remove(entry.root);
@@ -678,7 +663,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         }
 
         if (entry.appearanceKey !== appKey) {
-          clearSceneGroup(entry.avatarSlot);
+          clearWizardAvatarSlot(entry.avatarSlot);
           entry.avatarSlot.add(
             buildWizardGroup({
               raceId: rp.raceId,
@@ -727,7 +712,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         const rEmoteInfo = remoteEmotesRef.current.get(rp.sessionId);
         const rEmote = rEmoteInfo && now < rEmoteInfo.until ? rEmoteInfo.emote : null;
         if (entry.avatarSlot.children[0]) {
-          animateWizardRig(entry.avatarSlot.children[0], distMoved > 0.015, t, 1.0, rEmote);
+          animateWizardRig(entry.avatarSlot.children[0], distMoved > 0.015, t, 1.0, rEmote, dt, rp.y > 0.02, Boolean(rp.mountId));
         }
 
         // Remote companion follow + animation
@@ -800,12 +785,11 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       // Animate Wizard Stride / Breathing / Cloak / Wings / Emote
       const activeLocalEmote =
         localEmoteRef.current && now < localEmoteRef.current.until ? localEmoteRef.current.emote : null;
-      const animateRowan = rowanUpdateRef.current;
-      if (animateRowan) {
-        const motion = playerY > 0.02 ? 'airborne' : !moving || isMounted ? 'idle' : sprinting ? 'sprint' : 'walk';
-        animateRowan(dt, motion);
-      } else if (fallbackAvatar.children[0]) {
-        animateWizardRig(fallbackAvatar.children[0], moving && playerY <= 0.02, t, sprinting ? 1.35 : 1.0, activeLocalEmote);
+      const localAvatar = avatarSlot.children[0];
+      if (localAvatar) {
+        animateWizardRig(localAvatar, moving && playerY <= 0.02, t, sprinting ? 1.35 : 1.0, activeLocalEmote, dt, playerY > 0.02, isMounted);
+        container.dataset.worldAvatarModel = String(localAvatar.userData.humanModel ?? 'procedural');
+        container.dataset.worldAvatarClip = String(localAvatar.userData.humanClip ?? '');
       }
 
       // Animate Lead Creature Follow + Wings / Tail / Gear / Halo
@@ -1093,13 +1077,14 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
       renderer.domElement.removeEventListener('webglcontextlost', handleLost);
       renderer.domElement.removeEventListener('webglcontextrestored', handleRestored);
       avatarSlotRef.current = null;
-      fallbackAvatarRef.current = null;
       mountSlotRef.current = null;
       creatureSlotRef.current = null;
       dormSlotRef.current = null;
       playerContainerRef.current = null;
       nearbyHitRef.current = null;
       setNearbyPrompt(null);
+      clearWizardAvatarSlot(avatarSlot);
+      for (const entry of remoteMeshes.values()) clearWizardAvatarSlot(entry.avatarSlot);
       if (nameplatesLayer) nameplatesLayer.innerHTML = '';
       bloomPass?.dispose();
       composer?.dispose();
@@ -1114,21 +1099,11 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
     };
   }, [zone, dormThemeId, graphicsAttempt]);
 
-  useEffect(() => {
-    const slot = avatarSlotRef.current;
-    const fallback = fallbackAvatarRef.current;
-    const container = containerRef.current;
-    if (!showRowanModel || !slot || !fallback || !container) return;
-    return mountRowanModel(slot, fallback, container, 'rigged', (model) => {
-      rowanUpdateRef.current = model?.update ?? null;
-    });
-  }, [showRowanModel, zone, dormThemeId, graphicsAttempt]);
-
   // Seamless Hot-Swap 1: Wizard Avatar Wardrobe / Tailor / Race updates (ZERO scene teardown!)
   useEffect(() => {
-    const slot = fallbackAvatarRef.current;
+    const slot = avatarSlotRef.current;
     if (!slot) return;
-    clearSceneGroup(slot);
+    clearWizardAvatarSlot(slot);
     slot.add(
       buildWizardGroup({
         raceId: wizard.raceId,
@@ -1258,7 +1233,11 @@ function animateWizardRig(
   t: number,
   speedScalar: number,
   emote?: EmoteId | null,
+  dt = 0,
+  jumping = false,
+  mounted = false,
 ) {
+  if (updateRowanHuman(avatar, dt, { moving: moving && !mounted, speedScalar, emote: moving && mounted ? null : emote, jumping })) return;
   const bodyRig = avatar.getObjectByName('bodyRig');
   if (!bodyRig) return;
 

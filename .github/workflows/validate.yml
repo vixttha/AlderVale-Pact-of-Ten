@@ -42,6 +42,8 @@ jobs:
         run: bun run lint:rules
       - name: Unit and structural tests
         run: bun run test
+      - name: Rowan model provenance and rig contract
+        run: node scripts/validate-human-model.mjs
       - name: Build production client
         run: bun run build
       - name: Real HTTP and WebSocket integration

@@ -15,8 +15,8 @@ import {
 import { createStarterWizard, type WizardDocument } from '../../../shared/economy.ts';
 import type { RealmAccountState } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
-import { usesRowanModel } from '../../engine/rowanModel.ts';
 import { AvatarPreview3D } from '../../engine/avatarPreview3d.tsx';
+import { HumanAppearanceChoice } from './HumanAppearanceChoice.tsx';
 
 interface TitleWizardStudioProps {
   userEmail: string | null;
@@ -79,6 +79,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   });
 
   const activeRace = RACES[raceId];
+  const rowanHuman = raceId === 'human' && sculpt.humanModel !== 'classic';
   const unlockedSet = new Set(realmAccount.unlockedRaces);
 
   const handleRacePick = (nextRace: RaceId) => {
@@ -238,7 +239,6 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     </div>
                     <div className="mt-3 h-48 rounded-xl bg-[#111726]/70 overflow-hidden">
                       <AvatarPreview3D
-                        rowanModel={usesRowanModel(w) ? 'rigged' : undefined}
                         config={{
                           raceId: w.raceId,
                           beastClan: w.beastClan,
@@ -382,6 +382,11 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
 
               {/* Anime-Storybook Facial, Proportion & Streetwear Dye Sculpting */}
               <div className="grid gap-3 sm:grid-cols-2 rounded-xl border border-[#d7c7a9]/15 bg-[#171f33] p-3 text-xs">
+                {raceId === 'human' && (
+                  <div className="sm:col-span-2 text-[#c7d0e0]">
+                    <HumanAppearanceChoice value={sculpt.humanModel} onChange={(humanModel) => setSculpt((s) => ({ ...s, humanModel }))} />
+                  </div>
+                )}
                 <div>
                   <label className="block font-semibold text-[#c7d0e0] mb-1">Wizard Name</label>
                   <input
@@ -395,6 +400,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <label className="block font-semibold text-[#c7d0e0] mb-1">Hair Style</label>
                   <select
                     value={sculpt.hairStyle}
+                    disabled={rowanHuman}
                     onChange={(e) => setSculpt((s) => ({ ...s, hairStyle: e.target.value }))}
                     className="w-full rounded-lg border border-white/15 bg-[#101626] px-2.5 py-1.5 text-white"
                   >
@@ -413,6 +419,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                       <button
                         key={hex}
                         type="button"
+                        disabled={rowanHuman}
                         onClick={() => setSculpt((s) => ({ ...s, skinHex: hex }))}
                         className={`h-6 w-6 rounded-full border-2 ${sculpt.skinHex === hex ? 'border-[#f4c98b] scale-110' : 'border-white/25'}`}
                         style={{ backgroundColor: hex }}
@@ -428,6 +435,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <div className="flex items-center gap-2">
                     <input
                       type="range"
+                      aria-label="Wizard height"
                       min={0.88}
                       max={1.12}
                       step={0.02}
@@ -437,6 +445,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     />
                     <select
                       value={sculpt.build}
+                      aria-label="Wizard build"
                       onChange={(e) => setSculpt((s) => ({ ...s, build: e.target.value as WizardSculpt['build'] }))}
                       className="rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -452,6 +461,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <div className="flex items-center gap-2">
                     <select
                       value={sculpt.eyeShape}
+                      disabled={rowanHuman}
                       onChange={(e) => setSculpt((s) => ({ ...s, eyeShape: e.target.value as WizardSculpt['eyeShape'] }))}
                       className="flex-1 rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -461,6 +471,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     </select>
                     <select
                       value={sculpt.browStyle}
+                      disabled={rowanHuman}
                       onChange={(e) => setSculpt((s) => ({ ...s, browStyle: e.target.value as WizardSculpt['browStyle'] }))}
                       className="flex-1 rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -476,6 +487,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <div className="flex items-center gap-2">
                     <select
                       value={sculpt.marking}
+                      disabled={rowanHuman}
                       onChange={(e) => setSculpt((s) => ({ ...s, marking: e.target.value as WizardSculpt['marking'] }))}
                       className="flex-1 rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -487,6 +499,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     </select>
                     <select
                       value={sculpt.castPose}
+                      disabled={rowanHuman}
                       onChange={(e) => setSculpt((s) => ({ ...s, castPose: e.target.value as WizardSculpt['castPose'] }))}
                       className="flex-1 rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -500,23 +513,23 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                 <div className="sm:col-span-2 flex flex-wrap items-center gap-4 pt-1">
                   <label className="flex items-center gap-1.5">
                     <span>Jacket</span>
-                    <input type="color" value={sculpt.primaryDye} onChange={(e) => setSculpt((s) => ({ ...s, primaryDye: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.primaryDye} onChange={(e) => setSculpt((s) => ({ ...s, primaryDye: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                   <label className="flex items-center gap-1.5">
                     <span>Trim</span>
-                    <input type="color" value={sculpt.trimDye} onChange={(e) => setSculpt((s) => ({ ...s, trimDye: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.trimDye} onChange={(e) => setSculpt((s) => ({ ...s, trimDye: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                   <label className="flex items-center gap-1.5">
                     <span>Hair</span>
-                    <input type="color" value={sculpt.hairHex} onChange={(e) => setSculpt((s) => ({ ...s, hairHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.hairHex} onChange={(e) => setSculpt((s) => ({ ...s, hairHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                   <label className="flex items-center gap-1.5">
                     <span>L-Eye</span>
-                    <input type="color" value={sculpt.eyeLeftHex} onChange={(e) => setSculpt((s) => ({ ...s, eyeLeftHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.eyeLeftHex} onChange={(e) => setSculpt((s) => ({ ...s, eyeLeftHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                   <label className="flex items-center gap-1.5">
                     <span>R-Eye</span>
-                    <input type="color" value={sculpt.eyeRightHex} onChange={(e) => setSculpt((s) => ({ ...s, eyeRightHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.eyeRightHex} onChange={(e) => setSculpt((s) => ({ ...s, eyeRightHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                 </div>
               </div>

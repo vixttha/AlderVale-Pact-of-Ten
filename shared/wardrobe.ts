@@ -226,6 +226,8 @@ export const RACES: Record<RaceId, RaceDefinition> = {
 export const RACE_LIST: RaceDefinition[] = Object.values(RACES);
 
 export interface WizardSculpt {
+  /** Undefined keeps older saves compatible with the default Rowan appearance. */
+  humanModel?: 'rowan' | 'classic';
   height: number; // 0.88..1.12
   build: 'slender' | 'balanced' | 'athletic';
   skinHex: string;
