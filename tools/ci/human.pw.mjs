@@ -121,7 +121,8 @@ test('failed model loading leaves the Classic fallback and enrollment usable', a
 });
 
 test('a guest wins as Rowan and keeps First Spark and its rewards after reload', async ({ page }) => {
-  test.setTimeout(90_000);
+  // This flow renders Rowan again after a full reload on software WebGL.
+  test.setTimeout(135_000);
   const errors = [];
   const wizardName = 'Rowan Duelist';
   const questName = 'First Spark in the Ring';
@@ -139,11 +140,8 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
       shards: wizard.currencies.spellShards,
     };
   }, wizardName);
-  const openQuestLedger = async () => {
-    await page.getByRole('button', { name: 'Campus', exact: true }).click();
-    await page.getByRole('button', { name: 'Quests, Term & Codex', exact: true }).click();
-  };
   const expectFirstSparkCompleted = async () => {
+    await page.getByRole('button', { name: /Active Saga Quest/ }).click();
     const cardHeader = page.getByText(questName, { exact: true }).locator('..');
     await expect(cardHeader.getByText('Completed', { exact: true })).toBeVisible();
   };
@@ -195,7 +193,6 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
     shards: starter.shards + 5,
   };
   await expect.poll(readWizard).toEqual(rewarded);
-  await openQuestLedger();
   await expectFirstSparkCompleted();
 
   await page.reload();
@@ -204,7 +201,6 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
   await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
   await expect(page.getByText(`${rewarded.florins}F`, { exact: true })).toBeVisible();
   await expect(page.getByText(`${rewarded.shards} Shards`, { exact: true })).toBeVisible();
-  await openQuestLedger();
   await expectFirstSparkCompleted();
   expect(await readWizard()).toEqual(rewarded);
   expect(errors).toEqual([]);
