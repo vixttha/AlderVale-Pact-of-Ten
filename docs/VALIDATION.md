@@ -8,7 +8,8 @@ public, Notion stays private, and project work must add no unapproved spending.
 
 ## Runner coverage
 
-The validation workflow runs seven independent jobs:
+The validation workflow runs seven independent jobs. A separate Semgrep
+Community Edition workflow adds one Linux job and does not change that matrix:
 
 - Linux, Windows, and macOS: frozen application install with Bun 1.4.4; type
   checking; Firestore rules lint; existing unit/structural tests; production build;
@@ -25,6 +26,13 @@ The Linux core job writes built asset sizes, SHA-256 hashes, and GLB header chec
 to the job summary. Browser failures retain reports/traces for one day. The test
 tool dependencies live separately in tools/ci so AI Studio's application manifest
 and Bun lockfile are unchanged.
+
+Semgrep CE (`.github/workflows/semgrep.yml`) runs `semgrep scan` 1.185.0 on
+`ubuntu-latest` for pull requests, pushes to `main`, manual dispatch, and a
+weekly Monday 06:27 UTC schedule the owner requested. It does not use Semgrep
+Pro, `SEMGREP_APP_TOKEN`, or `semgrep ci`. Findings are audit-only (the job
+does not fail on matches). The JSON artifact is kept one day. Private-repository
+runs skip unless manually dispatched.
 
 ## Run locally
 
@@ -54,9 +62,10 @@ If the repository becomes private, all jobs skip automatically; use Actions >
 AlderVale validation > Run workflow deliberately to consume private allowances.
 The project rules additionally require establishing that a private dispatch fits
 free allowances without paid overage, or obtaining explicit spending authorization.
-There is no schedule, background agent, automatic deployment, or self-hosted
-runner requirement. Standard hosted public runner compute is free under GitHub's
-current terms; larger runners, excess storage, and external APIs are separate.
+The only scheduled job is the owner-requested weekly Semgrep CE scan. There is
+no background agent, automatic deployment, or self-hosted runner requirement.
+Standard hosted public runner compute is free under GitHub's current terms;
+larger runners, excess storage, and external APIs are separate.
 
 GitHub Issues and pull requests own engineering work. The private Notion project
 home holds the brief, proposals, and AI Studio/Codex handoff. After a code change,

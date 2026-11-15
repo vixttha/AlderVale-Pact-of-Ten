@@ -1,0 +1,27 @@
+# In-repo Semgrep Community Edition policy.
+# CI runs this file plus Registry packs `p/javascript`, `p/typescript`,
+# and `p/nodejs`. (`--config auto` cannot run with metrics off.) Do not put `interfile: true`
+# rules here: that option is Semgrep Pro / Code, which this project does not enable.
+rules:
+  - id: aldervale.javascript.no-eval
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      `eval()` is banned. Keep game and server logic explicit instead of
+      executing strings.
+    pattern: eval(...)
+    metadata:
+      policy: local
+      category: security
+      cwe: 'CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code'
+
+  - id: aldervale.javascript.no-function-constructor
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      `new Function(...)` is banned. It is equivalent to eval.
+    pattern: new Function(...)
+    metadata:
+      policy: local
+      category: security
+      cwe: 'CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code'
