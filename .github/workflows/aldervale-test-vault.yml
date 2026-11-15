@@ -1,0 +1,69 @@
+name: AlderVale Test Vault
+
+on:
+  push:
+    branches: [AlderVale-test-Vault]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aldervale-test-vault-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    if: github.event.repository.private == false
+    name: Core (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run lint:rules
+      - run: npm run build
+      - run: npm test
+
+  firestore:
+    if: github.event.repository.private == false
+    name: Firestore emulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Set up Java
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - name: Run Firestore rules and transactions
+        env:
+          GOOGLE_CLOUD_PROJECT: demo-aldervale-audit
+          FIRESTORE_DATABASE_ID: '(default)'
+        run: >-
+          npm exec --yes --package=firebase-tools@15.36.0 --
+          firebase emulators:exec --only firestore --project demo-aldervale-audit
+          "npm test -- tests/firestore.integration.test.ts"
