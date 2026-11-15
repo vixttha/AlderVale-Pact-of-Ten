@@ -43,8 +43,8 @@ helper against the Jules API. Only that step receives the existing secret.
   tests before secret-bearing dispatch step, bounded job timeout.
 - [x] Add `docs/jules-audits.md` describing trigger, secret, Jules connection,
   usage, session link, failures, and evidence limits.
-- [ ] Review diff and run focused tests and `git diff --check`.
-- [ ] Commit only these files and publish to main as approved; inspect the
+- [x] Review diff and run focused tests and `git diff --check`.
+- [x] Commit only these files and publish to main as approved; inspect the
   automatic run and its session-submission result. Record any live blocker.
 
 ## Execution ledger
@@ -58,3 +58,10 @@ helper against the Jules API. Only that step receives the existing secret.
   slash-delimited source IDs. Added failing regression coverage, then expanded
   validation. Also support documented session responses containing a name without
   a URL, constructing a link only from a validated session resource name.
+- First publication: `a610be82996ecb75ef2724e68994c9ecd691cfe8` triggered
+  Actions run `43708619777` automatically. Hosted tests passed; the Sources
+  request completed but the target repository was unavailable to the key.
+- Before concluding a connection blocker, added a regression for GitHub's
+  case-insensitive repository names and corrected the source identity comparison.
+  The next automatic run verifies that casing cannot cause a false missing-source
+  diagnosis. No audit session was created by the first run.

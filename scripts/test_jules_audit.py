@@ -18,6 +18,11 @@ LINK = "https://jules.google.com/session/123456"
 
 
 class AuditTests(unittest.TestCase):
+    def test_github_repository_identity_is_case_insensitive(self):
+        source = {**SOURCE, "githubRepo": {"owner": "Vixttha", "repo": "aldervale-pact-of-ten"}}
+        with patch.object(audit, "request_json", return_value={"sources": [source]}):
+            self.assertEqual(audit.find_source("test-key", REPO), source["name"])
+
     def test_documented_slash_delimited_source(self):
         source = {**SOURCE, "name": "sources/github/vixttha/AlderVale-Pact-of-Ten"}
         with patch.object(audit, "request_json", return_value={"sources": [source]}):

@@ -71,7 +71,10 @@ def find_source(key, repository):
             github = source.get("githubRepo", {})
             if not isinstance(github, dict):
                 continue
-            if github.get("owner") == owner and github.get("repo") == repo:
+            source_owner, source_repo = github.get("owner"), github.get("repo")
+            if (isinstance(source_owner, str) and isinstance(source_repo, str)
+                    and source_owner.casefold() == owner.casefold()
+                    and source_repo.casefold() == repo.casefold()):
                 name = source.get("name")
                 if not isinstance(name, str) or not re.fullmatch(r"sources/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_.-]+)*", name):
                     raise AuditError("Jules returned an invalid source name.")
