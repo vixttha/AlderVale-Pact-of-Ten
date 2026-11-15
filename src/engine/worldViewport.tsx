@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { moveOnCampus } from './campusCollision.ts';
 import { clearSceneGroup, disposeScene } from './disposeScene.ts';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -751,12 +752,11 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         const dz = ((fwdZ * moveForward + rgtZ * moveRight) / len) * 6.8 * speedMult * dt;
 
         const maxRadius = zone === 'sanctuary' ? 12.2 : 21.5;
-        const nx = playerContainer.position.x + dx;
-        const nz = playerContainer.position.z + dz;
-        if (Math.hypot(nx, nz) <= maxRadius) {
-          playerContainer.position.x = nx;
-          playerContainer.position.z = nz;
-        }
+        const [nextX, nextZ] = moveOnCampus(
+          playerContainer.position.x, playerContainer.position.z, dx, dz, maxRadius, builtZone.colliders,
+        );
+        playerContainer.position.x = nextX;
+        playerContainer.position.z = nextZ;
         desiredFacing = Math.atan2(dx, dz);
 
         if (now - lastNetEmit > 110) {

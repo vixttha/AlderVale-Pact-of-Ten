@@ -1,3 +1,4 @@
+import { DEFAULT_PLAYER_SETTINGS, normalizePlayerSettings, type PlayerSettings } from '../../shared/settings.ts';
 import {
   collection,
   doc,
@@ -7,6 +8,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
   where,
   runTransaction,
   writeBatch,
@@ -129,7 +131,33 @@ export function saveGuestRealm(realmId: RealmId, bundle: GuestRealmBundle) {
   }
 }
 
-export async function ensureCloudAccountAndRealm(uid: string, displayName: string, email: string | null, realmId: RealmId): Promise<RealmAccountState> {
+const guestSettingsKey = 'aldervale_player_settings_v1';
+
+export function loadGuestSettings(): PlayerSettings {
+  try {
+    return normalizePlayerSettings(JSON.parse(localStorage.getItem(guestSettingsKey) ?? 'null'));
+  } catch {
+    return { ...DEFAULT_PLAYER_SETTINGS };
+  }
+}
+
+export function saveGuestSettings(settings: PlayerSettings): boolean {
+  try {
+    localStorage.setItem(guestSettingsKey, JSON.stringify(settings));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function saveCloudSettings(uid: string, patch: Partial<PlayerSettings>, database = db) {
+  return updateDoc(doc(database, 'accounts', uid), {
+    ...Object.fromEntries(Object.entries(patch).map(([key, value]) => [`settings.${key}`, value])),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function ensureCloudAccountAndRealm(uid: string, displayName: string, email: string | null, realmId: RealmId): Promise<{ realm: RealmAccountState; settings: PlayerSettings }> {
   const realmPath = `accounts/${uid}/realms/${realmId}`;
   try {
     const accRef = doc(db, 'accounts', uid);
@@ -140,20 +168,21 @@ export async function ensureCloudAccountAndRealm(uid: string, displayName: strin
         tx.set(accRef, {
           uid, displayName: (displayName || 'Alder Wizard').slice(0, 40),
           ...(email ? { email: email.slice(0, 160) } : {}),
-          settings: { harpVolume: 0.4, sfxVolume: 0.65, solo2xDefault: false },
+          settings: DEFAULT_PLAYER_SETTINGS,
           createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
         });
       }
+      const settings = normalizePlayerSettings(account.data()?.settings);
       if (!snap.exists()) {
         const fresh: RealmAccountState = {
           uid, realmId, wizardIds: [], unlockedRaces: [...STARTER_UNLOCKED_RACES],
           sharedVault: [], termXp: 0, claimedTermTiers: [],
         };
         tx.set(realmRef, { ...fresh, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-        return fresh;
+        return { realm: fresh, settings };
       }
       const d = snap.data();
-      return {
+      const realm: RealmAccountState = {
         uid,
         realmId,
         wizardIds: Array.isArray(d.wizardIds) ? d.wizardIds : [],
@@ -162,6 +191,7 @@ export async function ensureCloudAccountAndRealm(uid: string, displayName: strin
         termXp: Number(d.termXp ?? 0),
         claimedTermTiers: Array.isArray(d.claimedTermTiers) ? d.claimedTermTiers : [],
       };
+      return { realm, settings };
     });
   } catch (err) {
     handleFirestoreError(err, OperationType.GET, realmPath);
@@ -256,22 +286,23 @@ export async function createCloudWizards(account: RealmAccountState, entries: {
   pets: OwnedCreature[];
   sanctuary: SanctuaryState | null;
   gallery?: string[];
-}[]) {
-  requireCloudOwner(account.uid);
-  const realmRef = doc(db, 'accounts', account.uid, 'realms', account.realmId);
-  await runTransaction(db, async (tx) => {
+}[], database = db) {
+  if (database === db) requireCloudOwner(account.uid);
+  const realmRef = doc(database, 'accounts', account.uid, 'realms', account.realmId);
+  await runTransaction(database, async (tx) => {
     const existing = await tx.get(realmRef);
     const previousIds: string[] = existing.get('wizardIds') ?? [];
     if (entries.some(({ wizard }) => previousIds.includes(wizard.id))) {
       throw new Error('This wizard is already saved. Reopen the realm to refresh your wizard list.');
     }
     const wizardIds = [...new Set([...previousIds, ...entries.map(({ wizard }) => wizard.id)])];
+    const existingVault: string[] = existing.get('sharedVault') ?? [];
     const existingClaims: number[] = existing.get('claimedTermTiers') ?? [];
     if (wizardIds.length > 3) throw new Error('All three wizard slots are in use.');
     for (const { wizard, pets, sanctuary, gallery } of entries) {
-      const wizardRef = doc(db, 'wizards', wizard.id);
+      const wizardRef = doc(database, 'wizards', wizard.id);
       tx.set(wizardRef, { ...wizardPayload(wizard), createdAt: serverTimestamp() });
-      tx.set(doc(db, 'publicWizards', wizard.id), { ...publicWizardPayload(wizard), createdAt: serverTimestamp() });
+      tx.set(doc(database, 'publicWizards', wizard.id), { ...publicWizardPayload(wizard), createdAt: serverTimestamp() });
       for (const pet of pets) {
         tx.set(doc(wizardRef, 'creatures', pet.id), { ...creaturePayload(pet), createdAt: serverTimestamp() });
       }
@@ -284,6 +315,7 @@ export async function createCloudWizards(account: RealmAccountState, entries: {
       ...account,
       wizardIds,
       termXp: Math.max(account.termXp, Number(existing.get('termXp') ?? 0)),
+      sharedVault: [...new Set([...existingVault, ...account.sharedVault])],
       claimedTermTiers: [...new Set([...existingClaims, ...account.claimedTermTiers])],
     }), { merge: true });
   });

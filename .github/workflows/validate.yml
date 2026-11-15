@@ -2,7 +2,7 @@ name: AlderVale validation
 
 on:
   push:
-    branches: [main, 'codex/**']
+    branches: [main, 'codex/**', 'ci/**']
   pull_request:
   workflow_dispatch:
 

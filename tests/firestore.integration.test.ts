@@ -92,6 +92,45 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     expect((await getDoc(wizardRef)).get('currencies.florins')).toBe(rowan.currencies.florins + 120);
   }, 20_000);
 
+  it('retains guest claims and merges vault items when migrating a wizard', async () => {
+    const { createStarterWizard } = await import('../shared/economy.ts');
+    const { createCloudWizards } = await import('../src/lib/storage.ts');
+    const owner = player('migration-owner');
+    const wizard = createStarterWizard({
+      id: 'guest-wizard', ownerId: 'migration-owner', realmId: 'breeze',
+      name: 'Guest Wizard', raceId: 'human', elementId: 'ember',
+      sculpt: {} as Parameters<typeof createStarterWizard>[0]['sculpt'],
+    });
+    const accountRef = doc(owner, 'accounts', wizard.ownerId, 'realms', wizard.realmId);
+    const account = { uid: wizard.ownerId, realmId: wizard.realmId, wizardIds: [], unlockedRaces: ['human' as const], termXp: 60 };
+    await setDoc(accountRef, {
+      ...account, claimedTermTiers: [1], sharedVault: ['cloud-gear'], createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+    await createCloudWizards({ ...account, claimedTermTiers: [2], sharedVault: ['guest-gear'] },
+      [{ wizard, pets: [], sanctuary: null }], owner);
+    expect((await getDoc(accountRef)).data()).toMatchObject({
+      wizardIds: [wizard.id], claimedTermTiers: [1, 2], sharedVault: ['cloud-gear', 'guest-gear'],
+    });
+    expect((await getDoc(doc(owner, 'wizards', wizard.id))).exists()).toBe(true);
+  });
+
+  it('saves preference fields to the owning account without overwriting unchanged settings', async () => {
+    const { saveCloudSettings } = await import('../src/lib/storage.ts');
+    const { normalizePlayerSettings } = await import('../shared/settings.ts');
+    const owner = player('settings-owner');
+    const ref = doc(owner, 'accounts/settings-owner');
+    await setDoc(ref, {
+      uid: 'settings-owner', displayName: 'Settings Wizard',
+      settings: { harpVolume: 0.4, sfxVolume: 0.65, solo2xDefault: false },
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+    await saveCloudSettings('settings-owner', { harpVolume: 0, cameraSensitivity: 1.6, solo2xDefault: true }, owner);
+    expect(normalizePlayerSettings((await getDoc(ref)).get('settings'))).toEqual({
+      harpVolume: 0, sfxVolume: 0.65, cameraSensitivity: 1.6, solo2xDefault: true,
+    });
+    await assertFails(saveCloudSettings('settings-owner', { harpVolume: 1 }, player('another-account')));
+  });
+
   it('keeps wallets private and uses the same tour transaction for visibility and listing', async () => {
     const owner = player('rowan-owner');
     const visitor = player('visitor');
@@ -115,12 +154,17 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
   });
 
   it('settles Bazaar purchases, prevents duplicate purchases and checks trade balances', async () => {
-    const { buyListing, postListing, cancelListing, settleTrade, listBazaar, awardLiveVictory, createHouse, listHouses } = await import('../server/market.ts');
+    const { buyListing, postListing, cancelListing, settleTrade, listBazaar, awardLiveVictory } = await import('../server/market.ts');
     const buyer = player('buyer-owner');
     await assertSucceeds(setDoc(doc(buyer, 'wizards/buyer'), wizard('buyer-owner', 'Buyer')));
     const starter = await buyListing('breeze', 'rowan-owner', 'rowan', 'academy-hat');
     expect(starter.wallet.florins).toBe(138);
     expect(starter.wallet.gear.hat_pointed_brim).toBe(1);
+    for (const priceFlorins of [0, -1, 1.2, NaN, '100', 1_000_001]) {
+      await expect(postListing('breeze', 'rowan-owner', {
+        wizardId: 'rowan', itemId: 'hat_pointed_brim', priceFlorins,
+      })).rejects.toMatchObject({ status: 400 });
+    }
     const { listing, wallet } = await postListing('breeze', 'rowan-owner', { wizardId: 'rowan', itemId: 'hat_pointed_brim', priceFlorins: 100 });
     expect(wallet.gear.hat_pointed_brim).toBe(0);
     const purchases = await Promise.allSettled([
@@ -142,7 +186,28 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     const cancelled = await cancelListing('breeze', 'buyer-owner', escrow.listing.id);
     expect(cancelled.wallet.gear.hat_pointed_brim).toBe(1);
     await expect(cancelListing('breeze', 'buyer-owner', escrow.listing.id)).resolves.toEqual(cancelled);
-    const house = await createHouse('breeze', 'rowan-owner', { name: 'Starlight', crestElement: 'ember' });
-    expect(await listHouses('breeze')).toContainEqual(house);
+    expect((await listBazaar('breeze', 'buyer-owner')).wallet?.florins).toBe(125);
   }, 20_000);
+
+  it('persists realm-scoped House memberships and serializes concurrent joins', async () => {
+    const { createHouse, listHouses, changeHouseMembership } = await import('../server/market.ts');
+    const first = await createHouse('breeze', 'house-founder', { name: 'Starlight', crestElement: 'ember' });
+    const second = await createHouse('breeze', 'other-founder', { name: 'Moonstone', crestElement: 'sol' });
+    expect(await listHouses('breeze', 'house-founder')).toMatchObject({ currentHouseId: first.id });
+    expect((await listHouses('breeze')).houses).toContainEqual(first);
+    expect((await listHouses('horizon')).houses).not.toContainEqual(first);
+    await assertFails(getDoc(doc(player('house-founder'), `worldRealms/breeze/clubs/${first.id}`)));
+    const results = await Promise.allSettled([first, second].map((house) =>
+      changeHouseMembership('breeze', 'house-guest', house.id, 'join'),
+    ));
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    const joined = results[0].status === 'fulfilled' ? first : second;
+    expect(await listHouses('breeze', 'house-guest')).toMatchObject({ currentHouseId: joined.id });
+    expect((await listHouses('breeze')).houses.find(({ id }) => id === joined.id)).toEqual({ ...joined, memberCount: 2 });
+    await changeHouseMembership('breeze', 'house-guest', joined.id, 'leave');
+    expect((await listHouses('breeze', 'house-guest')).currentHouseId).toBeNull();
+    await changeHouseMembership('breeze', 'house-founder', first.id, 'leave');
+    expect((await listHouses('breeze')).houses).not.toContainEqual(first);
+  }, 20_000);
+
 });

@@ -268,6 +268,7 @@ service cloud.firestore {
       }
     }
 
+    // Legacy read-only paths. Current clients use the server API for realm services.
     match /bazaar/{realmId}/listings/{listingId} {
       allow get: if isSignedIn() && isValidRealm(realmId) && isValidId(listingId);
       allow list: if isSignedIn() && resource.data.realmId == realmId;
@@ -278,7 +279,7 @@ service cloud.firestore {
       allow list: if isSignedIn() && resource.data.realmId == realmId;
     }
 
-    // Wallets, listing escrow, duel receipts and tour indexes are written by the server.
+    // Wallets, listing escrow, Houses, duel receipts and tour indexes are server-only.
     match /worldRealms/{path=**} {
       allow read, write: if false;
     }

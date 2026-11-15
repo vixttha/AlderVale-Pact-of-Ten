@@ -64,3 +64,37 @@ test('title and world remain usable with WebGL unavailable', async ({ page }) =>
   await expect(page.getByRole('button', { name: 'Settings', exact: true }).last()).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('guest settings survive reload and the HUD shows offline after a lost connection', async ({ page }) => {
+  test.setTimeout(90_000);
+  let realmSocket;
+  let refuseReconnect = false;
+  await page.routeWebSocket('**/ws', (socket) => {
+    if (refuseReconnect) {
+      void socket.close();
+      return;
+    }
+    realmSocket = socket;
+    socket.connectToServer();
+  });
+  await page.goto('/');
+  await page.getByRole('textbox').first().fill('Settings Rowan');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  await expect(page.getByText('1 Online', { exact: true })).toBeVisible();
+  refuseReconnect = true;
+  await realmSocket.close();
+  await expect(page.getByText('Offline', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('slider', { name: /Acoustic Harp/ }).press('Home');
+  await page.getByRole('slider', { name: /Spell & UI Chimes/ }).press('End');
+  await page.getByRole('slider', { name: /Camera Orbit/ }).press('End');
+  await page.getByRole('checkbox', { name: /Default 2× Speed/ }).check();
+  await page.reload();
+  await page.getByRole('button', { name: /Enter Aldervale/ }).click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.getByRole('slider', { name: /Acoustic Harp/ })).toHaveValue('0');
+  await expect(page.getByRole('slider', { name: /Spell & UI Chimes/ })).toHaveValue('1');
+  await expect(page.getByRole('slider', { name: /Camera Orbit/ })).toHaveValue('2');
+  await expect(page.getByRole('checkbox', { name: /Default 2× Speed/ })).toBeChecked();
+});

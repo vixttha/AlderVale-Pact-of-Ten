@@ -2,9 +2,10 @@ import { FieldValue, type Transaction } from 'firebase-admin/firestore';
 import { cloudDb } from './cloud.ts';
 import type { RealmId } from '../shared/realms.ts';
 import type { WizardDocument } from '../shared/economy.ts';
-import { ELEMENTS } from '../shared/elements.ts';
+import type { AcademyHouse } from '../shared/houses.ts';
+import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { GEAR_BY_ID } from '../shared/wardrobe.ts';
-import { STARTING_MARKET_FLORINS, type BazaarListing, type MarketAccount } from '../shared/market.ts';
+import { isBazaarPrice, STARTING_MARKET_FLORINS, type BazaarListing, type MarketAccount } from '../shared/market.ts';
 
 export class RequestError extends Error {
   readonly status: number;
@@ -74,7 +75,7 @@ export async function listBazaar(realm: RealmId, uid?: string) {
 export async function postListing(realm: RealmId, uid: string, body: Record<string, unknown>) {
   const { itemId, priceFlorins } = body;
   const item = typeof itemId === 'string' && Object.hasOwn(GEAR_BY_ID, itemId) ? GEAR_BY_ID[itemId] : null;
-  if (!item || typeof priceFlorins !== 'number' || !Number.isSafeInteger(priceFlorins) || priceFlorins < 1 || priceFlorins > 1_000_000) {
+  if (!item || !isBazaarPrice(priceFlorins)) {
     throw new RequestError(400, 'Select owned Bazaar gear and a valid price');
   }
   const ref = realmRef(realm).collection('listings').doc();
@@ -162,12 +163,38 @@ export async function awardLiveVictory(realm: RealmId, uid: string, duelId: stri
   });
 }
 
-export async function listHouses(realm: RealmId) {
-  const snapshot = await realmRef(realm).collection('clubs').limit(100).get();
-  return [
-    { id: `house_alder_${realm}`, name: 'Order of the Star-Oak', crestElement: 'sol', motto: 'Ten Elements, One Canopy.', members: ['npc_headmaster_vance'] },
-    ...snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-  ];
+interface StoredHouse {
+  name: string;
+  crestElement: ElementId;
+  motto: string;
+  members: string[];
+}
+
+function publicHouse(id: string, { name, crestElement, motto, members }: StoredHouse): AcademyHouse {
+  return { id, name, crestElement, motto, memberCount: members.length };
+}
+
+function houseCollections(realm: RealmId) {
+  const ref = realmRef(realm);
+  return { houses: ref.collection('clubs'), memberships: ref.collection('houseMemberships') };
+}
+
+export async function listHouses(realm: RealmId, uid?: string) {
+  const { houses } = houseCollections(realm);
+  const [listed, membership] = await Promise.all([
+    houses.limit(100).get(),
+    uid ? houses.where('members', 'array-contains', uid).limit(1).get() : undefined,
+  ]);
+  const current = membership?.docs[0];
+  const listedHouses = listed.docs.map((doc) => publicHouse(doc.id, doc.data() as StoredHouse));
+  if (current && !listedHouses.some((house) => house.id === current.id)) {
+    listedHouses.push(publicHouse(current.id, current.data() as StoredHouse));
+  }
+  const academy: AcademyHouse = {
+    id: `house_alder_${realm}`, name: 'Order of the Star-Oak', crestElement: 'sol',
+    motto: 'Ten Elements, One Canopy.', memberCount: 1, academy: true,
+  };
+  return { houses: [academy, ...listedHouses], currentHouseId: current?.id ?? null };
 }
 
 export async function createHouse(realm: RealmId, uid: string, body: Record<string, unknown>) {
@@ -176,9 +203,48 @@ export async function createHouse(realm: RealmId, uid: string, body: Record<stri
   if (name.length < 2 || typeof crestElement !== 'string' || !Object.hasOwn(ELEMENTS, crestElement)) {
     throw new RequestError(400, 'Provide a house name and a valid crest');
   }
-  const house = { name, crestElement, motto: typeof body.motto === 'string' ? body.motto.slice(0, 120) : 'United by Canopy & Pact', members: [uid] };
-  const ref = await realmRef(realm).collection('clubs').add(house);
-  return { id: ref.id, ...house };
+  const { houses, memberships } = houseCollections(realm);
+  const ref = houses.doc();
+  const membership = memberships.doc(uid);
+  const house: StoredHouse = {
+    name, crestElement: crestElement as ElementId,
+    motto: typeof body.motto === 'string' ? body.motto.slice(0, 120) : 'United by Canopy & Pact',
+    members: [uid],
+  };
+  return cloudDb.runTransaction(async (tx) => {
+    await tx.get(membership);
+    const existing = await tx.get(houses.where('members', 'array-contains', uid).limit(1));
+    if (!existing.empty) throw new RequestError(409, 'Leave your current House first.');
+    tx.create(ref, house);
+    tx.set(membership, { houseId: ref.id });
+    return publicHouse(ref.id, house);
+  });
+}
+
+export async function changeHouseMembership(realm: RealmId, uid: string, id: string, action: 'join' | 'leave') {
+  if (!isDocumentId(id)) throw new RequestError(400, 'Invalid House');
+  const { houses, memberships } = houseCollections(realm);
+  const ref = houses.doc(id);
+  const membership = memberships.doc(uid);
+  return cloudDb.runTransaction(async (tx) => {
+    const [snap] = await Promise.all([tx.get(ref), tx.get(membership)]);
+    const house = snap.data() as StoredHouse | undefined;
+    if (action === 'leave') {
+      if (!house?.members.includes(uid)) return;
+      const members = house.members.filter((member) => member !== uid);
+      if (members.length) tx.update(ref, { members });
+      else tx.delete(ref);
+      tx.delete(membership);
+      return;
+    }
+    if (!house) throw new RequestError(404, 'House unavailable');
+    if (house.members.includes(uid)) return;
+    const existing = await tx.get(houses.where('members', 'array-contains', uid).limit(1));
+    if (!existing.empty) throw new RequestError(409, 'Leave your current House first.');
+    if (house.members.length >= 100) throw new RequestError(409, 'This House is full.');
+    tx.update(ref, { members: [...house.members, uid] });
+    tx.set(membership, { houseId: id });
+  });
 }
 
 export async function listTours(realm: RealmId) {

@@ -116,10 +116,14 @@ export interface DuelState {
   playerTeam: CombatantState[];
   enemyTeam: CombatantState[];
   firstTeam: 'player' | 'enemy';
-  phase: 'planning' | 'resolving' | 'victory' | 'defeat' | 'fled';
+  phase: 'planning' | 'resolving' | 'victory' | 'defeat' | 'draw' | 'fled';
   logs: string[];
   /** Telegraphed Boss Cheat warning for next turn */
   telegraphedCheat: string | null;
+}
+
+export function isDuelComplete(phase: DuelState['phase']): boolean {
+  return phase === 'victory' || phase === 'defeat' || phase === 'draw';
 }
 
 export interface WizardDerivedStats {
@@ -591,12 +595,15 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
   const playersAlive = next.playerTeam.some((p) => p.hp > 0);
   const enemiesAlive = next.enemyTeam.some((e) => e.hp > 0);
 
-  if (!enemiesAlive) {
+  if (!playersAlive && !enemiesAlive) {
+    next.phase = 'draw';
+    roundLogs.push('Draw. Both sides were knocked out.');
+  } else if (!enemiesAlive) {
     next.phase = 'victory';
     roundLogs.push('Victory! All opponents defeated.');
   } else if (!playersAlive) {
     next.phase = 'defeat';
-    roundLogs.push('Defeated! Rest at the Sanctuary Fountain to refill Flasks.');
+    roundLogs.push('Defeated in the ring. You can try again.');
   } else {
     next.round += 1;
     next.phase = 'planning';

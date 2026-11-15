@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express, { type Request, type Response, type NextFunction } from 'express';
-import { buyListing, cancelListing, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, RequestError } from './server/market.ts';
+import { buyListing, cancelListing, changeHouseMembership, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, RequestError } from './server/market.ts';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
@@ -70,8 +70,15 @@ export async function createAldervaleApp({ frontend = true } = {}) {
   app.post('/api/bazaar/:realmId/cancel/:listingId', realmRoute(async (req, res, realm) => {
     res.json(await cancelListing(realm, await requireAccount(req), req.params.listingId));
   }));
-  app.get('/api/houses/:realmId', realmRoute(async (_req, res, realm) => {
-    res.json({ houses: await listHouses(realm) });
+  app.get('/api/houses/:realmId', realmRoute(async (req, res, realm) => {
+    const uid = req.headers.authorization ? await requireAccount(req) : undefined;
+    res.json(await listHouses(realm, uid));
+  }));
+  app.post('/api/houses/:realmId/:houseId/:action(join|leave)', realmRoute(async (req, res, realm) => {
+    const uid = await requireAccount(req);
+    const action = req.params.action === 'join' ? 'join' : 'leave';
+    await changeHouseMembership(realm, uid, req.params.houseId, action);
+    res.json(await listHouses(realm, uid));
   }));
   app.post('/api/houses/:realmId', realmRoute(async (req, res, realm) => {
     res.status(201).json({ house: await createHouse(realm, await requireAccount(req), req.body ?? {}) });

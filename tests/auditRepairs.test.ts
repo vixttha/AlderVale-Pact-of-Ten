@@ -6,6 +6,7 @@ import { BufferGeometry, Group, Mesh, MeshBasicMaterial } from 'three';
 import { applySagaEvent } from '../shared/quests.ts';
 import type { WizardDocument } from '../shared/economy.ts';
 import type { DuelState } from '../shared/combat.ts';
+import { moveOnCampus } from '../src/engine/campusCollision.ts';
 import { disposeScene } from '../src/engine/disposeScene.ts';
 
 const { advice } = vi.hoisted(() => ({ advice: vi.fn() }));
@@ -32,6 +33,15 @@ describe('Saga progress', () => {
     expect(next.progression.completedQuests).toEqual(['q_bond_arbor']);
     expect(wizard.progression.completedQuests).toEqual([]);
   });
+});
+
+it('blocks a direct fountain approach while preserving movement around its edge', () => {
+  const colliders = [{ x: 0, z: 1, radius: 3.05 }];
+  expect(moveOnCampus(0, 4.3, 0, -0.8, 21.5, colliders)).toEqual([0, 4.05]);
+  const [x, z] = moveOnCampus(0, 4.05, 0.6, -0.6, 21.5, colliders);
+  expect(x).toBeGreaterThan(0.6);
+  expect(Math.hypot(x, z - 1)).toBeCloseTo(3.05);
+  expect(moveOnCampus(21, 0, 0.8, 0, 21.5, colliders)).toEqual([21, 0]);
 });
 
 it('disposes owned scene resources exactly once while retaining shared model resources', () => {
@@ -89,7 +99,7 @@ describe('Application server', () => {
     const { createAldervaleApp } = await import('../server.ts');
     const { attachAldervaleWebSocketServer } = await import('../server/wsHub.ts');
     server = createServer(await createAldervaleApp({ frontend: false }));
-    wss = attachAldervaleWebSocketServer(server);
+    wss = attachAldervaleWebSocketServer(server, 1000);
     await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   });
@@ -137,6 +147,39 @@ describe('Application server', () => {
     await player.next('world_joined');
     return { ...player, ticket };
   }
+
+  it('scores a reconnect timeout as a win for the player on the other side', async () => {
+    const first = await join('Timed-Out Rowan');
+    const second = await join('Remaining Ash');
+    first.send({ type: 'queue_pvp' });
+    await first.next('queue_status');
+    second.send({ type: 'queue_pvp' });
+    await first.next('duel_state');
+    await second.next('duel_state');
+    first.socket.close();
+    const final = await second.next('duel_state', (frame) => frame.state?.phase === 'victory');
+    expect(final.state?.playerTeam[0].name).toBe('Remaining Ash');
+    expect(final.state?.enemyTeam[0].hp).toBe(0);
+    second.socket.close();
+  });
+
+  it('lets a co-op partner keep fighting after the other player flees', async () => {
+    const rowan = await join('Co-op Rowan');
+    const ash = await join('Co-op Ash');
+    rowan.send({ type: 'queue_coop' });
+    await rowan.next('queue_status');
+    ash.send({ type: 'queue_coop' });
+    const first = (await rowan.next('duel_state')).state!;
+    await ash.next('duel_state');
+    rowan.send({ type: 'duel_leave' });
+    const continued = (await ash.next('duel_state')).state!;
+    expect(continued.phase).toBe('planning');
+    expect(continued.playerTeam.find(({ id }) => id === first.playerTeam[0].id)?.hp).toBe(0);
+    ash.send({ type: 'duel_leave' });
+    expect((await ash.next('duel_state')).state?.phase).toBe('defeat');
+    rowan.socket.close();
+    ash.socket.close();
+  });
 
   it('runs a two-player duel with private hands, reconnects a guest and reports each result correctly', async () => {
     const rowan = await join('Rowan');

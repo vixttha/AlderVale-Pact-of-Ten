@@ -13,4 +13,16 @@ GOOGLE_CLOUD_PROJECT=demo-aldervale-audit FIRESTORE_DATABASE_ID='(default)' \
   npx firebase-tools emulators:exec --only firestore --project demo-aldervale-audit 'npm test'
 ```
 
+## Academy Houses
+
+House data is stored in `worldRealms/{realmId}/clubs`. Each account can found or join
+one player-created House per realm. Leaving changes membership immediately and
+removes an empty House. The seeded academy House is a directory entry. The API
+publishes member counts and keeps membership account IDs server-side. Existing
+House member lists remain readable and are checked before allowing a join or creation.
+
+The root `bazaar` and `houses` Firestore paths are legacy read-only paths. New
+listings, clubs, and membership writes go through the server-backed `worldRealms`
+paths documented in `firebase-blueprint.json`.
+
 A production smoke test still needs verified Google sign-in, the configured Firestore database, and both browser and backend access to that database.

@@ -1,3 +1,4 @@
+import type { PlayerSettings } from '../../../shared/settings.ts';
 import React, { useEffect, useState } from 'react';
 import { ShoppingBag, ScrollText, Shield, Sliders, Map, Store, Sparkles } from 'lucide-react';
 import { MODULAR_GEAR, RACES } from '../../../shared/wardrobe.ts';
@@ -7,7 +8,8 @@ import { RESOURCES, TERM_REWARD_TRACK, type ResourceId, type WizardDocument } fr
 import { CREATURE_SPECIES } from '../../../shared/creatures.ts';
 import type { RealmAccountState } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
-import { type BazaarListing, type MarketAccount } from '../../../shared/market.ts';
+import type { AcademyHouse } from '../../../shared/houses.ts';
+import { isBazaarPrice, type BazaarListing, type MarketAccount } from '../../../shared/market.ts';
 import { auth } from '../../lib/firebase.ts';
 
 export type HubModalTab = 'shops' | 'bazaar' | 'quests' | 'social' | 'map' | 'settings';
@@ -19,8 +21,8 @@ interface AcademyModalHubProps {
   isSignedIn: boolean;
   wallet: MarketAccount | null;
   onWallet: (wallet: MarketAccount) => void;
-  settings: { harpVolume: number; sfxVolume: number; cameraSensitivity: number; solo2xDefault: boolean };
-  onUpdateSettings: (patch: Partial<{ harpVolume: number; sfxVolume: number; cameraSensitivity: number; solo2xDefault: boolean }>) => void;
+  settings: PlayerSettings;
+  onUpdateSettings: (patch: Partial<PlayerSettings>) => void;
   onUpdateWizard: (next: WizardDocument) => void;
   onClaimTermTier: (tier: number) => Promise<boolean>;
   onTravelZone: (z: ZoneId) => void;
@@ -47,7 +49,8 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
 }) => {
   const [tab, setTab] = useState<HubModalTab>(initialTab);
   const [bazaarListings, setBazaarListings] = useState<BazaarListing[]>([]);
-  const [houses, setHouses] = useState<{ id: string; name: string; crestElement: WizardDocument['elementId']; motto: string; members: string[] }[]>([]);
+  const [houses, setHouses] = useState<AcademyHouse[]>([]);
+  const [currentHouseId, setCurrentHouseId] = useState<string | null>(null);
   const [houseName, setHouseName] = useState('');
   const [listItemId, setListItemId] = useState('');
   const [marketBusy, setMarketBusy] = useState(false);
@@ -61,7 +64,7 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
     if (tab !== 'bazaar' && tab !== 'social') return;
     const controller = new AbortController();
     const load = async () => {
-      const token = tab === 'bazaar' ? await auth.currentUser?.getIdToken() : undefined;
+      const token = await auth.currentUser?.getIdToken();
       const response = await fetch(`/api/${tab === 'bazaar' ? 'bazaar' : 'houses'}/${wizard.realmId}`, {
         ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
         signal: controller.signal,
@@ -74,6 +77,7 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
         if (data.wallet) onWallet(data.wallet);
       } else {
         setHouses(data.houses ?? []);
+        setCurrentHouseId(data.currentHouseId ?? null);
       }
     };
     void load().catch((error) => {
@@ -186,6 +190,10 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   const postBazaarListing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (marketBusy) return;
+    if (!isBazaarPrice(listPrice)) {
+      setNotice('Enter a whole-number price between 1 and 1,000,000 Florins.');
+      return;
+    }
     setMarketBusy(true);
     try {
       const data = await marketRequest(`/api/bazaar/${wizard.realmId}/list`, {
@@ -219,13 +227,33 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
 
   const createHouse = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (marketBusy) return;
+    setMarketBusy(true);
     try {
       const data = await marketRequest(`/api/houses/${wizard.realmId}`, { name: houseName, crestElement: wizard.elementId });
       setHouses((prev) => [data.house, ...prev]);
+      setCurrentHouseId(data.house.id);
       setHouseName('');
       setNotice('Academy House founded!');
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Could not found the House.');
+    } finally {
+      setMarketBusy(false);
+    }
+  };
+
+  const updateHouseMembership = async (house: AcademyHouse, action: 'join' | 'leave') => {
+    if (marketBusy) return;
+    setMarketBusy(true);
+    try {
+      const data = await marketRequest(`/api/houses/${wizard.realmId}/${house.id}/${action}`, {});
+      setHouses(data.houses);
+      setCurrentHouseId(data.currentHouseId);
+      setNotice(action === 'join' ? `Joined ${house.name}.` : `Left ${house.name}.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not change House membership.');
+    } finally {
+      setMarketBusy(false);
     }
   };
 
@@ -481,14 +509,17 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
 
         {tab === 'social' && (
           <div className="mt-4 space-y-4">
+            {!isSignedIn && <p>Sign in with Google to found or join an Academy House.</p>}
             <form onSubmit={createHouse} className="flex flex-wrap gap-2 rounded-2xl border border-[#d7c7a9] bg-white/85 p-3">
               <input
                 value={houseName}
                 onChange={(e) => setHouseName(e.target.value)}
                 placeholder="New Academy House Name..."
+                disabled={!isSignedIn || Boolean(currentHouseId) || marketBusy}
+                required minLength={2} maxLength={32}
                 className="flex-1 rounded-lg border px-3 py-1.5"
               />
-              <button type="submit" className="rounded-xl bg-[#241b16] px-4 py-1.5 font-bold text-[#f4c98b]">
+              <button type="submit" disabled={!isSignedIn || Boolean(currentHouseId) || marketBusy} className="rounded-xl bg-[#241b16] px-4 py-1.5 font-bold text-[#f4c98b] disabled:opacity-50">
                 Found House
               </button>
             </form>
@@ -500,6 +531,20 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
                     <ElementCrest elementId={h.crestElement} showLabel />
                   </div>
                   <p className="mt-1 text-[#615346]">{h.motto}</p>
+                  {!h.academy && (
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <span>{h.memberCount} {h.memberCount === 1 ? 'member' : 'members'}</span>
+                      {isSignedIn && (!currentHouseId || currentHouseId === h.id) && (
+                        <button
+                          disabled={marketBusy}
+                          onClick={() => void updateHouseMembership(h, currentHouseId === h.id ? 'leave' : 'join')}
+                          className="rounded-lg border border-[#d7c7a9] px-3 py-1.5 font-bold disabled:opacity-50"
+                        >
+                          {currentHouseId === h.id ? 'Leave House' : 'Join House'}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -16,3 +16,7 @@ export interface BazaarListing {
 }
 
 export const STARTING_MARKET_FLORINS = 220;
+
+export function isBazaarPrice(value: unknown): value is number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 1 && value <= 1_000_000;
+}

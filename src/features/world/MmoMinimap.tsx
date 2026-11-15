@@ -7,6 +7,7 @@ interface MmoMinimapProps {
   zone: ZoneId;
   playerPos: { x: number; z: number; rotY: number };
   remotePlayers: LivePlayerPresence[];
+  worldConnected: boolean;
   completedQuestIds: string[];
   onOpenWorldMap: () => void;
 }
@@ -31,6 +32,7 @@ export const MmoMinimap: React.FC<MmoMinimapProps> = ({
   zone,
   playerPos,
   remotePlayers,
+  worldConnected,
   completedQuestIds,
   onOpenWorldMap,
 }) => {
@@ -171,7 +173,7 @@ export const MmoMinimap: React.FC<MmoMinimapProps> = ({
 
       <div className="storybook-dark-panel rounded-xl px-2.5 py-1 text-[10px] font-mono-num text-[#e2d8c5] flex items-center gap-2">
         <span>{ZONES[zone].name.split(' ')[0]}</span>
-        <span className="text-[#6fffe9]">{remotePlayers.length + 1} Online</span>
+        <span className="text-[#6fffe9]">{worldConnected ? `${remotePlayers.length + 1} Online` : 'Offline'}</span>
         <span className="opacity-75">
           ({Math.round(playerPos.x)}, {Math.round(playerPos.z)})
         </span>

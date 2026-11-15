@@ -12,7 +12,7 @@ import type { RealmId } from '../shared/realms.ts';
 import type { ZoneId } from '../shared/world.ts';
 import type { ElementId } from '../shared/elements.ts';
 import type { BeastClanId, RaceId, WizardSculpt } from '../shared/wardrobe.ts';
-import { resolveDuelRound, chooseAiAction, drawUpToSeven, type DuelState, type TurnActionInput, type CombatantState } from '../shared/combat.ts';
+import { resolveDuelRound, isDuelComplete, chooseAiAction, drawUpToSeven, type DuelState, type TurnActionInput, type CombatantState } from '../shared/combat.ts';
 import { getStarterDeckForElement } from '../shared/spells.ts';
 
 export type EmoteId = 'wave' | 'cheer' | 'meditate' | 'cast';
@@ -79,7 +79,7 @@ interface TradeSession {
   bConfirmed: boolean;
 }
 
-export function attachAldervaleWebSocketServer(httpServer: Server) {
+export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGraceMs = 30_000) {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws', maxPayload: 16 * 1024 });
   const clients = new Map<string, ClientConn>();
   const duels = new Map<string, LiveDuelRoom>();
@@ -103,9 +103,11 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
     }
   }
 
-  function broadcastRealmZone(realmId: RealmId, zone: ZoneId, payload: unknown, excludeSessionId?: string) {
+  function broadcastRealmZone(realmId: RealmId, zone: ZoneId, payload: { type: string; player?: LivePlayerPresence; [key: string]: unknown }, excludeSessionId?: string) {
     const raw = JSON.stringify(payload);
+    const source = payload.player && clients.get(payload.player.sessionId);
     for (const c of clients.values()) {
+      if (source && source !== c && source.verifiedUid && c.verifiedUid === source.verifiedUid) continue;
       if (c.presence && c.presence.realmId === realmId && c.presence.zone === zone && c.sessionId !== excludeSessionId) {
         if (c.ws.readyState === WebSocket.OPEN) c.ws.send(raw);
       }
@@ -121,9 +123,10 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
     }
   }
 
-  function getZoneSnapshot(realmId: RealmId, zone: ZoneId): LivePlayerPresence[] {
+  function getZoneSnapshot(realmId: RealmId, zone: ZoneId, viewer: ClientConn): LivePlayerPresence[] {
     const out: LivePlayerPresence[] = [];
     for (const c of clients.values()) {
+      if (c.ws.readyState !== WebSocket.OPEN || (c !== viewer && viewer.verifiedUid && viewer.verifiedUid === c.verifiedUid)) continue;
       if (c.presence && c.presence.realmId === realmId && c.presence.zone === zone) {
         out.push(c.presence);
       }
@@ -154,7 +157,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
     const mode = room.state.mode;
     if (mode !== 'pvp' && mode !== 'coop') return;
     const winners = room.state.phase === 'victory' ? room.state.playerTeam
-      : mode === 'pvp' ? room.state.enemyTeam : [];
+      : mode === 'pvp' && room.state.phase === 'defeat' ? room.state.enemyTeam : [];
     const awarded = new Set<string>();
     for (const actor of winners.filter((winner) => winner.hp > 0)) {
       const participant = room.participants.get(actor.id);
@@ -173,10 +176,19 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
     const actor = [...room.state.playerTeam, ...room.state.enemyTeam].find((entry) => entry.id === actorId);
     if (!actor || actor.hp <= 0) return;
     actor.hp = 0;
+    room.pendingActions.delete(actorId);
     room.state.logs.push(`${actor.name} forfeited the duel.`);
     if (!room.state.playerTeam.some((entry) => entry.hp > 0)) room.state.phase = 'defeat';
     else if (!room.state.enemyTeam.some((entry) => entry.hp > 0)) room.state.phase = 'victory';
     else {
+      const departed = room.participants.get(actorId);
+      const conn = departed ? clients.get(departed.sessionId) : undefined;
+      room.participants.delete(actorId);
+      if (conn?.presence) {
+        conn.duelId = null;
+        conn.presence.inDuel = false;
+        broadcastRealmZone(conn.presence.realmId, conn.presence.zone, { type: 'player_updated', player: conn.presence });
+      }
       broadcastDuel(room);
       tryResolveRoom(room);
       return;
@@ -220,7 +232,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
       room.state.phase === 'planning' && room.state.turnTimerSeconds
         ? Date.now() + room.state.turnTimerSeconds * 1000
         : null;
-    if (room.state.phase === 'victory' || room.state.phase === 'defeat') finishRoom(room);
+    if (isDuelComplete(room.state.phase)) finishRoom(room);
     broadcastDuel(room);
   }
 
@@ -326,7 +338,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
             reconnectTimers.delete(timerKey);
             for (const room of duels.values()) {
               const part = room.participants.get(pBound.wizardId);
-              if (part && room.realmId === pBound.realmId && room.state.phase !== 'victory' && room.state.phase !== 'defeat') {
+              if (part && room.realmId === pBound.realmId && !isDuelComplete(room.state.phase)) {
                 part.sessionId = sessionId;
                 part.disconnectedAt = null;
                 conn.duelId = room.duelId;
@@ -337,7 +349,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
           }
           send(conn, {
             type: 'zone_snapshot',
-            players: getZoneSnapshot(pBound.realmId, pBound.zone),
+            players: getZoneSnapshot(pBound.realmId, pBound.zone, conn),
             activeDuels: Array.from(duels.values())
               .filter((d) => d.realmId === pBound.realmId && d.state.phase === 'planning')
               .map((d) => ({ duelId: d.duelId, mode: d.state.mode, round: d.state.round, title: `${d.state.playerTeam[0]?.name} vs ${d.state.enemyTeam[0]?.name}` })),
@@ -355,7 +367,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
           conn.presence.zone = nextZone;
           if (prevZone !== nextZone) {
             broadcastRealmZone(conn.presence.realmId, prevZone, { type: 'player_left', sessionId });
-            send(conn, { type: 'zone_snapshot', players: getZoneSnapshot(conn.presence.realmId, nextZone), activeDuels: [] });
+            send(conn, { type: 'zone_snapshot', players: getZoneSnapshot(conn.presence.realmId, nextZone, conn), activeDuels: [] });
             broadcastRealmZone(conn.presence.realmId, nextZone, { type: 'player_joined', player: conn.presence }, sessionId);
           } else {
             broadcastRealmZone(conn.presence.realmId, nextZone, { type: 'player_moved', sessionId, x: conn.presence.x, y: conn.presence.y, z: conn.presence.z, rotY: conn.presence.rotY, mountId: conn.presence.mountId }, sessionId);
@@ -706,7 +718,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server) {
             const t = setTimeout(() => {
               if (part.disconnectedAt) forfeit(room, part.actorId);
               reconnectTimers.delete(timerKey);
-            }, 30_000);
+            }, reconnectGraceMs);
             reconnectTimers.set(timerKey, t);
           }
         }

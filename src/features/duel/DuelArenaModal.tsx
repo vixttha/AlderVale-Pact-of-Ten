@@ -23,6 +23,7 @@ import {
   drawUpToSeven,
   resolveDuelRound,
   chooseAiAction,
+  isDuelComplete,
   totalAvailablePipsForSchool,
   computeWizardDerivedStats,
   STATUS_EFFECT_META,
@@ -124,6 +125,7 @@ interface DuelArenaModalProps {
     spireFloor?: number;
     trialElement?: ElementId;
     completed?: boolean;
+    draw?: boolean;
   }) => void;
   onClose: () => void;
 }
@@ -396,7 +398,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
         mode: duel.mode,
         spireFloor: duel.spireFloor,
         trialElement: trialTargetElement,
-        completed: duel.phase === 'victory' || duel.phase === 'defeat',
+        completed: isDuelComplete(duel.phase),
+        draw: duel.phase === 'draw',
       });
     }
     setLocalDuel(null);
@@ -578,12 +581,14 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
           >
             <FastForward className="h-3.5 w-3.5" /> 2× Speed {speed2x ? 'ON' : 'OFF'}
           </button>
-          <button
-            onClick={() => handleClaimExit(false)}
-            className="inline-flex items-center gap-1 rounded-xl border border-red-400/40 bg-red-950/50 px-3 py-1.5 text-xs font-bold text-red-200 hover:bg-red-900/60"
-          >
-            <Flag className="h-3.5 w-3.5" /> {spectating ? 'Leave Spectator View' : 'Flee'}
-          </button>
+          {!isDuelComplete(duel.phase) && (
+            <button
+              onClick={() => handleClaimExit(false)}
+              className="inline-flex items-center gap-1 rounded-xl border border-red-400/40 bg-red-950/50 px-3 py-1.5 text-xs font-bold text-red-200 hover:bg-red-900/60"
+            >
+              <Flag className="h-3.5 w-3.5" /> {spectating ? 'Leave Spectator View' : 'Flee'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -691,10 +696,10 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
               <div key={i} className="rounded-lg bg-white/5 px-2.5 py-1">{line}</div>
             ))}
           </div>
-          {(duel.phase === 'victory' || duel.phase === 'defeat') && (
+          {isDuelComplete(duel.phase) && (
             <div className="mt-3 rounded-xl border border-[#f4c98b] bg-[#2a3454] p-3 text-center">
               <div className="font-display text-lg font-bold text-[#f4c98b]">
-                {duel.phase === 'victory' ? 'Victory Achieved!' : 'Defeated in the Ring'}
+                {duel.phase === 'victory' ? 'Victory Achieved!' : duel.phase === 'draw' ? 'Draw in the Ring' : 'Defeated in the Ring'}
               </div>
               <button
                 onClick={() => handleClaimExit(duel.phase === 'victory')}

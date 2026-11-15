@@ -203,6 +203,23 @@ describe('Aldervale Combat & Breeding Domain Rules', () => {
     return c;
   }
 
+  it('finishes simultaneous burning knockouts as a draw', () => {
+    const player = makeTestCombatant('wizard', 'ember', true);
+    const enemy = makeTestCombatant('enemy', 'frost', false);
+    for (const actor of [player, enemy]) {
+      actor.hp = 20;
+      applyStatusEffect(actor, { id: 'test-burn', kind: 'burning', label: 'Burning', element: 'ember', turnsLeft: 2, magnitude: 25 });
+    }
+    const state: DuelState = {
+      duelId: 'mutual-ko', mode: 'pvp', round: 1, turnTimerSeconds: 30, arenaBubble: null,
+      playerTeam: [player], enemyTeam: [enemy], firstTeam: 'player', phase: 'planning', logs: [],
+      telegraphedCheat: null,
+    };
+    const result = resolveDuelRound(state, []);
+    expect(result.phase).toBe('draw');
+    expect([result.playerTeam[0].hp, result.enemyTeam[0].hp]).toEqual([0, 0]);
+  });
+
   it('keeps the selected spell when an earlier card is discarded and replaced', () => {
     const p = makeTestCombatant('wizard', 'ember', true);
     const e = makeTestCombatant('enemy', 'frost', false);

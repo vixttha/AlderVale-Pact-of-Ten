@@ -35,4 +35,17 @@ describe('Firestore Security Rules — Dirty Dozen Structural Audit', () => {
     expect(rules).not.toMatch(/allow\s+read:\s+if\s+isSignedIn\(\)/);
     expect(rules).not.toMatch(/allow\s+list:\s+if\s+isSignedIn\(\);/);
   });
+
+  it('declares a rules match for every blueprint Firestore collection root', () => {
+    const blueprint = JSON.parse(readFileSync('firebase-blueprint.json', 'utf8'));
+    const roots = new Set<string>();
+    for (const collectionPath of Object.keys(blueprint.firestore)) {
+      const root = collectionPath.split('/').filter(Boolean)[0];
+      roots.add(root);
+    }
+    expect(roots).toEqual(new Set(['accounts', 'wizards', 'worldRealms', 'publicWizards']));
+    for (const root of roots) {
+      expect(rules).toMatch(new RegExp(`match /${root}/\\{`));
+    }
+  });
 });

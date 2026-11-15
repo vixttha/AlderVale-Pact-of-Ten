@@ -34,14 +34,14 @@ Use Node 24 and Bun 1.4.4 (older Bun cannot read this lockfile). From the repo r
 
 ```powershell
 bun install --frozen-lockfile
-bun run lint
-bun run lint:rules
-bun run test
-bun run build
-node --test tools/ci/server.check.mjs
+bun run validate:core
 node scripts/asset-report.mjs
 npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
 ```
+
+`validate:core` matches the Linux/Windows/macOS **core** job in
+`.github/workflows/validate.yml` (typecheck, rules lint, Vitest, build, HTTP/WS
+integration). Browser and Firestore emulator jobs still use `tools/ci` as below.
 
 From tools/ci, run `npx playwright install chromium`, then
 `npm run test:browser -- --project=chromium`. For rules, install Java 21 and run
@@ -50,8 +50,8 @@ Firestore emulator; no Firebase login, production account, or secret is needed.
 
 ## Public and private operation
 
-Pushes to main/codex branches and pull requests run automatically while public.
-The hosted validation workflow skips private repositories.
+Pushes to `main`, `codex/**`, and `ci/**` branches and pull requests run
+automatically while public. The hosted validation workflow skips private repositories.
 There is no schedule, background agent, automatic deployment, or self-hosted
 runner requirement. Standard hosted public runner compute is free under GitHub's
 current terms; larger runners, excess storage, and external APIs are separate.
