@@ -4,6 +4,7 @@ import type { AddressInfo } from 'node:net';
 import { WebSocket, type WebSocketServer } from 'ws';
 import { BufferGeometry, Group, Mesh, MeshBasicMaterial } from 'three';
 import { applySagaEvent } from '../shared/quests.ts';
+import { xpRequiredForLevel } from '../shared/realms.ts';
 import type { WizardDocument } from '../shared/economy.ts';
 import type { DuelState } from '../shared/combat.ts';
 import { moveOnCampus } from '../src/engine/campusCollision.ts';
@@ -26,6 +27,18 @@ describe('Saga progress', () => {
     expect(second.xp).toBe(140);
     expect(second.currencies).toEqual({ florins: 260, spellShards: 5 });
     expect(applySagaEvent(second, 'rune-catch')).toBe(second);
+  });
+
+  it('pays the First Spark and Rare Trial rewards once at their listed values', () => {
+    const first = applySagaEvent(wizard, 'solo-win');
+    expect(first.xp).toBe(90);
+    expect(first.currencies).toEqual({ florins: 210, spellShards: 4 });
+    expect(applySagaEvent(first, 'solo-win')).toBe(first);
+    const trial = applySagaEvent(wizard, 'rare-trial-attempt');
+    expect(trial.level).toBe(2);
+    expect(trial.xp + xpRequiredForLevel(1)).toBe(260);
+    expect(trial.currencies).toEqual({ florins: 420, spellShards: 9 });
+    expect(applySagaEvent(trial, 'rare-trial-win')).toBe(trial);
   });
 
   it('allows Rune-Catch as the alternative for a legacy save with no counters', () => {

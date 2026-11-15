@@ -97,4 +97,37 @@ test('guest settings survive reload and the HUD shows offline after a lost conne
   await expect(page.getByRole('slider', { name: /Spell & UI Chimes/ })).toHaveValue('1');
   await expect(page.getByRole('slider', { name: /Camera Orbit/ })).toHaveValue('2');
   await expect(page.getByRole('checkbox', { name: /Default 2× Speed/ })).toBeChecked();
+
+  refuseReconnect = false;
+  await page.getByRole('button', { name: 'Switch Wizard or Realm' }).click();
+  await page.getByRole('button', { name: 'Enroll New Wizard' }).click();
+  await page.getByRole('textbox').first().fill('Second Slot Rowan');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  await expect(page.getByText('1 Online', { exact: true })).toBeVisible();
+  await expect(page.getByText('Settings Rowan', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Propose Trade' })).toHaveCount(0);
+});
+
+
+test('the Commons fountain blocks walking, still refills, and fleeing gives accurate feedback', async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.goto('/');
+  await page.getByRole('textbox').first().fill('Fountain Rowan');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  const world = page.locator('[data-world-avatar-model]');
+  await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
+  const fountain = page.getByRole('button', { name: /Sanctuary Healing Fountain/ });
+  const position = page.getByText(/^\(0, 4\)$/);
+  await page.keyboard.down('w');
+  await expect(fountain).toBeVisible();
+  await expect(position).toBeVisible();
+  await page.keyboard.up('w');
+  await page.keyboard.press('e');
+  await expect(page.getByText('Sanctuary Fountain restored all Mana & Healing Flasks!')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Duel', exact: true }).click();
+  await page.getByRole('button', { name: 'Frost', exact: true }).click();
+  await page.getByRole('button', { name: 'Flee', exact: true }).click();
+  await expect(page.getByText('You left the duel.', { exact: true })).toBeVisible();
+  await expect(page.getByText(/top off your Flasks/)).toHaveCount(0);
 });
