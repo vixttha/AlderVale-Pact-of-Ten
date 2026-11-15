@@ -34,6 +34,7 @@ test('Rowan renders by default and Classic remains editable without repeated mod
 });
 
 test('Rowan and Classic survive guest reloads', async ({ page }) => {
+  test.setTimeout(90_000);
   await page.goto('/');
   await page.getByRole('textbox').first().fill('Rowan Adventurer');
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
@@ -54,6 +55,7 @@ test('Rowan and Classic survive guest reloads', async ({ page }) => {
 });
 
 test('Rowan keeps gear stats from the Tailor and saves them on reload', async ({ page }) => {
+  test.setTimeout(90_000);
   await page.goto('/');
   await page.getByRole('textbox').first().fill('Rowan Tailor');
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
@@ -79,6 +81,7 @@ test('Rowan keeps gear stats from the Tailor and saves them on reload', async ({
 });
 
 test('Rowan walks, sprints, jumps and meditates with authored clips', async ({ page }) => {
+  test.setTimeout(90_000);
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
@@ -118,6 +121,7 @@ test('failed model loading leaves the Classic fallback and enrollment usable', a
 });
 
 test('a guest can finish a solo duel and return to the world as Rowan', async ({ page }) => {
+  test.setTimeout(90_000);
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');

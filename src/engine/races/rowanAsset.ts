@@ -7,6 +7,8 @@ export interface RowanAsset {
   scene: THREE.Object3D;
   animations: THREE.AnimationClip[];
 }
+const standingTransforms = new WeakMap<RowanAsset, { scale: number; position: THREE.Vector3 }>();
+
 export interface RowanMotion {
   moving: boolean;
   speedScalar?: number;
@@ -47,28 +49,37 @@ export function prepareRowanInstance(asset: RowanAsset, sculpt: WizardSculpt) {
   mixer.update(0);
   model.updateMatrixWorld(true);
 
-  // The rig's bind-pose bounds differ from its actual standing pose.
-  const bounds = new THREE.Box3().setFromObject(model, true);
-  const size = bounds.getSize(new THREE.Vector3());
   const release = () => {
     mixer.stopAllAction();
     mixer.uncacheRoot(model);
     skeletons.forEach((skeleton) => skeleton.dispose());
     materials.forEach((material) => material.dispose());
   };
-  if (!Number.isFinite(size.y) || size.y < 0.001 || !Number.isFinite(size.x + size.z)) {
-    release();
-    throw new Error('Rowan model has invalid posed bounds');
+  let standing = standingTransforms.get(asset);
+  if (!standing) {
+    // Scan the posed vertices once per source asset. Each clone starts in the same idle pose.
+    const bounds = new THREE.Box3().setFromObject(model, true);
+    const size = bounds.getSize(new THREE.Vector3());
+    if (!Number.isFinite(size.y) || size.y < 0.001 || !Number.isFinite(size.x + size.z)) {
+      release();
+      throw new Error('Rowan model has invalid posed bounds');
+    }
+    const scale = 1.8 / size.y;
+    standing = {
+      scale,
+      position: new THREE.Vector3(
+        -(bounds.min.x + bounds.max.x) * 0.5 * scale,
+        -bounds.min.y * scale,
+        -(bounds.min.z + bounds.max.z) * 0.5 * scale,
+      ),
+    };
+    standingTransforms.set(asset, standing);
   }
-  const scale = 1.8 / size.y;
+
   const normalized = new THREE.Group();
   normalized.name = 'rowanVisual';
-  normalized.scale.setScalar(scale);
-  normalized.position.set(
-    -(bounds.min.x + bounds.max.x) * 0.5 * scale,
-    -bounds.min.y * scale,
-    -(bounds.min.z + bounds.max.z) * 0.5 * scale,
-  );
+  normalized.scale.setScalar(standing.scale);
+  normalized.position.copy(standing.position);
   normalized.add(model);
   const group = new THREE.Group();
   group.name = 'bodyRig';
