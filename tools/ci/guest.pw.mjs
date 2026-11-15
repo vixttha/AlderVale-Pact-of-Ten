@@ -34,6 +34,86 @@ test('guest wizard survives reload in its own realm', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Begin Academy Journey' })).toBeVisible();
 });
 
+const breezeSaveKey = 'aldervale_guest_breeze_v1';
+
+async function installGuestSaveFailure(page) {
+  await page.addInitScript((key) => {
+    const setItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (name, value) {
+      if (this === localStorage && name === key && window.blockGuestSave) {
+        throw new DOMException('Storage full', 'QuotaExceededError');
+      }
+      return setItem.call(this, name, value);
+    };
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
+      return kind.includes('webgl') ? null : getContext.call(this, kind, ...args);
+    };
+  }, breezeSaveKey);
+}
+
+function readBreezeSave(page) {
+  return page.evaluate((key) => JSON.parse(localStorage.getItem(key)), breezeSaveKey);
+}
+
+test('guest enrollment waits for a successful save and retries without duplicate wizards', async ({ page }) => {
+  await installGuestSaveFailure(page);
+  await page.goto('/');
+  await page.evaluate(() => { window.blockGuestSave = true; });
+  const name = page.getByRole('textbox').first();
+  const begin = page.getByRole('button', { name: 'Begin Academy Journey' });
+  await name.fill('Retry Rowan');
+  await begin.click();
+  await expect(page.getByRole('alert')).toContainText('Could not save your new wizard');
+  await expect(name).toHaveValue('Retry Rowan');
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toHaveCount(0);
+  expect(await readBreezeSave(page)).toBeNull();
+
+  await page.evaluate(() => { window.blockGuestSave = false; });
+  await begin.click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+  const save = await readBreezeSave(page);
+  expect(save.wizards).toHaveLength(1);
+  const [wizard] = save.wizards;
+  expect(wizard.name).toBe('Retry Rowan');
+  expect(save.account.wizardIds).toEqual([wizard.id]);
+  expect(save.creatures[wizard.id]).toHaveLength(1);
+  expect(save.sanctuaries[wizard.id].wizardId).toBe(wizard.id);
+  await page.reload();
+  await expect(page.getByText('Retry Rowan', { exact: true })).toBeVisible();
+});
+
+test('failed guest progress remains visible until retry saves both wizard and realm changes', async ({ page }) => {
+  await installGuestSaveFailure(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+  const originalSave = await readBreezeSave(page);
+  await page.evaluate(() => { window.blockGuestSave = true; });
+  await page.getByRole('button', { name: 'Tailor', exact: true }).click();
+  await page.getByRole('button', { name: 'Realm Vault' }).click();
+  await page.getByRole('button', { name: 'Claim to Wizard' }).click();
+  const failure = page.getByRole('alert').filter({ hasText: 'Guest progress could not be saved' });
+  await expect(failure).toBeVisible();
+  expect(await readBreezeSave(page)).toEqual(originalSave);
+  const retry = page.getByRole('button', { name: 'Retry save' });
+  await retry.click();
+  await expect(failure).toBeVisible();
+  expect(await readBreezeSave(page)).toEqual(originalSave);
+
+  await page.evaluate(() => { window.blockGuestSave = false; });
+  await retry.click();
+  await expect(failure).toHaveCount(0);
+  const recovered = await readBreezeSave(page);
+  expect(recovered.account.sharedVault).toEqual([]);
+  expect(recovered.wizards[0].wardrobe.ownedGearIds).toContain('hat_pointed_brim');
+  await page.reload();
+  await page.getByRole('button', { name: /Enter Aldervale/ }).click();
+  await page.getByRole('button', { name: 'Tailor', exact: true }).click();
+  await page.getByRole('button', { name: 'Realm Vault' }).click();
+  await expect(page.getByRole('button', { name: 'Claim to Wizard' })).toHaveCount(0);
+});
+
 test('mobile creation controls remain reachable', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');

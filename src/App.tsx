@@ -47,6 +47,7 @@ import {
   saveCloudSanctuary,
   saveCloudWizard,
   saveGuestRealm,
+  type GuestRealmBundle,
   type OwnedCreature,
   type RealmAccountState,
   type SanctuaryState,
@@ -75,6 +76,8 @@ type ActiveOverlay =
   | { type: 'deck' }
   | { type: 'sanctuary' }
   | { type: 'hub'; tab: HubModalTab };
+
+type GuestProgressUpdate = (bundle: GuestRealmBundle) => void;
 
 function wizardStarter(wizard: WizardDocument): { pet: OwnedCreature; dorm: SanctuaryState } {
   const byElement: Partial<Record<ElementId, string>> = {
@@ -106,6 +109,10 @@ export function App() {
   const [dockCollapsed, setDockCollapsed] = useState(false);
 
   const [toast, setToast] = useState<string | null>(null);
+  const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
+  const [failedGuestRealms, setFailedGuestRealms] = useState<RealmId[]>([]);
+  const pendingGuestProgress = useRef(new Map<RealmId, GuestProgressUpdate[]>());
+  const scheduledGuestSaves = useRef(new Set<RealmId>());
   const [npcDialog, setNpcDialog] = useState<CampusNpc | null>(null);
   const [inspectedPlayer, setInspectedPlayer] = useState<LivePlayerPresence | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -184,6 +191,38 @@ export function App() {
     setTimeout(() => setToast((curr) => (curr === msg ? null : curr)), 4000);
   }, []);
 
+  const readGuestProgress = useCallback((realm: RealmId) => {
+    const bundle = loadGuestRealm(realm);
+    pendingGuestProgress.current.get(realm)?.forEach((update) => update(bundle));
+    return bundle;
+  }, []);
+
+  const commitGuestProgress = useCallback((realm: RealmId, bundle: GuestRealmBundle) => {
+    if (!saveGuestRealm(realm, bundle)) return false;
+    pendingGuestProgress.current.delete(realm);
+    setFailedGuestRealms((current) => current.includes(realm) ? current.filter((id) => id !== realm) : current);
+    return true;
+  }, []);
+
+  const retryGuestProgress = useCallback((realm: RealmId) => {
+    if (pendingGuestProgress.current.has(realm) && !commitGuestProgress(realm, readGuestProgress(realm))) {
+      setFailedGuestRealms((current) => current.includes(realm) ? current : [...current, realm]);
+    }
+  }, [commitGuestProgress, readGuestProgress]);
+
+  const updateGuestProgress = useCallback((realm: RealmId, update: GuestProgressUpdate) => {
+    const pending = pendingGuestProgress.current.get(realm);
+    if (pending) pending.push(update);
+    else pendingGuestProgress.current.set(realm, [update]);
+    // One action can update several parts of the same realm save, such as a vault withdrawal.
+    if (scheduledGuestSaves.current.has(realm)) return;
+    scheduledGuestSaves.current.add(realm);
+    queueMicrotask(() => {
+      scheduledGuestSaves.current.delete(realm);
+      retryGuestProgress(realm);
+    });
+  }, [retryGuestProgress]);
+
   useEffect(() => {
     academyAudio.setVolumes(settings.harpVolume, settings.sfxVolume);
   }, [settings.harpVolume, settings.sfxVolume]);
@@ -203,7 +242,7 @@ export function App() {
   // Load realm state (Cloud if signed in, else Guest localStorage)
   const loadRealmData = useCallback(async (user: User | null, realm: RealmId, version: number) => {
     if (!user) {
-      const guest = loadGuestRealm(realm);
+      const guest = readGuestProgress(realm);
       setPlayerSettings(loadGuestSettings());
       setRealmAccount(guest.account);
       setWizards(guest.wizards);
@@ -243,7 +282,7 @@ export function App() {
     if (version !== realmLoad.current) return;
     setRealmAccount(cloudAcc);
     setWizards(cloudWizards);
-  }, [setPlayerSettings, showToast]);
+  }, [readGuestProgress, setPlayerSettings, showToast]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -276,28 +315,28 @@ export function App() {
 
   const persistWizard = useCallback(
     (next: WizardDocument, pets: OwnedCreature[] = [], account?: RealmAccountState, updatedPets: OwnedCreature[] = []) => {
+      const updateWizardList = (list: WizardDocument[]) => list.some((w) => w.id === next.id)
+        ? list.map((w) => w.id === next.id ? next : w)
+        : [...list, next];
       setActiveWizard(next);
-      setWizards((prev) => {
-        const idx = prev.findIndex((w) => w.id === next.id);
-        const list = idx >= 0 ? prev.map((w) => (w.id === next.id ? next : w)) : [...prev, next];
-        if (!fbUser) {
-          const guest = loadGuestRealm(next.realmId);
-          guest.wizards = list;
+      setWizards(updateWizardList);
+      if (!fbUser) {
+        updateGuestProgress(next.realmId, (guest) => {
+          guest.wizards = updateWizardList(guest.wizards);
           if (account) guest.account = account;
           if (pets.length || updatedPets.length) {
             const byId = new Map((guest.creatures[next.id] ?? []).map((pet) => [pet.id, pet]));
             for (const pet of [...pets, ...updatedPets]) byId.set(pet.id, pet);
             guest.creatures[next.id] = [...byId.values()];
           }
-          saveGuestRealm(next.realmId, guest);
-        }
-        return list;
-      });
-      if (fbUser) wizardSaves.current = wizardSaves.current.then(
-        () => saveCloudWizard(next, pets, account, updatedPets),
-      ).catch(() => showToast('Cloud save failed. Your latest changes may need to be retried.'));
+        });
+      } else {
+        wizardSaves.current = wizardSaves.current.then(
+          () => saveCloudWizard(next, pets, account, updatedPets),
+        ).catch(() => showToast('Cloud save failed. Your latest changes may need to be retried.'));
+      }
     },
-    [fbUser, showToast],
+    [fbUser, showToast, updateGuestProgress],
   );
 
   const claimTermTier = async (tier: number) => {
@@ -315,7 +354,7 @@ export function App() {
       }
       return result.claimed;
     }
-    const guest = loadGuestRealm(wizard.realmId);
+    const guest = readGuestProgress(wizard.realmId);
     if (guest.account.claimedTermTiers.includes(tier)) return false;
     const reward = TERM_REWARD_TRACK.find((item) => item.tier === tier);
     const saved = guest.wizards.find((item) => item.id === wizard.id);
@@ -323,7 +362,7 @@ export function App() {
     const next = applyTermReward(saved, reward);
     const account = { ...guest.account, claimedTermTiers: [...guest.account.claimedTermTiers, tier] };
     const list = guest.wizards.map((item) => item.id === wizard.id ? next : item);
-    if (!saveGuestRealm(wizard.realmId, { ...guest, account, wizards: list })) throw new Error('The guest save could not be written.');
+    if (!commitGuestProgress(wizard.realmId, { ...guest, account, wizards: list })) throw new Error('The guest save could not be written.');
     setWizards(list);
     setRealmAccount(account);
     setActiveWizard(next);
@@ -337,12 +376,10 @@ export function App() {
         wizardSaves.current = wizardSaves.current.then(() => saveCloudRealmAccount(fbUser.uid, next))
           .catch(() => showToast('Realm progress could not be saved.'));
       } else {
-        const guest = loadGuestRealm(next.realmId);
-        guest.account = next;
-        saveGuestRealm(next.realmId, guest);
+        updateGuestProgress(next.realmId, (guest) => { guest.account = next; });
       }
     },
-    [fbUser, showToast],
+    [fbUser, showToast, updateGuestProgress],
   );
 
   const persistCreatures = useCallback(
@@ -353,12 +390,12 @@ export function App() {
         const pending = newCreature ? saveCloudCreatures([newCreature], new Set([newCreature.id])) : saveCloudCreatures(nextList);
         void pending.catch(() => showToast('Creature progress could not be saved.'));
       } else {
-        const guest = loadGuestRealm(activeWizard.realmId);
-        guest.creatures[activeWizard.id] = nextList;
-        saveGuestRealm(activeWizard.realmId, guest);
+        updateGuestProgress(activeWizard.realmId, (guest) => {
+          guest.creatures[activeWizard.id] = nextList;
+        });
       }
     },
-    [fbUser, activeWizard, showToast],
+    [fbUser, activeWizard, showToast, updateGuestProgress],
   );
 
   const persistSanctuary = useCallback(
@@ -367,12 +404,12 @@ export function App() {
       if (fbUser) {
         void saveCloudSanctuary(nextSanc, isNew).catch(() => showToast('Your Dorm changes could not be saved.'));
       } else {
-        const guest = loadGuestRealm(nextSanc.realmId);
-        guest.sanctuaries[nextSanc.wizardId] = nextSanc;
-        saveGuestRealm(nextSanc.realmId, guest);
+        updateGuestProgress(nextSanc.realmId, (guest) => {
+          guest.sanctuaries[nextSanc.wizardId] = nextSanc;
+        });
       }
     },
-    [fbUser],
+    [fbUser, showToast, updateGuestProgress],
   );
 
   const enterWorld = async (wiz: WizardDocument, prepared?: { pet: OwnedCreature; dorm: SanctuaryState }) => {
@@ -394,18 +431,23 @@ export function App() {
           loadedPets = pets.length ? pets : await loadCloudCreatures(wiz.id);
           loadedSanc = dorm ?? await loadCloudSanctuary(wiz.id, wiz.realmId) ?? defaults.dorm;
         } else {
-          const guest = loadGuestRealm(wiz.realmId);
-          loadedPets = guest.creatures[wiz.id]?.length ? guest.creatures[wiz.id] : [defaults.pet];
-          loadedSanc = guest.sanctuaries[wiz.id] ?? defaults.dorm;
-          guest.creatures[wiz.id] = loadedPets;
-          guest.sanctuaries[wiz.id] = loadedSanc;
-          saveGuestRealm(wiz.realmId, guest);
+          const guest = readGuestProgress(wiz.realmId);
+          const savedPets = guest.creatures[wiz.id];
+          const savedDorm = guest.sanctuaries[wiz.id];
+          loadedPets = savedPets?.length ? savedPets : [defaults.pet];
+          loadedSanc = savedDorm ?? defaults.dorm;
+          if (!savedPets?.length || !savedDorm) {
+            updateGuestProgress(wiz.realmId, (bundle) => {
+              bundle.creatures[wiz.id] = loadedPets;
+              bundle.sanctuaries[wiz.id] = loadedSanc;
+            });
+          }
         }
       }
       if (worldEntry.current !== entry || (fbUser?.uid ?? null) !== (auth.currentUser?.uid ?? null)) return;
       setCreatures(loadedPets);
       setSanctuary(loadedSanc);
-      setGalleryImages(fbUser ? [] : loadGuestRealm(wiz.realmId).gallery?.[wiz.id] ?? []);
+      setGalleryImages(fbUser ? [] : readGuestProgress(wiz.realmId).gallery?.[wiz.id] ?? []);
       if (fbUser) {
         void loadCloudGallery(wiz).then((images) => {
           if (worldEntry.current === entry) setGalleryImages(images);
@@ -437,10 +479,10 @@ export function App() {
         wizardSaves.current = pending.then(() => undefined, () => undefined);
         images = await pending;
       } else {
-        const guest = loadGuestRealm(wizard.realmId);
+        const guest = readGuestProgress(wizard.realmId);
         images = [image, ...(guest.gallery?.[wizard.id] ?? [])].slice(0, 9);
         const gallery = { ...guest.gallery, [wizard.id]: images };
-        if (!saveGuestRealm(wizard.realmId, { ...guest, gallery })) throw new Error('Guest storage is full.');
+        if (!commitGuestProgress(wizard.realmId, { ...guest, gallery })) throw new Error('Guest storage is full.');
       }
       if (entry === worldEntry.current) {
         setGalleryImages(images);
@@ -454,6 +496,7 @@ export function App() {
   const handleCreateWizard = async (wiz: WizardDocument): Promise<boolean> => {
     if (wizardCreation.current || !realmReady || wizards.length >= 3) return false;
     wizardCreation.current = true;
+    setEnrollmentError(null);
     try {
       const nextAcc = { ...realmAccount, wizardIds: [...realmAccount.wizardIds, wiz.id].slice(0, 3) };
       if (fbUser) {
@@ -465,19 +508,22 @@ export function App() {
         await enterWorld(owned, prepared);
       } else {
         const prepared = wizardStarter(wiz);
-        const guest = loadGuestRealm(wiz.realmId);
-        saveGuestRealm(wiz.realmId, {
-          ...guest, account: nextAcc, wizards: [...guest.wizards, wiz],
+        const guest = readGuestProgress(wiz.realmId);
+        if (guest.wizards.length >= 3) throw new Error('All three wizard slots are in use.');
+        const list = [...guest.wizards, wiz];
+        const account = { ...guest.account, wizardIds: list.map((wizard) => wizard.id) };
+        if (!commitGuestProgress(wiz.realmId, {
+          ...guest, account, wizards: list,
           creatures: { ...guest.creatures, [wiz.id]: [prepared.pet] },
           sanctuaries: { ...guest.sanctuaries, [wiz.id]: prepared.dorm },
-        });
-        setRealmAccount(nextAcc);
-        setWizards((current) => [...current, wiz]);
+        })) throw new Error('Could not save your new wizard on this device. Check browser storage and try enrolling again.');
+        setRealmAccount(account);
+        setWizards(list);
         await enterWorld(wiz, prepared);
       }
       return true;
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Could not save the new wizard.');
+      setEnrollmentError(error instanceof Error ? error.message : 'Could not save the new wizard.');
       return false;
     } finally {
       wizardCreation.current = false;
@@ -932,22 +978,44 @@ export function App() {
     showToast(`Victory! +${totalXp} XP, +${totalFlorins} Florins, +${totalShards} Spell Shards!${questNotice}${hatchNotice}`);
   };
 
+  const guestSaveWarning = failedGuestRealms.length > 0 && (
+    <div className="fixed top-3 left-1/2 z-50 flex w-max max-w-[calc(100%-1.5rem)] -translate-x-1/2 flex-wrap items-center gap-3 rounded-xl storybook-dark-panel px-4 py-2 text-sm shadow-xl">
+      <p role="alert">
+        Guest progress could not be saved. Check browser storage and retry before closing or reloading.
+      </p>
+      <button
+        type="button"
+        onClick={() => failedGuestRealms.forEach(retryGuestProgress)}
+        className="rounded-lg bg-[#f4c98b] px-3 py-1.5 font-bold text-[#241b16]"
+      >
+        Retry save
+      </button>
+    </div>
+  );
+
   if (!activeWizard) {
     return (
-      <TitleWizardStudio
-        userEmail={fbUser?.email ?? null}
-        isSignedIn={Boolean(fbUser)}
-        selectedRealm={selectedRealm}
-        realmAccount={realmAccount}
-        wizards={wizards}
-        onSignInGoogle={() => void signInWithGooglePopup().catch(() => showToast('Google sign-in could not complete. Try again.'))}
-        onSignOut={() => void signOutFirebase().catch(() => showToast('Could not sign out. Try again.'))}
-        onSelectRealm={setSelectedRealm}
-        onEnterWorld={(w) => void enterWorld(w)}
-        onCreateWizard={handleCreateWizard}
-        notice={toast}
-        realmReady={realmReady}
-      />
+      <>
+        {guestSaveWarning}
+        <TitleWizardStudio
+          userEmail={fbUser?.email ?? null}
+          isSignedIn={Boolean(fbUser)}
+          selectedRealm={selectedRealm}
+          realmAccount={realmAccount}
+          wizards={wizards}
+          onSignInGoogle={() => void signInWithGooglePopup().catch(() => showToast('Google sign-in could not complete. Try again.'))}
+          onSignOut={() => void signOutFirebase().catch(() => showToast('Could not sign out. Try again.'))}
+          onSelectRealm={(realm) => {
+            setEnrollmentError(null);
+            setSelectedRealm(realm);
+          }}
+          onEnterWorld={(w) => void enterWorld(w)}
+          onCreateWizard={handleCreateWizard}
+          notice={toast}
+          enrollmentError={enrollmentError}
+          realmReady={realmReady}
+        />
+      </>
     );
   }
 
@@ -963,6 +1031,7 @@ export function App() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#182033]">
+      {guestSaveWarning}
       {/* Full-Viewport 3D Sky-Island World (>=85% unobstructed) */}
       <WorldViewport
         wizard={activeWizard}

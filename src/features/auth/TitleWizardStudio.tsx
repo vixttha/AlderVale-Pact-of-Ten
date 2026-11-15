@@ -30,6 +30,7 @@ interface TitleWizardStudioProps {
   onCreateWizard: (wizard: WizardDocument) => Promise<boolean>;
   onSignOut: () => void;
   notice: string | null;
+  enrollmentError: string | null;
   realmReady: boolean;
 }
 
@@ -52,6 +53,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   onCreateWizard,
   onSignOut,
   notice,
+  enrollmentError,
   realmReady,
 }) => {
   const [submitting, setSubmitting] = useState(false);
@@ -282,6 +284,8 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   </button>
                 )}
               </div>
+
+              {enrollmentError && <p role="alert" className="rounded-xl bg-[#502d39] p-3 text-sm">{enrollmentError}</p>}
 
               {/* Three-Strata Race Ecology Picker */}
               <div className="space-y-3">
