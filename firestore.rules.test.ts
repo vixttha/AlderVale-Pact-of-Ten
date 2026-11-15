@@ -10,7 +10,7 @@ describe('Firestore Security Rules — Dirty Dozen Structural Audit', () => {
 
   it('starts with default-deny catch-all rule', () => {
     expect(rules).toContain("rules_version = '2';");
-    expect(rules).toContain('match /{document=**} {\n      allow read, write: if false;\n    }');
+    expect(rules).toMatch(/match \/\{document=\*\*\}\s*\{\s*allow read, write: if false;\s*\}/);
   });
 
   it('covers every collection in firebase-blueprint.json', () => {
