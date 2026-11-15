@@ -40,14 +40,14 @@ export const loopSteps: LoopStep[] = [
   },
   {
     id: "persist",
-    playerSees: "Reload keeps the wizard, florins, and quest progress.",
-    code: "Guest bundles use localStorage key aldervale_guest_<realm>_v1 through loadGuestRealm and saveGuestRealm. saveGuestRealm ignores storage failures.",
+    playerSees: "Reload keeps the wizard, florins, and quest progress. The player returns to the title and enters that wizard again.",
+    code: "Guest bundles use localStorage key aldervale_guest_<realm>_v1 through loadGuestRealm and saveGuestRealm. activeWizard starts null, and selectedRealm starts as breeze. Zone, settings, and overlay are not stored. saveGuestRealm ignores storage failures.",
     automatedCheck: "G13-001 in tests/vault/guestQuestSave.test.ts reloads one breeze wizard and checks that a second solo-win does not pay again.",
   },
   {
     id: "webgl",
     playerSees: "If WebGL cannot be created, a recovery panel replaces a blank world.",
-    code: "WorldViewport and AvatarPreview3D construct WebGLRenderer with no failure path. A lost context after creation shows Restoring 3D Sky-Canvas. Creation failure is uncaught.",
+    code: "WorldViewport and AvatarPreview3D construct WebGLRenderer with no failure path. WorldViewport shows Restoring 3D Sky-Canvas after a lost context. AvatarPreview3D does not. Creation failure is uncaught in both.",
     automatedCheck: "No test covers a failed WebGL constructor.",
   },
 ];
@@ -73,7 +73,7 @@ export type NextSlice = {
 
 export const nextSlice: NextSlice = {
   sliceId: "webgl-create-failure",
-  reason: "The other five loop steps have a code path. WebGL creation failure does not.",
+  reason: "The other five loop steps have a code path. Returning to the title after reload is expected. WebGL creation failure does not have a path.",
   acceptance: "If the world renderer cannot be created, the player sees a recovery panel and can leave the world. The title form stays usable if the portrait preview cannot be created.",
   files: [
     "src/engine/worldViewport.tsx",
