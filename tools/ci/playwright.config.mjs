@@ -16,7 +16,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'], launchOptions: { firefoxUserPrefs: { 'webgl.force-enabled': true, 'webgl.enable-webgl2': true } } } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
   webServer: {

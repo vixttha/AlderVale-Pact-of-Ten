@@ -13,6 +13,8 @@ The validation workflow runs seven independent jobs:
 - Chromium, Firefox, and WebKit on Linux: title/creation controls, guest wizard
   persistence and realm separation, and narrow viewport controls. External web
   requests are blocked so tests cannot touch production Firebase or paid APIs.
+  Linux browser jobs use a virtual display and software graphics; Firefox's
+  native headless mode on the runner could not create the required WebGL2 context.
 - Firestore emulator on Java 21: permitted operations plus ownership, identity,
   PII, realm, timestamp, ID-length, and bazaar state/price rejection scenarios.
 

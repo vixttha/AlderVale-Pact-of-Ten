@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // Browser checks intentionally use local guest storage and never contact production Firebase.
 test.beforeEach(async ({ page }) => {
+  page.on('pageerror', (error) => console.error(`[browser pageerror] ${error.message}`));
   await page.route('**/*', (route) => {
     const url = new URL(route.request().url());
     return url.hostname === '127.0.0.1' || url.hostname === 'localhost'
