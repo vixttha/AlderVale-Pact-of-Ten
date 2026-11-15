@@ -120,15 +120,41 @@ test('failed model loading leaves the Classic fallback and enrollment usable', a
   expect(errors).toEqual([]);
 });
 
-test('a guest can finish a solo duel and return to the world as Rowan', async ({ page }) => {
+test('a guest wins as Rowan and keeps First Spark and its rewards after reload', async ({ page }) => {
   test.setTimeout(90_000);
   const errors = [];
+  const wizardName = 'Rowan Duelist';
+  const questName = 'First Spark in the Ring';
+  const readWizard = () => page.evaluate((name) => {
+    const save = JSON.parse(localStorage.getItem('aldervale_guest_breeze_v1') ?? 'null');
+    const wizard = save?.wizards.find((entry) => entry.name === name);
+    if (!wizard) return null;
+    return {
+      id: wizard.id,
+      realmId: wizard.realmId,
+      completedQuests: wizard.progression.completedQuests,
+      level: wizard.level,
+      xp: wizard.xp,
+      florins: wizard.currencies.florins,
+      shards: wizard.currencies.spellShards,
+    };
+  }, wizardName);
+  const openQuestLedger = async () => {
+    await page.getByRole('button', { name: 'Campus', exact: true }).click();
+    await page.getByRole('button', { name: 'Quests, Term & Codex', exact: true }).click();
+  };
+  const expectFirstSparkCompleted = async () => {
+    const cardHeader = page.getByText(questName, { exact: true }).locator('..');
+    await expect(cardHeader.getByText('Completed', { exact: true })).toBeVisible();
+  };
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await page.getByRole('textbox').first().fill('Rowan Duelist');
+  await page.getByRole('textbox').first().fill(wizardName);
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
   const world = page.locator('[data-world-avatar-model]');
   await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
+  const starter = await readWizard();
+  expect(starter).toMatchObject({ realmId: 'breeze', completedQuests: [], level: 1, xp: 0 });
 
   await page.getByRole('button', { name: 'Duel', exact: true }).click();
   await page.getByRole('button', { name: 'Frost', exact: true }).click();
@@ -151,9 +177,35 @@ test('a guest can finish a solo duel and return to the world as Rowan', async ({
     if (await exit.isVisible()) break;
     await expect(pass).toBeEnabled();
   }
-  await expect(exit).toBeVisible();
-  await exit.click();
+  const claimVictory = page.getByRole('button', { name: 'Claim Rewards & Return', exact: true });
+  await expect(claimVictory).toBeVisible();
+  await claimVictory.click();
+  // Breeze solo payout (298 XP, 163F, 2 shards) plus First Spark (90 XP, 110F, 3 shards).
+  await expect(page.getByText(`Victory! +388 XP, +273 Florins, +5 Spell Shards! Quest completed: ${questName}.`, {
+    exact: true,
+  })).toBeVisible();
   await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
-  await expect(page.getByText('Rowan Duelist', { exact: true })).toBeVisible();
+  await expect(page.getByText(wizardName, { exact: true })).toBeVisible();
+  const rewarded = {
+    ...starter,
+    completedQuests: ['q_first_duel'],
+    level: 3,
+    xp: 13,
+    florins: starter.florins + 273,
+    shards: starter.shards + 5,
+  };
+  await expect.poll(readWizard).toEqual(rewarded);
+  await openQuestLedger();
+  await expectFirstSparkCompleted();
+
+  await page.reload();
+  await expect(page.getByText(wizardName, { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Enter Aldervale', exact: true }).click();
+  await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
+  await expect(page.getByText(`${rewarded.florins}F`, { exact: true })).toBeVisible();
+  await expect(page.getByText(`${rewarded.shards} Shards`, { exact: true })).toBeVisible();
+  await openQuestLedger();
+  await expectFirstSparkCompleted();
+  expect(await readWizard()).toEqual(rewarded);
   expect(errors).toEqual([]);
 });
