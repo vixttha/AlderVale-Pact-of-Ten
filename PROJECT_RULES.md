@@ -60,11 +60,14 @@ repository and the private Notion project so the two remain consistent.
 - Standard public hosted compute being free does not make external APIs,
   hosting, storage overages, or game backends free. Recheck changing terms.
 
-## 4. Use AI Studio, Codex, and plugins together
+## 4. Agent roles and tool use
 
-- Google AI Studio leads most game features, world/UI design, and visual
-  iteration. Codex handles focused supporting implementation, hard bugs, Git,
-  CI, tests, profiling, and asset tooling.
+- The project owner is the sole project lead and final authority for priorities, scope, acceptance, merge, and release.
+- ChatGPT.com is the main developer and project manager within its actual repository access; this does not transfer final acceptance authority from the owner.
+- Codex CLI is reserved for rare, especially complex work. Roughly one task in 40 is an owner guideline, not a quota.
+- Grokbot / Glitchwarden and Muse provide on-request issue reviews and independent AI audits. Muse may also implement game fixes when directed. Never claim a review occurred without evidence.
+- Google AI Studio is an optional implementation environment when the owner chooses; it is not the assumed lead.
+- Notion coordinates private context, plans, decisions, and handoffs when asked; do not assume continuous monitoring or automatic cross-app execution.
 - Use installed/connected plugins whenever they materially help the task and
   fit the free-project budget. Prefer purpose-built connected tools to browser
   work when they have the required capabilities. Do not use a plugin merely to
