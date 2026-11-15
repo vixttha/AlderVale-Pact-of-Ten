@@ -4,11 +4,16 @@ Google AI Studio remains the main builder. Codex maintains focused tooling and
 tests. GitHub Actions runs the checks against the commit shown on each run.
 
 Follow the owner's [project rules](../PROJECT_RULES.md): the repository stays
-public, Notion stays private, and project work must add no unapproved spending.
+public, Notion stays private, project work must add no unapproved spending, and
+the three-day window is 2026-11-15 through 2026-11-18 America/New_York.
 
 ## Runner coverage
 
-The validation workflow runs seven independent jobs:
+The validation workflow runs eight independent jobs:
+
+- Three-day horizon on Linux: prints remaining time to the job summary and fails
+  after 2026-11-18 23:59 America/New_York. Public `main` and pull-request runs
+  use this check; it does not replace owner playtest.
 
 - Linux, Windows, and macOS: frozen application install with Bun 1.4.4; type
   checking; Firestore rules lint; existing unit/structural tests; production build;
@@ -33,6 +38,7 @@ Use Node 24 and Bun 1.4.4 (older Bun cannot read this lockfile). From the repo r
 ```powershell
 bun install --frozen-lockfile
 bun run validate:core
+node scripts/horizon-check.mjs
 node scripts/asset-report.mjs
 npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
 ```

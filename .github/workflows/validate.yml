@@ -14,6 +14,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  horizon:
+    # Public runs use standard free hosted runners. Private runs require a manual dispatch.
+    if: github.event.repository.private == false || github.event_name == 'workflow_dispatch'
+    name: Three-day horizon
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Document and enforce the recorded three-day window
+        run: node scripts/horizon-check.mjs
+
   core:
     # Public runs use standard free hosted runners. Private runs require a manual dispatch.
     if: github.event.repository.private == false || github.event_name == 'workflow_dispatch'

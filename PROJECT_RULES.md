@@ -95,6 +95,23 @@ independent reviewers, approvals, completed meetings, or delivery dates. Passing
 CI is evidence of its tested scenarios, not proof of cloud sign-in, production
 security, deployment behavior, gameplay quality, or release acceptance.
 
+## 6. Three-day project law
+
+Owner confirmed 2026-11-15. The private Notion project is the deadline
+authority. This section records the same window for GitHub, CI, issues, Sentry,
+and AI work without copying private Notion content.
+
+- Calendar window: 2026-11-15 through 2026-11-18 America/New_York.
+- End of the window: 2026-11-18 23:59 America/New_York.
+- Scope, CI, issues, Sentry, and AI work must fit this window.
+- After the window, the default is to stop new feature work unless the owner
+  extends the law in writing.
+- Prefer GitHub Actions public-repository runners for verification. Do not add
+  paid Sentry plans, new paid APIs, or paid runners.
+
+The `Three-day horizon` job in `.github/workflows/validate.yml` prints remaining
+time and fails after the deadline on public `main` and pull-request runs.
+
 ## Operating references
 
 - [Validation guide](docs/VALIDATION.md)
