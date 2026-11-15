@@ -1,8 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { disposeScene } from './disposeScene.ts';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { buildWizardGroup, type WizardMeshConfig } from './avatarMesh.ts';
+import { clearWizardAvatarSlot, updateRowanHuman } from './races/rowanHuman.ts';
 import { addOutlineToGroup, makeAnimeToonMaterial } from './animeShaders.ts';
+import { probeSoftwareGl } from './softwareGl.ts';
 
 interface AvatarPreview3DProps {
   config: WizardMeshConfig;
@@ -10,31 +13,46 @@ interface AvatarPreview3DProps {
 }
 
 export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, className = '' }) => {
+  const [unavailable, setUnavailable] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const avatarSlotRef = useRef<THREE.Group | null>(null);
+  const statusRef = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const isSoftwareGl = probeSoftwareGl();
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: !isSoftwareGl,
+        alpha: true,
+        powerPreference: isSoftwareGl ? 'low-power' : 'high-performance',
+      });
+    } catch {
+      setUnavailable(true);
+      return;
+    }
     const gl = renderer.getContext() as WebGL2RenderingContext;
-    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
-    const rendererStr = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : '';
-    const isSoftwareGl = /SwiftShader|llvmpipe|softpipe|Software|Basic Render|Paravirtual/i.test(rendererStr);
+    renderer.domElement.dataset.softwareGl = isSoftwareGl ? '1' : '0';
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.setSize(el.clientWidth || 280, el.clientHeight || 340);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMapping = isSoftwareGl ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const roomEnv = new RoomEnvironment();
-    scene.environment = pmrem.fromScene(roomEnv, 0.04).texture;
-    roomEnv.dispose();
+    const pmrem = isSoftwareGl ? null : new THREE.PMREMGenerator(renderer);
+    let environmentTarget: THREE.WebGLRenderTarget | undefined;
+    if (pmrem) {
+      const roomEnv = new RoomEnvironment();
+      environmentTarget = pmrem.fromScene(roomEnv, 0.04);
+      scene.environment = environmentTarget.texture;
+      roomEnv.dispose();
+    }
 
     const sun = new THREE.DirectionalLight('#fff2d6', 2.05);
     sun.position.set(3, 5, 4);
@@ -57,7 +75,6 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     scene.add(pedestal);
 
     const avatarSlot = new THREE.Group();
-    avatarSlot.add(buildWizardGroup(config));
     scene.add(avatarSlot);
     avatarSlotRef.current = avatarSlot;
 
@@ -68,14 +85,18 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     let disposed = false;
     let rafId = 0;
     let timeoutId = 0;
+    let pendingFence: WebGLSync | null = null;
     let angle = 0.25;
+    let lastDraw = performance.now();
 
     function afterDraw(cb: () => void) {
       const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      pendingFence = sync;
       gl.flush();
       const poll = () => {
         if (disposed) {
           if (sync) gl.deleteSync(sync);
+          pendingFence = null;
           return;
         }
         const state = sync ? gl.getSyncParameter(sync, gl.SYNC_STATUS) : gl.SIGNALED;
@@ -83,6 +104,7 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
           timeoutId = window.setTimeout(poll, 5);
         } else {
           if (sync) gl.deleteSync(sync);
+          pendingFence = null;
           timeoutId = window.setTimeout(cb, 80);
         }
       };
@@ -90,8 +112,21 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
     }
 
     function renderLoop() {
-      if (disposed) return;
-      angle += 0.014;
+      if (disposed || !el) return;
+      const now = performance.now();
+      const dt = Math.min(0.12, (now - lastDraw) / 1000);
+      lastDraw = now;
+      const avatar = avatarSlot.children[0];
+      if (avatar) {
+        updateRowanHuman(avatar, dt, { moving: false });
+        const model = String(avatar.userData.humanModel ?? 'procedural');
+        el.dataset.avatarModel = model;
+        el.dataset.avatarClip = String(avatar.userData.humanClip ?? '');
+        const status = model === 'loading' ? 'Loading Rowan appearance…'
+          : model === 'fallback' ? 'Rowan unavailable. Showing Classic human.' : '';
+        if (statusRef.current && statusRef.current.textContent !== status) statusRef.current.textContent = status;
+      }
+      angle += dt * 0.84;
       avatarSlot.rotation.y = Math.sin(angle) * 0.65;
       renderer.render(scene, camera);
       if (isSoftwareGl) afterDraw(renderLoop);
@@ -115,9 +150,14 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
       disposed = true;
       cancelAnimationFrame(rafId);
       clearTimeout(timeoutId);
+      if (pendingFence) gl.deleteSync(pendingFence);
+      pendingFence = null;
       ro.disconnect();
+      clearWizardAvatarSlot(avatarSlot);
       avatarSlotRef.current = null;
-      pmrem.dispose();
+      disposeScene(scene);
+      environmentTarget?.dispose();
+      pmrem?.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode === el) el.removeChild(renderer.domElement);
     };
@@ -126,9 +166,15 @@ export const AvatarPreview3D: React.FC<AvatarPreview3DProps> = ({ config, classN
   useEffect(() => {
     const slot = avatarSlotRef.current;
     if (!slot) return;
-    slot.clear();
+    clearWizardAvatarSlot(slot);
     slot.add(buildWizardGroup(config));
   }, [config]);
 
-  return <div ref={containerRef} className={`w-full h-full ${className}`} />;
+  return (
+    <div ref={containerRef} aria-label="Wizard appearance preview" className={`relative w-full h-full ${className}`}>
+      {unavailable
+        ? <div role="status" className="flex h-full min-h-24 items-center justify-center px-4 text-center text-sm">3D preview unavailable</div>
+        : <p ref={statusRef} role="status" className="pointer-events-none absolute bottom-2 left-2 right-2 text-center text-xs text-white" />}
+    </div>
+  );
 };

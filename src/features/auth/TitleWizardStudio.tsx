@@ -16,6 +16,7 @@ import { createStarterWizard, type WizardDocument } from '../../../shared/econom
 import type { RealmAccountState } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
 import { AvatarPreview3D } from '../../engine/avatarPreview3d.tsx';
+import { HumanAppearanceChoice } from './HumanAppearanceChoice.tsx';
 
 interface TitleWizardStudioProps {
   userEmail: string | null;
@@ -26,7 +27,11 @@ interface TitleWizardStudioProps {
   onSignInGoogle: () => void;
   onSelectRealm: (realmId: RealmId) => void;
   onEnterWorld: (wizard: WizardDocument) => void;
-  onCreateWizard: (wizard: WizardDocument) => void;
+  onCreateWizard: (wizard: WizardDocument) => Promise<boolean>;
+  onSignOut: () => void;
+  notice: string | null;
+  enrollmentError: string | null;
+  realmReady: boolean;
 }
 
 const STRATA_ORDER: { id: StratumId; label: string }[] = [
@@ -46,7 +51,12 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   onSelectRealm,
   onEnterWorld,
   onCreateWizard,
+  onSignOut,
+  notice,
+  enrollmentError,
+  realmReady,
 }) => {
+  const [submitting, setSubmitting] = useState(false);
   const [creating, setCreating] = useState(wizards.length === 0);
   const [name, setName] = useState('Rowan Skyweaver');
   const [raceId, setRaceId] = useState<RaceId>('human');
@@ -71,6 +81,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   });
 
   const activeRace = RACES[raceId];
+  const rowanHuman = raceId === 'human' && sculpt.humanModel !== 'classic';
   const unlockedSet = new Set(realmAccount.unlockedRaces);
 
   const handleRacePick = (nextRace: RaceId) => {
@@ -99,9 +110,11 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
     }));
   };
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
+  const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanName = name.trim().slice(0, 24) || 'Alder Initiate';
+    if (submitting || !realmReady) return;
+    const trimmedName = name.trim().slice(0, 24);
+    const cleanName = trimmedName.length >= 2 ? trimmedName : 'Alder Initiate';
     const wiz = createStarterWizard({
       id: `wiz_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       ownerId: realmAccount.uid,
@@ -112,12 +125,19 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
       elementId,
       sculpt,
     });
-    onCreateWizard(wiz);
+    setSubmitting(true);
+    try {
+      if (await onCreateWizard(wiz)) setCreating(false);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="h-full w-full overflow-y-auto bg-[radial-gradient(circle_at_top,#2a3b5c_0%,#182033_65%,#111624_100%)] text-[#f7f0e2] p-4 md:p-6">
       <div className="mx-auto max-w-6xl space-y-5">
+        {notice && <p role="status" className="rounded-xl bg-[#202942] p-3">{notice}</p>}
+        {isSignedIn && <button onClick={onSignOut} className="text-sm underline">Sign out</button>}
         {/* Header Bar */}
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#d7c7a9]/25 bg-[#202942]/95 px-6 py-4 shadow-xl">
           <div>
@@ -265,6 +285,8 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                 )}
               </div>
 
+              {enrollmentError && <p role="alert" className="rounded-xl bg-[#502d39] p-3 text-sm">{enrollmentError}</p>}
+
               {/* Three-Strata Race Ecology Picker */}
               <div className="space-y-3">
                 <div className="text-xs font-bold uppercase tracking-wider text-[#f4c98b]">
@@ -364,6 +386,11 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
 
               {/* Anime-Storybook Facial, Proportion & Streetwear Dye Sculpting */}
               <div className="grid gap-3 sm:grid-cols-2 rounded-xl border border-[#d7c7a9]/15 bg-[#171f33] p-3 text-xs">
+                {raceId === 'human' && (
+                  <div className="sm:col-span-2 text-[#c7d0e0]">
+                    <HumanAppearanceChoice value={sculpt.humanModel} onChange={(humanModel) => setSculpt((s) => ({ ...s, humanModel }))} />
+                  </div>
+                )}
                 <div>
                   <label className="block font-semibold text-[#c7d0e0] mb-1">Wizard Name</label>
                   <input
@@ -377,6 +404,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <label className="block font-semibold text-[#c7d0e0] mb-1">Hair Style</label>
                   <select
                     value={sculpt.hairStyle}
+                    disabled={rowanHuman}
                     onChange={(e) => setSculpt((s) => ({ ...s, hairStyle: e.target.value }))}
                     className="w-full rounded-lg border border-white/15 bg-[#101626] px-2.5 py-1.5 text-white"
                   >
@@ -395,6 +423,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                       <button
                         key={hex}
                         type="button"
+                        disabled={rowanHuman}
                         onClick={() => setSculpt((s) => ({ ...s, skinHex: hex }))}
                         className={`h-6 w-6 rounded-full border-2 ${sculpt.skinHex === hex ? 'border-[#f4c98b] scale-110' : 'border-white/25'}`}
                         style={{ backgroundColor: hex }}
@@ -410,6 +439,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <div className="flex items-center gap-2">
                     <input
                       type="range"
+                      aria-label="Wizard height"
                       min={0.88}
                       max={1.12}
                       step={0.02}
@@ -419,6 +449,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     />
                     <select
                       value={sculpt.build}
+                      aria-label="Wizard build"
                       onChange={(e) => setSculpt((s) => ({ ...s, build: e.target.value as WizardSculpt['build'] }))}
                       className="rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -434,6 +465,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <div className="flex items-center gap-2">
                     <select
                       value={sculpt.eyeShape}
+                      disabled={rowanHuman}
                       onChange={(e) => setSculpt((s) => ({ ...s, eyeShape: e.target.value as WizardSculpt['eyeShape'] }))}
                       className="flex-1 rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -443,6 +475,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     </select>
                     <select
                       value={sculpt.browStyle}
+                      disabled={rowanHuman}
                       onChange={(e) => setSculpt((s) => ({ ...s, browStyle: e.target.value as WizardSculpt['browStyle'] }))}
                       className="flex-1 rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -458,6 +491,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <div className="flex items-center gap-2">
                     <select
                       value={sculpt.marking}
+                      disabled={rowanHuman}
                       onChange={(e) => setSculpt((s) => ({ ...s, marking: e.target.value as WizardSculpt['marking'] }))}
                       className="flex-1 rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -469,6 +503,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                     </select>
                     <select
                       value={sculpt.castPose}
+                      disabled={rowanHuman}
                       onChange={(e) => setSculpt((s) => ({ ...s, castPose: e.target.value as WizardSculpt['castPose'] }))}
                       className="flex-1 rounded-lg border border-white/15 bg-[#101626] px-2 py-1 text-white"
                     >
@@ -482,23 +517,23 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                 <div className="sm:col-span-2 flex flex-wrap items-center gap-4 pt-1">
                   <label className="flex items-center gap-1.5">
                     <span>Jacket</span>
-                    <input type="color" value={sculpt.primaryDye} onChange={(e) => setSculpt((s) => ({ ...s, primaryDye: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.primaryDye} onChange={(e) => setSculpt((s) => ({ ...s, primaryDye: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                   <label className="flex items-center gap-1.5">
                     <span>Trim</span>
-                    <input type="color" value={sculpt.trimDye} onChange={(e) => setSculpt((s) => ({ ...s, trimDye: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.trimDye} onChange={(e) => setSculpt((s) => ({ ...s, trimDye: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                   <label className="flex items-center gap-1.5">
                     <span>Hair</span>
-                    <input type="color" value={sculpt.hairHex} onChange={(e) => setSculpt((s) => ({ ...s, hairHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.hairHex} onChange={(e) => setSculpt((s) => ({ ...s, hairHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                   <label className="flex items-center gap-1.5">
                     <span>L-Eye</span>
-                    <input type="color" value={sculpt.eyeLeftHex} onChange={(e) => setSculpt((s) => ({ ...s, eyeLeftHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.eyeLeftHex} onChange={(e) => setSculpt((s) => ({ ...s, eyeLeftHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                   <label className="flex items-center gap-1.5">
                     <span>R-Eye</span>
-                    <input type="color" value={sculpt.eyeRightHex} onChange={(e) => setSculpt((s) => ({ ...s, eyeRightHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
+                    <input disabled={rowanHuman} type="color" value={sculpt.eyeRightHex} onChange={(e) => setSculpt((s) => ({ ...s, eyeRightHex: e.target.value }))} className="h-6 w-8 rounded bg-transparent" />
                   </label>
                 </div>
               </div>
@@ -537,10 +572,10 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
                   <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" /> Live Multiplayer</span>
                 </div>
                 <button
-                  type="submit"
+                  type="submit" disabled={submitting || !realmReady}
                   className="w-full rounded-xl bg-[#f4c98b] py-3 font-display text-base font-bold text-[#241b16] shadow-lg hover:bg-[#ffd9a3] transition"
                 >
-                  Begin Academy Journey
+                  {submitting ? 'Saving wizard…' : 'Begin Academy Journey'}
                 </button>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import type { PlayerSettings } from '../../../shared/settings.ts';
 import React, { useEffect, useState } from 'react';
 import { ShoppingBag, ScrollText, Shield, Sliders, Map, Store, Sparkles } from 'lucide-react';
 import { MODULAR_GEAR, RACES } from '../../../shared/wardrobe.ts';
@@ -7,6 +8,8 @@ import { RESOURCES, TERM_REWARD_TRACK, type ResourceId, type WizardDocument } fr
 import { CREATURE_SPECIES } from '../../../shared/creatures.ts';
 import type { RealmAccountState } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
+import type { AcademyHouse } from '../../../shared/houses.ts';
+import { isBazaarPrice, type BazaarListing, type MarketAccount } from '../../../shared/market.ts';
 import { auth } from '../../lib/firebase.ts';
 
 export type HubModalTab = 'shops' | 'bazaar' | 'quests' | 'social' | 'map' | 'settings';
@@ -16,10 +19,12 @@ interface AcademyModalHubProps {
   wizard: WizardDocument;
   realmAccount: RealmAccountState;
   isSignedIn: boolean;
-  settings: { harpVolume: number; sfxVolume: number; cameraSensitivity: number; solo2xDefault: boolean };
-  onUpdateSettings: (patch: Partial<{ harpVolume: number; sfxVolume: number; cameraSensitivity: number; solo2xDefault: boolean }>) => void;
+  wallet: MarketAccount | null;
+  onWallet: (wallet: MarketAccount) => void;
+  settings: PlayerSettings;
+  onUpdateSettings: (patch: Partial<PlayerSettings>) => void;
   onUpdateWizard: (next: WizardDocument) => void;
-  onUpdateRealmAccount: (next: RealmAccountState) => void;
+  onClaimTermTier: (tier: number) => Promise<boolean>;
   onTravelZone: (z: ZoneId) => void;
   onSwitchWizardOrRealm: () => void;
   onLinkGoogle: () => void;
@@ -31,38 +36,55 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   wizard,
   realmAccount,
   isSignedIn,
+  wallet,
+  onWallet,
   settings,
   onUpdateSettings,
   onUpdateWizard,
-  onUpdateRealmAccount,
+  onClaimTermTier,
   onTravelZone,
   onSwitchWizardOrRealm,
   onLinkGoogle,
   onClose,
 }) => {
   const [tab, setTab] = useState<HubModalTab>(initialTab);
-  const [bazaarListings, setBazaarListings] = useState<{ id: string; sellerName: string; itemType: string; itemId: string; itemName: string; priceFlorins: number }[]>([]);
-  const [houses, setHouses] = useState<{ id: string; name: string; crestElement: WizardDocument['elementId']; motto: string; members: string[] }[]>([]);
+  const [bazaarListings, setBazaarListings] = useState<BazaarListing[]>([]);
+  const [houses, setHouses] = useState<AcademyHouse[]>([]);
+  const [currentHouseId, setCurrentHouseId] = useState<string | null>(null);
   const [houseName, setHouseName] = useState('');
-  const [listItemName, setListItemName] = useState('Starstitch Brim Hat');
+  const [listItemId, setListItemId] = useState('');
+  const [marketBusy, setMarketBusy] = useState(false);
   const [listPrice, setListPrice] = useState(85);
+  const [termBusy, setTermBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const dwarfDiscount = RACES[wizard.raceId].passiveBonus.craftDiscountPct ? 0.88 : 1.0;
 
   useEffect(() => {
-    if (tab === 'bazaar') {
-      fetch(`/api/bazaar/${wizard.realmId}`)
-        .then((r) => r.json())
-        .then((d) => setBazaarListings(d.listings ?? []))
-        .catch(() => {});
-    } else if (tab === 'social') {
-      fetch(`/api/houses/${wizard.realmId}`)
-        .then((r) => r.json())
-        .then((d) => setHouses(d.houses ?? []))
-        .catch(() => {});
-    }
-  }, [tab, wizard.realmId]);
+    if (tab !== 'bazaar' && tab !== 'social') return;
+    const controller = new AbortController();
+    const load = async () => {
+      const token = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/${tab === 'bazaar' ? 'bazaar' : 'houses'}/${wizard.realmId}`, {
+        ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
+        signal: controller.signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? 'Realm service unavailable');
+      if (controller.signal.aborted) return;
+      if (tab === 'bazaar') {
+        setBazaarListings(data.listings ?? []);
+        if (data.wallet) onWallet(data.wallet);
+      } else {
+        setHouses(data.houses ?? []);
+        setCurrentHouseId(data.currentHouseId ?? null);
+      }
+    };
+    void load().catch((error) => {
+      if (!controller.signal.aborted) setNotice(error instanceof Error ? error.message : 'Realm service unavailable');
+    });
+    return () => controller.abort();
+  }, [tab, wizard.realmId, isSignedIn, onWallet]);
 
   const buyGear = (gearId: string, price: number) => {
     const finalPrice = Math.round(price * dwarfDiscount);
@@ -138,90 +160,100 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
     setNotice('Daily Almanac stamped! +Florins & +2 Spell Shards.');
   };
 
-  const claimTermTier = (tier: number) => {
-    const def = TERM_REWARD_TRACK.find((t) => t.tier === tier);
-    if (!def || realmAccount.termXp < def.xpRequired || realmAccount.claimedTermTiers.includes(tier)) return;
-    onUpdateRealmAccount({
-      ...realmAccount,
-      claimedTermTiers: [...realmAccount.claimedTermTiers, tier],
-    });
-    onUpdateWizard({
-      ...wizard,
-      currencies: {
-        florins: wizard.currencies.florins + (def.reward.florins ?? 0),
-        honorMarks: wizard.currencies.honorMarks + (def.reward.honorMarks ?? 0),
-        bondingSeals: wizard.currencies.bondingSeals + (def.reward.seals ?? 0),
-        spellShards: wizard.currencies.spellShards + (def.reward.shards ?? 0),
-      },
-      wardrobe: def.reward.cosmeticId && !wizard.wardrobe.ownedGearIds.includes(def.reward.cosmeticId)
-        ? { ...wizard.wardrobe, ownedGearIds: [...wizard.wardrobe.ownedGearIds, def.reward.cosmeticId] }
-        : wizard.wardrobe,
-      progression: tier === 8 ? { ...wizard.progression, rebirthSeals: wizard.progression.rebirthSeals + 1 } : wizard.progression,
-    });
-    setNotice(`Claimed Free Term Tier ${tier}: ${def.label}!`);
+  const claimTermTier = async (tier: number) => {
+    const reward = TERM_REWARD_TRACK.find((entry) => entry.tier === tier);
+    if (termBusy || !reward) return;
+    setTermBusy(true);
+    try {
+      const claimed = await onClaimTermTier(tier);
+      setNotice(claimed ? `Claimed Free Term Tier ${tier}: ${reward.label}!` : 'This Term reward has already been claimed.');
+    } catch {
+      setNotice('The Term reward could not be saved. Please try again.');
+    } finally {
+      setTermBusy(false);
+    }
   };
+
+  async function marketRequest(path: string, body: Record<string, unknown>) {
+    const token = await auth.currentUser?.getIdToken();
+    if (!token) throw new Error('Sign in with Google to use the shared Bazaar and Academy Houses.');
+    const response = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error ?? 'The realm service is unavailable.');
+    return data;
+  }
 
   const postBazaarListing = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken().catch(() => null);
-    if (!token) {
-      setNotice('Sign in with Google to post live Bazaar listings.');
+    if (marketBusy) return;
+    if (!isBazaarPrice(listPrice)) {
+      setNotice('Enter a whole-number price between 1 and 1,000,000 Florins.');
       return;
     }
-    const resp = await fetch(`/api/bazaar/${wizard.realmId}/list`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        sellerWizardId: wizard.id,
-        sellerName: wizard.name,
-        itemType: 'gear',
-        itemId: 'hat_pointed_brim',
-        itemName: listItemName,
-        priceFlorins: listPrice,
-      }),
-    });
-    if (resp.ok) {
-      const data = await resp.json();
+    setMarketBusy(true);
+    try {
+      const data = await marketRequest(`/api/bazaar/${wizard.realmId}/list`, {
+        wizardId: wizard.id, itemId: listItemId, priceFlorins: listPrice,
+      });
+      onWallet(data.wallet);
+      setListItemId('');
       setBazaarListings((prev) => [data.listing, ...prev]);
-      setNotice('Listed in Realm Courtyard Bazaar!');
+      setNotice('Gear placed in escrow and listed in the Bazaar.');
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not post the listing.');
+    } finally {
+      setMarketBusy(false);
     }
   };
 
-  const buyBazaarListing = async (listingId: string, price: number) => {
-    if (wizard.currencies.florins < price) return;
-    const token = await auth.currentUser?.getIdToken().catch(() => null);
-    if (!token) {
-      setNotice('Sign in with Google to buy from other players.');
-      return;
-    }
-    const resp = await fetch(`/api/bazaar/${wizard.realmId}/buy/${listingId}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (resp.ok) {
-      onUpdateWizard({ ...wizard, currencies: { ...wizard.currencies, florins: wizard.currencies.florins - price } });
-      setBazaarListings((prev) => prev.filter((l) => l.id !== listingId));
-      setNotice('Purchased from Courtyard Bazaar!');
+  const settleBazaarListing = async (listingId: string, action: 'buy' | 'cancel') => {
+    if (marketBusy) return;
+    setMarketBusy(true);
+    try {
+      const data = await marketRequest(`/api/bazaar/${wizard.realmId}/${action}/${listingId}`, { wizardId: wizard.id });
+      onWallet(data.wallet);
+      setBazaarListings((prev) => prev.filter((listing) => listing.id !== listingId));
+      setNotice(action === 'buy' ? 'Purchase completed. Your gear is available in Tailor.' : 'Listing cancelled. Your gear is back in Tailor.');
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not update the listing.');
+    } finally {
+      setMarketBusy(false);
     }
   };
 
   const createHouse = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken().catch(() => null);
-    if (!token) {
-      setNotice('Sign in with Google to found an Academy House.');
-      return;
-    }
-    const resp = await fetch(`/api/houses/${wizard.realmId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ name: houseName, crestElement: wizard.elementId }),
-    });
-    if (resp.ok) {
-      const data = await resp.json();
+    if (marketBusy) return;
+    setMarketBusy(true);
+    try {
+      const data = await marketRequest(`/api/houses/${wizard.realmId}`, { name: houseName, crestElement: wizard.elementId });
       setHouses((prev) => [data.house, ...prev]);
+      setCurrentHouseId(data.house.id);
       setHouseName('');
       setNotice('Academy House founded!');
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not found the House.');
+    } finally {
+      setMarketBusy(false);
+    }
+  };
+
+  const updateHouseMembership = async (house: AcademyHouse, action: 'join' | 'leave') => {
+    if (marketBusy) return;
+    setMarketBusy(true);
+    try {
+      const data = await marketRequest(`/api/houses/${wizard.realmId}/${house.id}/${action}`, {});
+      setHouses(data.houses);
+      setCurrentHouseId(data.currentHouseId);
+      setNotice(action === 'join' ? `Joined ${house.name}.` : `Left ${house.name}.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Could not change House membership.');
+    } finally {
+      setMarketBusy(false);
     }
   };
 
@@ -349,11 +381,20 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
 
         {tab === 'bazaar' && (
           <div className="mt-4 space-y-4">
+            <p className="rounded-xl bg-[#efe4ce] p-3">
+              Bazaar wallet: {wallet?.florins ?? '—'} Florins · {wallet?.honorMarks ?? 0} Honor Marks · {wallet?.bondingSeals ?? 0} Bonding Seals.
+              Bazaar transactions and live duel rewards use this realm wallet. Academy shops use wizard Florins.
+            </p>
             <form onSubmit={postBazaarListing} className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#d7c7a9] bg-white/85 p-3">
               <span className="font-bold">Post Listing ({wizard.realmId.toUpperCase()} Realm):</span>
-              <input value={listItemName} onChange={(e) => setListItemName(e.target.value)} className="rounded-lg border px-2.5 py-1" maxLength={40} />
-              <input type="number" min={1} max={10000} value={listPrice} onChange={(e) => setListPrice(Number(e.target.value))} className="w-24 rounded-lg border px-2 py-1" />
-              <button type="submit" className="rounded-xl bg-[#241b16] px-4 py-1.5 font-bold text-[#f4c98b]">List for Florins</button>
+              <select aria-label="Bazaar gear to list" value={listItemId} onChange={(e) => setListItemId(e.target.value)} className="rounded-lg border px-2.5 py-1">
+                <option value="">Select Bazaar gear</option>
+                {MODULAR_GEAR.filter((gear) => (wallet?.gear[gear.id] ?? 0) > 0).map((gear) => (
+                  <option key={gear.id} value={gear.id}>{gear.name}</option>
+                ))}
+              </select>
+              <input aria-label="Listing price in Bazaar Florins" type="number" min={1} max={1000000} value={listPrice} onChange={(e) => setListPrice(Number(e.target.value))} className="w-24 rounded-lg border px-2 py-1" />
+              <button type="submit" disabled={!isSignedIn || marketBusy || !listItemId} className="rounded-xl bg-[#241b16] px-4 py-1.5 font-bold text-[#f4c98b] disabled:opacity-50">List for Florins</button>
             </form>
 
             <div className="grid gap-2 sm:grid-cols-2">
@@ -363,12 +404,18 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
                     <div className="font-bold text-sm">{l.itemName}</div>
                     <div className="text-[#615346]">Seller: {l.sellerName}</div>
                   </div>
-                  <button
-                    onClick={() => buyBazaarListing(l.id, l.priceFlorins)}
-                    className="rounded-xl bg-[#38a3a5] px-3 py-1.5 font-bold text-white"
-                  >
-                    Buy {l.priceFlorins}F
-                  </button>
+                  {l.canCancel ? (
+                    <button onClick={() => void settleBazaarListing(l.id, 'cancel')} disabled={marketBusy}
+                      className="rounded-xl border border-[#d7c7a9] px-3 py-1.5 font-bold">
+                      Cancel listing
+                    </button>
+                  ) : (
+                    <button onClick={() => void settleBazaarListing(l.id, 'buy')}
+                      disabled={!isSignedIn || marketBusy || (wallet?.florins ?? 0) < l.priceFlorins}
+                      className="rounded-xl bg-[#38a3a5] px-3 py-1.5 font-bold text-white disabled:opacity-50">
+                      Buy {l.priceFlorins}F
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -403,8 +450,8 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
                         <div className="text-[#615346] font-mono-num">{t.xpRequired} XP</div>
                       </div>
                       <button
-                        disabled={!ready}
-                        onClick={() => claimTermTier(t.tier)}
+                        disabled={!ready || termBusy}
+                        onClick={() => void claimTermTier(t.tier)}
                         className="mt-2 rounded-lg bg-[#241b16] py-1 font-bold text-[#f4c98b] disabled:opacity-40"
                       >
                         {claimed ? 'Claimed' : ready ? 'Claim Free' : 'Locked'}
@@ -462,14 +509,17 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
 
         {tab === 'social' && (
           <div className="mt-4 space-y-4">
+            {!isSignedIn && <p>Sign in with Google to found or join an Academy House.</p>}
             <form onSubmit={createHouse} className="flex flex-wrap gap-2 rounded-2xl border border-[#d7c7a9] bg-white/85 p-3">
               <input
                 value={houseName}
                 onChange={(e) => setHouseName(e.target.value)}
                 placeholder="New Academy House Name..."
+                disabled={!isSignedIn || Boolean(currentHouseId) || marketBusy}
+                required minLength={2} maxLength={32}
                 className="flex-1 rounded-lg border px-3 py-1.5"
               />
-              <button type="submit" className="rounded-xl bg-[#241b16] px-4 py-1.5 font-bold text-[#f4c98b]">
+              <button type="submit" disabled={!isSignedIn || Boolean(currentHouseId) || marketBusy} className="rounded-xl bg-[#241b16] px-4 py-1.5 font-bold text-[#f4c98b] disabled:opacity-50">
                 Found House
               </button>
             </form>
@@ -481,6 +531,20 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
                     <ElementCrest elementId={h.crestElement} showLabel />
                   </div>
                   <p className="mt-1 text-[#615346]">{h.motto}</p>
+                  {!h.academy && (
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <span>{h.memberCount} {h.memberCount === 1 ? 'member' : 'members'}</span>
+                      {isSignedIn && (!currentHouseId || currentHouseId === h.id) && (
+                        <button
+                          disabled={marketBusy}
+                          onClick={() => void updateHouseMembership(h, currentHouseId === h.id ? 'leave' : 'join')}
+                          className="rounded-lg border border-[#d7c7a9] px-3 py-1.5 font-bold disabled:opacity-50"
+                        >
+                          {currentHouseId === h.id ? 'Leave House' : 'Join House'}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

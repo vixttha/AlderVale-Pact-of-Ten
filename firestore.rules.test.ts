@@ -27,11 +27,11 @@ describe('Firestore Security Rules — Dirty Dozen Structural Audit', () => {
     expect(rules).toContain('match /publicWizards/{wizardId}');
   });
 
-  it('enforces email verification, server timestamps, id bounds, and terminal state locks', () => {
+  it('enforces email verification, server timestamps, ID bounds, and server-only world state', () => {
     expect(rules).toContain('request.auth.token.email_verified == true');
     expect(rules).toContain('request.time');
     expect(rules).toContain('isValidId(');
-    expect(rules).toContain("existing().status == 'open'");
+    expect(rules).toMatch(/match \/worldRealms\/\{path=\*\*\}\s*\{\s*allow read, write: if false;/);
     expect(rules).not.toMatch(/allow\s+read:\s+if\s+isSignedIn\(\)/);
     expect(rules).not.toMatch(/allow\s+list:\s+if\s+isSignedIn\(\);/);
   });
@@ -43,7 +43,7 @@ describe('Firestore Security Rules — Dirty Dozen Structural Audit', () => {
       const root = collectionPath.split('/').filter(Boolean)[0];
       roots.add(root);
     }
-    expect(roots.size).toBeGreaterThanOrEqual(5);
+    expect(roots).toEqual(new Set(['accounts', 'wizards', 'worldRealms', 'publicWizards']));
     for (const root of roots) {
       expect(rules).toMatch(new RegExp(`match /${root}/\\{`));
     }

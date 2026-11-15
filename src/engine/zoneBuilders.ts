@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { CampusCollider } from './campusCollision.ts';
 import { CAMPUS_NPCS, DORM_THEMES, type ZoneId } from '../../shared/world.ts';
 import { RESOURCES, type ResourceId } from '../../shared/economy.ts';
 import { ELEMENTS } from '../../shared/elements.ts';
@@ -30,6 +31,7 @@ export interface ZoneBuildResult {
   interactables: { object: THREE.Object3D; hit: InteractiveHitTarget }[];
   animatedObjects: { mesh: THREE.Object3D; speed: number; baseY: number; spin?: boolean }[];
   waterTextures: THREE.CanvasTexture[];
+  colliders: CampusCollider[];
 }
 
 /**
@@ -172,6 +174,7 @@ export function buildZoneScene(params: {
   const interactables: { object: THREE.Object3D; hit: InteractiveHitTarget }[] = [];
   const animatedObjects: { mesh: THREE.Object3D; speed: number; baseY: number; spin?: boolean }[] = [];
   const waterTextures: THREE.CanvasTexture[] = [];
+  const colliders: CampusCollider[] = [];
 
   const theme = DORM_THEMES.find((t) => t.id === params.dormThemeId) ?? DORM_THEMES[0];
   const grassTex = getGrassTexture(maxAniso);
@@ -297,6 +300,7 @@ export function buildZoneScene(params: {
     fountain.add(basin, upperBasin, water, spire, halo, createContactShadow(2.8, 0.3));
     fountain.position.set(0, 0, 1);
     group.add(fountain);
+    colliders.push({ x: fountain.position.x, z: fountain.position.z, radius: basin.geometry.parameters.radiusBottom + 0.3 });
     animatedObjects.push({ mesh: spire, speed: 2.0, baseY: 1.92, spin: true });
     interactables.push({
       object: fountain,
@@ -663,7 +667,7 @@ export function buildZoneScene(params: {
     });
   }
 
-  return { group, dormSlot, interactables, animatedObjects, waterTextures };
+  return { group, dormSlot, interactables, animatedObjects, waterTextures, colliders };
 }
 
 function buildAnimeTree(leafHex: string, scale = 1.0): THREE.Group {

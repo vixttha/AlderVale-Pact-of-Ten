@@ -98,12 +98,30 @@ export interface WizardDocument {
     almanacDay: number;
     lastAlmanacClaim: string;
     completedQuests: string[];
+    questWins?: Record<string, number>;
     bestiarySeen: string[];
     titleBadge: string;
     loadouts: WizardLoadout[];
     eggs: { id: string; parentA: string; parentB: string; resultSpeciesId: string; winsNeeded: number; winsDone: number }[];
   };
   activeCreatureId: string;
+}
+
+export function applyTermReward(wizard: WizardDocument, tier: TermTierReward): WizardDocument {
+  const { reward } = tier;
+  return {
+    ...wizard,
+    currencies: {
+      florins: wizard.currencies.florins + (reward.florins ?? 0),
+      honorMarks: wizard.currencies.honorMarks + (reward.honorMarks ?? 0),
+      bondingSeals: wizard.currencies.bondingSeals + (reward.seals ?? 0),
+      spellShards: wizard.currencies.spellShards + (reward.shards ?? 0),
+    },
+    wardrobe: reward.cosmeticId && !wizard.wardrobe.ownedGearIds.includes(reward.cosmeticId)
+      ? { ...wizard.wardrobe, ownedGearIds: [...wizard.wardrobe.ownedGearIds, reward.cosmeticId] }
+      : wizard.wardrobe,
+    progression: tier.tier === 8 ? { ...wizard.progression, rebirthSeals: wizard.progression.rebirthSeals + 1 } : wizard.progression,
+  };
 }
 
 export function createStarterWizard(params: {

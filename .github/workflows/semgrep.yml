@@ -1,0 +1,105 @@
+# Semgrep Community Edition (OSS) only.
+# Do not add SEMGREP_APP_TOKEN, `semgrep ci`, `--pro`, `--pro-intrafile`,
+# or `semgrep install-semgrep-pro`. Those enable Semgrep AppSec Platform / Pro
+# (commercial; free allowance then Team licenses from $30/contributor/month,
+# with an automatic Teams trial on first overage).
+name: Semgrep CE
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # Owner-requested weekly scan. Offset from the hour as Semgrep recommends.
+    - cron: '27 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aldervale-semgrep-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semgrep:
+    name: semgrep-oss/scan
+    # Public hosted compute is free. Private runs skip unless manually dispatched.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event.repository.private == false || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SEMGREP_SEND_METRICS: 'off'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Install Semgrep Community Edition
+        run: pip install --disable-pip-version-check --no-cache-dir semgrep==1.185.0
+      - name: Audit scan (does not fail the job on findings)
+        # `semgrep scan` exits 0 when the scan completes, even with findings.
+        # Pass `--error` later if the owner wants fail-on-findings gating.
+        run: |
+          semgrep --version
+          semgrep scan \
+            --metrics=off \
+            --config .semgrep.yml \
+            --config p/javascript \
+            --config p/typescript \
+            --config p/nodejs \
+            --json \
+            --output semgrep-findings.json
+      - name: Summarize findings
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path("semgrep-findings.json")
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          lines = [
+              "## Semgrep Community Edition",
+              "",
+              "Engine: OSS `semgrep scan` 1.185.0 (no Pro, no AppSec Platform token).",
+              "Policy: `.semgrep.yml` plus Registry `p/javascript`, `p/typescript`, `p/nodejs`. Audit mode (no `--error`).",
+              "",
+          ]
+          if not path.is_file():
+              lines.append("No findings file was produced.")
+          else:
+              data = json.loads(path.read_text())
+              results = data.get("results") or []
+              errors = data.get("errors") or []
+              lines.append(f"Findings: **{len(results)}**. Parser/scan errors: {len(errors)}.")
+              if results:
+                  lines.append("")
+                  lines.append("| Severity | Rule | File |")
+                  lines.append("| --- | --- | --- |")
+                  for item in results[:40]:
+                      extra = item.get("extra") or {}
+                      sev = extra.get("severity", "")
+                      rule = item.get("check_id", "")
+                      start = (item.get("start") or {}).get("line", "")
+                      path_name = f"{item.get('path', '')}:{start}"
+                      lines.append(f"| {sev} | `{rule}` | `{path_name}` |")
+                  if len(results) > 40:
+                      lines.append("")
+                      lines.append(f"Showing 40 of {len(results)}. See the 1-day artifact.")
+          text = "\n".join(lines) + "\n"
+          print(text)
+          if summary:
+              with open(summary, "a", encoding="utf-8") as handle:
+                  handle.write(text)
+          PY
+      - name: Retain findings JSON for one day
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: semgrep-ce-${{ github.run_attempt }}
+          path: semgrep-findings.json
+          retention-days: 1
+          if-no-files-found: ignore

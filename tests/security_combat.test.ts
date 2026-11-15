@@ -203,6 +203,40 @@ describe('Aldervale Combat & Breeding Domain Rules', () => {
     return c;
   }
 
+  it('finishes simultaneous burning knockouts as a draw', () => {
+    const player = makeTestCombatant('wizard', 'ember', true);
+    const enemy = makeTestCombatant('enemy', 'frost', false);
+    for (const actor of [player, enemy]) {
+      actor.hp = 20;
+      applyStatusEffect(actor, { id: 'test-burn', kind: 'burning', label: 'Burning', element: 'ember', turnsLeft: 2, magnitude: 25 });
+    }
+    const state: DuelState = {
+      duelId: 'mutual-ko', mode: 'pvp', round: 1, turnTimerSeconds: 30, arenaBubble: null,
+      playerTeam: [player], enemyTeam: [enemy], firstTeam: 'player', phase: 'planning', logs: [],
+      telegraphedCheat: null,
+    };
+    const result = resolveDuelRound(state, []);
+    expect(result.phase).toBe('draw');
+    expect([result.playerTeam[0].hp, result.enemyTeam[0].hp]).toEqual([0, 0]);
+  });
+
+  it('keeps the selected spell when an earlier card is discarded and replaced', () => {
+    const p = makeTestCombatant('wizard', 'ember', true);
+    const e = makeTestCombatant('enemy', 'frost', false);
+    p.hand = ['ember_hearth_blade', 'ember_cinder_dart'];
+    p.deck = ['frost_tower_ward'];
+    const state: DuelState = {
+      duelId: 'cycle-check', mode: 'solo', round: 1, turnTimerSeconds: null, arenaBubble: null,
+      playerTeam: [p], enemyTeam: [e], firstTeam: 'player', phase: 'planning', logs: [], telegraphedCheat: null,
+    };
+    const result = resolveDuelRound(state, [{
+      actorId: p.id, targetId: e.id, creatureAction: 'none', cardIndex: 1, discardIndices: [0],
+    }], () => 0.1);
+    expect(result.enemyTeam[0].hp).toBeLessThan(e.hp);
+    expect(result.playerTeam[0].hand).toEqual(['frost_tower_ward']);
+    expect(result.playerTeam[0].discard).toEqual(['ember_hearth_blade', 'ember_cinder_dart']);
+  });
+
   it('refunds full Pips when a spell fizzles', () => {
     const p = makeTestCombatant('wiz', 'ember', true);
     const e = makeTestCombatant('foe', 'frost', false);

@@ -85,9 +85,9 @@ test('buyers cannot alter the price when buying', async () => {
     status: 'sold', buyerId: 'bob', priceFlorins: 1, updatedAt: serverTimestamp(),
   }));
 });
-test('a valid purchase can transition open to sold at the original price', async () => {
+test('buyers must use the server transaction to settle a legacy listing', async () => {
   await seed('bazaar/breeze/listings/l1', listing());
-  await assertSucceeds(updateDoc(doc(db('bob'), 'bazaar/breeze/listings/l1'), {
+  await assertFails(updateDoc(doc(db('bob'), 'bazaar/breeze/listings/l1'), {
     status: 'sold', buyerId: 'bob', updatedAt: serverTimestamp(),
   }));
 });

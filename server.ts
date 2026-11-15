@@ -1,22 +1,24 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
+import { buyListing, cancelListing, changeHouseMembership, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, RequestError } from './server/market.ts';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { verifyFirebaseBearerToken } from './server/authVerify.ts';
-import { realmWorldStore } from './server/authzStore.ts';
+import { resourceStore } from './server/authzStore.ts';
 import { generateArchivistAdvice, type StrategizeRequest } from './server/lecternAi.ts';
 import { attachAldervaleWebSocketServer } from './server/wsHub.ts';
 import type { RealmId } from './shared/realms.ts';
-import type { ElementId } from './shared/elements.ts';
+
 
 function isRealmId(val: string): val is RealmId {
   return val === 'breeze' || val === 'horizon' || val === 'everpeak';
 }
 
-export async function createAldervaleApp() {
+export async function createAldervaleApp({ frontend = true } = {}) {
   const app = express();
-  app.use(express.json({ limit: '512kb' }));
+  app.use('/api/academy/strategize', express.json({ limit: '4kb' }));
+  app.use('/api', express.json({ limit: '32kb' }));
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true, game: 'Aldervale: Pact of Ten' });
@@ -24,7 +26,7 @@ export async function createAldervaleApp() {
 
   // Strict Transactional Resource Update (Orange Team Pattern: 401/404/204, zero override headers)
   app.patch('/api/resources/:resourceId', async (req, res) => {
-    const result = await realmWorldStore.resourceStore.updateResourceAuthorized({
+    const result = await resourceStore.updateResourceAuthorized({
       headers: req.headers as Record<string, string | string[] | undefined>,
       authenticate: async (headers) => {
         const auth = typeof headers.authorization === 'string' ? headers.authorization : undefined;
@@ -41,136 +43,91 @@ export async function createAldervaleApp() {
     }
   });
 
-  // Realm-isolated Courtyard Bazaar
-  app.get('/api/bazaar/:realmId', (req, res) => {
-    if (!isRealmId(req.params.realmId)) return res.status(400).json({ error: 'Invalid realm' });
-    const listings = Array.from(realmWorldStore.bazaar[req.params.realmId].values()).filter((l) => l.status === 'open');
-    res.json({ listings });
-  });
-
-  app.post('/api/bazaar/:realmId/list', async (req, res) => {
-    if (!isRealmId(req.params.realmId)) return res.status(400).json({ error: 'Invalid realm' });
-    const principal = await verifyFirebaseBearerToken(req.headers.authorization);
-    if (!principal) return res.status(401).json({ error: 'Authentication required' });
-
-    const body = req.body as {
-      sellerWizardId?: string;
-      sellerName?: string;
-      itemType?: 'gear' | 'card' | 'runestone' | 'furniture' | 'reagent';
-      itemId?: string;
-      itemName?: string;
-      priceFlorins?: number;
+  function realmRoute(handler: (req: Request, res: Response, realm: RealmId) => Promise<unknown>) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      const realm = req.params.realmId;
+      if (!isRealmId(realm)) return res.status(400).json({ error: 'Invalid realm' });
+      void handler(req, res, realm).catch(next);
     };
-    const price = Math.max(1, Math.min(1000000, Math.floor(Number(body.priceFlorins ?? 0))));
-    if (!body.itemId || !body.itemName || !body.sellerWizardId || price < 1) {
-      return res.status(400).json({ error: 'Invalid listing payload' });
-    }
+  }
 
-    const id = `baz_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-    const listing = {
-      id,
-      realmId: req.params.realmId,
-      sellerId: principal.uid,
-      sellerName: String(body.sellerName ?? 'Wizard').slice(0, 24),
-      itemType: body.itemType ?? 'gear',
-      itemId: String(body.itemId).slice(0, 64),
-      itemName: String(body.itemName).slice(0, 48),
-      priceFlorins: price,
-      status: 'open' as const,
-    };
-    realmWorldStore.bazaar[req.params.realmId].set(id, listing);
-    res.status(201).json({ listing });
-  });
-
-  app.post('/api/bazaar/:realmId/buy/:listingId', async (req, res) => {
-    if (!isRealmId(req.params.realmId)) return res.status(400).json({ error: 'Invalid realm' });
+  async function requireAccount(req: Request): Promise<string> {
     const principal = await verifyFirebaseBearerToken(req.headers.authorization);
-    if (!principal) return res.status(401).json({ error: 'Authentication required' });
+    if (!principal?.emailVerified) throw new RequestError(401, 'Sign in with a verified Google account');
+    return principal.uid;
+  }
 
-    const listing = realmWorldStore.bazaar[req.params.realmId].get(req.params.listingId);
-    if (!listing || listing.status !== 'open') {
-      return res.status(404).json({ error: 'Listing unavailable' });
+  app.get('/api/bazaar/:realmId', realmRoute(async (req, res, realm) => {
+    const uid = req.headers.authorization ? await requireAccount(req) : undefined;
+    res.json(await listBazaar(realm, uid));
+  }));
+  app.post('/api/bazaar/:realmId/list', realmRoute(async (req, res, realm) => {
+    res.status(201).json(await postListing(realm, await requireAccount(req), req.body ?? {}));
+  }));
+  app.post('/api/bazaar/:realmId/buy/:listingId', realmRoute(async (req, res, realm) => {
+    res.json(await buyListing(realm, await requireAccount(req), req.body?.wizardId, req.params.listingId));
+  }));
+  app.post('/api/bazaar/:realmId/cancel/:listingId', realmRoute(async (req, res, realm) => {
+    res.json(await cancelListing(realm, await requireAccount(req), req.params.listingId));
+  }));
+  app.get('/api/houses/:realmId', realmRoute(async (req, res, realm) => {
+    const uid = req.headers.authorization ? await requireAccount(req) : undefined;
+    res.json(await listHouses(realm, uid));
+  }));
+  app.post('/api/houses/:realmId/:houseId/:action(join|leave)', realmRoute(async (req, res, realm) => {
+    const uid = await requireAccount(req);
+    const action = req.params.action === 'join' ? 'join' : 'leave';
+    await changeHouseMembership(realm, uid, req.params.houseId, action);
+    res.json(await listHouses(realm, uid));
+  }));
+  app.post('/api/houses/:realmId', realmRoute(async (req, res, realm) => {
+    res.status(201).json({ house: await createHouse(realm, await requireAccount(req), req.body ?? {}) });
+  }));
+  app.get('/api/tours/:realmId', realmRoute(async (_req, res, realm) => {
+    res.json({ tours: await listTours(realm) });
+  }));
+  app.post('/api/tours/:realmId/publish', realmRoute(async (req, res, realm) => {
+    res.json(await publishTour(realm, await requireAccount(req), req.body?.wizardId));
+  }));
+
+  const allowance = new Map<string, { resetAt: number; count: number }>();
+  app.post('/api/academy/strategize', (req, res, next) => {
+    const body = req.body as Partial<StrategizeRequest> | undefined;
+    const goal = body?.goal;
+    if (!body || ![body.wizardName, body.raceName, body.elementName, body.activeCreatureName].every(
+      (value) => typeof value === 'string' && value.trim().length > 0 && value.length <= 64
+    ) || typeof goal !== 'string' || !goal.trim() || goal.length > 400 ||
+      typeof body.level !== 'number' || !Number.isInteger(body.level) || body.level < 1 || body.level > 50 ||
+      typeof body.rank !== 'number' || !Number.isInteger(body.rank) || body.rank < 1 || body.rank > 20) {
+      return res.status(400).json({ error: 'Enter a strategy question of up to 400 characters' });
     }
-    if (listing.sellerId === principal.uid) {
-      return res.status(400).json({ error: 'Cannot buy your own listing' });
+    if (process.env.GEMINI_API_KEY) {
+      const now = Date.now();
+      for (const [key, value] of allowance) if (value.resetAt <= now) allowance.delete(key);
+      const keys = ['global', `ip:${req.ip}`];
+      if (keys.some((key, index) => (allowance.get(key)?.count ?? 0) >= (index === 0 ? 30 : 5))) {
+        return res.set('Retry-After', '60').status(429).json({ error: 'The Lectern is busy. Try again in a minute.' });
+      }
+      for (const key of keys) {
+        const entry = allowance.get(key) ?? { resetAt: now + 60_000, count: 0 };
+        entry.count += 1;
+        allowance.set(key, entry);
+      }
     }
-    listing.status = 'sold';
-    listing.buyerId = principal.uid;
-    res.json({ listing });
+    void generateArchivistAdvice(body as StrategizeRequest).then((result) => res.json(result)).catch(next);
   });
 
-  // Realm-isolated Academy Houses
-  app.get('/api/houses/:realmId', (req, res) => {
-    if (!isRealmId(req.params.realmId)) return res.status(400).json({ error: 'Invalid realm' });
-    res.json({ houses: Array.from(realmWorldStore.houses[req.params.realmId].values()) });
+  app.use('/api', (_req, res) => res.status(404).json({ error: 'API route not found' }));
+  app.use('/api', (error: unknown, _req: Request, res: Response, next: NextFunction) => {
+    if (res.headersSent) return next(error);
+    if (error instanceof RequestError) return res.status(error.status).json({ error: error.message });
+    const status = (error as { status?: number } | null)?.status;
+    if (status === 400 || status === 413) return res.status(status).json({ error: 'Invalid request body' });
+    console.warn('Aldervale API temporarily unavailable:', error instanceof Error ? error.message : 'Unknown error');
+    return res.status(503).json({ error: 'Service temporarily unavailable. Try again shortly.' });
   });
 
-  app.post('/api/houses/:realmId', async (req, res) => {
-    if (!isRealmId(req.params.realmId)) return res.status(400).json({ error: 'Invalid realm' });
-    const principal = await verifyFirebaseBearerToken(req.headers.authorization);
-    if (!principal) return res.status(401).json({ error: 'Authentication required' });
-    const body = req.body as { name?: string; crestElement?: ElementId; motto?: string };
-    const name = String(body.name ?? '').trim().slice(0, 32);
-    if (name.length < 2) return res.status(400).json({ error: 'House name required' });
-
-    const id = `house_${Date.now()}`;
-    const club = {
-      id,
-      realmId: req.params.realmId,
-      leaderId: principal.uid,
-      name,
-      crestElement: (body.crestElement ?? 'sol') as ElementId,
-      motto: String(body.motto ?? 'United by Canopy & Pact').slice(0, 120),
-      members: [principal.uid],
-    };
-    realmWorldStore.houses[req.params.realmId].set(id, club);
-    res.status(201).json({ house: club });
-  });
-
-  // Realm-isolated Public Dorm Tours
-  app.get('/api/tours/:realmId', (req, res) => {
-    if (!isRealmId(req.params.realmId)) return res.status(400).json({ error: 'Invalid realm' });
-    const list = Array.from(realmWorldStore.dormTours[req.params.realmId].values()).map((t) => ({
-      wizardId: t.wizardId,
-      wizardName: t.wizardName,
-      themeId: t.themeId,
-      ratingAvg: t.ratingCount > 0 ? Number((t.ratingSum / t.ratingCount).toFixed(1)) : 5.0,
-      ratingCount: t.ratingCount,
-    }));
-    res.json({ tours: list });
-  });
-
-  app.post('/api/tours/:realmId/publish', async (req, res) => {
-    if (!isRealmId(req.params.realmId)) return res.status(400).json({ error: 'Invalid realm' });
-    const principal = await verifyFirebaseBearerToken(req.headers.authorization);
-    if (!principal) return res.status(401).json({ error: 'Authentication required' });
-    const body = req.body as { wizardId?: string; wizardName?: string; themeId?: string };
-    if (!body.wizardId) return res.status(400).json({ error: 'wizardId required' });
-    const existing = realmWorldStore.dormTours[req.params.realmId].get(body.wizardId);
-    if (existing && existing.ownerId !== principal.uid) return res.status(404).json({ error: 'Not found' });
-    realmWorldStore.dormTours[req.params.realmId].set(body.wizardId, {
-      wizardId: body.wizardId,
-      ownerId: principal.uid,
-      realmId: req.params.realmId,
-      wizardName: String(body.wizardName ?? 'Wizard Loft').slice(0, 32),
-      themeId: String(body.themeId ?? 'sunlit_loft').slice(0, 32),
-      ratingSum: existing?.ratingSum ?? 5,
-      ratingCount: existing?.ratingCount ?? 1,
-      raters: existing?.raters ?? new Set(),
-    });
-    res.json({ ok: true });
-  });
-
-  // Free-Tier Gemini 4 Hydrogen Archivist Lectern
-  app.post('/api/academy/strategize', async (req, res) => {
-    try {
-      const body = req.body as StrategizeRequest;
-      const result = await generateArchivistAdvice(body);
-      res.json(result);
-    } catch {
-      res.status(500).json({ error: 'Archivist lectern temporarily busy' });
-    }
-  });
+  if (!frontend) return app;
 
   // Vite middleware in dev, static dist in prod
   const distDir = path.resolve(process.cwd(), 'dist');

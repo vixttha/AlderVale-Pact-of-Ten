@@ -101,39 +101,31 @@
     },
     "BazaarListing": {
       "title": "BazaarListing",
-      "description": "Realm-isolated Courtyard Bazaar listing for Florin trading.",
+      "description": "Server-owned listing with Bazaar gear held in escrow while open.",
       "type": "object",
       "properties": {
-        "sellerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
-        "sellerWizardId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
-        "sellerName": { "type": "string", "minLength": 1, "maxLength": 24 },
-        "realmId": { "type": "string", "enum": ["breeze", "horizon", "everpeak"] },
-        "itemType": { "type": "string", "enum": ["gear", "card", "runestone", "furniture", "reagent"] },
-        "itemId": { "type": "string", "minLength": 1, "maxLength": 64 },
-        "itemName": { "type": "string", "minLength": 1, "maxLength": 48 },
-        "priceFlorins": { "type": "number" },
-        "status": { "type": "string", "enum": ["open", "sold", "cancelled"] },
-        "buyerId": { "type": "string", "maxLength": 128 },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "id": {"type": "string"},
+        "sellerUid": {"type": "string"},
+        "sellerName": {"type": "string"},
+        "itemId": {"type": "string"},
+        "itemName": {"type": "string"},
+        "priceFlorins": {"type": "integer", "minimum": 1, "maximum": 1000000},
+        "status": {"type": "string", "enum": ["open", "sold", "cancelled"]},
+        "buyerUid": {"type": "string"}
       },
-      "required": ["sellerId", "sellerWizardId", "sellerName", "realmId", "itemType", "itemId", "itemName", "priceFlorins", "status", "createdAt", "updatedAt"]
+      "required": ["id", "sellerUid", "sellerName", "itemId", "itemName", "priceFlorins", "status"]
     },
     "AcademyHouse": {
       "title": "AcademyHouse",
-      "description": "Realm-isolated player social House / guild.",
+      "description": "Server-owned House record. Public API returns member count without account IDs.",
       "type": "object",
       "properties": {
-        "leaderId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
-        "realmId": { "type": "string", "enum": ["breeze", "horizon", "everpeak"] },
-        "name": { "type": "string", "minLength": 2, "maxLength": 32 },
-        "crestElement": { "type": "string", "minLength": 2, "maxLength": 24 },
-        "motto": { "type": "string", "maxLength": 120 },
-        "memberCount": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "name": {"type": "string", "minLength": 2, "maxLength": 32},
+        "crestElement": {"type": "string"},
+        "motto": {"type": "string", "maxLength": 120},
+        "members": {"type": "array", "items": {"type": "string"}, "maxItems": 100}
       },
-      "required": ["leaderId", "realmId", "name", "crestElement", "motto", "memberCount", "createdAt", "updatedAt"]
+      "required": ["name", "crestElement", "motto", "members"]
     },
     "PublicWizardCard": {
       "title": "PublicWizardCard",
@@ -175,13 +167,17 @@
       "schema": { "$ref": "#/entities/SanctuaryLayout" },
       "description": "Sanctuary Dorm layout, triggers, and garden plots."
     },
-    "/bazaar/{realmId}/listings/{listingId}": {
+    "/worldRealms/{realmId}/listings/{listingId}": {
       "schema": { "$ref": "#/entities/BazaarListing" },
       "description": "Realm-isolated Courtyard Bazaar listings."
     },
-    "/houses/{realmId}/clubs/{houseId}": {
+    "/worldRealms/{realmId}/clubs/{houseId}": {
       "schema": { "$ref": "#/entities/AcademyHouse" },
       "description": "Realm-isolated Academy Houses."
+    },
+    "/worldRealms/{realmId}/houseMemberships/{uid}": {
+      "schema": { "type": "object", "properties": { "houseId": { "type": "string" } }, "required": ["houseId"] },
+      "description": "Server-owned, realm-scoped coordination record for one current House per account."
     },
     "/publicWizards/{wizardId}": {
       "schema": { "$ref": "#/entities/PublicWizardCard" },

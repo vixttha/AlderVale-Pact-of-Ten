@@ -19,6 +19,7 @@ interface CreaturesArborPanelProps {
   creatures: OwnedCreature[];
   onUpdateWizard: (next: WizardDocument) => void;
   onUpdateCreatures: (next: OwnedCreature[], newCreature?: OwnedCreature) => void;
+  onRuneCatch: (pet: OwnedCreature) => void;
   onClose: () => void;
 }
 
@@ -27,6 +28,7 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
   creatures,
   onUpdateWizard,
   onUpdateCreatures,
+  onRuneCatch,
   onClose,
 }) => {
   const [tab, setTab] = useState<'kennel' | 'train' | 'adopt' | 'breed'>('kennel');
@@ -81,10 +83,7 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
       if (candidate) nextTalents.push(candidate.id);
     }
 
-    const updated = creatures.map((c) =>
-      c.id === activePet.id ? { ...c, bondXp: nextBond, stage: nextStage, talents: nextTalents } : c,
-    );
-    onUpdateCreatures(updated);
+    onRuneCatch({ ...activePet, bondXp: nextBond, stage: nextStage, talents: nextTalents });
     academyAudio.playChime(bullseye ? 'victory' : 'ui');
     setRuneStatus(
       bullseye
