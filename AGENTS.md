@@ -3,6 +3,11 @@
 Read [PROJECT_RULES.md](PROJECT_RULES.md) before project work. These are the solo
 owner's standing rules, not a proposal.
 
+At startup, resolve GitHub `main` to a commit and read these instructions and
+[the AlderVale agent contract](docs/AGENT_OPERATIONS.md) at that exact commit.
+Record your worker ID, host, baseline SHA, task scope and working ref before
+editing. Read-only Web UIs should report any source they could not verify.
+
 - Keep this GitHub repository public and the Notion project private. Do not
   automatically make the repository private after finishing a task.
 - Google AI Studio does most feature and visual development. Codex supports
