@@ -1,7 +1,7 @@
 # AlderVale project rules
 
 These are the solo owner's confirmed directions from 2026-11-15. They apply to
-AI Studio handoffs, Codex work, plugins, automation, and project documentation.
+development, handoffs, plugins, automation, and project documentation.
 Later explicit owner instructions can change them; record the change in the
 repository and the private Notion project so the two remain consistent.
 
@@ -60,19 +60,22 @@ repository and the private Notion project so the two remain consistent.
 - Standard public hosted compute being free does not make external APIs,
   hosting, storage overages, or game backends free. Recheck changing terms.
 
-## 4. Use AI Studio, Codex, and plugins together
+## 4. Tool roles and project records
 
-- Google AI Studio leads most game features, world/UI design, and visual
-  iteration. Codex handles focused supporting implementation, hard bugs, Git,
-  CI, tests, profiling, and asset tooling.
+- ChatGPT.com leads development and project management. The owner sets
+  priorities and decides whether to accept, merge, or release changes.
+- Use Codex CLI for rare, especially complex tasks. Use Google AI Studio when
+  the owner chooses it. Grokbot and Muse can provide AI audits on request, and
+  Muse can work on fixes when directed.
 - Use installed/connected plugins whenever they materially help the task and
   fit the free-project budget. Prefer purpose-built connected tools to browser
   work when they have the required capabilities. Do not use a plugin merely to
   increase the number of integrations.
-- Use GitHub for source code, engineering issues, PRs, Actions results, and
-  versioned project rules. Use Notion for private context, roadmap, decisions,
-  proposals, and AI Studio/Codex handoffs. Reuse the existing GitHub-synced Notion
-  databases instead of creating a competing engineering tracker.
+- Use GitHub as the source for engineering rules, code, issues, PRs, and Actions
+  evidence. Use Notion to coordinate private context, milestones, owner decisions,
+  proposals, and handoffs. Reuse the existing GitHub-synced Notion databases.
+- A newer confirmed owner decision governs tool roles when older repository
+  wording conflicts. Flag the mismatch and reconcile the affected docs.
 - New account connections, wider permissions, public sharing, purchases, or
   paid plugin operations require specific authorization. Existing authorization
   persists; do not repeatedly ask for routine actions it already covers.
@@ -83,12 +86,13 @@ repository and the private Notion project so the two remain consistent.
 ## 5. Handoffs and honest completion
 
 1. Select a scoped outcome and acceptance criteria.
-2. Save/push the current AI Studio work to GitHub before overlapping Codex edits.
+2. Check for overlapping work and save or push it before another tool edits the
+   same files.
 3. Record the base SHA, scope, reproduction steps, and relevant issue/PR.
 4. Run proportional checks; inspect failures and repair their cause without
    weakening acceptance criteria just to obtain a green result.
 5. Report the resulting SHA, actual validation receipts, and remaining limits.
-6. Pull accepted GitHub changes into AI Studio before its next edit.
+6. Bring accepted GitHub changes into the active tool before its next edit.
 
 Keep the project solo unless the owner says otherwise. Do not invent teammates,
 independent reviewers, approvals, completed meetings, or delivery dates. Passing

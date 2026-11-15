@@ -5,8 +5,9 @@ owner's standing rules, not a proposal.
 
 - Keep this GitHub repository public and the Notion project private. Do not
   automatically make the repository private after finishing a task.
-- Google AI Studio does most feature and visual development. Codex supports
-  focused implementation, tooling, integration, testing, and verification.
+- ChatGPT.com leads development and project management. The owner sets
+  priorities and decides acceptance. See PROJECT_RULES.md for the roles of
+  Notion, Codex CLI, Google AI Studio, Grokbot, and Muse.
 - Use standard GitHub-hosted public runners for useful project validation.
   Follow the free-project budget and runner controls in PROJECT_RULES.md.
 - Use connected plugins when they materially help. GitHub owns code, issues,
