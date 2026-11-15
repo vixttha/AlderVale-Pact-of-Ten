@@ -1,0 +1,32 @@
+name: Automatic Jules Audit
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jules-audit-main
+  cancel-in-progress: false
+
+jobs:
+  submit-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out audit helper
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+          sparse-checkout-cone-mode: true
+
+      - name: Verify audit dispatcher
+        run: python3 -B -m unittest discover -s scripts -p test_jules_audit.py -v
+
+      - name: Submit findings-only Jules audit
+        env:
+          GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+        run: python3 -B scripts/jules_audit.py
