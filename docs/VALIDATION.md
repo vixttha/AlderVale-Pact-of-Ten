@@ -32,14 +32,14 @@ Use Node 24 and Bun 1.4.4 (older Bun cannot read this lockfile). From the repo r
 
 ```powershell
 bun install --frozen-lockfile
-bun run lint
-bun run lint:rules
-bun run test
-bun run build
-node --test tools/ci/server.check.mjs
+bun run validate:core
 node scripts/asset-report.mjs
 npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
 ```
+
+`validate:core` matches the Linux/Windows/macOS **core** job in
+`.github/workflows/validate.yml` (typecheck, rules lint, Vitest, build, HTTP/WS
+integration). Browser and Firestore emulator jobs still use `tools/ci` as below.
 
 From tools/ci, run `npx playwright install chromium`, then
 `npm run test:browser -- --project=chromium`. For rules, install Java 21 and run
