@@ -18,3 +18,25 @@ for (const file of (await files('dist')).sort()) {
   }
   console.log(`| ${relative('.', file).replaceAll('\\', '/')} | ${(await stat(file)).size} | ${createHash('sha256').update(data).digest('hex')} |`);
 }
+
+/** Advisory only — never fail CI; threshold leaves headroom above the ~1.6 MB baseline. */
+const JS_BUNDLE_WARN_BYTES = 2_200_000;
+const distFiles = (await files('dist')).sort();
+let jsTotal = 0;
+let largestJs = { path: '', size: 0 };
+for (const file of distFiles) {
+  if (!file.endsWith('.js')) continue;
+  const size = (await stat(file)).size;
+  jsTotal += size;
+  if (size > largestJs.size) largestJs = { path: relative('.', file).replaceAll('\\', '/'), size };
+}
+console.log('\n## JavaScript bundle summary (advisory)\n');
+console.log(`- Total \`.js\` in \`dist/\`: **${jsTotal}** bytes`);
+if (largestJs.path) {
+  console.log(`- Largest chunk: \`${largestJs.path}\` (${largestJs.size} bytes)`);
+}
+if (jsTotal > JS_BUNDLE_WARN_BYTES) {
+  console.log(
+    `\n> **Advisory:** total JS (${jsTotal}) exceeds the ${JS_BUNDLE_WARN_BYTES}-byte soft reference used in CI. This does not fail the job; tighten bundles or raise the reference after owner review.`,
+  );
+}

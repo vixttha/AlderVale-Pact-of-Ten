@@ -48,7 +48,8 @@ Firestore emulator; no Firebase login, production account, or secret is needed.
 
 ## Public and private operation
 
-Pushes to main/codex branches and pull requests run automatically while public.
+Pushes to `main`, `codex/**`, and `ci/**` branches and pull requests run
+automatically while public.
 If the repository becomes private, all jobs skip automatically; use Actions >
 AlderVale validation > Run workflow deliberately to consume private allowances.
 The project rules additionally require establishing that a private dispatch fits
