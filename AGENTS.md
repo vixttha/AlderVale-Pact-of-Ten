@@ -30,7 +30,6 @@ Read [PROJECT_RULES.md](PROJECT_RULES.md) before project work. These are the sol
 Apply the project workflow guidance available in the current host. See the
 [ChatGPT Project Instructions](docs/CHATGPT_PROJECT_INSTRUCTIONS.md) for setup.
 
+## Bug and conflict work
 
-## Bug Library v0.0.4 — coordinated bug and conflict work
-
-When investigating or fixing an AlderVale bug or conflict, also read the provider-neutral [Bug Library agent entry point](v0.0.4/AGENT_ENTRYPOINT.md) and the linked v0.0.4 workflow, triage, and conflict standards at the same checked-out revision. GitHub Issues remains canonical. Level 2 authorizes investigation and scoped fix preparation for confirmed, recorded, in-scope bugs and evidence-backed investigation/resolution preparation for recorded conflicts. It does not authorize new issue creation, owner-decision changes, scope expansion, merge, issue closure, or release. Follow the owner’s current milestone and all existing project laws. If the v0.0.4 documents are absent from the checked-out revision, do not assume this operating model has been integrated; use the pinned source only as supplied context.
+Resolve the separate [Bug Library branch](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/bug-library) to one full commit SHA before reading its operating guidance. Use the entry point from the version on that branch or from an exact candidate SHA the owner assigned. Resolve game `main` independently for changes to the game. GitHub Issues remains canonical; the owner retains acceptance, issue closure, merge, and release authority.
