@@ -114,6 +114,41 @@ test('failed guest progress remains visible until retry saves both wizard and re
   await expect(page.getByRole('button', { name: 'Claim to Wizard' })).toHaveCount(0);
 });
 
+test('recovers a corrupt Breeze guest save in the browser without changing Horizon', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const horizonSaveKey = 'aldervale_guest_horizon_v1';
+
+  // This check exercises storage and the enrollment UI without relying on software WebGL.
+  await installGuestSaveFailure(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: /Horizon Realm/ }).click();
+  await page.getByRole('textbox').first().fill('Horizon Keeper');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+  const horizonSave = await page.evaluate((key) => localStorage.getItem(key), horizonSaveKey);
+  expect(JSON.parse(horizonSave).wizards[0]).toMatchObject({ name: 'Horizon Keeper', realmId: 'horizon' });
+
+  await page.evaluate((key) => localStorage.setItem(key, '{"account":'), breezeSaveKey);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.getByRole('textbox').first().fill('Recovered Breeze');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.getByRole('heading', { name: /Your Wizards in Breeze/ })).toBeVisible();
+  await expect(page.getByText('Recovered Breeze', { exact: true })).toBeVisible();
+  const breeze = await readBreezeSave(page);
+  expect(breeze.wizards).toHaveLength(1);
+  expect(breeze.wizards[0]).toMatchObject({ name: 'Recovered Breeze', realmId: 'breeze' });
+
+  await page.getByRole('button', { name: /Horizon Realm/ }).click();
+  await expect(page.getByText('Horizon Keeper', { exact: true })).toBeVisible();
+  await expect(page.getByText('Recovered Breeze', { exact: true })).toHaveCount(0);
+  expect(await page.evaluate((key) => localStorage.getItem(key), horizonSaveKey)).toBe(horizonSave);
+  expect(errors).toEqual([]);
+});
+
 test('mobile creation controls remain reachable', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
@@ -124,15 +159,17 @@ test('mobile creation controls remain reachable', async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
+function disableWebGl() {
+  const getContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
+    return kind.includes('webgl') ? null : getContext.call(this, kind, ...args);
+  };
+}
+
 test('title and world remain usable with WebGL unavailable', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.addInitScript(() => {
-    const getContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
-      return kind.includes('webgl') ? null : getContext.call(this, kind, ...args);
-    };
-  });
+  await page.addInitScript(disableWebGl);
   await page.goto('/');
   await expect(page.getByText('3D preview unavailable').first()).toBeVisible();
   await page.getByRole('textbox').first().fill('Fallback Rowan');
@@ -145,8 +182,51 @@ test('title and world remain usable with WebGL unavailable', async ({ page }) =>
   expect(errors).toEqual([]);
 });
 
-test('guest settings survive reload and the HUD shows offline after a lost connection', async ({ page }) => {
-  test.setTimeout(120_000);
+test('G30-003 clears a stale peer when the realm connection drops and rejoins', async ({ page }) => {
+  await page.addInitScript(disableWebGl);
+  let initialSocket;
+  let reconnect;
+
+  await page.routeWebSocket('**/ws', (socket) => {
+    socket.onMessage((message) => {
+      if (JSON.parse(message).type !== 'join_world') return;
+      if (initialSocket) {
+        reconnect = socket;
+        return;
+      }
+
+      initialSocket = socket;
+      socket.send(JSON.stringify({ type: 'welcome', sessionId: 'vault-initial' }));
+      socket.send(JSON.stringify({ type: 'world_joined' }));
+      socket.send(JSON.stringify({
+        type: 'zone_snapshot',
+        players: [{ sessionId: 'vault-peer', x: 3, z: 6 }],
+      }));
+    });
+  });
+
+  await page.goto('/');
+  await page.getByRole('textbox').first().fill('Reconnect Rowan');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  const online = page.getByText(/^\d+ Online$/);
+  const offline = page.getByText('Offline', { exact: true });
+  await expect(online).toHaveText('2 Online');
+
+  await initialSocket.close();
+  await expect(offline).toBeVisible();
+  await expect(online).toHaveCount(0);
+
+  // Hold the next snapshot so it cannot erase stale peers before the assertion.
+  await expect.poll(() => Boolean(reconnect)).toBe(true);
+  reconnect.send(JSON.stringify({ type: 'welcome', sessionId: 'vault-reconnected' }));
+  reconnect.send(JSON.stringify({ type: 'world_joined' }));
+  await expect(online).toHaveText('1 Online');
+  await expect(offline).toHaveCount(0);
+});
+
+test('guest settings survive reload and the HUD shows offline after a lost connection', async ({ page, browserName }) => {
+  // WebKit re-enters the 3D world multiple times with software rendering on CI.
+  test.setTimeout(browserName === 'webkit' ? 150_000 : 120_000);
   let realmSocket;
   let refuseReconnect = false;
   await page.routeWebSocket('**/ws', (socket) => {
@@ -170,7 +250,7 @@ test('guest settings survive reload and the HUD shows offline after a lost conne
   await page.getByRole('slider', { name: /Spell & UI Chimes/ }).press('End');
   await page.getByRole('slider', { name: /Camera Orbit/ }).press('End');
   await page.getByRole('checkbox', { name: /Default 2× Speed/ }).check();
-  await page.reload();
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 30_000 });
   await page.getByRole('button', { name: /Enter Aldervale/ }).click();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(page.getByRole('slider', { name: /Acoustic Harp/ })).toHaveValue('0');

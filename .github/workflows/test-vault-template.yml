@@ -1,38 +1,101 @@
-name: Test Vault template
+name: Test Vault v0.0.2 adoption
 
 on:
   pull_request:
     paths:
       - '.github/workflows/test-vault-template.yml'
       - 'docs/test-vault/**'
+      - 'tests/vault/first_playable_reference.py'
+      - 'tests/vault/quest_catalog.rb'
+      - 'shared/quests.ts'
+      - 'shared/realms.ts'
+      - 'shared/world.ts'
   push:
     branches: [main]
     paths:
       - '.github/workflows/test-vault-template.yml'
       - 'docs/test-vault/**'
+      - 'tests/vault/first_playable_reference.py'
+      - 'tests/vault/quest_catalog.rb'
+      - 'shared/quests.ts'
+      - 'shared/realms.ts'
+      - 'shared/world.ts'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: test-vault-template-${{ github.ref }}
+  group: vault-template-adoption-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  catalog:
+  adoption:
+    name: Vault adoption (${{ matrix.fixture }})
     if: github.event.repository.private == false
-    name: Validate Test Vault catalog
+    strategy:
+      fail-fast: false
+      matrix:
+        fixture: [python-cli, go-api, docs-only]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        if: matrix.fixture == 'go-api'
+        with:
+          go-version: '1.25.5'
+          cache: false
+      - name: Verify copy-in adoption
+        shell: bash
+        env:
+          FIXTURE: ${{ matrix.fixture }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -o pipefail
+          {
+            printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)"
+            printf 'Base: %s\nHead: %s\n' "${BASE:-n/a}" "${HEAD:-n/a}"
+            printf 'Run / attempt: %s / %s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            python3 docs/test-vault/public-template/verify_adoption.py --fixture "$FIXTURE"
+          } 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+  aldervale-catalog:
+    name: Vault AlderVale catalog
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Validate cases and record checkout
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Validate AlderVale topics
         shell: bash
         run: |
-          tested_sha=$(git rev-parse HEAD)
-          printf 'Tested checkout: %s\n' "$tested_sha" | tee -a "$GITHUB_STEP_SUMMARY"
-          python3 docs/test-vault/public-template/validate_catalog.py \
-            docs/test-vault/game-catalog.md docs/test-vault/engineering-catalog.md
+          set -o pipefail
+          printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)" | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 docs/test-vault/public-template/verify_adoption.py --aldervale-only 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py \
+            --catalog docs/test-vault/aldervale/cases.md 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Compare game rules with the Python reference
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 tests/vault/first_playable_reference.py -v 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Verify the quest catalog with Ruby
+        shell: bash
+        run: |
+          set -o pipefail
+          ruby --version
+          ruby tests/vault/quest_catalog.rb 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
