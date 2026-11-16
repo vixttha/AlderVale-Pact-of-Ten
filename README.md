@@ -2,7 +2,7 @@
 
 AlderVale’s home for the public README’s approved versions, changelogs, and drafts.
 
-**Current HQ version:** `v0.0.3` · Owner-approved archive for the `readme-hq` branch.
+**Current HQ version:** `v0.0.4`
 
 | Start here | Use it for |
 | --- | --- |
@@ -12,9 +12,9 @@ AlderVale’s home for the public README’s approved versions, changelogs, and 
 | [README HQ workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/workspace/README.md) | Find the source files and workspace record for each HQ version. |
 | [README HQ folder guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/README.md) | Review the updated validator documentation and its coverage guard. |
 
-**Current archived public README baseline:** [v0.0.1](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/v0.0.1/README.md). The separate [public README integration proposal](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/62) is in Draft. Refresh and revalidate it against current `main` before promotion.
+**Public game README v0.0.2** · [Read on `main`](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/README.md) · [Archived README](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/v0.0.2/README.md) · [Changelog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/v0.0.2/CHANGELOG.md)
 
-**Current public README draft:** [v0.0.2 draft](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/v0.0.2/DRAFT.md) · [Public README workspace record](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/v0.0.2/README.md).
+Publication was recorded in [PR #110](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/110).
 
 **HQ v0.0.3 archive:** [Landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/v0.0.3/README.md) · [Folder guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/v0.0.3/GUIDE.md) · [Changelog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/v0.0.3/CHANGELOG.md).
 
