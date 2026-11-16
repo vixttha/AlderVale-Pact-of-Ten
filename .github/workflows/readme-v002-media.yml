@@ -1,0 +1,76 @@
+name: README v0.0.2 gameplay capture
+on:
+  push:
+    branches: [ci/readme-v002-media]
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 3fa20bc5ed4fecc228cc3733536a589bf75df6a0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: '1.4.4'
+      - name: Build exact verified game revision
+        run: |
+          test "$(git rev-parse HEAD)" = 3fa20bc5ed4fecc228cc3733536a589bf75df6a0
+          git rev-parse HEAD
+          bun install --frozen-lockfile
+          bun run build
+          npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
+      - name: Capture the Breeze duel in Chromium
+        working-directory: tools/ci
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          npx playwright install --with-deps chromium
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('human.pw.mjs')
+          source = p.read_text()
+          anchor = "  await expect(page.getByText('Round 1', { exact: true })).toBeVisible();"
+          assert source.count(anchor) == 1
+          p.write_text(source.replace(anchor, anchor + """
+            await expect(page.getByRole('button', { name: 'Cast Turn', exact: true })).toBeVisible();
+            await page.screenshot({ path: process.env.RUNNER_TEMP + '/breeze-first-spark-duel.png', animations: 'disabled' });
+          """))
+          PY
+          xvfb-run --auto-servernum npm run test:browser -- --project=chromium --headed -g 'a guest wins as Rowan and keeps First Spark and its rewards after reload'
+      - name: Prepare screenshot and integrity receipt
+        run: |
+          cd "$RUNNER_TEMP"
+          python3 -m pip install --quiet --disable-pip-version-check Pillow==12.2.0
+          python3 - <<'PY'
+          from PIL import Image
+          im = Image.open("breeze-first-spark-duel.png").convert("RGB")
+          im.save("breeze-first-spark-duel.webp", quality=84, method=6)
+          print("Screenshot dimensions:", im.size)
+          PY
+          sha256sum breeze-first-spark-duel.webp
+          python3 - <<'PY'
+          import base64
+          import textwrap
+          from pathlib import Path
+          data = base64.b64encode(Path('breeze-first-spark-duel.webp').read_bytes()).decode()
+          for index, line in enumerate(textwrap.wrap(data, 768, break_on_hyphens=False)):
+              print(f"SCREENSHOT_{index:03d} {line}")
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: aldervale-readme-v002-gameplay
+          path: |
+            ${{ runner.temp }}/breeze-first-spark-duel.png
+            ${{ runner.temp }}/breeze-first-spark-duel.webp
+          retention-days: 1
+          if-no-files-found: error
