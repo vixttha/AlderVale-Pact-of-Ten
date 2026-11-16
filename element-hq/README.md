@@ -32,12 +32,12 @@ This workspace was created from `main` at `a57f92c349ecc7cc39cc2e7b23cb7a9e8a551
 
 Primary source files at that snapshot:
 
-- [`shared/elements.ts`](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/elements.ts)
-- [`shared/creatures.ts`](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/creatures.ts)
-- [`shared/spells.ts`](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/spells.ts)
-- [`shared/combat.ts`](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/combat.ts)
-- [Hatchery & Training Arbor](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/src/features/creatures/CreaturesArborPanel.tsx)
-- [Duel reward and egg progression](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/src/App.tsx)
+- [`shared/elements.ts`](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/elements.ts)
+- [`shared/creatures.ts`](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/creatures.ts)
+- [`shared/spells.ts`](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/spells.ts)
+- [`shared/combat.ts`](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/combat.ts)
+- [Hatchery & Training Arbor](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/src/features/creatures/CreaturesArborPanel.tsx)
+- [Duel reward and egg progression](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/src/App.tsx)
 
 Related engineering work that must remain separate from this design branch:
 
@@ -58,7 +58,7 @@ Related engineering work that must remain separate from this design branch:
 
 ## Acceptance state
 
-This is a working design proposal. In particular, the fusion combat matchup extension, Gale's lack of a fusion recipe, fusion-birth prerequisites, and the progression write for `unlockedFusions` need explicit resolution. **Milestone fit is unverified for gameplay implementation.** This branch does not expand the playable milestone or authorize code changes.
+This is a working design proposal. In particular, the fusion combat matchup extension, Gale's lack of a fusion recipe, fusion-birth prerequisites, and the progression write for `unlockedFusions` need explicit resolution. This branch is documentation-only and does not authorize gameplay code changes.
 
 ## Version record
 
