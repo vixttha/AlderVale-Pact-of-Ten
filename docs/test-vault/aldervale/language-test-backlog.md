@@ -6,12 +6,12 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 
 | Language or format | AlderVale test | Use in this project |
 |---|---|---|
-| TypeScript with Vitest | First Spark pays exactly once, XP rolls over at exact thresholds, rank caps, and guest saves recover from invalid JSON without touching another realm. | Existing and expanded in this PR |
-| JavaScript with Playwright | Complete title, wizard creation, Breeze solo duel and reload in Chromium, Firefox and WebKit. Also verify offline HUD, Tailor HP and fallback. | Existing |
+| TypeScript with Vitest | First Spark pays exactly once, XP rolls over at exact thresholds, rank caps, and guest saves recover from invalid JSON and preserve the last good save when a write fails. | Existing and expanded in this PR |
+| JavaScript with Playwright | Complete title, wizard creation, Breeze solo duel and reload in Chromium, Firefox and WebKit. Also verify offline HUD, Tailor HP, fallback, and corrupt-save recovery without overwriting the other realm. | Existing and expanded in this PR |
 | Node.js JavaScript | Start built server, check health and HTML, then exchange chat with isolated realm fixtures. | Existing |
 | Python | Validate case IDs and topic coverage. Independently compare XP progression and First Spark replay with the TypeScript rules. Extend the same approach to combat rounds. | Catalog, XP, and First Spark checks run. Combat comparison is proposed. |
 | Go | Run a small health-handler fixture for the starter kit. A normal client can later verify the documented realm socket reconnect contract. | Starter fixture exists. Game client proposed. |
-| Ruby | Parse an exported quest and NPC catalog, assert that every quest giver resolves, and check localized text and encoding. | Proposed |
+| Ruby | Parse the shipped quest and NPC export as UTF-8 JSON, verify required display text, and resolve each quest giver to exactly one NPC. | Implemented in the existing public Ubuntu Vault job |
 | C# | Independently deserialize versioned synthetic saves and preserve realm, wallet, active creature, and quest flags. | Proposed |
 | Rust | Check Rowan GLB chunk sizes, accessors and animation tracks against the asset contract. | Proposed |
 | Haskell or F# | Model a deterministic combat round and compare damage, status expiration and draw outcomes over shared fixtures. | Proposed |
@@ -25,7 +25,7 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 | JSON and YAML | Validate shared fixtures, test receipts, and Actions configuration. | Existing catalog and workflow checks |
 | TLA+, Alloy or SMT | Model quest completion and one-time reward issuance, then compare counterexample scenarios to game tests. | Proposed |
 
-For the current milestone, use the existing TypeScript, JavaScript, and demo emulator lanes. For cross-language work, prefer the same input fixtures and an independently derived expected result. A test receipt records the exact checkout, event, attempt, and job.
+For the current milestone, use the existing game and Vault jobs. For cross-language work, prefer the same input fixtures and an independently derived expected result. A test receipt records the exact checkout, event, attempt, and job.
 
 ## All programming entries in the pinned registry
 

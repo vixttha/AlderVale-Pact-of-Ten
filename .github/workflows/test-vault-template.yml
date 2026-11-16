@@ -6,6 +6,7 @@ on:
       - '.github/workflows/test-vault-template.yml'
       - 'docs/test-vault/**'
       - 'tests/vault/first_playable_reference.py'
+      - 'tests/vault/quest_catalog.rb'
       - 'shared/quests.ts'
       - 'shared/realms.ts'
       - 'shared/world.ts'
@@ -15,6 +16,7 @@ on:
       - '.github/workflows/test-vault-template.yml'
       - 'docs/test-vault/**'
       - 'tests/vault/first_playable_reference.py'
+      - 'tests/vault/quest_catalog.rb'
       - 'shared/quests.ts'
       - 'shared/realms.ts'
       - 'shared/world.ts'
@@ -91,3 +93,9 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/vault/first_playable_reference.py -v 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Verify the quest catalog with Ruby
+        shell: bash
+        run: |
+          set -o pipefail
+          ruby --version
+          ruby tests/vault/quest_catalog.rb 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"

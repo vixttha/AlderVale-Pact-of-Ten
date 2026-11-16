@@ -121,4 +121,32 @@ describe('Vault: guest quest rewards and realm saves', () => {
     expect(loadGuestRealm('breeze').wizards.map(({ id }) => id)).toEqual([replacement.id]);
     expect(loadGuestRealm('horizon').account).toEqual(horizonSave.account);
   });
+
+  it('G28-005 preserves the last good save when replacing it fails', () => {
+    const breezeKey = 'aldervale_guest_breeze_v1';
+    const horizonKey = 'aldervale_guest_horizon_v1';
+    const breeze = loadGuestRealm('breeze');
+    const horizon = loadGuestRealm('horizon');
+
+    expect(saveGuestRealm('breeze', breeze)).toBe(true);
+    expect(saveGuestRealm('horizon', horizon)).toBe(true);
+    const breezeBefore = localStorage.getItem(breezeKey);
+    const horizonBefore = localStorage.getItem(horizonKey);
+    const write = vi.spyOn(localStorage, 'setItem').mockImplementationOnce(() => {
+      throw new DOMException('Storage full', 'QuotaExceededError');
+    });
+    const updated = { ...breeze, account: { ...breeze.account, termXp: 42 } };
+
+    try {
+      expect(saveGuestRealm('breeze', updated)).toBe(false);
+      expect(localStorage.getItem(breezeKey)).toBe(breezeBefore);
+      expect(localStorage.getItem(horizonKey)).toBe(horizonBefore);
+
+      expect(saveGuestRealm('breeze', updated)).toBe(true);
+      expect(loadGuestRealm('breeze')).toEqual(updated);
+      expect(localStorage.getItem(horizonKey)).toBe(horizonBefore);
+    } finally {
+      write.mockRestore();
+    }
+  });
 });
