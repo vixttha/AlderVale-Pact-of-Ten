@@ -126,7 +126,7 @@ jobs:
                           or any(len(row) != columns or not all(row) for row in cells)):
                       raise SystemExit("Elemental visual table must cover each catalog element once with complete cells")
 
-              geography_end = design_lines.index("## Balance and verification", visual_end + 1)
+              geography_end = design_lines.index("## 8. Existing game compatibility", visual_end + 1)
               geography_lines = design_lines[visual_end:geography_end]
               geography_headings = [
                   "### Regional geography",
@@ -151,6 +151,24 @@ jobs:
                           or any(len(row) != columns or not all(row) for row in rows)
                           or {row[0] for row in rows} != expected):
                       raise SystemExit("Elemental world map must cover each habitat and fusion once")
+
+              compatibility_end = design_lines.index("## Balance and verification", geography_end + 1)
+              compatibility = design_lines[geography_end:compatibility_end]
+              compatibility_headings = {
+                  "### Stable IDs and display names",
+                  "### Compatibility audit",
+                  "### Rollout and rollback",
+                  "### Acceptance checks",
+              }
+              if missing_compatibility := compatibility_headings - set(compatibility):
+                  raise SystemExit(f"Missing compatibility sections: {sorted(missing_compatibility)}")
+              audit_start = compatibility.index("### Compatibility audit")
+              audit_end = compatibility.index("### Rollout and rollback", audit_start + 1)
+              audit_rows = [line.split("|")[1].strip("* ") for line in compatibility[audit_start:audit_end]
+                            if line.startswith("| **")]
+              expected_audit_rows = {"Spells", "Creatures", "Combat calculations", "Fusion recipes", "Saves", "Progression"}
+              if len(audit_rows) != len(expected_audit_rows) or set(audit_rows) != expected_audit_rows:
+                  raise SystemExit("Compatibility audit must cover each game area once")
 
           print(f"Verified Element HQ documents at {head}")
           PY
