@@ -1,7 +1,8 @@
 import { beforeAll, afterAll, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
-import { Box3, Bone } from 'three';
+import { Box3, Bone, Quaternion } from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { AddressInfo } from 'node:net';
 
 vi.mock('../src/engine/animeShaders.ts', async (importOriginal) => {
@@ -80,6 +81,25 @@ it('loads the real Rowan asset once and animates two independent player avatars'
   } finally {
     disposeWizardAvatar(first);
     disposeWizardAvatar(second);
+  }
+});
+
+it('selects a fast Rowan clip whose end pose matches its start pose', async () => {
+  const { selectRowanClip } = await import('../src/engine/races/rowanAsset.ts');
+  const { animations } = await new GLTFLoader().loadAsync(`${url}models/exported-model.glb`);
+  const name = selectRowanClip({ moving: true, speedScalar: 1.35 });
+  const clip = animations.find((animation) => animation.name === name);
+  expect(clip).toBeDefined();
+  const rotations = clip!.tracks.filter((track) => track.name.endsWith('.quaternion'));
+  expect(rotations.length).toBeGreaterThan(0);
+
+  const start = new Quaternion();
+  const end = new Quaternion();
+  for (const track of rotations) {
+    const finalKeyOffset = track.values.length - track.getValueSize();
+    start.fromArray(track.values).normalize();
+    end.fromArray(track.values, finalKeyOffset).normalize();
+    expect(start.angleTo(end), track.name).toBeLessThan(Math.PI / 180);
   }
 });
 
