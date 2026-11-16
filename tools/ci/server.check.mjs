@@ -58,6 +58,16 @@ async function waitFor(peer, type) {
   throw new Error(`Missing ${type}: ${JSON.stringify(peer.messages)}`);
 }
 
+async function waitForCount(peer, type, count) {
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const matches = peer.messages.filter((message) => message.type === type);
+    if (matches.length >= count) return matches.slice(0, count);
+    await delay(25);
+  }
+  const received = peer.messages.filter((message) => message.type === type).length;
+  throw new Error(`Only received ${received}/${count} ${type} events`);
+}
+
 async function join(peer, wizardId, realmId) {
   peer.socket.send(JSON.stringify({ type: 'join_world', presence: {
     wizardId, ownerId: `guest_${wizardId}`, name: wizardId, realmId, zone: 'hub',
@@ -111,4 +121,42 @@ test('three real sockets exchange same-realm chat without crossing realms', asyn
   const left = waitFor(bob, 'player_left');
   alice.socket.close();
   assert.ok((await left).sessionId);
+});
+
+// Characterization probe for issue #76. The current server has no per-connection
+// throttle: all small broadcast-producing frames in this burst reach the peer.
+// This records current behavior; a future approved rate policy should replace
+// the all-delivered assertion with policy-specific burst/recovery tests.
+test('forwards an unthrottled burst of movement, chat, emote and cantrip broadcasts (issue #76)', async () => {
+  const sender = await connect();
+  const recipient = await connect();
+  await join(sender, 'rate-sender', 'breeze');
+  await join(recipient, 'rate-recipient', 'breeze');
+
+  const burst = 40;
+  for (let index = 0; index < burst; index++) {
+    sender.socket.send(JSON.stringify({ type: 'move', x: index + 1, y: 0, z: 0, rotY: 0 }));
+  }
+  const moved = await waitForCount(recipient, 'player_moved', burst);
+
+  for (let index = 0; index < burst; index++) {
+    sender.socket.send(JSON.stringify({ type: 'chat', text: `issue76-chat-${index}` }));
+  }
+  const chat = await waitForCount(recipient, 'chat_message', burst);
+
+  for (let index = 0; index < burst; index++) {
+    sender.socket.send(JSON.stringify({ type: 'emote', emote: 'wave' }));
+  }
+  const emotes = await waitForCount(recipient, 'player_emote', burst);
+
+  for (let index = 0; index < burst; index++) {
+    sender.socket.send(JSON.stringify({ type: 'cantrip_pulse', cantrip: 'sense' }));
+  }
+  const cantrips = await waitForCount(recipient, 'cantrip_fx', burst);
+
+  assert.equal(moved.length, burst);
+  assert.equal(chat.filter((message) => message.text.startsWith('issue76-chat-')).length, burst);
+  assert.equal(emotes.length, burst);
+  assert.equal(cantrips.length, burst);
+  console.log(`issue #76 burst receipt: move=${moved.length}/${burst}, chat=${chat.length}/${burst}, emote=${emotes.length}/${burst}, cantrip=${cantrips.length}/${burst}`);
 });
