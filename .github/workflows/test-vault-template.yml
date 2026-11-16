@@ -8,10 +8,11 @@ on:
       - 'tests/vault/first_playable_reference.py'
       - 'tests/vault/quest_catalog.rb'
       - 'tests/vault/rust/**'
+      - 'tests/vault/cpp/**'
+      - 'shared/**'
+      - 'src/lib/storage.ts'
+      - 'src/lib/firebase.ts'
       - 'public/models/**.glb'
-      - 'shared/quests.ts'
-      - 'shared/realms.ts'
-      - 'shared/world.ts'
   push:
     branches: [main]
     paths:
@@ -20,10 +21,11 @@ on:
       - 'tests/vault/first_playable_reference.py'
       - 'tests/vault/quest_catalog.rb'
       - 'tests/vault/rust/**'
+      - 'tests/vault/cpp/**'
+      - 'shared/**'
+      - 'src/lib/storage.ts'
+      - 'src/lib/firebase.ts'
       - 'public/models/**.glb'
-      - 'shared/quests.ts'
-      - 'shared/realms.ts'
-      - 'shared/world.ts'
   workflow_dispatch:
 
 permissions:
@@ -110,3 +112,24 @@ jobs:
           rustup toolchain install 1.95.0 --profile minimal
           rustc +1.95.0 --version | tee -a "$GITHUB_STEP_SUMMARY"
           cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Check C++ combat and guest-save contracts
+        shell: bash
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eo pipefail
+          build_dir="$RUNNER_TEMP/aldervale-cpp-vault"
+          (
+            set -e
+            printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)"
+            printf 'Base: %s\nHead: %s\n' "${BASE:-n/a}" "${HEAD:-n/a}"
+            printf 'Run / attempt: %s / %s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            node --version
+            cmake --version
+            c++ --version
+            cmake -S tests/vault/cpp -B "$build_dir"
+            cmake --build "$build_dir" --parallel 2
+            node tests/vault/cpp/export-observations.mjs > "$build_dir/observed-v1.tsv"
+            ctest --test-dir "$build_dir" --output-on-failure --verbose
+          ) 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"

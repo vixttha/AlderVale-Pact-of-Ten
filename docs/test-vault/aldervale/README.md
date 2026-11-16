@@ -1,6 +1,6 @@
 # AlderVale Test Vault v0.0.2
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [38 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## What runs on AlderVale's public GitHub runners
 
@@ -10,6 +10,8 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 |---|---|---|---|---|---|
 | G01-001, G09-001, G13-001 | [#13][issue13] | Guest enrollment, First Spark victory, and reward persistence | [Browser journey][human], [save tests][save] | Browser, Core | Owner desktop result |
 | G01-002, G02-001, G28-001 | | Enrollment retry, realm separation, and failed saves | [Guest browser suite][guest] | Browser | |
+| G06-001 to G06-003, G09-002 | | Damage, combat state, team order and replay checkpoints | [C++ contracts][cpp] | Vault catalog | Browser and live duel behavior have separate coverage. |
+| G28-007 | [#13][issue13] | Guest v1 serialization, recovery, reward idempotence and realm isolation | [C++ contracts][cpp] | Vault catalog | Browser storage and signed-in saves have separate coverage. |
 | G04-001 to G04-003 | | XP thresholds, rollover, rank, and caps | [Vitest][xp], [Python reference][python] | Core, Vault catalog | |
 | G13-002 | [#13][issue13] | Harmony and Rare Trial quest award logic | [Quest reducer tests][reducer] | Core | In-game Arbor and Rare Trial completion |
 | G13-003, G13-004 | [#13][issue13] | First Spark replay and the three published payout schedules | [Python reference][python], [Ruby catalog][ruby] | Vault catalog | Arbor and Rare Trial in-game completion |
@@ -28,6 +30,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [issue10]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/10
 [issue13]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13
 [issue22]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/22
+[cpp]: ../../../tests/vault/cpp/README.md
 [rust-assets]: ../../../tests/vault/rust/tests/glb_contract.rs
 [reducer]: ../../../tests/questRewards.test.ts
 [human]: ../../../tools/ci/human.pw.mjs
@@ -63,6 +66,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Independent rule reference | `python3 tests/vault/first_playable_reference.py -v` with Python 3.12 and Node 24. |
 | Ruby quest catalog | `ruby tests/vault/quest_catalog.rb` with Node 24 and the Ruby bundled on the public Ubuntu runner. |
 | Rust binary asset contract | `cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml` |
+| C++ gameplay contracts | Follow the [C++20, Node 24 and CTest commands][cpp]. |
 | Project case table | `python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py --catalog docs/test-vault/aldervale/cases.md` |
 
 ## Evidence on verified main
