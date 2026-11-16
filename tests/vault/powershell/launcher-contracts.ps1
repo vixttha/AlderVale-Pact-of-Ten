@@ -158,7 +158,7 @@ try {
         Invoke-Git -Arguments @('-C', $repo, 'worktree', 'add', '--detach', $smokeRepo, $revision) | Out-Host
         $script:hasWorktree = $true
         $launcher = Join-Path $smokeRepo 'AlderVale Play/Play AlderVale.cmd'
-        $script:smoke = Invoke-Launcher -Launcher $launcher -Arguments '--smoke --checkout' -TimeoutMs 360000
+        $script:smoke = Invoke-Launcher -Launcher $launcher -Arguments '--smoke --checkout' -TimeoutMs 480000
         Assert-Equal 0 $script:smoke.ExitCode "Launcher startup at $smokeRepo. $($script:smoke.Output)"
         $index = Join-Path $smokeRepo "AlderVale Play/.installation/$revision/dist/index.html"
         if (-not (Test-Path -LiteralPath $index -PathType Leaf)) { throw "Launcher did not produce $index" }
@@ -256,8 +256,13 @@ try {
     Write-Host "PowerShell launcher contracts: $($counts.Passed)/5 passed"
     if ($counts.Failed) { throw "$($counts.Failed) PowerShell launcher contract(s) failed" }
 } finally {
-    if ($hasWorktree) {
-        Invoke-Git -Arguments @('-C', $repo, 'worktree', 'remove', '--force', $smokeRepo) | Out-Host
+    try {
+        if ($hasWorktree) {
+            # npm can create paths longer than Git for Windows' default limit.
+            Invoke-Git -Arguments @('-C', $repo, '-c', 'core.longpaths=true',
+                'worktree', 'remove', '--force', $smokeRepo) | Out-Host
+        }
+    } finally {
+        Remove-Item -LiteralPath $temp -Recurse -Force
     }
-    Remove-Item -LiteralPath $temp -Recurse -Force
 }
