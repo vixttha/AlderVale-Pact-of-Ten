@@ -9,7 +9,7 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 | TypeScript with Vitest | First Spark pays exactly once, XP rolls over at exact thresholds, rank caps, and guest saves recover from invalid JSON without touching another realm. | Existing and expanded in this PR |
 | JavaScript with Playwright | Complete title, wizard creation, Breeze solo duel and reload in Chromium, Firefox and WebKit. Also verify offline HUD, Tailor HP and fallback. | Existing |
 | Node.js JavaScript | Start built server, check health and HTML, then exchange chat with isolated realm fixtures. | Existing |
-| Python | Validate case IDs and optional topic coverage. Later compare combat replay totals from a fixed export against an independent model. | Catalog check exists. Replay proposed. |
+| Python | Validate case IDs and topic coverage. Independently compare XP progression and First Spark replay with the TypeScript rules. Extend the same approach to combat rounds. | Catalog, XP, and First Spark checks run. Combat comparison is proposed. |
 | Go | Run a small health-handler fixture for the starter kit. A normal client can later verify the documented realm socket reconnect contract. | Starter fixture exists. Game client proposed. |
 | Ruby | Parse an exported quest and NPC catalog, assert that every quest giver resolves, and check localized text and encoding. | Proposed |
 | C# | Independently deserialize versioned synthetic saves and preserve realm, wallet, active creature, and quest flags. | Proposed |

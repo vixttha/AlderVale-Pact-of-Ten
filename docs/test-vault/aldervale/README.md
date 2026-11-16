@@ -1,16 +1,17 @@
 # AlderVale Test Vault v0.0.2
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [20 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [22 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## What runs on AlderVale's public GitHub runners
 
-The [AlderVale validation workflow](../../../.github/workflows/validate.yml) supplies the seven existing game jobs. The [Test Vault adoption workflow](../../../.github/workflows/test-vault-template.yml) checks the project case table and the broader case catalog. For a pull request, link the run and record the actual tested checkout, base, head, and attempt. Keep automated results and owner observations separate.
+The [AlderVale validation workflow](../../../.github/workflows/validate.yml) supplies the seven existing game jobs. The [Test Vault adoption workflow](../../../.github/workflows/test-vault-template.yml) checks the project case table and the broader case catalog and runs the independent Python reference against the real TypeScript rules. For a pull request, link the run and record the actual tested checkout, base, head, and attempt. Keep automated results and owner observations separate.
 
 | Cases | Check on the public runners | Coverage and gaps |
 |---|---|---|
 | G01-001, G09-001, G13-001 | [First Spark browser journey](../../../tools/ci/human.pw.mjs#L123) and [quest save Vitest](../../../tests/vault/guestQuestSave.test.ts) | Browser covers the controlled Breeze duel, victory receipt, and reload. Vitest covers quest reward idempotency and realm isolation. The owner desktop result is separate. |
 | G01-002, G02-001, G28-001 | [Guest browser suite](../../../tools/ci/guest.pw.mjs) | Checks enrollment retry, realm separation, and failed progress saves. |
 | G04-001, G04-002 | [Progression Vitest](../../../tests/vault/progression.test.ts) | Tests exact threshold boundaries, multi-level rollover, and progression caps. |
+| G04-003, G13-003 | [Python reference suite](../../../tests/vault/first_playable_reference.py) | Compares 126 award inputs with a cumulative XP model and checks the exact First Spark reducer result and replay after JSON serialization. |
 | G28-003 | [Guest save Vitest](../../../tests/vault/guestQuestSave.test.ts) | Tests malformed Breeze JSON, default recovery, successful replacement save, and an untouched Horizon save. |
 | G13-002 | [Issue #13](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13) and [PR #86](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/86) | The PR proposes more reward unit coverage. Completion paths and owner acceptance remain tracked in the issue. |
 | G17-001, G21-002 | [Rowan browser suite](../../../tools/ci/human.pw.mjs#L57) and [Rowan lifecycle Vitest](../../../tests/rowanLifecycle.test.ts) | Checks equipped gear persistence, the Classic fallback, and model retry. |
@@ -30,6 +31,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Focused Vault unit tests | `bun run test tests/vault/gameData.test.ts tests/vault/guestQuestSave.test.ts tests/vault/progression.test.ts` |
 | Browser | `npm --prefix tools/ci run test:browser -- --project=chromium`. The Linux CI lane uses `xvfb-run` with the headed browser and repeats on Firefox and WebKit. |
 | Firestore rules | `npm --prefix tools/ci run test:rules` with Java 21. The full CI lane also runs the Firestore integration tests in the same demo emulator. |
+| Independent rule reference | `python3 tests/vault/first_playable_reference.py -v` with Python 3.12 and Node 24. |
 | Project case table | `python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py --catalog docs/test-vault/aldervale/cases.md` |
 
 ## Evidence on verified main

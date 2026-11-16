@@ -9,9 +9,11 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | G02-001 | Realm and wizard persistence | P0 | Playwright | Create a guest wizard in one realm and reload. The wizard remains selectable there and does not appear in the other realm. |
 | G04-001 | XP threshold | P0 | Vitest | Awards of 146, 147, and 148 XP from level 1 yield levels 1, 2, and 2 and leave 146, 0, and 1 XP respectively. |
 | G04-002 | Progression limits | P0 | Vitest | Carry unused XP across multiple threshold crossings, update the rank, and cap level at 50, rank at 20, and banked XP at 10,000,000. |
+| G04-003 | Independent progression reference | P0 | Python and Node.js | Compare 126 combinations of starting level, saved XP, and award size against an independent cumulative XP model. Verify rollover, rank bands, and caps. |
 | G09-001 | Solo duel | P0 | Playwright | As Rowan in Breeze, start the First Spark solo duel, win it, claim victory, and return to the campus. |
 | G13-001 | First Spark rewards | P0 | Vitest and Playwright | The controlled Breeze duel reports +388 XP, +273 Florins, and +5 Spell Shards in total. The quest completion and saved rewards survive reload. The Vitest storage regression checks that replay cannot pay the quest a second time. |
 | G13-002 | Other campus quests | P0 | Vitest and Playwright | Verify Harmony of the Arbor and Rare Trial payouts for each completion path covered by the approved rules. Track pending behavior and acceptance in GitHub issue #13. |
+| G13-003 | Independent First Spark reference | P0 | Python and Node.js | The saga reducer adds the listed 90 XP, 110 Florins, and 3 Spell Shards once. Preserve previous completion and other currencies. Replay after a JSON round trip leaves the result unchanged. |
 | G17-001 | Tailor persistence | P1 | Playwright | Claim the Starstitch Brim Hat from the Realm Vault, equip it at the Tailor, and confirm the +10 HP persists after reload. |
 | G21-002 | Rowan fallback and retry | P1 | Vitest and Playwright | Failed Rowan model loading leaves the Classic enrollment path usable. The lifecycle suite checks that a user retry can load the model. |
 | G28-001 | Guest progress retry | P0 | Playwright | Keep a failed progress save visible. After retry and reload, preserve wizard and realm changes and prevent a second claim. |

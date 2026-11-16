@@ -5,11 +5,19 @@ on:
     paths:
       - '.github/workflows/test-vault-template.yml'
       - 'docs/test-vault/**'
+      - 'tests/vault/first_playable_reference.py'
+      - 'shared/quests.ts'
+      - 'shared/realms.ts'
+      - 'shared/world.ts'
   push:
     branches: [main]
     paths:
       - '.github/workflows/test-vault-template.yml'
       - 'docs/test-vault/**'
+      - 'tests/vault/first_playable_reference.py'
+      - 'shared/quests.ts'
+      - 'shared/realms.ts'
+      - 'shared/world.ts'
   workflow_dispatch:
 
 permissions:
@@ -75,3 +83,11 @@ jobs:
           python3 docs/test-vault/public-template/verify_adoption.py --aldervale-only 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py \
             --catalog docs/test-vault/aldervale/cases.md 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Compare game rules with the Python reference
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 tests/vault/first_playable_reference.py -v 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
