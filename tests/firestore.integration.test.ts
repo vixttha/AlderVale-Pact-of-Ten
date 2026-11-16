@@ -258,9 +258,9 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     expect(wallets.map(({ florins }) => florins)).toEqual([233, 125]);
     await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', 10, 5, 'trade-1')).resolves.toEqual(wallets);
     await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', 999999, 0, 'trade-2')).rejects.toThrow('insufficient');
-    await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', -1, 0, 'trade-3')).rejects.toThrow('Invalid');
-    await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', 10, 5, 'trade-3')).resolves.toBeDefined();
+    await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', -1, 0, 'trade-3')).rejects.toThrow('Invalid trade offer');
     expect((await listBazaar('breeze', 'rowan-owner')).wallet?.florins).toBe(233);
+    expect((await listBazaar('breeze', 'buyer-owner')).wallet?.florins).toBe(125);
     const first = await awardLiveVictory('breeze', 'rowan-owner', 'duel-receipt', 'coop');
     const replay = await awardLiveVictory('breeze', 'rowan-owner', 'duel-receipt', 'coop');
     expect(first).toMatchObject({ florins: 353, honorMarks: 8, bondingSeals: 1 });
