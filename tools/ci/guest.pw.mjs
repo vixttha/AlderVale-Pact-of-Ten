@@ -159,15 +159,17 @@ test('mobile creation controls remain reachable', async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
+function disableWebGl() {
+  const getContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
+    return kind.includes('webgl') ? null : getContext.call(this, kind, ...args);
+  };
+}
+
 test('title and world remain usable with WebGL unavailable', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.addInitScript(() => {
-    const getContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
-      return kind.includes('webgl') ? null : getContext.call(this, kind, ...args);
-    };
-  });
+  await page.addInitScript(disableWebGl);
   await page.goto('/');
   await expect(page.getByText('3D preview unavailable').first()).toBeVisible();
   await page.getByRole('textbox').first().fill('Fallback Rowan');
@@ -178,6 +180,48 @@ test('title and world remain usable with WebGL unavailable', async ({ page }) =>
   await page.getByRole('button', { name: 'Settings' }).click();
   await expect(page.getByRole('button', { name: 'Settings', exact: true }).last()).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test('G30-003 clears a stale peer when the realm connection drops and rejoins', async ({ page }) => {
+  await page.addInitScript(disableWebGl);
+  let initialSocket;
+  let reconnect;
+
+  await page.routeWebSocket('**/ws', (socket) => {
+    socket.onMessage((message) => {
+      if (JSON.parse(message).type !== 'join_world') return;
+      if (initialSocket) {
+        reconnect = socket;
+        return;
+      }
+
+      initialSocket = socket;
+      socket.send(JSON.stringify({ type: 'welcome', sessionId: 'vault-initial' }));
+      socket.send(JSON.stringify({ type: 'world_joined' }));
+      socket.send(JSON.stringify({
+        type: 'zone_snapshot',
+        players: [{ sessionId: 'vault-peer', x: 3, z: 6 }],
+      }));
+    });
+  });
+
+  await page.goto('/');
+  await page.getByRole('textbox').first().fill('Reconnect Rowan');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  const online = page.getByText(/^\d+ Online$/);
+  const offline = page.getByText('Offline', { exact: true });
+  await expect(online).toHaveText('2 Online');
+
+  await initialSocket.close();
+  await expect(offline).toBeVisible();
+  await expect(online).toHaveCount(0);
+
+  // Hold the next snapshot so it cannot erase stale peers before the assertion.
+  await expect.poll(() => Boolean(reconnect)).toBe(true);
+  reconnect.send(JSON.stringify({ type: 'welcome', sessionId: 'vault-reconnected' }));
+  reconnect.send(JSON.stringify({ type: 'world_joined' }));
+  await expect(online).toHaveText('1 Online');
+  await expect(offline).toHaveCount(0);
 });
 
 test('guest settings survive reload and the HUD shows offline after a lost connection', async ({ page, browserName }) => {

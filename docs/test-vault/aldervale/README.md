@@ -1,6 +1,6 @@
 # AlderVale Test Vault v0.0.2
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [25 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [28 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## What runs on AlderVale's public GitHub runners
 
@@ -12,12 +12,15 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | G01-002, G02-001, G28-001 | [Guest browser suite](../../../tools/ci/guest.pw.mjs) | Checks enrollment retry, realm separation, and failed progress saves. |
 | G04-001, G04-002 | [Progression Vitest](../../../tests/vault/progression.test.ts) | Tests exact threshold boundaries, multi-level rollover, and progression caps. |
 | G04-003, G13-003 | [Python reference suite](../../../tests/vault/first_playable_reference.py) | Compares 126 award inputs with a cumulative XP model and checks the exact First Spark reducer result and replay after JSON serialization. |
+| G13-004 | [Ruby quest catalog contract](../../../tests/vault/quest_catalog.rb) and [issue #13](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13) | Checks all three published payouts and quest giver mappings. In-game Arbor and Rare Trial completion paths still need their own evidence. |
 | G28-003 | [Guest save Vitest](../../../tests/vault/guestQuestSave.test.ts) | Tests malformed Breeze JSON, default recovery, successful replacement save, and an untouched Horizon save. |
 | G28-004 | [Guest browser suite](../../../tools/ci/guest.pw.mjs) | Exercises recovery in the browser and compares the other realm's stored data before and after. |
 | G28-005 | [Guest save Vitest](../../../tests/vault/guestQuestSave.test.ts) | Checks that a failed replacement leaves the prior saves intact and a retry writes only the intended realm. |
 | G13-002 | [Issue #13](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13) and [PR #86](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/86) | The PR proposes more reward unit coverage. Completion paths and owner acceptance remain tracked in the issue. |
 | G17-001, G21-002 | [Rowan browser suite](../../../tools/ci/human.pw.mjs#L57) and [Rowan lifecycle Vitest](../../../tests/rowanLifecycle.test.ts) | Checks equipped gear persistence, the Classic fallback, and model retry. |
-| G30-001 | [Offline HUD browser scenario](../../../tools/ci/guest.pw.mjs#L148) and [issue #10](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/10) | A passing offline assertion is evidence for that run. Keep the open issue and any intermittent failures visible. |
+| G28-006 | [Guest settings Vitest](../../../tests/vault/guestSettings.test.ts) and [issue #22](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/22) | Covers guest setting boundaries, corrupt saves, and write recovery. Signed-in settings need separate evidence. |
+| G30-001 | [Offline HUD browser scenario](../../../tools/ci/guest.pw.mjs) and [issue #10](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/10) | A passing offline assertion is evidence for that run. Keep the open issue and any intermittent failures visible. |
+| G30-003 | [Guest browser suite](../../../tools/ci/guest.pw.mjs) and [issue #10](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/10) | A scripted socket drives the real HUD through connected, offline, and peer-free reconnect states before any new snapshot. The existing real-server scenario provides additional coverage. |
 | G34-001, G34-002 | [Mobile enrollment and WebGL fallback](../../../tools/ci/guest.pw.mjs#L117) and [issue #4](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/4) | Narrow creation controls and WebGL fallback have coverage. HUD zoom, reduced motion, and physical-device behavior need separate checks. |
 | E15-001 | [Game data Vitest](../../../tests/vault/gameData.test.ts) | Covers the catalog contracts listed in the case table. |
 | E15-002 | [Ruby quest catalog check](../../../tests/vault/quest_catalog.rb) | Reads the shipped English quest text through JSON and checks that each giver resolves to a single NPC. |
@@ -31,7 +34,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Lane | Command |
 |---|---|
 | Core | `bun install --frozen-lockfile`, then `bun run validate:core` |
-| Focused Vault unit tests | `bun run test tests/vault/gameData.test.ts tests/vault/guestQuestSave.test.ts tests/vault/progression.test.ts` |
+| Focused Vault unit tests | `bun run test tests/vault/gameData.test.ts tests/vault/guestQuestSave.test.ts tests/vault/guestSettings.test.ts tests/vault/progression.test.ts` |
 | Browser | `npm --prefix tools/ci run test:browser -- --project=chromium`. The Linux CI lane uses `xvfb-run` with the headed browser and repeats on Firefox and WebKit. |
 | Firestore rules | `npm --prefix tools/ci run test:rules` with Java 21. The full CI lane also runs the Firestore integration tests in the same demo emulator. |
 | Independent rule reference | `python3 tests/vault/first_playable_reference.py -v` with Python 3.12 and Node 24. |
