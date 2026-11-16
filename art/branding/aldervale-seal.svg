@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-200 -200 400 400" role="img" aria-label="AlderVale leaf seal icon">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5dc8a"/><stop offset=".5" stop-color="#b9872d"/><stop offset="1" stop-color="#f8e6a8"/></linearGradient><linearGradient id="f" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#24452a"/><stop offset="1" stop-color="#092113"/></linearGradient><g id="l"><path d="M0 0 C-34 -28 -43 -76 0 -116 C43 -76 34 -28 0 0Z" fill="url(#f)" stroke="url(#g)" stroke-width="7"/><path d="M0 -5 Q0 -53 0 -105 M0 -48 L-19 -68 M0 -62 L19 -81" fill="none" stroke="#9cae61" stroke-width="3"/></g></defs>
+<circle r="177" fill="#102719" stroke="url(#g)" stroke-width="10"/><circle r="159" fill="none" stroke="#8b692d" stroke-width="3"/>
+<use href="#l" transform="translate(0 -44)"/><use href="#l" transform="translate(44 -20) rotate(60)"/><use href="#l" transform="translate(44 30) rotate(120)"/><use href="#l" transform="translate(0 52) rotate(180)"/><use href="#l" transform="translate(-44 30) rotate(240)"/><use href="#l" transform="translate(-44 -20) rotate(300)"/>
+<path d="M0 -55 L14 -14 L55 0 L14 14 L0 55 L-14 14 L-55 0 L-14 -14Z" fill="url(#g)" stroke="#6f501d" stroke-width="4"/>
+</svg>
