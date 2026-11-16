@@ -18,7 +18,7 @@ export interface RowanMotion {
 
 export function selectRowanClip(motion: RowanMotion): string {
   if (motion.jumping) return 'Jump_air';
-  if (motion.moving) return (motion.speedScalar ?? 1) > 1.1 ? 'Run_Anime' : 'Walk';
+  if (motion.moving) return (motion.speedScalar ?? 1) > 1.1 ? 'Sprint' : 'Walk';
   if (motion.emote === 'meditate') return 'Sitting_Idle';
   // The supplied asset has no separate wave or spell-cast clip.
   if (motion.emote === 'cheer' || motion.emote === 'wave') return 'Victory';

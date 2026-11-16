@@ -97,7 +97,7 @@ test('Rowan walks, sprints, jumps and meditates with authored clips', async ({ p
   await page.keyboard.down('w');
   await expect(world).toHaveAttribute('data-world-avatar-clip', 'Walk');
   await page.keyboard.down('Shift');
-  await expect(world).toHaveAttribute('data-world-avatar-clip', 'Run_Anime');
+  await expect(world).toHaveAttribute('data-world-avatar-clip', 'Sprint');
   await page.keyboard.up('w');
   await page.keyboard.up('Shift');
   await expect(world).toHaveAttribute('data-world-avatar-clip', 'Idle_Subtle');
