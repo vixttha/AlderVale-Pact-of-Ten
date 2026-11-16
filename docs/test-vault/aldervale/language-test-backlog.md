@@ -13,7 +13,7 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 | Go | Run a small health-handler fixture for the starter kit. A normal client can later verify the documented realm socket reconnect contract. | Starter fixture exists. Game client proposed. |
 | Ruby | Parse the shipped quest and NPC export as UTF-8 JSON, verify required display text, and resolve each quest giver to exactly one NPC. Compare all three published payouts against fixed reward values. | Implemented in the existing public Ubuntu Vault job |
 | C# | Independently deserialize versioned synthetic saves and preserve realm, wallet, active creature, and quest flags. | Proposed |
-| Rust | Check Rowan GLB chunk sizes, accessors and animation tracks against the asset contract. | Proposed |
+| Rust | Check embedded GLB buffer and accessor ranges, skin data, and animation samples on game assets and known-bad fixtures. | Implemented in the existing Vault catalog job |
 | Haskell or F# | Model a deterministic combat round and compare damage, status expiration and draw outcomes over shared fixtures. | Proposed |
 | R or Julia | Analyze duel wins, round duration and balance variance against a fixed seed corpus. | Proposed |
 | Bash and PowerShell | Verify build and launcher paths with spaces and deterministic exit codes on their supported runner OS. | Proposed launcher checks |

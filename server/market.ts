@@ -157,8 +157,18 @@ export async function cancelListing(realm: RealmId, uid: string, listingId: stri
   });
 }
 
+const MAX_TRADE_FLORINS = 1_000_000;
+
+function assertTradeFlorins(amount: number, label: string) {
+  if (!Number.isSafeInteger(amount) || amount < 0 || amount > MAX_TRADE_FLORINS) {
+    throw new RequestError(400, `Invalid ${label}`);
+  }
+}
+
 export async function settleTrade(realm: RealmId, a: string, b: string, aOffer: number, bOffer: number, tradeId: string) {
   if (a === b) throw new RequestError(409, 'Choose another account to trade with');
+  assertTradeFlorins(aOffer, 'trade offer');
+  assertTradeFlorins(bOffer, 'trade offer');
   return cloudDb.runTransaction(async (tx) => {
     const receipt = realmRef(realm).collection('tradeReceipts').doc(tradeId);
     const [first, second, settled] = await Promise.all([readWallet(tx, realm, a), readWallet(tx, realm, b), tx.get(receipt)]);

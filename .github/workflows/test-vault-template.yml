@@ -7,6 +7,8 @@ on:
       - 'docs/test-vault/**'
       - 'tests/vault/first_playable_reference.py'
       - 'tests/vault/quest_catalog.rb'
+      - 'tests/vault/rust/**'
+      - 'public/models/**.glb'
       - 'shared/quests.ts'
       - 'shared/realms.ts'
       - 'shared/world.ts'
@@ -17,6 +19,8 @@ on:
       - 'docs/test-vault/**'
       - 'tests/vault/first_playable_reference.py'
       - 'tests/vault/quest_catalog.rb'
+      - 'tests/vault/rust/**'
+      - 'public/models/**.glb'
       - 'shared/quests.ts'
       - 'shared/realms.ts'
       - 'shared/world.ts'
@@ -69,7 +73,7 @@ jobs:
     name: Vault AlderVale catalog
     if: github.event.repository.private == false
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -99,3 +103,10 @@ jobs:
           set -o pipefail
           ruby --version
           ruby tests/vault/quest_catalog.rb 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Verify embedded GLB asset contracts with Rust
+        shell: bash
+        run: |
+          set -eo pipefail
+          rustup toolchain install 1.95.0 --profile minimal
+          rustc +1.95.0 --version | tee -a "$GITHUB_STEP_SUMMARY"
+          cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"

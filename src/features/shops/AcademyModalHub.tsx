@@ -4,7 +4,7 @@ import { ShoppingBag, ScrollText, Shield, Sliders, Map, Store, Sparkles } from '
 import { MODULAR_GEAR, RACES } from '../../../shared/wardrobe.ts';
 import { SPELLS, getSpellShopLockReason } from '../../../shared/spells.ts';
 import { MOUNTS, CAMPUS_QUESTS, ZONES, type ZoneId } from '../../../shared/world.ts';
-import { RESOURCES, TERM_REWARD_TRACK, type ResourceId, type WizardDocument } from '../../../shared/economy.ts';
+import { CRAFT_XP_PER_TRANSMUTE, RESOURCES, TERM_REWARD_TRACK, craftProgressionAfterGain, type ResourceId, type WizardDocument } from '../../../shared/economy.ts';
 import { CREATURE_SPECIES } from '../../../shared/creatures.ts';
 import type { RealmAccountState } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
@@ -140,8 +140,7 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
       },
       progression: {
         ...wizard.progression,
-        craftXp: wizard.progression.craftXp + 25,
-        craftRank: wizard.progression.craftXp + 25 >= 100 ? wizard.progression.craftRank + 1 : wizard.progression.craftRank,
+        ...craftProgressionAfterGain(wizard.progression.craftXp, CRAFT_XP_PER_TRANSMUTE),
       },
     });
     setNotice('Transmuted 2 Sunleaf + 2 Ember-Ash -> 1 Starstone Shard (+25 Craft XP)!');
