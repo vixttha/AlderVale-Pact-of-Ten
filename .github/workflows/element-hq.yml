@@ -1,0 +1,75 @@
+name: Element HQ documents
+
+on:
+  push:
+    branches: [element-hq-v1]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: element-hq-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  documents:
+    name: Verify Element HQ checkout
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Check branch contents and template
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+
+          def git(*args):
+              return subprocess.check_output(["git", *args], text=True)
+
+          head = git("rev-parse", "HEAD").strip()
+          if head != os.environ["GITHUB_SHA"]:
+              raise SystemExit(f"Unexpected checkout: {head}")
+
+          workflow = ".github/workflows/element-hq.yml"
+          template = "element-hq/templates/element-design.md"
+          documents = {
+              "element-hq/README.md",
+              "element-hq/element-registry.md",
+              "element-hq/fusion-system-v1.md",
+              template,
+          }
+          tracked = set(git("ls-files", "-z").rstrip("\0").split("\0"))
+          missing = (documents | {"README.md", workflow}) - tracked
+          unexpected = {
+              path for path in tracked
+              if path not in {"README.md", workflow}
+              and (not path.startswith("element-hq/") or not path.endswith(".md")
+                   or not Path(path).is_file() or Path(path).is_symlink())
+          }
+          if missing or unexpected:
+              raise SystemExit(f"Missing: {sorted(missing)}; unexpected: {sorted(unexpected)}")
+
+          guide = Path("README.md").read_text(encoding="utf-8")
+          for path in sorted(documents):
+              if f"]({path})" not in guide:
+                  raise SystemExit(f"Branch guide is missing its link to {path}")
+
+          headings = set(Path(template).read_text(encoding="utf-8").splitlines())
+          sections = {
+              "## Identity and lore",
+              "## Current mechanics and sources",
+              "## Proposed mechanics",
+              "## Creatures and fusion lineage",
+              "## Balance and verification",
+              "## Open questions and decisions",
+          }
+          if sections - headings:
+              raise SystemExit(f"Missing template sections: {sorted(sections - headings)}")
+
+          print(f"Verified Element HQ documents at {head}")
+          PY
