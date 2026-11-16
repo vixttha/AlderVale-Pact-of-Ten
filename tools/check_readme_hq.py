@@ -281,7 +281,7 @@ def parse_link_url(href, label):
     try:
         return urlsplit(href)
     except ValueError as error:
-        raise ValidationError(f"{label} has a malformed URL {href}: {error}") from error
+        raise ValidationError(f"{label} has a malformed URL (destination redacted): {error}") from error
 
 def links_to(root, file, relative_path):
     expected = root / relative_path
@@ -305,7 +305,7 @@ def check_links(root, repo, main_ref, file):
             actual = git(repo, "cat-file", "-t", object_spec)
             require(
                 actual.returncode == 0 and actual.stdout.strip().decode() == expected,
-                f"{label} has a broken main link to {href}",
+                f"{label} has a broken main link to {safe_external_display(href)}",
             )
             if url.fragment:
                 source = git_blob(repo, main_ref, unquote(path))
@@ -438,12 +438,17 @@ class PinnedHTTPSConnection(PinnedConnectionMixin, http.client.HTTPSConnection):
 
 
 
-def request_public_url(url, method):
-    host, port, addresses = validate_external_target(url)
+def request_path(url):
     parsed = urlsplit(url)
-    path = quote(parsed.path or "/", safe="/:@-._~")
+    path = quote(parsed.path or "/", safe="/%:@-._~")
     if parsed.query:
         path += "?" + quote(parsed.query, safe="=&%/:?@-._~+")
+    return path
+
+
+def request_public_url(url, method):
+    host, port, addresses = validate_external_target(url)
+    path = request_path(url)
     last_error = None
     for address in addresses[:4]:
         connection = None
@@ -533,8 +538,17 @@ def probe_external_url(url, transport=None, target_validator=None):
 
 
 def safe_external_display(url):
-    parsed = urlsplit(url)
-    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, "", ""))
+    try:
+        parsed = urlsplit(url)
+        host = parsed.hostname or ""
+        if ":" in host:
+            host = f"[{host}]"
+        port = parsed.port
+    except ValueError:
+        return "<malformed URL>"
+    if port is not None:
+        host = f"{host}:{port}"
+    return urlunsplit((parsed.scheme, host, parsed.path, "", ""))
 
 
 def collect_external_links(root):
@@ -963,11 +977,20 @@ def run_external_link_regression_tests():
     cases += 1
 
     try:
-        parse_link_url("https://[malformed/path", "README.md")
+        parse_link_url("https://[malformed/path?token=secret", "README.md")
     except ValidationError as error:
         require("README.md" in str(error) and "malformed URL" in str(error), "Malformed URL lacked a useful source diagnostic")
+        require("secret" not in str(error), "Malformed URL diagnostics exposed a query secret")
     else:
         raise ValidationError("A malformed IPv6-style URL was accepted")
+    cases += 1
+
+    encoded_target = request_path("https://public.example/a%20b?q=hello%20world&x=a+b")
+    require(encoded_target == "/a%20b?q=hello%20world&x=a+b", "Percent-encoded URL components were changed")
+    cases += 1
+
+    redacted = safe_external_display("https://user:pass@example.com/path?token=secret#section")
+    require(redacted == "https://example.com/path", "External URL diagnostics exposed credentials, query, or fragment")
     cases += 1
 
     return cases
