@@ -200,15 +200,15 @@ PR #84 adds checks that can require the matching entry in `unlockedFusions`, but
 
 ## 8. Authority and implementation boundary
 
-This document records a proposed design based on existing source. It does not authorize gameplay code changes, issue closure, PR merge, or release. The current first-playable milestone does not include a new fusion implementation; **milestone fit is unverified** for any future implementation. The owner must accept the design and separately authorize implementation scope.
+This document records a proposed design based on existing source. It does not authorize gameplay code changes, issue closure, PR merge, or release. This is a design proposal only; the owner must accept it and separately authorize any implementation scope.
 
 ## 9. Source references
 
-- [Element definitions and parent pairs](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/elements.ts)
-- [Fusion creature definitions and resolver](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/creatures.ts)
-- [Fusion spell definitions](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/spells.ts)
-- [Hatchery egg creation](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/src/features/creatures/CreaturesArborPanel.tsx)
-- [Egg incubation on duel wins](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/src/App.tsx)
+- [Element definitions and parent pairs](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/elements.ts)
+- [Fusion creature definitions and resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/creatures.ts)
+- [Fusion spell definitions](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/spells.ts)
+- [Hatchery egg creation](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/src/features/creatures/CreaturesArborPanel.tsx)
+- [Egg incubation on duel wins](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/src/App.tsx)
 - [PR #84 — proposed rare/fusion spell progression gates](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/84)
 - [Issue #47 — fusion-only creature lineage requirement](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/47)
 - [Issue #67 — rare-element starter decks](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/67)
