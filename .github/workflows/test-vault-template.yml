@@ -12,6 +12,13 @@ on:
       - 'shared/quests.ts'
       - 'shared/realms.ts'
       - 'shared/world.ts'
+      - 'shared/economy.ts'
+      - 'shared/settings.ts'
+      - 'shared/spells.ts'
+      - 'shared/elements.ts'
+      - 'src/lib/storage.ts'
+      - 'src/lib/firebase.ts'
+      - 'tests/vault/fsharp/**'
   push:
     branches: [main]
     paths:
@@ -24,6 +31,13 @@ on:
       - 'shared/quests.ts'
       - 'shared/realms.ts'
       - 'shared/world.ts'
+      - 'shared/economy.ts'
+      - 'shared/settings.ts'
+      - 'shared/spells.ts'
+      - 'shared/elements.ts'
+      - 'src/lib/storage.ts'
+      - 'src/lib/firebase.ts'
+      - 'tests/vault/fsharp/**'
   workflow_dispatch:
 
 permissions:
@@ -92,6 +106,27 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
+      - uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
+        with:
+          global-json-file: tests/vault/fsharp/global.json
+      - name: Compare saga sequences with the F sharp model
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+          DOTNET_NOLOGO: '1'
+        run: |
+          set -eo pipefail
+          (
+            set -e
+            printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)"
+            printf 'Base: %s\nHead: %s\nRun / attempt: %s / %s\n' "${PR_BASE_SHA:-n/a}" "${PR_HEAD_SHA:-n/a}" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            node --version
+            cd tests/vault/fsharp
+            dotnet --version
+            dotnet fsi --exec quest-contracts.fsx
+          ) 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Compare game rules with the Python reference
         shell: bash
         run: |

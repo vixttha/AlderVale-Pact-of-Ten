@@ -14,7 +14,8 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 | Ruby | Parse the shipped quest and NPC export as UTF-8 JSON, verify required display text, and resolve each quest giver to exactly one NPC. Compare all three published payouts against fixed reward values. | Implemented in the existing public Ubuntu Vault job |
 | C# | Independently deserialize versioned synthetic saves and preserve realm, wallet, active creature, and quest flags. | Proposed |
 | Rust | Check embedded GLB buffer and accessor ranges, skin data, and animation samples on game assets and known-bad fixtures. | Implemented in the existing Vault catalog job |
-| Haskell or F# | Model a deterministic combat round and compare damage, status expiration and draw outcomes over shared fixtures. | Proposed |
+| F# | Compare the saga reducer and guest saves against an independent model of quest completion, interleaving, reloads and one-time payouts. | Implemented in the Ubuntu Vault catalog job |
+| Haskell | Model a deterministic combat round and compare damage, status expiration and draw outcomes over shared fixtures. | Proposed |
 | R or Julia | Analyze duel wins, round duration and balance variance against a fixed seed corpus. | Proposed |
 | Bash and PowerShell | Verify build and launcher paths with spaces and deterministic exit codes on their supported runner OS. | Proposed launcher checks |
 | Firestore Rules and Java | Execute Rules checks and save transactions in the Java-backed demo emulator. | Existing |

@@ -20,6 +20,11 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | G13-007 | Harmony route switch | P0 | Vitest | Save one lead-creature win. Completing via Rune-Catch preserves the partial counter and prevents a later lead-creature win from paying Harmony again. |
 | G13-008 | Rare Trial victory persistence | P0 | Vitest | Apply a Rare Trial victory event at Rank 4. Retain the 260 XP, 320 Florins, and 8 Spell Shards after reload and ignore a repeated victory event. |
 | G13-009 | Multiple quest payouts | P0 | Vitest | Persist First Spark and then Harmony on the same wizard. Keep both completion flags, both payouts, and the expected total XP and currencies. Ignore both replays. |
+| G13-010 | Exact saga completion boundaries | P0 | F# and Node.js | Compare event prefixes to an independent payout and XP model near completion, rollover and cap boundaries. |
+| G13-011 | Harmony route switching | P0 | F# and Node.js | Interleave lead-creature wins, Rune-Catch and save boundaries. Preserve the winning route and pay once. |
+| G13-012 | Interleaved saga quests | P0 | F# and Node.js | Check every event sequence of up to four events against the independent model. Preserve other quests, progress and currencies. |
+| G13-013 | Saga state at every save boundary | P0 | F# and Node.js | Reload once at each possible boundary and at all boundaries together over short event sequences. Compare state before and after each reload and preserve the other realm. |
+| G13-014 | Saga completion replay | P0 | F# and Node.js | Repeat completion routes after a reload and intervening events. Preserve payout totals and completion flags. |
 | G17-001 | Tailor persistence | P1 | Playwright | Claim the Starstitch Brim Hat from the Realm Vault, equip it at the Tailor, and confirm the +10 HP persists after reload. |
 | G21-002 | Rowan fallback and retry | P1 | Vitest and Playwright | Failed Rowan model loading leaves the Classic enrollment path usable. The lifecycle suite checks that a user retry can load the model. |
 | G21-003 | Embedded binary buffer bounds | P1 | Rust / Cargo | Buffer views fit inside the declared binary payload. Invalid lengths, truncated data, and overflowing spans are rejected. |
