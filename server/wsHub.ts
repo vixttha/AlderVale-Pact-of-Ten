@@ -6,7 +6,6 @@ import { duelView, readDuelAction } from './duelView.ts';
 import { ELEMENTS } from '../shared/elements.ts';
 import { RACES } from '../shared/wardrobe.ts';
 import { ZONES } from '../shared/world.ts';
-import { SPECIES_BY_ID } from '../shared/creatures.ts';
 import type { Server } from 'node:http';
 import type { RealmId } from '../shared/realms.ts';
 import type { ZoneId } from '../shared/world.ts';
