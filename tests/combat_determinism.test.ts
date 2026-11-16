@@ -60,12 +60,30 @@ function makeState(player: CombatantState, enemy: CombatantState): DuelState {
   };
 }
 
+function resolveAt(state: DuelState, action: TurnActionInput, time: number) {
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(time);
+  // Restart the same RNG sequence for each replay.
+  let seed = 1;
+  const rng = () => {
+    seed = (Math.imul(1664525, seed) + 1013904223) >>> 0;
+    return seed / 2 ** 32;
+  };
+  try {
+    return resolveDuelRound(state, [action], rng);
+  } finally {
+    clock.mockRestore();
+  }
+}
+
 describe('deterministic combat effect IDs (#74)', () => {
-  it('keeps the Spellwright blade ID when only the wall clock changes', () => {
-    const player = makeCombatant('wizard', 'gale', true);
+  it.each([
+    { spell: 'gale_sky_falcon', element: 'gale', collection: 'blades' },
+    { spell: 'frost_glacial_stag', element: 'frost', collection: 'shields' },
+  ] as const)('replays the full round with the Spellwright $collection effect', ({ spell, element, collection }) => {
+    const player = makeCombatant('wizard', element, true);
     const enemy = makeCombatant('enemy', 'frost', false);
-    player.hand = ['gale_sky_falcon'];
-    player.spellwrighting = { gale_sky_falcon: 'B' };
+    player.hand = [spell];
+    player.spellwrighting = { [spell]: 'B' };
     const state = makeState(player, enemy);
     const action: TurnActionInput = {
       actorId: player.id,
@@ -74,29 +92,25 @@ describe('deterministic combat effect IDs (#74)', () => {
       creatureAction: 'none',
     };
 
-    const clock = vi.spyOn(Date, 'now');
-    try {
-      clock.mockReturnValue(1000);
-      const first = resolveDuelRound(state, [action], () => 0.1);
-      clock.mockReturnValue(2000);
-      const second = resolveDuelRound(state, [action], () => 0.1);
-
-      expect(first.playerTeam[0].blades).toHaveLength(1);
-      expect(first.playerTeam[0].blades.map((effect) => effect.id))
-        .toEqual(second.playerTeam[0].blades.map((effect) => effect.id));
-    } finally {
-      clock.mockRestore();
-    }
+    const first = resolveAt(state, action, 1000);
+    expect(first.playerTeam[0][collection]).toHaveLength(1);
+    expect(resolveAt(state, action, 2000)).toEqual(first);
   });
 
-  it('keeps the creature blade ID when only the wall clock changes', () => {
-    const player = makeCombatant('wizard', 'ember', true);
+  it.each([
+    { speciesId: 'cinder_kitsune', element: 'ember', side: 'playerTeam', collection: 'blades' },
+    { speciesId: 'rime_stag', element: 'frost', side: 'playerTeam', collection: 'shields' },
+    { speciesId: 'harbor_kelpie', element: 'tide', side: 'enemyTeam', collection: 'traps' },
+  ] as const)('replays the full round with $speciesId and keeps distinct IDs across rounds', ({
+    speciesId, element, side, collection,
+  }) => {
+    const player = makeCombatant('wizard', element, true);
     const enemy = makeCombatant('enemy', 'frost', false);
     player.creatures = [{
       id: 'pet-1',
-      speciesId: 'cinder_kitsune',
-      nickname: 'Hearth',
-      element: 'ember',
+      speciesId,
+      nickname: 'Companion',
+      element,
       stage: 1,
       chromatic: 'none',
       branchChoice: 'B',
@@ -112,24 +126,15 @@ describe('deterministic combat effect IDs (#74)', () => {
       creatureAction: 'skill',
     };
 
-    const clock = vi.spyOn(Date, 'now');
-    try {
-      clock.mockReturnValue(1000);
-      const first = resolveDuelRound(state, [action], () => 0.1);
-      clock.mockReturnValue(2000);
-      const second = resolveDuelRound(state, [action], () => 0.1);
+    const first = resolveAt(state, action, 1000);
+    const effects = first[side][0][collection];
+    expect(effects).toHaveLength(1);
+    expect(resolveAt(state, action, 2000)).toEqual(first);
 
-      expect(first.playerTeam[0].blades).toHaveLength(1);
-      expect(first.playerTeam[0].blades.map((effect) => effect.id))
-        .toEqual(second.playerTeam[0].blades.map((effect) => effect.id));
-
-      const nextRound = resolveDuelRound(first, [action], () => 0.1);
-      const ids = nextRound.playerTeam[0].blades.map((effect) => effect.id);
-      expect(ids).toHaveLength(2);
-      expect(ids[0]).toBe(first.playerTeam[0].blades[0].id);
-      expect(new Set(ids).size).toBe(2);
-    } finally {
-      clock.mockRestore();
-    }
+    const nextRound = resolveAt(first, action, 2000);
+    const nextEffects = nextRound[side][0][collection];
+    expect(nextEffects).toHaveLength(2);
+    expect(nextEffects[0]).toEqual(effects[0]);
+    expect(nextEffects[1].id).not.toBe(effects[0].id);
   });
 });
