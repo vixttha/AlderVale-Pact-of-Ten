@@ -1,9 +1,21 @@
 import { describe, expect, it } from 'vitest';
+import type { ElementId } from '../shared/elements.ts';
 import { ownedCreatureToCombatSlot, pickDuelCreatureRoster } from '../shared/combat.ts';
 
-const pets = [
-  { id: 'pet_a', speciesId: 'cinder_kitsune', nickname: 'A', elementId: 'ember' as const, stage: 1 as const, chromatic: 'none' as const, branchChoice: 'A' as const, talents: ['tal_may_blade'] },
-  { id: 'pet_b', speciesId: 'leaf_sprout', nickname: 'B', elementId: 'leaf' as const, stage: 2 as const, chromatic: 'none' as const, branchChoice: 'B' as const, talents: ['tal_spellproof'] },
+type TestPet = {
+  id: string;
+  speciesId: string;
+  nickname: string;
+  elementId: ElementId;
+  stage: 1 | 2 | 3;
+  chromatic: 'none' | 'dawn' | 'dusk';
+  branchChoice: 'A' | 'B';
+  talents: string[];
+};
+
+const pets: TestPet[] = [
+  { id: 'pet_a', speciesId: 'cinder_kitsune', nickname: 'A', elementId: 'ember', stage: 1, chromatic: 'none', branchChoice: 'A', talents: ['tal_may_blade'] },
+  { id: 'pet_b', speciesId: 'bramble_sprout', nickname: 'B', elementId: 'bramble', stage: 2, chromatic: 'none', branchChoice: 'B', talents: ['tal_spellproof'] },
   { id: 'pet_c', speciesId: 'tide_pup', nickname: 'C', elementId: 'tide' as const, stage: 1 as const, chromatic: 'dawn' as const, branchChoice: 'A' as const, talents: [] },
   { id: 'pet_d', speciesId: 'spark_wisp', nickname: 'D', elementId: 'spark' as const, stage: 3 as const, chromatic: 'none' as const, branchChoice: 'A' as const, talents: ['tal_may_shield'] },
 ];
