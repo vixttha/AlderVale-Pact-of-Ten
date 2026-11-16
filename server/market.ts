@@ -4,6 +4,7 @@ import type { RealmId } from '../shared/realms.ts';
 import type { WizardDocument } from '../shared/economy.ts';
 import type { AcademyHouse } from '../shared/houses.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
+import { CREATURE_TALENTS, getBondStage, SPECIES_BY_ID, type ChromaticVariant } from '../shared/creatures.ts';
 import { GEAR_BY_ID } from '../shared/wardrobe.ts';
 import { isBazaarPrice, STARTING_MARKET_FLORINS, type BazaarListing, type MarketAccount } from '../shared/market.ts';
 
@@ -42,6 +43,70 @@ export async function ownedWizard(uid: string, wizardId: unknown, realm: RealmId
   const data = snapshot.data() as WizardDocument | undefined;
   if (!data || data.ownerId !== uid || data.realmId !== realm) throw new RequestError(404, 'Wizard unavailable');
   return { ...data, id: snapshot.id };
+}
+
+export interface OwnedCreatureSelection {
+  id: string;
+  speciesId: string;
+  nickname: string;
+  elementId: ElementId;
+  stage: 1 | 2 | 3;
+  chromatic: ChromaticVariant;
+  branchChoice: 'A' | 'B';
+  talents: string[];
+}
+
+const creatureTalentIds = new Set(CREATURE_TALENTS.map((talent) => talent.id));
+
+export function normalizeCreatureSelection(value: unknown): OwnedCreatureSelection | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const data = value as Record<string, unknown>;
+  if (typeof data.speciesId !== 'string' || !Object.hasOwn(SPECIES_BY_ID, data.speciesId)) return null;
+
+  const species = SPECIES_BY_ID[data.speciesId];
+  const stage: 1 | 2 | 3 = data.stage === 2 || data.stage === 3
+    ? data.stage
+    : data.stage === 1
+      ? 1
+      : getBondStage(typeof data.bondXp === 'number' && Number.isFinite(data.bondXp) ? Math.max(0, data.bondXp) : 0);
+  const elementId = typeof data.elementId === 'string' && Object.hasOwn(ELEMENTS, data.elementId)
+    ? data.elementId as ElementId
+    : species.element;
+  const chromatic: ChromaticVariant = data.chromatic === 'dawn' || data.chromatic === 'dusk' ? data.chromatic : 'none';
+  const branchChoice: 'A' | 'B' = data.branchChoice === 'B' ? 'B' : 'A';
+  const nickname = typeof data.nickname === 'string' ? data.nickname.trim().slice(0, 24) : '';
+  const talents = Array.isArray(data.talents)
+    ? [...new Set(data.talents.filter((talent): talent is string => typeof talent === 'string' && creatureTalentIds.has(talent)))].slice(0, 5)
+    : [];
+
+  return {
+    id: typeof data.id === 'string' && isDocumentId(data.id) ? data.id : '',
+    speciesId: data.speciesId,
+    nickname: nickname || species.stageNames[stage - 1],
+    elementId,
+    stage,
+    chromatic,
+    branchChoice,
+    talents,
+  };
+}
+
+export async function loadOwnedCreatureSelection(
+  uid: string,
+  wizardId: string,
+  realm: RealmId,
+  creatureId: unknown,
+): Promise<OwnedCreatureSelection | null> {
+  if (!isDocumentId(creatureId)) return null;
+  return cloudDb.runTransaction(async (tx) => {
+    await ownedWizard(uid, wizardId, realm, tx);
+    const ref = cloudDb.collection('wizards').doc(wizardId).collection('creatures').doc(creatureId);
+    const snapshot = await tx.get(ref);
+    if (!snapshot.exists) return null;
+    const data = snapshot.data() as Record<string, unknown> | undefined;
+    if (!data || data.ownerId !== uid || data.wizardId !== wizardId || data.realmId !== realm) return null;
+    return normalizeCreatureSelection({ ...data, id: snapshot.id });
+  });
 }
 
 function writeWallet(tx: Transaction, realm: RealmId, uid: string, wallet: MarketAccount) {
