@@ -60,6 +60,7 @@ If the same item is already claimed, do not start a second implementation. Add i
 - Use standard public GitHub-hosted runners; no paid, larger, GPU or self-hosted runners.
 - Run the smallest relevant tests plus required project CI. Preserve all attempts.
 - Record PR base, PR head, actual tested checkout SHA, workflow run/attempt, each job outcome, regression name, fixtures/environment and gaps.
+- Validate new CI evidence with the [receipt checker](../receipts/FORMAT.md#executable-ci-receipt-checks), using the expected checkout and required checks from the verified scope.
 - A retry does not erase a prior failure. A pass applies only to the exact tested tree.
 - If the candidate changes after validation, rerun affected checks.
 
