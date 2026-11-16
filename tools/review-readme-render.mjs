@@ -4,7 +4,7 @@ import { mkdir } from 'node:fs/promises';
 
 const commit = process.env.README_HEAD;
 assert.match(commit, /^[0-9a-f]{40}$/);
-const url = 'https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/' + commit + '/README.md';
+const url = 'https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/' + commit;
 const out = process.env.RUNNER_TEMP + '/readme-render';
 await mkdir(out, { recursive: true });
 const browser = await chromium.launch();
@@ -24,7 +24,6 @@ try {
       }, locator);
       const article = page.locator('article.markdown-body').filter({ has: page.getByRole('heading', { name: 'AlderVale: Pact of Ten', exact: true }) });
       await article.waitFor({ timeout: 20000 });
-      const title = article.getByRole('heading', { name: 'AlderVale: Pact of Ten', exact: true });
       const campus = article.getByRole('img', { name: /Rowan stands before the fountain/i });
       const duel = article.getByRole('img', { name: /Round one of Rowan’s solo duel/i });
       await scroll('img[src$="breeze-campus.webp"]');
@@ -90,10 +89,9 @@ try {
         assert.equal(await article.locator('a[href="#' + target + '"]').count() >= 1, true);
         assert.equal(await article.locator('[id="user-content-' + target + '"]').count() + await article.locator('[id="' + target + '"]').count() >= 1, true);
       }
-      await title.evaluate(node => node.scrollIntoView({ block: 'start' }));
-      await page.screenshot({ path: out + '/' + colorScheme + '-' + width + '.png', animations: 'disabled' });
-      await scroll('img[src$="breeze-first-spark-duel.webp"]');
-      await page.screenshot({ path: out + '/' + colorScheme + '-' + width + '-duel.png', animations: 'disabled' });
+      const bounds = await article.boundingBox();
+      assert.ok(bounds && bounds.height > 900, JSON.stringify(bounds));
+      await article.screenshot({ path: out + '/' + colorScheme + '-' + width + '.png', animations: 'disabled', timeout: 15000 });
       console.log(JSON.stringify({ commit, ...metrics }));
       await page.close();
     }
