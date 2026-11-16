@@ -4,6 +4,7 @@ The Test Vault is the project's catalog of executable regression tests and the p
 
 The Vault builds on the gameplay candidate in PR #27. The catalogs describe broader coverage, including cases that still need fixtures, deployments, or manual playthroughs.
 
+- [Public Test Vault template and test ideas](public-template/README.md)
 - [Game and player journeys](game-catalog.md)
 - [Engineering and release](engineering-catalog.md)
 - [Languages, formats, and tools](languages.md)

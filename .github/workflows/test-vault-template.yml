@@ -1,0 +1,38 @@
+name: Test Vault template
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/test-vault-template.yml'
+      - 'docs/test-vault/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-vault-template.yml'
+      - 'docs/test-vault/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-vault-template-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catalog:
+    if: github.event.repository.private == false
+    name: Validate Test Vault catalog
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate cases and record checkout
+        shell: bash
+        run: |
+          tested_sha=$(git rev-parse HEAD)
+          printf 'Tested checkout: %s\n' "$tested_sha" | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 docs/test-vault/public-template/validate_catalog.py \
+            docs/test-vault/game-catalog.md docs/test-vault/engineering-catalog.md
