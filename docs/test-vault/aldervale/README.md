@@ -1,6 +1,6 @@
 # AlderVale Test Vault v0.0.2
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [38 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## What runs on AlderVale's public GitHub runners
 
@@ -22,6 +22,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | G34-001, G34-002 | [#4][issue4] | Narrow enrollment and WebGL fallback | [Guest browser suite][guest] | Browser | HUD zoom, reduced motion, and physical-device behavior |
 | E15-001, E15-002 | | Data integrity and quest giver references | [Catalog Vitest][data], [Ruby catalog][ruby] | Core, Vault catalog | |
 | E24-001, E24-002, E34-002 | | Browser and OS compatibility plus isolated backend checks | [Game workflow][game], [Firestore checks][firestore] | Browser, Core, Firestore emulator | Live sign-in |
+| E32-001 to E32-005 | | Graphify snapshot ref handling, integrity checks and concurrent retry | [Bash publisher suite][bash-graphify] | Graphify Ubuntu | Local Git remotes and synthetic snapshots. |
 | G36-001 | | First-playable guest loop | [Owner desktop playthrough](#owner-desktop-playthrough--g36-001) | Manual | Pending owner result |
 
 [issue4]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/4
@@ -40,6 +41,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [settings]: ../../../tests/vault/guestSettings.test.ts
 [data]: ../../../tests/vault/gameData.test.ts
 [game]: ../../../.github/workflows/validate.yml
+[bash-graphify]: ../../../tests/vault/bash/README.md
 [firestore]: ../../../tools/ci/firestore.check.mjs
 
 ### Test quality
@@ -63,6 +65,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Independent rule reference | `python3 tests/vault/first_playable_reference.py -v` with Python 3.12 and Node 24. |
 | Ruby quest catalog | `ruby tests/vault/quest_catalog.rb` with Node 24 and the Ruby bundled on the public Ubuntu runner. |
 | Rust binary asset contract | `cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml` |
+| Graphify publisher contracts | Run the [Bash suite][bash-graphify] in the existing public Ubuntu Graphify job. |
 | Project case table | `python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py --catalog docs/test-vault/aldervale/cases.md` |
 
 ## Evidence on verified main

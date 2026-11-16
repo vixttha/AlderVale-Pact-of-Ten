@@ -41,4 +41,9 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | E15-002 | Quest text and giver links | P1 | Ruby and Node.js | Read the shipped quest catalog as UTF-8 JSON, reject empty or damaged display text, and resolve each quest giver to exactly one campus NPC. |
 | E24-001 | Browser compatibility | P0 | GitHub Actions and Playwright | Run the guest and Rowan suites in Chromium, Firefox, and WebKit and retain each attempt's results. |
 | E24-002 | Core compatibility | P0 | GitHub Actions and Bun | Run the frozen install, lint, unit tests, build, and server integration on Ubuntu, Windows, and macOS. |
+| E32-001 | Stale Graphify main snapshot | P0 | Bash and Git | Skip an older source revision when remote main advances and preserve the archived snapshot branch. |
+| E32-002 | Unsupported Graphify publication ref | P0 | Bash and Git | Refuse a feature-ref publication without explicit opt-in and preserve the archived snapshot. |
+| E32-003 | Explicit Graphify commit snapshot | P1 | Bash and Git | Append a snapshot under the exact commit SHA and preserve the main graph and receipt. |
+| E32-004 | Damaged Graphify version snapshot | P0 | Bash and Git | Detect a retained graph checksum mismatch and abort without rewriting the archive. |
+| E32-005 | Concurrent Graphify publication | P0 | Bash and Git | Recover from a non-fast-forward push rejection and retain both publishers' snapshots. |
 | E34-002 | Isolated test services | P0 | GitHub Actions, browser fixtures, and Firestore emulator | Run the guest suite with external hosts blocked and Firestore checks against the `demo-aldervale-ci` emulator. |
