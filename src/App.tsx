@@ -924,7 +924,6 @@ export function App() {
     const rCfg = REALMS[activeWizard.realmId];
     const gainedXp = Math.round((res.mode === 'trial' ? 180 : 85) * rCfg.xpMultiplier);
     const nextStats = applyWizardXp(activeWizard, gainedXp);
-    const nextRank = nextStats.rank;
     const lead = creatures.find((pet) => pet.id === activeWizard.activeCreatureId) ?? creatures[0];
 
     // Charge 2-win Hybrid Eggs
@@ -961,23 +960,6 @@ export function App() {
       nextUnlockedElements.push(res.trialElement);
     }
 
-    // Unlock Prestige Races on Account at Rank 4 / 5 / 7
-    const nextUnlockedRaces = new Set(realmAccount.unlockedRaces);
-    if (nextRank >= 4 && res.mode === 'trial') {
-      nextUnlockedRaces.add('cloud_sylph');
-      nextUnlockedRaces.add('dwarf');
-      nextUnlockedRaces.add('high_elf');
-      nextUnlockedRaces.add('dark_elf');
-    }
-    if (nextRank >= 5 && creatures.some((c) => SPECIES_BY_ID[c.speciesId]?.isDrake && c.stage === 3)) {
-      nextUnlockedRaces.add('draconic_kin');
-    }
-    if (nextRank >= 7 && hatchedPets.some((p) => SPECIES_BY_ID[p.speciesId]?.isFusionOnly)) {
-      nextUnlockedRaces.add('astral_kin');
-    }
-
-    const nextAccount = { ...realmAccount, unlockedRaces: Array.from(nextUnlockedRaces), termXp: realmAccount.termXp + Math.round(65 * rCfg.xpMultiplier) };
-
     const florinWin = Math.round(
       (res.mode === 'trial' ? 140 : 65) * rCfg.dropMultiplier,
     );
@@ -1004,8 +986,28 @@ export function App() {
     const leadWon = lead && res.leadCreatureWinEligible === true;
     if (leadWon) updatedWiz = applySagaEvent(updatedWiz, 'lead-creature-win');
     const updatedLead = leadWon ? { ...lead, wins: (lead.wins ?? 0) + 1 } : null;
+
+    const nextCreatures = [...creatures.map((pet) => pet.id === updatedLead?.id ? updatedLead : pet), ...hatchedPets];
+    const nextUnlockedRaces = new Set(realmAccount.unlockedRaces);
+    if (updatedWiz.rank >= 4 && res.mode === 'trial') {
+      nextUnlockedRaces.add('cloud_sylph');
+      nextUnlockedRaces.add('dwarf');
+      nextUnlockedRaces.add('high_elf');
+      nextUnlockedRaces.add('dark_elf');
+    }
+    if (updatedWiz.rank >= 5 && nextCreatures.some((pet) => SPECIES_BY_ID[pet.speciesId]?.isDrake && pet.stage === 3)) {
+      nextUnlockedRaces.add('draconic_kin');
+    }
+    if (updatedWiz.rank >= 7 && nextCreatures.some((pet) => SPECIES_BY_ID[pet.speciesId]?.isFusionOnly)) {
+      nextUnlockedRaces.add('astral_kin');
+    }
+    const nextAccount = {
+      ...realmAccount,
+      unlockedRaces: [...nextUnlockedRaces],
+      termXp: realmAccount.termXp + Math.round(65 * rCfg.xpMultiplier),
+    };
     setRealmAccount(nextAccount);
-    setCreatures([...creatures.map((pet) => pet.id === updatedLead?.id ? updatedLead : pet), ...hatchedPets]);
+    setCreatures(nextCreatures);
     persistWizard(updatedWiz, hatchedPets, nextAccount, updatedLead ? [updatedLead] : []);
     const completed = CAMPUS_QUESTS.filter((quest) =>
       !activeWizard.progression.completedQuests.includes(quest.id) && updatedWiz.progression.completedQuests.includes(quest.id),
