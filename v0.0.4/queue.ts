@@ -25,6 +25,7 @@ export interface QueueTriage {
   securitySensitive?: boolean;
   duplicateOf?: number;
   scopeLimits?: string[];
+  affectedFiles?: string[];
 }
 
 export interface QueuePullRequest {
@@ -96,8 +97,13 @@ function hasLabel(issue: QueueIssue, label: string): boolean {
   return issue.labels.some((value) => value.toLowerCase() === label);
 }
 
-function activePullRequest(issueNumber: number, pullRequests: QueuePullRequest[]): QueuePullRequest | undefined {
-  return pullRequests.find((pr) => pr.state === "open" && pr.issueNumbers.includes(issueNumber));
+function activePullRequest(issueNumber: number, triage: QueueTriage, pullRequests: QueuePullRequest[]): QueuePullRequest | undefined {
+  const affected = new Set((triage.affectedFiles ?? []).map((path) => path.replace(/\\/g, "/")));
+  return pullRequests.find((pr) => {
+    if (pr.state !== "open") return false;
+    if (pr.issueNumbers.includes(issueNumber)) return true;
+    return pr.changedFiles.some((path) => affected.has(path.replace(/\\/g, "/")));
+  });
 }
 
 function packetFor(issue: QueueIssue, triage: QueueTriage, context: QueueContext): TaskPacket {
@@ -185,7 +191,7 @@ export function buildQueue(issues: QueueIssue[], context: QueueContext): QueueRe
       continue;
     }
 
-    const overlap = activePullRequest(issue.number, context.pullRequests);
+    const overlap = activePullRequest(issue.number, triage, context.pullRequests);
     if (overlap) {
       decisions.push({ issueNumber: issue.number, status: "blocked", reason: "OPEN_PR_ALREADY_COVERS_ISSUE_" + overlap.number });
       continue;

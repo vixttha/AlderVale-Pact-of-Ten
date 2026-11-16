@@ -57,7 +57,7 @@ export function assessConflict(record: ConflictRecord): ConflictAssessment {
   if (record.ownerDecisionRequired || record.governingAuthority === "owner-decision") {
     return { status: "escalated", reason: "OWNER_DECISION_REQUIRED" };
   }
-  if (record.category === "security-privacy" || record.governingAuthority === "security-privacy") {
+  if (record.category === "security-privacy") {
     return { status: "escalated", reason: "SECURITY_OR_PRIVACY_BOUNDARY" };
   }
   if (record.category === "milestone" || record.governingAuthority === "active-milestone") {
