@@ -1,18 +1,20 @@
 # AlderVale: Pact of Ten
 
+![AlderVale Workmark v1 with a green leaf wreath and gold lettering](assets/aldervale-workmark-v1.webp)
+
 AlderVale is a 3D browser RPG set at a spellcasting academy among floating islands. Create a wizard, explore the campus, and build a deck for turn-based duels.
 
-**In development · Local guest play.** Start in Breeze, earn your first quest rewards in a solo duel, and return to the same wizard after a reload.
+**In development · Local guest play.** Start in Breeze and earn your first quest rewards in a solo duel. You can play as a guest without a Google account or API key.
 
-[Run locally](#run-locally) · [First playthrough](#first-playthrough) · [How AI helps build AlderVale](#how-ai-helps-build-aldervale) · [Report a bug](#report-a-bug)
+[Play on Windows](#play-on-windows) · [Run from source](#run-from-source) · [First playthrough](#first-playthrough) · [Report a bug](#report-a-bug)
 
-![Rowan stands before the fountain in Breeze’s Central Academy Commons, surrounded by academy characters. The First Spark quest is visible in the HUD.](assets/breeze-campus.webp)
+## Play on Windows
 
-*Breeze’s Central Academy Commons. In-game capture from build `3fa20bc`.*
+In your local copy of the repository, open **AlderVale Play** and double-click **Play AlderVale.cmd**. Install Git and Node.js **24.12.0 or later** first. The launcher builds the game and opens it at [http://127.0.0.1:4178](http://127.0.0.1:4178). Keep the launcher window open while you play. [Windows launcher guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/AlderVale%20Play/README.md)
 
-## Run locally
+## Run from source
 
-You’ll need Git, Node.js **24.12.0 or later**, Bun **1.4.4**, and a browser with **WebGL 2** for the 3D campus.
+Install Git, Node.js **24.12.0 or later**, and Bun **1.4.4**. The 3D campus requires WebGL 2.
 
 ```bash
 git clone https://github.com/vixttha/AlderVale-Pact-of-Ten.git
@@ -21,14 +23,18 @@ bun install --frozen-lockfile
 bun run dev
 ```
 
-Keep the terminal open and visit [http://localhost:3000](http://localhost:3000). Guest play works without a Google account or an API key.
+Keep the terminal open and visit [http://localhost:3000](http://localhost:3000). Guest saves are stored by browser profile and address. Stick with the launcher address or the source address to resume the same save.
+
+![Rowan stands before the fountain in Breeze’s Central Academy Commons, surrounded by academy characters. The First Spark quest is visible in the HUD.](assets/breeze-campus.webp)
+
+*Breeze’s Central Academy Commons. In-game capture from build `3fa20bc`.*
 
 ## First playthrough
 
 1. **Create your wizard.** Choose **Breeze**, enter a wizard name, and pick **Alder Human** with the **Rowan** appearance. Select **Begin Academy Journey**.
 2. **Enter a duel.** On campus, open **Duel** and select **Frost** under **Solo Academy Skirmishes**. Pick an affordable spell and select **Cast Turn**, or use **Pass (+Gain Pip)** to build pips.
 3. **Claim First Spark.** After winning, select **Claim Rewards & Return**. Open **Active Saga Quest** and check that **First Spark in the Ring** shows **Completed**.
-4. **Resume your wizard.** Reload the page, select the same wizard in Breeze, and choose **Enter Aldervale**. Check that the quest is still complete and your Florin and Spell Shard totals match.
+4. **Resume your wizard.** Reload the page, select the same wizard in Breeze, and choose **Enter Aldervale**. Check that the quest is still complete and your Florin and Spell Shard totals match what you saw before reloading.
 
 ![Round one of Rowan’s solo duel in Breeze. Rowan faces a Frost Sky-Duelist, with both fighters’ health and pips shown above the available spell cards.](assets/breeze-first-spark-duel.webp)
 
@@ -44,26 +50,23 @@ Keep the terminal open and visit [http://localhost:3000](http://localhost:3000).
 
 The labels describe progression tuning. Actual playtime varies.
 
-## How AI helps build AlderVale
-
-AlderVale is a public record of AI-assisted game development. AI assists with implementation, debugging, and test design. Project decisions and release approvals stay under human control.
-
-**First Spark, from duel to saved progress.** The AI-assisted test work made the browser scenario repeatable while keeping the actual game controls, combat, and reward logic. It checks that Rowan earns the expected payout and that the same wizard, completed quest, Florins, and Spell Shards survive a reload. The scenario passed in Chromium, Firefox, and WebKit on build `3fa20bc`. [Test changes](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/61) · [Build validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43890556938)
-
 ## Troubleshooting
 
 - **3D world unavailable.** Try **Retry 3D**. You can still access your wizard and menus.
 - **Guest save failed.** Allow browser site storage, then select **Retry save** before reloading or closing the tab.
-- **Wizard missing after reload.** Use the same browser profile, URL, and realm. Clearing site data removes local guest saves.
+- **Wizard missing after reload.** Use the same browser profile, local address, and realm. Clearing site data removes local guest saves.
 
-## Validation
+## Development and testing
 
 Run `bun run validate:core` for type checking, rules lint, tests, the production build, and HTTP and WebSocket checks. GitHub Actions also runs guest journeys in Chromium, Firefox, and WebKit and checks Firestore rules in an emulator.
 
-- [Validation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md)
-- [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md)
-- [GitHub Actions](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions)
+- [Validation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md) · [GitHub Actions](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions)
+- [First-playable test coverage and desktop checklist](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/aldervale/README.md#owner-desktop-playthrough--g36-001) · [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md)
+
+### AI-assisted development
+
+AI assists with implementation, debugging, and test design. The First Spark browser test uses the game controls to win a duel, claim the payout, and verify the quest and rewards after reload. [Test changes](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/61) · [Build validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43917481646)
 
 ## Report a bug
 
-Search [GitHub Issues](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues) first. Include the build or commit, browser, operating system, realm, steps to reproduce, and what you expected to happen.
+Search [GitHub Issues](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues) first. Include the build or commit, browser, operating system, and realm. List the steps to reproduce the bug, what you expected, and what actually happened.
