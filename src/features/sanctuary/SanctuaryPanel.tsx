@@ -5,6 +5,7 @@ import { DORM_CATALOG, DORM_THEMES, DORM_WEATHERS } from '../../../shared/world.
 import { STARTER_ELEMENTS } from '../../../shared/elements.ts';
 import type { WizardDocument } from '../../../shared/economy.ts';
 import type { SanctuaryState } from '../../lib/storage.ts';
+import { formatDormTourRating, type DormTourListing } from '../../../shared/dormTours.ts';
 
 interface SanctuaryPanelProps {
   wizard: WizardDocument;
@@ -31,7 +32,7 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
   const [publishing, setPublishing] = useState(false);
   const [tourNotice, setTourNotice] = useState('');
   const [now, setNow] = useState(Date.now);
-  const [tours, setTours] = useState<{ wizardId: string; wizardName: string; themeId: string; ratingAvg: number; ratingCount: number }[]>([]);
+  const [tours, setTours] = useState<DormTourListing[]>([]);
 
   useEffect(() => {
     if (tab !== 'garden') return;
@@ -299,7 +300,7 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
                     <div className="font-bold text-sm">{t.wizardName}</div>
                     <div className="text-[#615346]">Theme: {t.themeId.replace('_', ' ')}</div>
                   </div>
-                  <span className="font-mono-num font-bold text-amber-700">★ {t.ratingAvg} ({t.ratingCount})</span>
+                  <span className="font-mono-num font-bold text-amber-700">{formatDormTourRating(t.ratingAvg, t.ratingCount)}</span>
                 </div>
               ))}
             </div>

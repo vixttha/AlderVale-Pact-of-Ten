@@ -215,7 +215,7 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     await assertFails(getDoc(doc(owner, 'worldRealms/breeze/wallets/rowan-owner')));
     const { publishTour, listTours } = await import('../server/market.ts');
     await expect(publishTour('breeze', 'rowan-owner', 'rowan')).resolves.toEqual({ isPublic: true });
-    expect(await listTours('breeze')).toMatchObject([{ wizardId: 'rowan' }]);
+    expect(await listTours('breeze')).toMatchObject([{ wizardId: 'rowan', ratingAvg: null, ratingCount: 0 }]);
     expect((await assertSucceeds(getDoc(doc(visitor, path)))).get('isPublic')).toBe(true);
   });
 
