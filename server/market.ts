@@ -6,6 +6,7 @@ import type { AcademyHouse } from '../shared/houses.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { GEAR_BY_ID } from '../shared/wardrobe.ts';
 import { isBazaarPrice, STARTING_MARKET_FLORINS, type BazaarListing, type MarketAccount } from '../shared/market.ts';
+import { dormTourRatingFromTotals } from '../shared/dormTours.ts';
 
 export class RequestError extends Error {
   readonly status: number;
@@ -251,7 +252,8 @@ export async function listTours(realm: RealmId) {
   const snapshot = await realmRef(realm).collection('dormTours').limit(100).get();
   return snapshot.docs.map((snap) => {
     const { wizardName, themeId, ratingSum, ratingCount } = snap.data();
-    return { wizardId: snap.id, wizardName, themeId, ratingAvg: ratingCount > 0 ? Number((ratingSum / ratingCount).toFixed(1)) : 5, ratingCount };
+    const rating = dormTourRatingFromTotals(ratingSum, ratingCount);
+    return { wizardId: snap.id, wizardName, themeId, ...rating };
   });
 }
 
