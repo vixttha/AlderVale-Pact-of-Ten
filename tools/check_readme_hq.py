@@ -27,7 +27,7 @@ LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+[^)]*)?\)")
 REFERENCE_LINK_RE = re.compile(r"^\s{0,3}\[[^\]]+\]:\s*(?:<([^>]+)>|(\S+))", re.MULTILINE)
 AUTOLINK_RE = re.compile(r"<(https?://[^>\s]+)>", re.IGNORECASE)
 HTML_HREF_RE = re.compile(r"""\bhref\s*=\s*(['"])(.*?)\1""", re.IGNORECASE)
-BARE_URL_RE = re.compile(r"(?i)(?<![\w\"'=])https?://[^\s<>\x60]+")
+BARE_URL_RE = re.compile(r"(?i)(?<![\w\"'=])https?://[^\s<>\x60\[\]()]+")
 MAX_EXTERNAL_LINKS = 200
 MAX_REDIRECTS = 5
 EXTERNAL_TIMEOUT_SECONDS = 8
