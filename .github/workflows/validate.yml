@@ -57,6 +57,24 @@ jobs:
       - name: Real HTTP and WebSocket integration
         id: server_test
         run: node --test tools/ci/server.check.mjs
+      - - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        if: runner.os == 'Linux'
+        with:
+          go-version: '1.27.4'
+          cache: false
+      - name: Go guest realm presence contract
+        if: runner.os == 'Linux'
+        working-directory: tests/vault/go
+        shell: bash
+        env:
+          TESTED_SHA: ${{ steps.checkout_revision.outputs.sha }}
+        run: |
+          set -euo pipefail
+          {
+            printf 'Go presence cases G30-004 through G30-008 · tested checkout %s\n' "$TESTED_SHA"
+            go version
+            go test -mod=readonly -count=1 -timeout=2m -v ./...
+          } 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Install and start the Windows owner-play build
         if: runner.os == 'Windows'
         run: '& ".\AlderVale Play\Play AlderVale.cmd" --smoke --checkout'

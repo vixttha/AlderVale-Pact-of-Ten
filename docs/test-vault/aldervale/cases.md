@@ -34,6 +34,11 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | G28-006 | Guest settings recovery | P1 | Vitest | Round-trip guest audio, camera, and solo speed settings. Recover defaults for corrupt values, retain valid fields, and preserve the last good save if a write fails. |
 | G30-001 | Offline HUD | P0 | Playwright | Show `1 Online` with the fixture connection and `Offline` when it drops. Record failures or retries under issue #10. |
 | G30-003 | Stale HUD peer on reconnect | P0 | Playwright | Show two players with one fixture peer, show Offline with no online count after a forced drop, and show only the local player on reconnect before a new peer snapshot arrives. |
+| G30-004 | Guest identity on reconnect | P0 | Go WebSocket | A disconnected guest who reconnects with their own saved ticket retains the wizard ID and receives a new connection ID. |
+| G30-005 | Presence after disconnect | P0 | Go WebSocket | An observer receives the departing session's player-left event. A fresh snapshot keeps the remaining peer and excludes the old session. |
+| G30-006 | Reconnect roster scope | P0 | Go WebSocket | A reconnected guest sees the correct same-zone peer. The snapshot excludes the old session and fixtures in another zone or realm. |
+| G30-007 | Zone transition presence | P0 | Go WebSocket | Existing peers in the departing and arriving zones receive the corresponding events, and the moving guest gets the new roster. Test two zone pairs. |
+| G30-008 | Fresh guest session | P1 | Go WebSocket | A new session without a saved ticket gets a distinct wizard ID despite reusing a display name. The old identity stays absent. |
 | G34-001 | Narrow viewport | P1 | Playwright | Keep the title and creation controls reachable at the fixture's mobile viewport. Check other HUD controls and zoom separately. |
 | G34-002 | WebGL recovery | P0 | Playwright | With WebGL unavailable, show a fallback during enrollment and world entry, keep settings usable, and preserve access after reload. |
 | G36-001 | Owner desktop acceptance | P0 | Manual owner playthrough | On a pinned desktop build, complete title, guest creation, entry and movement in one realm, a solo duel, and persistence of the wizard and rewards after reload. |
