@@ -44,7 +44,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 
 ### Test quality
 
-Follow the [Test Vault law](../../../PROJECT_RULES.md#test-vault-reliability-and-reuse). For the Rust batch, the same checks read Rowan and controlled valid and malformed GLBs. The reference model also exercises geometry checks on a second asset. The Rust checks cover embedded GLB data and explicitly reject unsupported sparse accessors or required extensions when encountered. If future assets use those features, update the profile and fixtures before including them.
+Follow the [Test Vault law](../../../PROJECT_RULES.md#test-vault-reliability-and-reuse). For the Rust batch, the same checks read Rowan and controlled valid and malformed GLBs. The reference model also exercises geometry checks on a second asset. The Rust checks cover embedded GLB data and explicitly reject unsupported sparse accessors or extensions that change the geometry or animation data layout. If future assets use those features, update the profile and fixtures before including them.
 
 ### Adding a language in batches of five
 

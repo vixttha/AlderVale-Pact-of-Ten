@@ -114,12 +114,24 @@ impl<'a> Glb<'a> {
         if json["asset"]["version"].as_str() != Some("2.0") {
             return Err("expected glTF asset.version 2.0".into());
         }
-        if json.get("extensionsRequired").is_some_and(|extensions| {
-            extensions
-                .as_array()
-                .is_none_or(|required| !required.is_empty())
-        }) {
-            return Err("required glTF extensions are outside the embedded asset profile".into());
+        if let Some(required) = json.get("extensionsRequired") {
+            let required = required.as_array().ok_or("extensionsRequired must be an array")?;
+            for extension in required {
+                let name = extension.as_str().ok_or("expected a required extension name")?;
+                if !matches!(
+                    name,
+                    "KHR_materials_unlit" | "KHR_texture_transform" | "KHR_texture_basisu"
+                    | "EXT_texture_webp" | "EXT_texture_avif" | "KHR_mesh_quantization"
+                    | "KHR_materials_clearcoat" | "KHR_materials_transmission"
+                    | "KHR_materials_volume" | "KHR_materials_ior" | "KHR_materials_specular"
+                    | "KHR_materials_sheen" | "KHR_materials_emissive_strength"
+                    | "KHR_materials_iridescence" | "KHR_materials_anisotropy"
+                    | "KHR_materials_diffuse_transmission" | "KHR_materials_dispersion"
+                    | "KHR_materials_variants" | "KHR_lights_punctual"
+                ) {
+                    return Err(format!("required glTF extension {name} is outside the embedded asset profile"));
+                }
+            }
         }
         let bin = bin.ok_or_else(|| "missing GLB BIN chunk".to_owned())?;
         Ok(Self { json, bin })
