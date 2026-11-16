@@ -2,6 +2,7 @@ import { FieldValue, type Transaction } from 'firebase-admin/firestore';
 import { cloudDb } from './cloud.ts';
 import type { RealmId } from '../shared/realms.ts';
 import type { WizardDocument } from '../shared/economy.ts';
+import { isOwnedCreatureDocument, type StoredCreatureSelection } from './creatureSelection.ts';
 import type { AcademyHouse } from '../shared/houses.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { GEAR_BY_ID } from '../shared/wardrobe.ts';
@@ -42,6 +43,29 @@ export async function ownedWizard(uid: string, wizardId: unknown, realm: RealmId
   const data = snapshot.data() as WizardDocument | undefined;
   if (!data || data.ownerId !== uid || data.realmId !== realm) throw new RequestError(404, 'Wizard unavailable');
   return { ...data, id: snapshot.id };
+}
+
+
+
+export async function ownedActiveCreature(uid: string, wizardId: unknown, realm: RealmId): Promise<StoredCreatureSelection | null> {
+  const wizard = await ownedWizard(uid, wizardId, realm);
+  if (!isDocumentId(wizard.activeCreatureId)) return null;
+  const ref = cloudDb.collection('wizards').doc(wizard.id).collection('creatures').doc(wizard.activeCreatureId);
+  const snapshot = await ref.get();
+  if (!snapshot.exists) return null;
+  const data = snapshot.data() as Record<string, unknown>;
+  if (!isOwnedCreatureDocument(data, uid, wizard.id, realm)) {
+    throw new RequestError(404, 'Selected creature unavailable');
+  }
+  return {
+    id: snapshot.id,
+    speciesId: data.speciesId,
+    nickname: data.nickname,
+    stage: data.stage,
+    chromatic: data.chromatic,
+    branchChoice: data.branchChoice,
+    talents: data.talents,
+  };
 }
 
 function writeWallet(tx: Transaction, realm: RealmId, uid: string, wallet: MarketAccount) {
