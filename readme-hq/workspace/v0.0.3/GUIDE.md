@@ -1,21 +1,20 @@
 # README HQ Folder Guide
 
-**Proposed HQ version:** `v0.0.3`
-**Review state:** Draft for owner review. v0.0.2 remains the latest approved and archived HQ version on `readme-hq`.
+**Current HQ version:** `v0.0.3` · Owner-approved archive for the `readme-hq` branch.
 
-This guide proposal documents the validator currently implemented in [`tools/check_readme_hq.py`](../../../tools/check_readme_hq.py). It does not change the approved v0.0.2 archive. The live folder guide remains v0.0.2 until the owner accepts a new archive.
+This guide documents the [README HQ validator](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/tools/check_readme_hq.py) and how to prepare, validate, and archive a new HQ version.
 
 ## Where to work
 
 | Task | Where to go |
 | --- | --- |
-| Review approved HQ versions | [HQ version history](../../versions/README.md) |
-| Review HQ workspaces | [HQ workspace index](../README.md) |
-| Review the public game README history | [Public README version history](../../../versions/README.md) |
-| Draft a public game README | [Public README workspaces](../../../workspace/README.md) |
-| Review the current approved folder guide | [v0.0.2 guide archive](../../versions/v0.0.2/GUIDE.md) |
-| Review the validator workflow | [README HQ workflow](../../../.github/workflows/readme-hq.yml) |
-| Review the frozen-source manifest | [Baseline manifest](../../../tools/readme_hq_baselines.json) |
+| Review approved HQ versions | [HQ version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/README.md) |
+| Review HQ workspaces | [HQ workspace index](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/workspace/README.md) |
+| Review the public game README history | [Public README version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/README.md) |
+| Draft a public game README | [Public README workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/README.md) |
+| Review the current approved folder guide | [v0.0.3 guide archive](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/v0.0.3/GUIDE.md) |
+| Review the validator workflow | [README HQ workflow](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/.github/workflows/readme-hq.yml) |
+| Review the frozen-source manifest | [Baseline manifest](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/tools/readme_hq_baselines.json) |
 
 ## What the validator checks
 
@@ -36,9 +35,8 @@ The validator checks the following areas.
 
 - Relative Markdown links and absolute links into the `readme-hq` branch are resolved against the exact validation checkout. Paths that escape the repository or point to missing files/directories fail.
 - Heading fragments are checked against generated Markdown heading slugs.
-- At the start of every hosted run, the validator fetches `origin/main` rather than relying on a pinned, stale main commit. The log records the exact main SHA used for that run.
+- At the start of every hosted run, the validator fetches `origin/main` to check links against the current revision. The log records the exact main SHA used for that run.
 - GitHub links to `main` are checked against that fetched main SHA. The validator verifies whether the target is a file or directory and checks heading fragments against the target file at that same main SHA.
-- A main-branch link is therefore verified against the main revision used by that run, not against the README HQ branch's older base.
 
 ### 3. External URL discovery
 
@@ -65,10 +63,9 @@ It deduplicates destinations, checks a bounded number of links, and skips local 
 
 - Successful 2xx responses and 304 are reported as `PASS`.
 - Missing pages (404 or 410), unsafe destinations, DNS failures, TLS certificate failures, redirect loops, and other definitive client errors are reported as failures.
-- Access blocks and inconclusive responses, including a remaining HTTP 403 after the bounded GET fallback, 401, 408, 425, 429, server errors, timeouts, and network/protocol errors, are reported as `UNVERIFIED`.
-- `UNVERIFIED` is not a pass. It means the automated checker could not establish that the destination is healthy; it remains visible in the run output.
+- Access blocks and inconclusive responses, including a remaining HTTP 403 after the bounded GET fallback, 401, 408, 425, 429, server errors, timeouts, and network/protocol errors, are reported as `UNVERIFIED`. The run output lists these destinations for follow-up.
 - Credentials in URLs are rejected. Diagnostics redact credentials, query strings, and fragments so tokens or private query values are not printed.
-- Local loopback examples are reported as skipped development examples, not as verified public destinations.
+- The run output counts skipped local loopback examples separately.
 
 ## Regression coverage
 
@@ -79,16 +76,14 @@ The guide-coverage guard checks the latest active HQ workspace guide while a ver
 ## Creating and approving an HQ version
 
 1. Create a version folder under `readme-hq/workspace/<version>/`. Keep the proposed landing page in `DRAFT.md`, the proposed folder guide in `GUIDE.md`, the proposed changelog in `CHANGELOG.md`, and the workspace record in `README.md`.
-2. Keep the workspace index row at `Draft` while the owner reviews it. A draft is not an approved version and must not be added to the archive version index or frozen-source manifest.
+2. Keep the workspace index row at `Draft` while the owner reviews it. Add the version to the archive index and frozen-source manifest after owner acceptance.
 3. After explicit owner acceptance, copy the approved landing page and guide byte for byte into `readme-hq/versions/<version>/`. Add the changelog, update the approved version index, update the live root README and folder guide, and add source commit/path/blob entries to the manifest in the same archive commit.
 4. Change the workspace row to an archived status, retain the source record, and preserve all earlier archives and changelogs.
 5. Run the README HQ workflow on the exact proposed archive commit. Review the checkout SHA, prior archive baseline, main SHA, test summary, and any UNVERIFIED external destinations.
-6. A branch archive does not merge into `main`, publish the public game README, or declare a game release. Those actions require separate owner authorization.
+6. Keep merges, public README publication, and game releases under separate owner authorization.
 
 ## Scope boundaries
 
-README HQ manages its own approved history and the separate public game README workspaces. It does not own gameplay changes or bug closure. GitHub Issues remain the canonical engineering tracker; Notion remains the private planning and handoff space.
+README HQ manages its own approved history and the separate public game README workspaces. GitHub Issues tracks engineering work. Notion holds private planning and handoffs.
 
-Keep the `readme-hq` branch separate from the full game `main` branch. It is a sparse documentation branch; do not merge it wholesale into `main`. PR #62 is a separate public README integration proposal and must be refreshed and revalidated against current `main` before any promotion.
-
-This proposed v0.0.3 guide is not active until the owner accepts the version. The v0.0.2 archive and its changelog remain frozen.
+Keep the `readme-hq` branch separate from the full game `main` branch. It is a sparse documentation branch; do not merge it wholesale into `main`. Refresh and revalidate the [separate public README proposal](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/62) against current `main` before promotion.
