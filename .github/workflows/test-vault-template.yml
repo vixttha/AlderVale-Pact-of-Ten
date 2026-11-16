@@ -12,6 +12,14 @@ on:
       - 'shared/quests.ts'
       - 'shared/realms.ts'
       - 'shared/world.ts'
+      - 'shared/creatures.ts'
+      - 'shared/economy.ts'
+      - 'shared/elements.ts'
+      - 'shared/settings.ts'
+      - 'shared/spells.ts'
+      - 'src/lib/storage.ts'
+      - 'src/lib/firebase.ts'
+      - 'tests/vault/csharp/**'
   push:
     branches: [main]
     paths:
@@ -24,6 +32,14 @@ on:
       - 'shared/quests.ts'
       - 'shared/realms.ts'
       - 'shared/world.ts'
+      - 'shared/creatures.ts'
+      - 'shared/economy.ts'
+      - 'shared/elements.ts'
+      - 'shared/settings.ts'
+      - 'shared/spells.ts'
+      - 'src/lib/storage.ts'
+      - 'src/lib/firebase.ts'
+      - 'tests/vault/csharp/**'
   workflow_dispatch:
 
 permissions:
@@ -92,6 +108,31 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
+      - uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
+        with:
+          global-json-file: tests/vault/csharp/global.json
+      - name: Verify guest save v1 contracts with C sharp
+        shell: bash
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+          DOTNET_NOLOGO: '1'
+        run: |
+          set -eo pipefail
+          fixture_dir="$RUNNER_TEMP/aldervale-csharp-saves"
+          (
+            set -e
+            printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)"
+            printf 'Base: %s\nHead: %s\n' "${BASE:-n/a}" "${HEAD:-n/a}"
+            printf 'Run / attempt: %s / %s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            node --version
+            node tests/vault/csharp/export-guest-saves.mjs "$fixture_dir"
+            cd tests/vault/csharp
+            dotnet --version
+            dotnet restore GuestSaveContracts.csproj --configfile NuGet.Config
+            dotnet run --project GuestSaveContracts.csproj --configuration Release --no-restore -- "$fixture_dir"
+          ) 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Compare game rules with the Python reference
         shell: bash
         run: |

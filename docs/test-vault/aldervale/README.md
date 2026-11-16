@@ -1,6 +1,6 @@
 # AlderVale Test Vault v0.0.2
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [38 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## What runs on AlderVale's public GitHub runners
 
@@ -19,6 +19,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | G28-003 to G28-005 | | Corrupt save recovery and failed replacement without affecting another realm | [Save tests][save], [guest browser suite][guest] | Core, Browser | |
 | G28-006 | [#22][issue22] | Settings boundaries, corruption and write recovery | [Guest settings Vitest][settings] | Core | Signed-in settings reload |
 | G30-001, G30-003 | [#10][issue10] | Offline HUD and stale-peer removal across reconnect | [Guest browser suite][guest] | Browser | |
+| G28-008 to G28-012 | [#13][issue13] for reward fields | Guest v1 cross-runtime save checks for identity, balances, progression, creature ownership, optional fields and invalid payload diagnostics | [C# guest save suite][csharp-save] | Vault catalog | This suite checks specific guest v1 fields. Browser storage, signed-in sync and future migrations have separate evidence. |
 | G34-001, G34-002 | [#4][issue4] | Narrow enrollment and WebGL fallback | [Guest browser suite][guest] | Browser | HUD zoom, reduced motion, and physical-device behavior |
 | E15-001, E15-002 | | Data integrity and quest giver references | [Catalog Vitest][data], [Ruby catalog][ruby] | Core, Vault catalog | |
 | E24-001, E24-002, E34-002 | | Browser and OS compatibility plus isolated backend checks | [Game workflow][game], [Firestore checks][firestore] | Browser, Core, Firestore emulator | Live sign-in |
@@ -29,6 +30,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [issue13]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13
 [issue22]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/22
 [rust-assets]: ../../../tests/vault/rust/tests/glb_contract.rs
+[csharp-save]: ../../../tests/vault/csharp/README.md
 [reducer]: ../../../tests/questRewards.test.ts
 [human]: ../../../tools/ci/human.pw.mjs
 [guest]: ../../../tools/ci/guest.pw.mjs
@@ -63,6 +65,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Independent rule reference | `python3 tests/vault/first_playable_reference.py -v` with Python 3.12 and Node 24. |
 | Ruby quest catalog | `ruby tests/vault/quest_catalog.rb` with Node 24 and the Ruby bundled on the public Ubuntu runner. |
 | Rust binary asset contract | `cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml` |
+| C# guest save contracts | Follow the [pinned .NET SDK and Node commands][csharp-save]. |
 | Project case table | `python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py --catalog docs/test-vault/aldervale/cases.md` |
 
 ## Evidence on verified main
