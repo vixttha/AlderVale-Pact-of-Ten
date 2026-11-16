@@ -8,6 +8,10 @@ Preserve the gold-edged leaf wreath, central four-point star, leaf across the in
 
 Earlier logo and seal reconstructions in [PR #40](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/40) are superseded as design references.
 
+## Approved brand direction
+
+Owner-approved on November 15, 2026. Woodland Fantasy for the title screen and everyday menus, with Pact Heraldry for seals, milestones, and rewards.
+
 | Integrity check | SHA-256 |
 | --- | --- |
 | SVG file | `50c048318847470bbfe6150016886a754655f5beb1f532624ec0d9b7dcfcf1ae` |
