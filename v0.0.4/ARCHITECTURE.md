@@ -101,7 +101,7 @@ After each accepted resolution, preserve a reusable knowledge note or receipt: s
 
 Every candidate records PR base SHA, PR head SHA, actual tested checkout SHA, merged result SHA if later merged, Actions run and attempt, individual job outcomes, regression scenarios, fixtures/environment, and gaps. Flaky, skipped, canceled, missing or wrong-SHA results never count as pass.
 
-Use [docs/VALIDATION.md](../docs/VALIDATION.md) and [docs/PUBLIC_RUNNER_POLICY.md](../docs/PUBLIC_RUNNER_POLICY.md) at the verified baseline. Use standard public GitHub-hosted runners only. CI evidence does not prove production security, production login, multiplayer safety, gameplay acceptance or release readiness unless the exact scenario is covered.
+Use [docs/VALIDATION.md](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md) and [docs/PUBLIC_RUNNER_POLICY.md](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/PUBLIC_RUNNER_POLICY.md) at the verified baseline. Use standard public GitHub-hosted runners only. CI evidence does not prove production security, production login, multiplayer safety, gameplay acceptance or release readiness unless the exact scenario is covered.
 
 ## 9. Notion coordination
 
