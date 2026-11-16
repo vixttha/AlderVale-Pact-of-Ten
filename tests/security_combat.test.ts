@@ -203,6 +203,33 @@ describe('Aldervale Combat & Breeding Domain Rules', () => {
     return c;
   }
 
+  it('boosts allied spell damage without boosting the co-op boss', () => {
+    const caster = makeTestCombatant('caster', 'ember', true);
+    const partner = makeTestCombatant('partner', 'ember', true);
+    const boss = makeTestCombatant('boss', 'ember', false);
+    const state: DuelState = {
+      duelId: 'coop-resonance', mode: 'coop', round: 1, turnTimerSeconds: 30, arenaBubble: null,
+      playerTeam: [caster, partner], enemyTeam: [boss], firstTeam: 'enemy', phase: 'planning', logs: [],
+      telegraphedCheat: null,
+    };
+    const playRound = (partnerCard: number | null) => resolveDuelRound(
+      state,
+      [
+        { actorId: caster.id, targetId: boss.id, cardIndex: 0, creatureAction: 'none' },
+        { actorId: partner.id, targetId: partner.id, cardIndex: partnerCard, creatureAction: 'none' },
+        { actorId: boss.id, targetId: caster.id, cardIndex: 0, creatureAction: 'none' },
+      ],
+      () => 0.1,
+    );
+
+    const withoutResonance = playRound(null);
+    const withResonance = playRound(1); // Hearth Blade does not damage the boss.
+    expect(withoutResonance.playerTeam[0].hp).toBeLessThan(caster.hp);
+    expect(withResonance.playerTeam[0].hp).toBe(withoutResonance.playerTeam[0].hp);
+    expect(withoutResonance.enemyTeam[0].hp).toBeLessThan(boss.hp);
+    expect(withResonance.enemyTeam[0].hp).toBeLessThan(withoutResonance.enemyTeam[0].hp);
+  });
+
   it('finishes simultaneous burning knockouts as a draw', () => {
     const player = makeTestCombatant('wizard', 'ember', true);
     const enemy = makeTestCombatant('enemy', 'frost', false);
