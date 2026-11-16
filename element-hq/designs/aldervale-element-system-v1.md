@@ -116,6 +116,50 @@ Yes. Elemental instincts are tendencies a creature can learn to manage through e
 
 The inspected game at [`93abf6e`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d) assigns one affinity from the resulting species on hatch. The five exact unordered pairs are implemented. Any other eligible Hatchery pair currently picks one parent's species at random, so a pairing with a fusion parent can copy that fusion species today. Rune-Catch updates Bond XP, stage, and talents while retaining the existing affinity. The creature record stores one element. The inheritance restrictions, in-world rarity, and portrayal of instinct above are proposed design rules. [Fusion resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/creatures.ts#L297) · [Hatchery fallback](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/features/creatures/CreaturesArborPanel.tsx#L127) · [Hatch reward](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/App.tsx#L936) · [Bond training](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/features/creatures/CreaturesArborPanel.tsx#L71) · [Creature record](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/lib/storage.ts#L24)
 
+## 5. Elemental mythology
+
+**Status** · Proposed v1 lore. The Ten are the six starter and four rare elements. The five fusions came later.
+
+### Where did the elements originate?
+
+When AlderVale was young, heat bled from its stone, winds stripped the ground bare, and storms broke before the rivers could settle. Wherever one force met another that could check it, the meeting happened again and again. Those encounters became the first memories of the Ten. The elements took their names from what people saw them do.
+
+In the oldest telling, the Ten made their pact when they each agreed to give their opposite room to act. Ember would warm ground Frost had sealed. Frost would cool what Ember left behind. The other four pairs made their own promises. Settlements grew where people learned to recognize those cycles. The Pact survives in the work of keeping them in balance.
+
+### Why are there five opposing pairs?
+
+Each pair answers a different way the young world could fall out of balance. Either member can check the other, depending on what has gone too far.
+
+| Pair | What they keep in balance |
+| --- | --- |
+| Ember ↔ Frost | Ember sets matter in motion through heat. Frost slows it and preserves what heat would consume. |
+| Gale ↔ Bramble | Gale lifts seeds and carries them into open ground. Bramble puts down roots and holds the soil when the wind rises. |
+| Tide ↔ Spark | Tide gathers and carries force in a steady current. Spark releases it in a sudden discharge. Water gives a charge a path, and a discharge can break a settled flow. |
+| Umbra ↔ Sol | Umbra shelters what needs rest or concealment. Sol brings what is hidden into view. Shade protects life from relentless light. |
+| Verdigris ↔ Chronos | Verdigris gives a thing form that can endure. Chronos gives it a history in which it can change. A rune can outlast the hand that carved it, and time can still wear away its edges. |
+
+These are the five reciprocal oppositions in the element catalog. The pact explains why each member can answer the other. Opposing elements can still produce a stable fusion where a named recipe allows it. Tide and Spark, Umbra and Sol, and Chronos and Verdigris already do so. [Element catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L24) · [Fusion recipes](../fusion-system-v1.md#2-existing-five-recipes)
+
+### Are the elements conscious?
+
+Yes. Each of the Ten has a consciousness that notices and remembers significant events expressed through its nature. Bramble might remember a forest regrowing after a storm. Chronos might attend to the moment a familiar sequence breaks. Each can answer a creature through impressions, recurring patterns, or a rare manifestation. Their awareness is selective, and a reply can be hard to interpret.
+
+A creature has its own mind and can disregard what it senses. Each fusion also has a distinct Confluence consciousness that emerged when its parent affinities could hold a stable form together. An Eclipse creature can sense its Confluence and still choose its own course. [Creature biology](#4-creature-biology) · [Fusion consciousness](../fusion-system-v1.md#can-a-fusion-have-its-own-elemental-consciousness)
+
+### Can they manifest physically?
+
+Yes. An elemental consciousness can briefly gather a body from material or conditions suited to its nature. A Frost manifestation might take shape in rime across a frozen pool. Verdigris might move the loose plates of an old gate into a standing figure. A manifestation can be seen and touched, and it disperses when the conditions that sustain it fade.
+
+A manifestation leaves no egg and has no creature lineage of its own. A living creature can witness or respond to it and keeps its own affinity. Manifestations can appear in stories or environmental scenes. Capturing or fighting one would require a separate encounter design.
+
+### What is the relationship between Space and Time?
+
+**Space** is where things are and how far apart they stand. **Time** gives events their order and duration. They make movement possible together. A door can link two places because it has a position and a shape. A traveler crosses it in a sequence, from opening the door to reaching the other side.
+
+Verdigris expresses the spatial side of the relationship by giving boundaries, structures, and runes a lasting shape. Chronos expresses timing, sequence, and echoes. Space is a principle of the world rather than a school in the Ten. Chronos keeps Verdigris as its opposing element.
+
+Their fusion, **Aetheris**, binds a sequence to a form. In the myth, a runic astrolabe can align its rings at a particular moment, and the same alignment returns when the sequence repeats. That gives Aetheris its time-forged identity. The lore establishes timing and structure. Teleportation, time travel, and rollback mechanics would each need their own design. [Chronos and Verdigris](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L137) · [Aetheris](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L219) · [Aetheris lore](../fusion-system-v1.md#35-aetheris--chronos--verdigris)
+
 ## Balance and verification
 
 | Scenario | Expected result | Evidence to collect |

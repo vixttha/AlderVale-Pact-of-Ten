@@ -87,5 +87,16 @@ jobs:
               if missing_biology := biology_headings - design_headings:
                   raise SystemExit(f"Missing creature biology sections: {sorted(missing_biology)}")
 
+              mythology_headings = {
+                  "## 5. Elemental mythology",
+                  "### Where did the elements originate?",
+                  "### Why are there five opposing pairs?",
+                  "### Are the elements conscious?",
+                  "### Can they manifest physically?",
+                  "### What is the relationship between Space and Time?",
+              }
+              if missing_mythology := mythology_headings - design_headings:
+                  raise SystemExit(f"Missing elemental mythology sections: {sorted(missing_mythology)}")
+
           print(f"Verified Element HQ documents at {head}")
           PY
