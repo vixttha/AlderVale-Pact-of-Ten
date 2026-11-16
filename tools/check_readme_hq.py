@@ -115,7 +115,8 @@ def check_archive(root, base, filenames, manifest_entries, label):
                 f"{label} {version}/{filename} frozen snapshot checksum mismatch",
             )
 
-    return versions_dir / rows[0], rows[0]
+    latest_version = max(rows, key=version_key)
+    return versions_dir / latest_version, latest_version
 
 
 def check_workspace(root, base, label):
@@ -310,10 +311,10 @@ def run_regression_tests(root):
     def stale_public_workspace_pointer(fixture):
         path = fixture / "README.md"
         content = read(path)
-        old = "Current public README draft: [v0.0.2](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/v0.0.2/README.md)"
-        new = "Current public README draft: [v0.0.2](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/v0.0.1/README.md)"
+        old = "workspace/v0.0.2/README.md"
+        new = "workspace/v0.0.1/README.md"
         require(old in content, "Regression fixture could not find the public workspace pointer")
-        path.write_text(content.replace(old, new), encoding="utf-8")
+        path.write_text(content.replace(old, new, 1), encoding="utf-8")
 
     def stale_candidate_draft_pointer(fixture):
         path = fixture / "readme-hq" / "workspace" / "v0.0.2" / "DRAFT.md"
