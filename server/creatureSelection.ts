@@ -10,6 +10,7 @@ export interface StoredCreatureSelection {
   chromatic: unknown;
   branchChoice: unknown;
   talents: unknown;
+  elementId?: unknown;
 }
 
 export interface GuestCreatureSelection {
