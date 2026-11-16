@@ -91,3 +91,71 @@ test('buyers must use the server transaction to settle a legacy listing', async 
     status: 'sold', buyerId: 'bob', updatedAt: serverTimestamp(),
   }));
 });
+
+const realmAccount = (overrides = {}) => ({
+  uid: 'alice',
+  realmId: 'breeze',
+  wizardIds: ['w_alice'],
+  unlockedRaces: ['human'],
+  termXp: 0,
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+  ...overrides,
+});
+const creature = (overrides = {}) => ({
+  ownerId: 'alice',
+  wizardId: 'w_alice',
+  realmId: 'breeze',
+  speciesId: 'cinder_kitsune',
+  nickname: 'Kit',
+  elementId: 'ember',
+  stage: 1,
+  chromatic: 'none',
+  bondXp: 0,
+  wins: 0,
+  talents: ['keen_sight'],
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+  ...overrides,
+});
+
+test('valid realm-account and creature string arrays are accepted', async () => {
+  await assertSucceeds(setDoc(doc(db('alice'), 'accounts/alice/realms/breeze'), realmAccount()));
+  await seed('wizards/w_alice', storedWizard());
+  await assertSucceeds(setDoc(doc(db('alice'), 'wizards/w_alice/creatures/c1'), creature()));
+});
+
+// These are failing-before-fix regression tests. A failure here means the current
+// rules accepted malformed array elements and assertFails observed that acceptance.
+test('rejects a non-string second wizardIds entry (issue #77)', async () => {
+  await assertFails(setDoc(doc(db('alice'), 'accounts/alice/realms/breeze'), realmAccount({
+    wizardIds: ['w_alice', { malformed: true }],
+  })));
+});
+test('rejects a non-string final wizardIds entry at the three-item limit (issue #77)', async () => {
+  await assertFails(setDoc(doc(db('alice'), 'accounts/alice/realms/breeze'), realmAccount({
+    wizardIds: ['w_alice', 'w_bob', 42],
+  })));
+});
+test('rejects a non-string second unlockedRaces entry (issue #77)', async () => {
+  await assertFails(setDoc(doc(db('alice'), 'accounts/alice/realms/breeze'), realmAccount({
+    unlockedRaces: ['human', 42],
+  })));
+});
+test('rejects a non-string final unlockedRaces entry at the twenty-item limit (issue #77)', async () => {
+  await assertFails(setDoc(doc(db('alice'), 'accounts/alice/realms/breeze'), realmAccount({
+    unlockedRaces: [...Array.from({ length: 19 }, (_, index) => `race_${index}`), { malformed: true }],
+  })));
+});
+test('rejects a non-string second talents entry (issue #77)', async () => {
+  await seed('wizards/w_alice', storedWizard());
+  await assertFails(setDoc(doc(db('alice'), 'wizards/w_alice/creatures/c1'), creature({
+    talents: ['keen_sight', { malformed: true }],
+  })));
+});
+test('rejects a non-string final talents entry at the twelve-item limit (issue #77)', async () => {
+  await seed('wizards/w_alice', storedWizard());
+  await assertFails(setDoc(doc(db('alice'), 'wizards/w_alice/creatures/c1'), creature({
+    talents: [...Array.from({ length: 11 }, (_, index) => `talent_${index}`), 42],
+  })));
+});
