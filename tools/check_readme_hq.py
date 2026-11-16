@@ -17,7 +17,7 @@ def read(path):
     return path.read_text(encoding="utf-8")
 
 
-def check_archive(base):
+def check_archive(base, filenames):
     versions = base / "versions"
     index = read(versions / "README.md")
     rows = re.findall(r"^\| (v\d+\.\d+\.\d+) \|", index, re.MULTILINE)
@@ -27,14 +27,14 @@ def check_archive(base):
     require(rows == sorted(rows, key=lambda v: tuple(map(int, v[1:].split("."))), reverse=True),
             f"{versions.relative_to(ROOT)} must list newest versions first")
     for version in rows:
-        for filename in ("README.md", "CHANGELOG.md"):
+        for filename in filenames:
             require((versions / version / filename).is_file(),
                     f"{versions.relative_to(ROOT)}/{version}/{filename} is missing")
             require(f"]({version}/{filename})" in index,
                     f"{versions.relative_to(ROOT)} does not link to {version}/{filename}")
         require((base / "workspace" / version / "README.md").is_file(),
                 f"{base.relative_to(ROOT)}/workspace/{version}/README.md is missing")
-    return versions / rows[0] / "README.md", rows[0]
+    return versions / rows[0], rows[0]
 
 
 def check_links(file):
@@ -55,14 +55,17 @@ def check_links(file):
                     f"{file.relative_to(ROOT)} has a broken heading link to {href}")
 
 
-_, public_version = check_archive(ROOT)
+_, public_version = check_archive(ROOT, ("README.md", "CHANGELOG.md"))
 hq = ROOT / "readme-hq"
-hq_snapshot, hq_version = check_archive(hq)
-require((ROOT / "README.md").read_bytes() == hq_snapshot.read_bytes(),
+hq_snapshot, hq_version = check_archive(hq, ("README.md", "GUIDE.md", "CHANGELOG.md"))
+require((ROOT / "README.md").read_bytes() == (hq_snapshot / "README.md").read_bytes(),
         "The HQ front page differs from the latest HQ snapshot")
+require((hq / "README.md").read_bytes() == (hq_snapshot / "GUIDE.md").read_bytes(),
+        "The HQ folder guide differs from the latest HQ snapshot")
 require(f"**Current HQ version:** `{hq_version}`" in read(hq / "README.md"),
         "The current HQ version pointer does not match the latest snapshot")
-for file in (*ROOT.glob("**/README.md"), *ROOT.glob("**/CHANGELOG.md")):
+for file in (*ROOT.glob("**/README.md"), *ROOT.glob("**/CHANGELOG.md"),
+             *hq.glob("versions/*/GUIDE.md")):
     check_links(file)
 
 print(f"PASS: public README {public_version} and README HQ {hq_version} archives, workspace records, snapshot parity, and internal navigation.")

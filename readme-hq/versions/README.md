@@ -2,6 +2,6 @@
 
 | Version | Date (Eastern) | Summary | Files |
 | --- | --- | --- | --- |
-| v0.0.1 | 2026-11-15 | First front page for tracking the public README and HQ’s own history. | [Snapshot](v0.0.1/README.md) · [Changelog](v0.0.1/CHANGELOG.md) |
+| v0.0.1 | 2026-11-15 | First HQ landing page and folder guide. | [Landing page](v0.0.1/README.md) · [Folder guide](v0.0.1/GUIDE.md) · [Changelog](v0.0.1/CHANGELOG.md) |
 
-Add one row per published HQ version, newest first. Keep every snapshot byte for byte. Each changelog records changes since the previous approved HQ version. The first entry establishes the baseline.
+Add one row per published HQ version, newest first. Keep the landing-page and folder-guide snapshots byte for byte. Each changelog records changes since the previous approved HQ version. The first entry establishes the baseline.
