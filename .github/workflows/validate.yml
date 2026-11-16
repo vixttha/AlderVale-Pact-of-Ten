@@ -57,6 +57,9 @@ jobs:
       - name: Real HTTP and WebSocket integration
         id: server_test
         run: node --test tools/ci/server.check.mjs
+      - name: Install and start the Windows owner-play build
+        if: runner.os == 'Windows'
+        run: '& ".\AlderVale Play\Play AlderVale.cmd" --smoke --checkout'
       - name: Asset sizes and GLB integrity
         if: runner.os == 'Linux'
         shell: bash
