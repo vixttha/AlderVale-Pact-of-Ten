@@ -14,16 +14,23 @@ try {
       const page = await browser.newPage({ viewport: { width, height: 970 }, colorScheme });
       const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
       assert.equal(response.status(), 200);
+      const scroll = locator => page.waitForFunction(selector => {
+        const node = Array.from(document.querySelectorAll('article.markdown-body'))
+          .find(article => article.querySelector('h1')?.textContent.trim() === 'AlderVale: Pact of Ten')
+          ?.querySelector(selector);
+        if (!node) return false;
+        node.scrollIntoView({ block: 'center' });
+        return true;
+      }, locator);
       const article = page.locator('article.markdown-body').filter({ has: page.getByRole('heading', { name: 'AlderVale: Pact of Ten', exact: true }) });
       await article.waitFor({ timeout: 20000 });
       const title = article.getByRole('heading', { name: 'AlderVale: Pact of Ten', exact: true });
-      await title.scrollIntoViewIfNeeded();
       const campus = article.getByRole('img', { name: /Rowan stands before the fountain/i });
       const duel = article.getByRole('img', { name: /Round one of Rowan’s solo duel/i });
-      await campus.scrollIntoViewIfNeeded();
+      await scroll('img[src$="breeze-campus.webp"]');
       await campus.evaluate(img => img.decode());
       const asset = duel;
-      await asset.scrollIntoViewIfNeeded();
+      await scroll('img[src$="breeze-first-spark-duel.webp"]');
       await asset.evaluate(img => img.decode());
       const metrics = await article.evaluate(node => {
         const images = Array.from(node.querySelectorAll('img'));
@@ -85,7 +92,7 @@ try {
       }
       await title.evaluate(node => node.scrollIntoView({ block: 'start' }));
       await page.screenshot({ path: out + '/' + colorScheme + '-' + width + '.png', animations: 'disabled' });
-      await duel.scrollIntoViewIfNeeded();
+      await scroll('img[src$="breeze-first-spark-duel.webp"]');
       await page.screenshot({ path: out + '/' + colorScheme + '-' + width + '-duel.png', animations: 'disabled' });
       console.log(JSON.stringify({ commit, ...metrics }));
       await page.close();
