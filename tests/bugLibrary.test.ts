@@ -183,7 +183,7 @@ describe("Bug Library queue", () => {
     assert.strictEqual(blocked.decisions[0].reason, "OPEN_PR_ALREADY_COVERS_ISSUE_99");
   });
 
- () => {
+  it("does not dispatch a partial First Spark record as a confirmed bug", () => {
     const result = buildQueue([issue(13)], context({
       triage: { 13: bugTriage({ status: "blocked", expectedBehavior: "First Spark is covered; Arbor and Rare Trial remain unverified." }) },
     }));
