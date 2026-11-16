@@ -69,7 +69,7 @@ describe('Fusion progression audit on the baseline game', () => {
       return {
         id, wizardId: wizard.id, ownerId: wizard.ownerId, realmId: wizard.realmId, speciesId,
         elementId: species.element, nickname: species.name, stage: 2, bondXp: 100,
-        branchChoice: 'A', chromatic: 'none', talents: [],
+        branchChoice: 'A', chromatic: 'none', wins: 0, talents: [],
       };
     }
     const parents = [parent('parent-a', a), parent('parent-b', b)];
