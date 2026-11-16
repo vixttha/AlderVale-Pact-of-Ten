@@ -98,6 +98,6 @@ These are the spell definitions on the baseline main snapshot. PR #84 proposes a
 
 ## 6. Source references
 
-- [Element definitions and matchup function](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/elements.ts)
-- [Spell definitions and status associations](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/spells.ts)
-- [Status-effect definitions](../blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/combat.ts)
+- [Element definitions and matchup function](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/elements.ts)
+- [Spell definitions and status associations](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/spells.ts)
+- [Status-effect definitions](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd/shared/combat.ts)
