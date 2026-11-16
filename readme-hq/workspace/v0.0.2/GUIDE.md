@@ -1,8 +1,10 @@
 # README HQ Folder Guide
 
-**Proposed HQ version:** `v0.0.2` (draft; not approved)
+**Current HQ version:** `v0.0.2`
 
-Use this folder to maintain the README HQ landing page and review how it has changed. The proposed [HQ landing page](DRAFT.md) is staged separately from the branch's current [landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md).
+**Branch status:** Approved and archived on `readme-hq`; not merged into `main`.
+
+Use this folder to maintain the README HQ landing page and review how it has changed. The current [HQ landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md) is the canonical entry point for this branch. Use the [HQ version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/README.md) to compare archived versions.
 
 ## Where to work
 
@@ -23,4 +25,4 @@ Use this folder to maintain the README HQ landing page and review how it has cha
 
 Public game README updates follow the promotion process on the [current branch HQ landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md#from-draft-to-public-readme).
 
-This guide is a workspace candidate. The branch's current guide remains the v0.0.1 baseline until v0.0.2 receives owner approval.
+This v0.0.2 guide is the current approved HQ version on `readme-hq`. It has not been merged into `main` and does not constitute a game release.
