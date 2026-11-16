@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createStarterWizard } from '../../shared/economy.ts';
 import { applySagaEvent } from '../../shared/quests.ts';
-import { xpRequiredForLevel } from '../../shared/realms.ts';
+import { xpRequiredForLevel, type RealmId } from '../../shared/realms.ts';
 import { CAMPUS_QUESTS } from '../../shared/world.ts';
 import { loadGuestRealm, saveGuestRealm } from '../../src/lib/storage.ts';
 
@@ -12,12 +12,12 @@ vi.mock('../../src/lib/firebase.ts', () => ({
   OperationType: {},
 }));
 
-function createGuestWizard() {
+function createGuestWizard(realmId: RealmId = 'breeze') {
   return createStarterWizard({
-    id: 'guest_first_spark',
+    id: `guest_first_spark_${realmId}`,
     ownerId: 'guest_local',
     name: 'First Spark',
-    realmId: 'breeze',
+    realmId,
     raceId: 'human',
     elementId: 'ember',
     sculpt: {
@@ -40,7 +40,7 @@ function createGuestWizard() {
   });
 }
 
-describe('Vault: guest First Spark payout and save', () => {
+describe('Vault: guest quest rewards and realm saves', () => {
   beforeEach(() => {
     const storage = new Map<string, string>();
     vi.stubGlobal('localStorage', {
@@ -88,5 +88,37 @@ describe('Vault: guest First Spark payout and save', () => {
     expect(reloaded.xp).toBe(completed.xp);
     expect(applySagaEvent(reloaded, 'solo-win')).toBe(reloaded);
     expect(loadGuestRealm('horizon').wizards).toEqual([]);
+  });
+  it('G28-003 recovers with first-run defaults after corrupt guest JSON and preserves another realm', () => {
+    const horizon = loadGuestRealm('horizon');
+    const wizard = createGuestWizard('horizon');
+    const horizonSave = {
+      ...horizon,
+      account: { ...horizon.account, wizardIds: [wizard.id], termXp: 42 },
+      wizards: [wizard],
+    };
+    expect(saveGuestRealm('horizon', horizonSave)).toBe(true);
+    localStorage.setItem('aldervale_guest_breeze_v1', '{"account":');
+
+    const recovered = loadGuestRealm('breeze');
+    expect(recovered.account).toMatchObject({
+      realmId: 'breeze', wizardIds: [], termXp: 0, claimedTermTiers: [],
+    });
+    expect(recovered.wizards).toEqual([]);
+    expect(recovered.creatures).toEqual({});
+    expect(recovered.sanctuaries).toEqual({});
+    expect(loadGuestRealm('horizon')).toMatchObject({
+      account: horizonSave.account,
+      wizards: [{ id: wizard.id, realmId: 'horizon' }],
+    });
+
+    const replacement = createGuestWizard();
+    expect(saveGuestRealm('breeze', {
+      ...recovered,
+      account: { ...recovered.account, wizardIds: [replacement.id] },
+      wizards: [replacement],
+    })).toBe(true);
+    expect(loadGuestRealm('breeze').wizards.map(({ id }) => id)).toEqual([replacement.id]);
+    expect(loadGuestRealm('horizon').account).toEqual(horizonSave.account);
   });
 });
