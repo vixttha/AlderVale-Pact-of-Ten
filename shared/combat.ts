@@ -810,3 +810,61 @@ export function chooseAiAction(ai: CombatantState, foes: CombatantState[]): Turn
     creatureAction: ai.creatures[ai.activeCreatureIdx]?.hp > 0 ? 'skill' : 'none',
   };
 }
+
+/** True when the wizard's lead was the active fighter at duel end (local Arbor win credit). */
+export function leadCreatureQualifiedForArborWin(me: CombatantState, leadCreatureId: string): boolean {
+  const leadIdx = me.creatures.findIndex((pet) => pet.id === leadCreatureId);
+  if (leadIdx < 0) return false;
+  return me.creatures[me.activeCreatureIdx]?.id === leadCreatureId;
+}
+
+/** Up to three duel slots, keeping the wizard's selected lead active in combat. */
+export function pickDuelCreatureRoster<T extends { id: string }>(
+  creatures: T[],
+  activeCreatureId: string | undefined | null,
+  maxSlots = 3,
+): { roster: T[]; activeCreatureIdx: number } {
+  if (creatures.length === 0) return { roster: [], activeCreatureIdx: 0 };
+
+  const lead = creatures.find((pet) => pet.id === activeCreatureId) ?? creatures[0];
+  const roster: T[] = [];
+  const seen = new Set<string>();
+  for (const pet of creatures) {
+    if (roster.length >= maxSlots) break;
+    if (seen.has(pet.id)) continue;
+    roster.push(pet);
+    seen.add(pet.id);
+  }
+
+  if (!seen.has(lead.id)) {
+    if (roster.length >= maxSlots) roster[roster.length - 1] = lead;
+    else roster.push(lead);
+  }
+
+  const activeCreatureIdx = Math.max(0, roster.findIndex((pet) => pet.id === lead.id));
+  return { roster, activeCreatureIdx };
+}
+
+export function ownedCreatureToCombatSlot(pet: {
+  id: string;
+  speciesId: string;
+  nickname: string;
+  elementId: ElementId;
+  stage: 1 | 2 | 3;
+  chromatic: ChromaticVariant;
+  branchChoice: 'A' | 'B';
+  talents: string[];
+}): CombatCreatureSlot {
+  return {
+    id: pet.id,
+    speciesId: pet.speciesId,
+    nickname: pet.nickname,
+    element: pet.elementId,
+    stage: pet.stage,
+    chromatic: pet.chromatic,
+    branchChoice: pet.branchChoice,
+    hp: 190 + pet.stage * 45,
+    maxHp: 190 + pet.stage * 45,
+    talents: pet.talents,
+  };
+}

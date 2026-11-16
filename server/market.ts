@@ -6,6 +6,7 @@ import type { AcademyHouse } from '../shared/houses.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { GEAR_BY_ID } from '../shared/wardrobe.ts';
 import { isBazaarPrice, STARTING_MARKET_FLORINS, type BazaarListing, type MarketAccount } from '../shared/market.ts';
+import { dormTourRatingFromTotals } from '../shared/dormTours.ts';
 
 export class RequestError extends Error {
   readonly status: number;
@@ -251,7 +252,8 @@ export async function listTours(realm: RealmId) {
   const snapshot = await realmRef(realm).collection('dormTours').limit(100).get();
   return snapshot.docs.map((snap) => {
     const { wizardName, themeId, ratingSum, ratingCount } = snap.data();
-    return { wizardId: snap.id, wizardName, themeId, ratingAvg: ratingCount > 0 ? Number((ratingSum / ratingCount).toFixed(1)) : 5, ratingCount };
+    const rating = dormTourRatingFromTotals(ratingSum, ratingCount);
+    return { wizardId: snap.id, wizardName, themeId, ...rating };
   });
 }
 
@@ -266,5 +268,19 @@ export async function publishTour(realm: RealmId, uid: string, wizardId: unknown
     tx.update(layout, { isPublic: true, updatedAt: FieldValue.serverTimestamp() });
     tx.set(listing, { wizardName: wizard.name + '’s Loft', themeId: dorm.themeId, ratingSum: old.get('ratingSum') ?? 0, ratingCount: old.get('ratingCount') ?? 0 });
     return { isPublic: true };
+  });
+}
+
+export async function unpublishTour(realm: RealmId, uid: string, wizardId: unknown) {
+  if (!isDocumentId(wizardId)) throw new RequestError(400, 'Invalid wizard');
+  const layout = cloudDb.collection('wizards').doc(wizardId).collection('sanctuary').doc('layout');
+  const listing = realmRef(realm).collection('dormTours').doc(wizardId);
+  return cloudDb.runTransaction(async (tx) => {
+    const [wizard, snapshot] = await Promise.all([ownedWizard(uid, wizardId, realm, tx), tx.get(layout)]);
+    const dorm = snapshot.data();
+    if (!dorm || dorm.ownerId !== uid || dorm.realmId !== realm) throw new RequestError(404, 'Dorm layout unavailable');
+    tx.update(layout, { isPublic: false, updatedAt: FieldValue.serverTimestamp() });
+    tx.delete(listing);
+    return { isPublic: false, wizardName: wizard.name };
   });
 }

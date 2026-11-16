@@ -79,6 +79,13 @@ interface TradeSession {
   bConfirmed: boolean;
 }
 
+interface TradeInvite {
+  inviteId: string;
+  realmId: RealmId;
+  fromSession: string;
+  toSession: string;
+}
+
 export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGraceMs = 30_000) {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws', maxPayload: 16 * 1024 });
   const clients = new Map<string, ClientConn>();
@@ -86,6 +93,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
   const pvpQueues: Record<RealmId, string[]> = { breeze: [], horizon: [], everpeak: [] };
   const coopQueues: Record<RealmId, string[]> = { breeze: [], horizon: [], everpeak: [] };
   const trades = new Map<string, TradeSession>();
+  const tradeInvites = new Map<string, TradeInvite>();
   const guestTickets = new Map<string, { wizardId: string; realm: RealmId; expiresAt: number }>();
   const reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
@@ -100,6 +108,42 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     for (const id of [trade.aSession, trade.bSession]) {
       const client = clients.get(id);
       if (client) send(client, { type: 'trade_cancelled', message });
+    }
+  }
+
+  function cancelInvitesForSession(sessionId: string, message: string) {
+    for (const [inviteId, invite] of [...tradeInvites.entries()]) {
+      if (invite.fromSession !== sessionId && invite.toSession !== sessionId) continue;
+      tradeInvites.delete(inviteId);
+      for (const id of [invite.fromSession, invite.toSession]) {
+        const client = clients.get(id);
+        if (client) send(client, { type: 'trade_invite_closed', inviteId, message });
+      }
+    }
+  }
+
+  function openTradeSession(realmId: RealmId, proposerSession: string, recipientSession: string) {
+    const tradeId = randomUUID();
+    const trade: TradeSession = {
+      tradeId,
+      realmId,
+      aSession: proposerSession,
+      bSession: recipientSession,
+      aOfferFlorins: 0,
+      bOfferFlorins: 0,
+      aLocked: false,
+      bLocked: false,
+      aConfirmed: false,
+      bConfirmed: false,
+    };
+    trades.set(tradeId, trade);
+    const proposer = clients.get(proposerSession);
+    const recipient = clients.get(recipientSession);
+    if (proposer?.presence) {
+      send(proposer, { type: 'trade_update', trade, partnerName: recipient?.presence?.name ?? 'Wizard', isA: true });
+    }
+    if (recipient?.presence) {
+      send(recipient, { type: 'trade_update', trade, partnerName: proposer?.presence?.name ?? 'Wizard', isA: false });
     }
   }
 
@@ -618,24 +662,38 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
             send(conn, { type: 'world_notice', text: 'Both traders must sign in with Google.' });
             return;
           }
-          if (conn.verifiedUid !== partner.verifiedUid && partner.presence?.realmId === conn.presence.realmId &&
-              ![...trades.values()].some((trade) => [trade.aSession, trade.bSession].some((id) => id === sessionId || id === targetSession))) {
-            const tradeId = randomUUID();
-            trades.set(tradeId, {
-              tradeId,
-              realmId: conn.presence.realmId,
-              aSession: sessionId,
-              bSession: targetSession,
-              aOfferFlorins: 0,
-              bOfferFlorins: 0,
-              aLocked: false,
-              bLocked: false,
-              aConfirmed: false,
-              bConfirmed: false,
-            });
-            const t = trades.get(tradeId)!;
-            send(conn, { type: 'trade_update', trade: t, partnerName: partner.presence.name, isA: true });
-            send(partner, { type: 'trade_update', trade: t, partnerName: conn.presence.name, isA: false });
+          if (conn.verifiedUid === partner.verifiedUid || partner.presence?.realmId !== conn.presence.realmId) return;
+          const busyPair = [...trades.values()].some((trade) => [trade.aSession, trade.bSession].some((id) => id === sessionId || id === targetSession));
+          const pendingPair = [...tradeInvites.values()].some((invite) =>
+            [invite.fromSession, invite.toSession].some((id) => id === sessionId || id === targetSession),
+          );
+          if (busyPair || pendingPair) {
+            send(conn, { type: 'world_notice', text: 'That player already has a pending or active trade.' });
+            return;
+          }
+          const inviteId = randomUUID();
+          tradeInvites.set(inviteId, {
+            inviteId,
+            realmId: conn.presence.realmId,
+            fromSession: sessionId,
+            toSession: targetSession,
+          });
+          send(partner, { type: 'trade_invite', inviteId, proposerName: conn.presence.name });
+          send(conn, { type: 'trade_invite_sent', inviteId, targetName: partner.presence.name });
+        } else if (type === 'trade_respond' && conn.presence) {
+          const inviteId = String(msg.inviteId ?? '');
+          const invite = tradeInvites.get(inviteId);
+          if (!invite || invite.toSession !== sessionId) return;
+          tradeInvites.delete(inviteId);
+          const proposer = clients.get(invite.fromSession);
+          if (msg.accept === true) {
+            if (proposer?.presence?.realmId === conn.presence.realmId) {
+              openTradeSession(invite.realmId, invite.fromSession, invite.toSession);
+            }
+          } else {
+            const declined = 'Trade invitation declined.';
+            send(conn, { type: 'trade_invite_closed', inviteId, message: declined });
+            if (proposer) send(proposer, { type: 'trade_invite_closed', inviteId, message: declined });
           }
         } else if (type === 'trade_step') {
           const t = trades.get(String(msg.tradeId ?? ''));
@@ -696,6 +754,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     });
 
     ws.on('close', () => {
+      cancelInvitesForSession(sessionId, 'Trade invitation ended because a player disconnected.');
       for (const trade of trades.values()) if (trade.aSession === sessionId || trade.bSession === sessionId) cancelTrade(trade, 'A trader disconnected.');
       for (const room of duels.values()) room.spectators.delete(sessionId);
       for (const q of Object.values(pvpQueues)) {

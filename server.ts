@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express, { type Request, type Response, type NextFunction } from 'express';
-import { buyListing, cancelListing, changeHouseMembership, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, RequestError } from './server/market.ts';
+import { buyListing, cancelListing, changeHouseMembership, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, unpublishTour, RequestError } from './server/market.ts';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
@@ -88,6 +88,9 @@ export async function createAldervaleApp({ frontend = true } = {}) {
   }));
   app.post('/api/tours/:realmId/publish', realmRoute(async (req, res, realm) => {
     res.json(await publishTour(realm, await requireAccount(req), req.body?.wizardId));
+  }));
+  app.post('/api/tours/:realmId/unpublish', realmRoute(async (req, res, realm) => {
+    res.json(await unpublishTour(realm, await requireAccount(req), req.body?.wizardId));
   }));
 
   const allowance = new Map<string, { resetAt: number; count: number }>();
