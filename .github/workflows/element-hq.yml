@@ -75,6 +75,10 @@ jobs:
                   raise SystemExit(f"{path} is missing sections: {sorted(missing_sections)}")
 
           if os.environ["GITHUB_REF"] == "refs/heads/aldervale-element-design-v1":
+              status = "element-hq/designs/aldervale-element-design-status.md"
+              if status not in tracked or f"]({status})" not in guide:
+                  raise SystemExit(f"Branch guide must link to the tracked {status}")
+
               biology_headings = {
                   "## 4. Creature biology",
                   "### Can two different elements produce offspring?",
