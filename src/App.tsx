@@ -25,7 +25,7 @@ import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { CAMPUS_NPCS, CAMPUS_QUESTS, MOUNTS, ZONES, type CampusNpc, type ZoneId } from '../shared/world.ts';
 import { computeWizardDerivedStats, type DuelState, type TurnActionInput } from '../shared/combat.ts';
 import { SPECIES_BY_ID } from '../shared/creatures.ts';
-import { applyTermReward, TERM_REWARD_TRACK, type WizardDocument } from '../shared/economy.ts';
+import { applyTermReward, grantFusionSpells, TERM_REWARD_TRACK, type WizardDocument } from '../shared/economy.ts';
 import { isWizardMuted } from '../shared/playerSocial.ts';
 import { RACES } from '../shared/wardrobe.ts';
 import { auth, signInWithGooglePopup, signOutFirebase } from './lib/firebase.ts';
@@ -460,7 +460,9 @@ export function App() {
       }
       setZone('hub');
       setOverlay({ type: 'none' });
-      setActiveWizard(wiz);
+      const recoveredWizard = grantFusionSpells(wiz, loadedPets);
+      if (recoveredWizard !== wiz) persistWizard(recoveredWizard);
+      else setActiveWizard(wiz);
     } catch {
       showToast('Could not load this wizard’s save. Please try again.');
     }
@@ -999,6 +1001,7 @@ export function App() {
       },
     };
 
+    updatedWiz = grantFusionSpells(updatedWiz, hatchedPets);
     if (res.mode === 'solo') updatedWiz = applySagaEvent(updatedWiz, 'solo-win');
     if (res.mode === 'trial') updatedWiz = applySagaEvent(updatedWiz, 'rare-trial-win');
     const leadWon = lead && res.leadCreatureWinEligible === true;
@@ -1015,7 +1018,11 @@ export function App() {
     const totalShards = updatedWiz.currencies.spellShards - activeWizard.currencies.spellShards;
     const questNotice = completed.length ? ` Quest completed: ${completed.map((quest) => quest.title).join(', ')}.` : '';
     const hatchNotice = hatchedPets.length ? ` Hatched ${hatchedPets.map((pet) => pet.nickname).join(', ')}!` : '';
-    showToast(`Victory! +${totalXp} XP, +${totalFlorins} Florins, +${totalShards} Spell Shards!${questNotice}${hatchNotice}`);
+    const learnedFusionCard = updatedWiz.progression.ownedSpellIds.some((id) =>
+      !activeWizard.progression.ownedSpellIds.includes(id),
+    );
+    const fusionNotice = learnedFusionCard ? ' Fusion spell added to your collection. See Deck & Lectern.' : '';
+    showToast(`Victory! +${totalXp} XP, +${totalFlorins} Florins, +${totalShards} Spell Shards!${questNotice}${hatchNotice}${fusionNotice}`);
   };
 
   const guestSaveWarning = failedGuestRealms.length > 0 && (
