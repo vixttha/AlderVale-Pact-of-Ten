@@ -834,6 +834,7 @@ def run_regression_tests(root, repo, main_ref, baseline):
 
 
 def run_external_link_regression_tests():
+    global validate_external_target, PinnedHTTPConnection, PinnedHTTPSConnection
     cases = 0
     with tempfile.TemporaryDirectory(prefix="readme-hq-external-") as temp_dir:
         fixture = Path(temp_dir)
