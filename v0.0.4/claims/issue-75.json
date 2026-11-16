@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "issueNumber": 75,
-  "claimId": "AV-CLAIM-75-20261116-01",
-  "status": "released",
-  "worker": "ChatGPT Head/Worker",
+  "claimId": "AV-CLAIM-75-20261116-02",
+  "status": "active",
+  "worker": "ChatGPT",
   "host": "chatgpt.com",
   "model": "GPT-6",
   "sessionId": "unavailable",
   "githubActor": "vixttha",
-  "baseSha": "a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd",
-  "workBranch": "fix-issue-75-live-creature-selection",
-  "claimedAt": "2026-11-16T13:17:05.229Z",
-  "expiresAt": "2026-11-16T14:31:38.620Z",
-  "note": "Released after PR #92 merged at 690076a36002a37377278409f8a789a450c46064; exact candidate run 43877414688 and post-merge main run 43882668187 passed 7/7. Cooperative lock only; not an authorization boundary."
+  "baseSha": "65e90e59eaf69a1551828a7358a0e65587643992",
+  "workBranch": "fix/issue-75-authenticated-matchmaking-ci",
+  "claimedAt": "2026-11-16T18:10:48.000Z",
+  "expiresAt": "2026-11-16T19:40:48.000Z",
+  "note": "Owner-scoped authenticated matchmaking emulator coverage for issue #75 following PR #92."
 }
