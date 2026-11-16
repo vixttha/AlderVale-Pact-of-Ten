@@ -90,10 +90,20 @@ test('muting one player does not hide a different player with the same display n
     text: 'message-from-unmuted-twin',
     at: Date.now() + 1,
   }));
+  serverSocket.send(JSON.stringify({
+    type: 'chat_message',
+    senderSessionId: 'control-session',
+    senderWizardId: 'control',
+    senderName: 'Control',
+    elementId: 'ember',
+    text: 'message-from-control-sender',
+    at: Date.now() + 2,
+  }));
 
   await page.getByRole('button', { name: 'Chat', exact: true }).click();
+  await expect(page.getByText('message-from-control-sender', { exact: true })).toBeVisible();
   await expect(page.getByText('message-from-muted-twin', { exact: true })).toHaveCount(0);
-  // This should remain visible because only twin-session-a was muted. On the
+  // This should remain visible because only one Twin identity was muted. On the
   // current build it is also hidden because the mute key is the shared name.
   await expect(page.getByText('message-from-unmuted-twin', { exact: true })).toBeVisible();
 });
