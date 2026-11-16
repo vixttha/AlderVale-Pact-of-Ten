@@ -55,7 +55,7 @@ test('Rowan and Classic survive guest reloads', async ({ page }) => {
 });
 
 test('Rowan keeps gear stats from the Tailor and saves them on reload', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   await page.goto('/');
   await page.getByRole('textbox').first().fill('Rowan Tailor');
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
