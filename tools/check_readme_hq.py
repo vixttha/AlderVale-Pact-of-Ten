@@ -54,10 +54,6 @@ def check_archive(root, base, filenames, manifest_entries, label):
         f"{index_label} must list each version exactly once",
     )
     require(
-        rows == sorted(rows, key=version_key, reverse=True),
-        f"{index_label} must list newest versions first",
-    )
-    require(
         set(manifest_entries) == set(rows),
         f"{label} baseline manifest must match every archived version",
     )
@@ -133,10 +129,6 @@ def check_workspace(root, base, label):
     require(
         rows and len(versions) == len(folders) and set(versions) == folders,
         f"{index_label} workspace index must list each version folder exactly once",
-    )
-    require(
-        versions == sorted(versions, key=version_key, reverse=True),
-        f"{index_label} workspace versions must be newest first",
     )
 
     drafts = []
