@@ -93,3 +93,14 @@ The v0.0.4 candidate and tracking issue originally identified \`3f7a39c7c8dcb2ff
 **Resolution:** reconcile the PR branch with current main; update the project baseline and preserve the older SHA as historical context.  
 **Owner decision:** not required; this is a documentation/source-provenance correction, not a product or project-law choice.  
 **Record:** \`records/conflicts/AV-CONFLICT-001.md\`.
+
+
+## Pilot record: AV-CONFLICT-002
+
+The proposed nested claim ref \`bug-library/claims/issue-75\` could not be created because the repository already has a top-level branch named \`bug-library\`. The Git ref namespace cannot represent the existing branch and a nested ref beneath that same name at once.
+
+**Sources:** existing \`bug-library\` branch at \`46c504ffdbd343df825398c403d3a0417acb9e82\`; successful flat claim branch \`bug-library-claim-issue-75\` at \`6570e8498b1ee5c99dc006cc3fb5317a7a9b0b32\`.  
+**Authority:** live GitHub repository refs.  
+**Resolution:** use the flat \`bug-library-claim-issue-N\` convention for all claim locks.  
+**Owner decision:** not required; this is a mechanical Git ref namespace constraint.  
+**Record:** \`records/conflicts/AV-CONFLICT-002.md\`.

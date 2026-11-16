@@ -257,3 +257,9 @@ export async function releaseClaim(
   const released: WorkerClaim = { ...current.claim, status: "released", expiresAt: releasedAt };
   return store.compareAndSwap(issueNumber, expectedRevision, released);
 }
+
+
+export function claimRefName(issueNumber: number): string {
+  if (!Number.isInteger(issueNumber) || issueNumber < 1) throw new Error("A positive issue number is required");
+  return "bug-library-claim-issue-" + issueNumber;
+}

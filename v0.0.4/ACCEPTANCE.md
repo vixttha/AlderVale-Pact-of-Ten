@@ -67,3 +67,6 @@ The project is ready for owner acceptance only when all applicable gates have ev
 | Conflict pilot | One mechanical/documentation conflict is recorded and resolved without owner decision | AV-CONFLICT-001 record and PR diff |
 | Fresh-session retrieval | A separate session reads public instructions and v0.0.4 docs; private Notion access is separately reported | Retrieval matrix; no inferred PASS |
 | Owner acceptance | Owner explicitly accepts/rejects architecture and pilot evidence | Owner decision only; pending until recorded |
+
+
+Additional pilot records: \`AV-CONFLICT-002\` verifies the flat atomic claim-ref naming convention; \`records/bugfixes/ISSUE-75.md\` records the first bug-fixing assignment. Both remain owner-acceptance pending until their exact-candidate evidence is complete.

@@ -66,7 +66,7 @@ ChatGPT, Gemini, Claude, Grok, Cursor, Codex or another LLM may use this workflo
 
 Use \`queue.ts\` to evaluate the issue snapshots after evidence-based triage. A confirmed bug needs explicit expected behavior, reproduction/source evidence and acceptance criteria. A conflict needs two revision-pinned sources and a governing-authority assessment. When milestone fit is unverified, process only work explicitly scoped by the owner; otherwise leave it blocked.
 
-Select only the single \`next\` task packet. Before editing, create the per-issue claim ref \`bug-library/claims/issue-N\` with a claim record. Initial ref creation must be atomic. Renew/release with an expected-SHA compare-and-swap. Never force-update a claim. An expired claim is not automatically stolen: inspect the worker branch, PRs and issue activity, then record coordinator recovery. If the host cannot provide atomic claim operations, do not start a second worker.
+Select only the single \`next\` task packet. Before editing, create the per-issue claim ref \`bug-library-claim-issue-N\` with a claim record. Initial ref creation must be atomic. Renew/release with an expected-SHA compare-and-swap. Never force-update a claim. An expired claim is not automatically stolen: inspect the worker branch, PRs and issue activity, then record coordinator recovery. If the host cannot provide atomic claim operations, do not start a second worker.
 
 ## Untrusted and sensitive material
 

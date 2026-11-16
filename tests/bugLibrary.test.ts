@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { acquireClaim, buildQueue, type ClaimStore, type QueueIssue, type QueueContext, type WorkerClaim } from "../v0.0.4/queue";
+import { acquireClaim, buildQueue, claimRefName, type ClaimStore, type QueueIssue, type QueueContext, type WorkerClaim } from "../v0.0.4/queue";
 import { assessConflict, type ConflictRecord } from "../v0.0.4/conflicts";
 
 const sha = "a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd";
@@ -89,6 +89,16 @@ describe("Bug Library queue", () => {
     expect(result.decisions[0].reason).toBe("TRIAGE_RECORD_REQUIRED");
   });
 
+  it("blocks overlapping file work even when the open PR forgot to link the issue", () => {
+    const scoped = { ...triage, 75: { ...triage[75], affectedFiles: ["server/wsHub.ts"] } };
+    const result = buildQueue([issue(75)], context({
+      triage: scoped,
+      pullRequests: [{ number: 100, state: "open", issueNumbers: [], changedFiles: ["server/wsHub.ts"], url: "https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/100" }],
+    }));
+    expect(result.next).toBeNull();
+    expect(result.decisions[0].reason).toBe("OPEN_PR_ALREADY_COVERS_ISSUE_100");
+  });
+
   it("sorts by severity but emits only one next assignment", () => {
     const second = { ...triage, 76: { ...triage[75], severity: "critical" as const, evidence: ["https://example.test/evidence"] } };
     const result = buildQueue([issue(75), issue(76)], context({ triage: second }));
@@ -97,6 +107,11 @@ describe("Bug Library queue", () => {
 });
 
 describe("Bug Library atomic claim contract", () => {
+  it("uses the flat ref name that avoids the existing bug-library branch namespace", () => {
+    expect(claimRefName(75)).toBe("bug-library-claim-issue-75");
+    expect(() => claimRefName(0)).toThrow();
+  });
+
   it("allows exactly one worker to win a compare-and-swap race", async () => {
     let revision: string | null = null;
     let claim: WorkerClaim | null = null;

@@ -116,7 +116,7 @@ Stop or escalate if the baseline is unknown, repository access is missing, a wor
 
 The pure queue decision engine is implemented in \`queue.ts\`. It consumes GitHub issue/PR snapshots plus an explicit evidence-backed triage record; it does not treat a label or issue body as proof that a bug is confirmed. It returns a ranked queue and exactly one next task packet. The host performs GitHub reads and passes the snapshots to the engine.
 
-Claims use a dedicated ref per item: \`bug-library/claims/issue-N\`. The ref points to a commit containing a machine-readable claim record. Initial ref creation is the atomic winner-takes-the-claim operation. Updates and release must use a compare-and-swap ref update with the previously observed SHA (\`expected_sha\`); never force-update a claim ref. A claim ref is coordination metadata, not an authorization or security boundary.
+Claims use a dedicated ref per item: \`bug-library-claim-issue-N\`. The ref points to a commit containing a machine-readable claim record. Initial ref creation is the atomic winner-takes-the-claim operation. Updates and release must use a compare-and-swap ref update with the previously observed SHA (\`expected_sha\`); never force-update a claim ref. A claim ref is coordination metadata, not an authorization or security boundary.
 
 Default lease: 60 minutes. The worker may renew before expiry using compare-and-swap. An expired active claim is **not** automatically reclaimed. The coordinator must inspect the claim history, worker branch, linked PRs, issue activity and current main, then explicitly mark the old claim abandoned/released with compare-and-swap before a new claim is attempted. If the host cannot perform atomic ref creation and expected-SHA updates, it must not claim; it returns a handoff instead.
 
@@ -129,3 +129,8 @@ Security/privacy findings are triaged without publishing exploit details, creden
 Security-sensitive fixes, data ownership changes, permission changes, project-law changes and critical gameplay/economy changes require explicit owner review before acceptance. The solo-owner workflow does not fabricate an independent reviewer: the internal auditor remains an internal check, and any separate reviewer is recorded only if one actually participates. No critical candidate is self-accepted by the worker.
 
 The queue engine and conflict assessor are pure decision helpers. They do not create issues, change labels, close issues, merge PRs, release software, call model APIs, run in the background or spend money.
+
+
+### Flat claim-ref namespace
+
+Claim refs use the flat name \`bug-library-claim-issue-N\`. The repository already has a top-level branch named \`bug-library\`; Git cannot create a nested ref below that same name. The flat naming convention is covered by conflict record \`AV-CONFLICT-002\`.
