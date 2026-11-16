@@ -1,6 +1,6 @@
 # AlderVale project audit — 2026-11-16
 
-> Public engineering record. Baseline: `main` at `3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21`. Snapshot counts below were read from GitHub on 2026-11-16 at approximately 08:49 UTC, before this documentation PR was opened.
+> Public engineering record. Baseline: `main` at `3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21`. Inventory refreshed on 2026-11-16 at approximately 08:55 UTC; counts include concurrent project PRs and this documentation PR.
 >
 > This report is not a release declaration and does not authorize merges, issue closures, repository-setting changes, or scope expansion. Private coordination and personal information are intentionally excluded.
 
@@ -10,8 +10,8 @@
 - **PR #61:** seven of seven hosted jobs passed on its current head; it remains open and unmerged.
 - **PR #81:** local validation is reported in the PR description, but no hosted Actions run was found for its head.
 - **Issues:** 58 total — 55 open, 3 closed.
-- **Pull requests before this audit PR:** 24 total — 6 open non-draft, 3 draft, 12 merged, 3 closed without merging.
-- **Branches:** 47 at the snapshot; GitHub reports none protected. The repository rulesets endpoint returned an empty list.
+- **Pull requests:** 27 total — 7 open non-draft, 5 draft, 12 merged, 3 closed without merging.
+- **Branches:** 49 at the refreshed snapshot; GitHub reports none protected. The repository rulesets endpoint returned an empty list.
 - **Published GitHub releases:** none found.
 
 ## Baseline and method
@@ -57,6 +57,22 @@ Attempt 1 on the same SHA had a WebKit timeout; attempt 2 passed without an appl
 
 No hosted Actions run was found for head `27f16f3`. Hosted validation on the exact PR head remains pending.
 
+
+
+### PR #84 — rare-element decks and spell progression
+
+[PR #84](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/84) addresses [#67](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/67) and [#68](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/68). It is open, targets current main, and has hosted validation on its exact head `ecb7e7041835a36ea25048e480bb5c1c576dc373`.
+
+[Actions run #81](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43831816272) passed all seven jobs: three OS core jobs, three browser jobs, and Firestore emulator permissions. The PR body reports 61 core unit tests passing and 12 skipped, with typecheck, rules lint, build, HTTP/WebSocket integration, browser flows, and emulator checks. The PR explicitly leaves #13 open. Milestone fit is unverified; no merge is authorized by this audit.
+
+### PR #83 — Bug Library v0.0.4 Level 2 draft
+
+[PR #83](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/83) is a draft documentation/instructions candidate based on current main. It changes eight documentation/instruction files and no application or CI files. Its exact-head validation run [#43833426029](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43833426029) passed all seven jobs; the public-runner policy and Semgrep runs also passed ([policy](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43833426014), [Semgrep](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43833426426)). The PR itself states that implementation milestone fit remains unverified. Keep it draft; no merge or release.
+
+### PR #85 — this audit document
+
+[PR #85](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/85) adds only this audit file. Its public-runner policy check and Semgrep CE run passed ([policy](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43834769096), [Semgrep](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43834769035)). The seven-job validation run [#43834769013](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43834769013) was still in progress at the refreshed snapshot. PR #85 remains draft.
+
 ### README HQ branch evidence
 
 Issue [#73](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/73) records a branch-local repair validated on `f8e7fa590b35afffa3dbaa08003a410ba888661c` by [run #73](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43809544065).
@@ -101,14 +117,14 @@ The same prior audit identified #41–#58 as valid at its then-current source ba
 
 ## Pull request inventory
 
-Before this audit documentation PR was opened:
+At the refreshed snapshot, including this documentation PR:
 
-- **Open, non-draft:** #81, #63, #61, #39, #36, #33.
-- **Draft:** #62, #40, #37.
+- **Open, non-draft:** #84, #81, #63, #61, #39, #36, #33.
+- **Draft:** #85, #83, #62, #40, #37.
 - **Merged:** #64, #60, #59, #34, #31, #30, #29, #27, #26, #24, #8, #6.
 - **Closed without merge:** #32, #9, #1.
 
-PR #61 and PR #81 are the only listed open candidates based on current main. The other open PRs use older base revisions and need overlap/base reconciliation before they can be treated as current candidates. In particular, #37 and #39 overlap in the Project Instructions area; #62 is a README-only draft; #63 changes project-rule documentation; #36 and #33 use older integration bases; and #40 is a separate logo-assets draft.
+PRs #84, #83, #85, #81, and #61 are based on current main. #84 is a gameplay repair with seven hosted jobs passing; #83 is a Bug Library documentation draft; #85 is this audit-documentation draft; #81 still needs hosted validation; and #61 has seven hosted jobs passing. The other open PRs use older base revisions and need overlap/base reconciliation before they can be treated as current candidates. In particular, #37 and #39 overlap in the Project Instructions area; #62 is a README-only draft; #63 changes project-rule documentation; #36 and #33 use older integration bases; and #40 is a separate logo-assets draft.
 
 ## Repository governance and hygiene
 
