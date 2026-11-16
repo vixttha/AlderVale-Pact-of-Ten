@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "issueNumber": 105,
   "claimId": "AV-CLAIM-105-20261116-01",
-  "status": "active",
+  "status": "released",
   "worker": "ChatGPT Head/Worker",
   "host": "chatgpt.com",
   "model": "GPT-6",
@@ -11,6 +11,6 @@
   "baseSha": "3fa20bc5ed4fecc228cc3733536a589bf75df6a0",
   "workBranch": "codex/fix-105-fusion-progression",
   "claimedAt": "2026-11-16T15:04:29Z",
-  "expiresAt": "2026-11-16T16:04:29Z",
-  "note": "Owner explicitly requested issue filing, a card-acquisition decision, a fix PR, and a return to first-playable acceptance."
+  "expiresAt": "2026-11-16T15:17:51Z",
+  "note": "Draft PR #107 and branch CI receipt 43892860972 delivered for owner review. The claim is released; issue #105 remains open."
 }
