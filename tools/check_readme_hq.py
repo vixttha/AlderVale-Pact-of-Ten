@@ -322,7 +322,7 @@ def run_regression_tests(root):
 
     add_case("public frozen README drift", "snapshot checksum mismatch", change_public_snapshot)
     add_case("HQ guide and live guide drift together", "snapshot checksum mismatch", change_hq_snapshot_and_live_guide)
-    add_case("HQ front page drift", "HQ front page differs from latest HQ snapshot", change_hq_front_page_only)
+    add_case("HQ front page drift", "front page differs from the latest HQ snapshot", change_hq_front_page_only)
     add_case("public workspace index omission", "workspace index must list each version folder exactly once", remove_public_workspace_row)
     add_case("HQ workspace index omission", "workspace index must list each version folder exactly once", remove_hq_workspace_row)
     add_case("broken link inside DRAFT.md", "broken link to", add_broken_draft_link)
