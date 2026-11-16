@@ -68,15 +68,15 @@ static void CheckProgression(SaveFixtures fixtures)
         var wizard = save.Wizards[0];
         Guard.Equal(1, wizard.Child("progression").Child("questWins").Child("q_bond_arbor"));
         var second = save.Wizards[1];
-        Guard.Equal(220, save.ReadWallets(second)["florins"]);
+        Guard.Equal(220, save.ReadWallet(second)["florins"]);
         Guard.Equal(0, second.Child("xp"));
         Guard.Sequence([], second.Child("progression").Child("completedQuests"));
     });
     fixtures.Check("horizon-v1", save =>
     {
         var wizard = save.Wizards.Single();
-        Guard.Equal(220, save.ReadWallets(wizard)["florins"]);
-        Guard.Equal(4, save.ReadWallets(wizard)["spellShards"]);
+        Guard.Equal(220, save.ReadWallet(wizard)["florins"]);
+        Guard.Equal(4, save.ReadWallet(wizard)["spellShards"]);
         Guard.Equal(1, wizard.Child("level"));
         Guard.Equal(1, wizard.Child("rank"));
         Guard.Equal(0, wizard.Child("xp"));
@@ -97,7 +97,7 @@ static void AssertProgressedWizard(GuestSave save, Field wizard)
     Guard.Equal(2, wizard.Child("level"));
     Guard.Equal(53, wizard.Child("xp"));
     Guard.Equal(1, wizard.Child("rank"));
-    var wallet = save.ReadWallets(wizard);
+    var wallet = save.ReadWallet(wizard);
     Guard.Equal(3_000_000_110L, wallet["florins"]);
     Guard.Equal(10, wallet["honorMarks"]);
     Guard.Equal(2, wallet["bondingSeals"]);
@@ -168,13 +168,13 @@ static void CheckInvalidSaves(SaveFixtures fixtures)
     const string balancePath = "$.wizards[0].currencies.florins";
     fixtures.Reject("breeze-v1", balancePath,
         json => json["wizards"]![0]!["currencies"]!["florins"] = "3000000110",
-        save => { save.ReadWallets(save.Wizards[0]); });
+        save => { save.ReadWallet(save.Wizards[0]); });
     fixtures.Reject("breeze-v1", balancePath,
         json => json["wizards"]![0]!["currencies"]!["florins"] = 0.5,
-        save => { save.ReadWallets(save.Wizards[0]); });
+        save => { save.ReadWallet(save.Wizards[0]); });
     fixtures.Reject("breeze-v1", balancePath,
         json => json["wizards"]![0]!["currencies"]!["florins"] = 9_007_199_254_740_992L,
-        save => { save.ReadWallets(save.Wizards[0]); });
+        save => { save.ReadWallet(save.Wizards[0]); });
     fixtures.Reject("breeze-v1", "$.account.wizardIds",
         json => json["account"]!["wizardIds"]![1] = "rowan-breeze",
         save => save.ValidateIdentity("breeze"));

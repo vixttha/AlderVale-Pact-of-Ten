@@ -35,7 +35,8 @@ internal readonly record struct Field(JsonElement Element, string Path)
     public Field[] Items()
     {
         Require(JsonValueKind.Array);
-        return Element.EnumerateArray().Select((value, index) => new Field(value, $"{Path}[{index}]")).ToArray();
+        var arrayPath = Path;
+        return Element.EnumerateArray().Select((value, index) => new Field(value, $"{arrayPath}[{index}]")).ToArray();
     }
 
     public Dictionary<string, Field> Members()
@@ -79,7 +80,7 @@ internal sealed class GuestSave(Field root)
         }
     }
 
-    public Dictionary<string, Field> ReadWallets(Field wizard)
+    public Dictionary<string, Field> ReadWallet(Field wizard)
     {
         var wallet = wizard.Child("currencies");
         var balances = new Dictionary<string, Field>(StringComparer.Ordinal);
