@@ -6,6 +6,10 @@ AlderVale is a 3D browser RPG set at a spellcasting academy among floating islan
 
 [Run locally](#run-locally) · [First playthrough](#first-playthrough) · [How AI helps build AlderVale](#how-ai-helps-build-aldervale) · [Report a bug](#report-a-bug)
 
+![Round one of Rowan’s solo duel in Breeze. Rowan faces a Frost Sky-Duelist, with both fighters’ health and pips shown above the available spell cards.](assets/breeze-first-spark-duel.webp)
+
+*First Spark in Breeze. In-game capture from build `3fa20bc`.*
+
 ## Run locally
 
 You’ll need Git, Node.js **24.12.0 or later**, Bun **1.4.4**, and a browser with **WebGL 2** for the 3D campus.
