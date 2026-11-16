@@ -4,13 +4,29 @@
 | --- | --- |
 | Design ID | `aldervale-element-system-v1` |
 | Type | Cross-element rule |
-| Status | Creature and fusion rules decided for v1. Other design areas are proposed. |
+| Status | The five elemental oppositions and the creature rules are recorded for v1. Other design areas are proposed. |
 | Source baseline | [`295a25c7facabf7d350c951817ba0a1af7b1612a`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/295a25c7facabf7d350c951817ba0a1af7b1612a) |
 | Related design or issue | [Element registry](../element-registry.md), [Fusion System v1 proposal](../fusion-system-v1.md), [prestige lineages #47](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/47), [spell progression #68](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/68) |
 
+## v1 elemental opposition decision
+
+The owner's five v1 pairs are reciprocal.
+
+| v1 design pair | Names available in the existing catalog |
+| --- | --- |
+| Fire ↔ Water | Ember ↔ Tide |
+| Lightning ↔ Frost | Spark ↔ Frost |
+| Wind ↔ Earth | Gale ↔ Earth (no Earth ID in the live catalog) |
+| Light ↔ Dark | Sol ↔ Umbra |
+| Metal ↔ Forest | Verdigris ↔ Bramble |
+
+The names in the right column identify related entries in the existing catalog. Earth has no standalone element in `shared/elements.ts`. Bramble corresponds to Forest in the design. Chronos exists in the game as Time and has no pair in the owner's list. How to carry Earth and Chronos through the game catalog, saves, and the existing Aetheris recipe remains an implementation decision.
+
+Only Light ↔ Dark already matches the live pairings. The [legacy combat matrix and fixtures](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/120) measure existing behavior at [`219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/219a6bda1f9b2e01f06fd97350a66ed8f470f0d1). The v1 implementation must verify both directions of each pair and check prism conversion separately. Several prism spells currently use the attacker's opposition as their destination. The fusion attack bonus also reads parent oppositions. Those dependencies need explicit review before changing the table.
+
 ## Identity and lore
 
-AlderVale has six starter elements, four rare elements, and five fusion elements. Each has a named crest and color pair. The combat roles below are design identities from the catalog. The setting details come from creature lore and describe those creatures' place in the world.
+The current game catalog has six starter elements, four rare elements, and five fusion elements. Each has a named crest and color pair. The combat roles below are design identities from the catalog. The setting details come from creature lore and describe those creatures' place in the world.
 
 | Element | Combat identity | Creature lore anchor | Crest |
 | --- | --- | --- | --- |
@@ -37,7 +53,7 @@ The [element catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a
 | Game behavior | Observed rule | Source or evidence |
 | --- | --- | --- |
 | Matchup order | A mirror hit uses **0.85×**. The attacker's direct opposing element uses **1.25×**. If a fusion attacks an element opposed by one of its parents, it uses **1.15×**. Other matchups use **1.00×**. The separate fusion bonus is directional. | [Matchup function](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/elements.ts#L242) |
-| Foundational opposing pairs | Ember ↔ Frost, Gale ↔ Bramble, Tide ↔ Spark, Umbra ↔ Sol, Verdigris ↔ Chronos. The spell damage path applies matchup before the target shield. Creature strikes also use the matchup helper. | [Element definitions](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/elements.ts#L24), [spell damage](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/combat.ts#L328), [creature strikes](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/combat.ts#L554) |
+| Legacy game opposing pairs | Ember ↔ Frost, Gale ↔ Bramble, Tide ↔ Spark, Umbra ↔ Sol, Verdigris ↔ Chronos. The spell damage path applies matchup before the target shield. Creature strikes also use the matchup helper. | [Element definitions](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/elements.ts#L24), [spell damage](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/combat.ts#L328), [creature strikes](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/combat.ts#L554) |
 | Status vocabulary | Burning, Stunned, Regen, Frostbite, and Shocked are status kinds. Spell-specific magnitudes and durations live in the spell records. | [Status types](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/combat.ts#L6), [spell catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/spells.ts) |
 | Rare-element spells | Umbra, Sol, Verdigris, and Chronos each have a rank-1 native attack. Advanced rare spells marked with an element requirement need rank 4 and that element's Rare Trial unlock. | [Rare spell definitions](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/spells.ts#L90), [purchase and use gates](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/spells.ts#L123) |
 | Fusion spell progression | Each listed fusion spell requires its catalog rank and the matching entry in `unlockedFusions`. New wizard data initializes that list empty. The inspected hatch reward updates eggs and bestiary but leaves the list unchanged. Acquisition and persistence of a matching unlock remain unverified end to end. | [Spell gates](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/spells.ts#L123), [wizard initialization](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/economy.ts#L195), [hatch reward save](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/src/App.tsx#L980) |
@@ -136,13 +152,13 @@ The inspected game at [`93abf6e`](https://github.com/vixttha/AlderVale-Pact-of-T
 
 ## 5. Elemental mythology
 
-**Status** · Proposed v1 lore. The Ten are the six starter and four rare elements. The five fusions came later.
+**Status** · Proposed v1 lore based on the [five owner-confirmed oppositions](#v1-elemental-opposition-decision).
 
 ### Where did the elements originate?
 
 When AlderVale was young, heat bled from its stone, winds stripped the ground bare, and storms broke before the rivers could settle. Wherever one force met another that could check it, the meeting happened again and again. Those encounters became the first memories of the Ten. The elements took their names from what people saw them do.
 
-In the oldest telling, the Ten made their pact when they each agreed to give their opposite room to act. Ember would warm ground Frost had sealed. Frost would cool what Ember left behind. The other four pairs made their own promises. Settlements grew where people learned to recognize those cycles. The Pact survives in the work of keeping them in balance.
+In the oldest telling, the Ten made their pact when they each agreed to give their opposite room to act. Water would bank Fire when it spread too far, and Fire would warm the waters held cold by winter. Settlements grew where people learned to recognize the five cycles. The Pact survives in the work of keeping them in balance.
 
 ### Why are there five opposing pairs?
 
@@ -150,13 +166,13 @@ Each pair answers a different way the young world could fall out of balance. Eit
 
 | Pair | What they keep in balance |
 | --- | --- |
-| Ember ↔ Frost | Ember sets matter in motion through heat. Frost slows it and preserves what heat would consume. |
-| Gale ↔ Bramble | Gale lifts seeds and carries them into open ground. Bramble puts down roots and holds the soil when the wind rises. |
-| Tide ↔ Spark | Tide gathers and carries force in a steady current. Spark releases it in a sudden discharge. Water gives a charge a path, and a discharge can break a settled flow. |
-| Umbra ↔ Sol | Umbra shelters what needs rest or concealment. Sol brings what is hidden into view. Shade protects life from relentless light. |
-| Verdigris ↔ Chronos | Verdigris gives a thing form that can endure. Chronos gives it a history in which it can change. A rune can outlast the hand that carved it, and time can still wear away its edges. |
+| Fire ↔ Water | Opposition of heat and currents. |
+| Lightning ↔ Frost | Opposition of sudden discharge and stillness. |
+| Wind ↔ Earth | Opposition of movement and solid ground. |
+| Light ↔ Dark | Opposition of illumination and concealment. |
+| Metal ↔ Forest | Opposition of forged structure and organic growth. |
 
-These are the five reciprocal oppositions in the element catalog. The pact explains why each member can answer the other. Opposing elements can still produce a stable fusion where a named recipe allows it. Tide and Spark, Umbra and Sol, and Chronos and Verdigris already do so. [Element catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L24) · [Fusion recipes](../fusion-system-v1.md#2-existing-five-recipes)
+Opposition and fusion describe different relationships. A sanctioned breeding recipe can pair two elements regardless of combat opposition. The existing Eclipse recipe pairs Light and Dark. [Existing fusion recipes](../fusion-system-v1.md#2-existing-five-recipes)
 
 ### Are the elements conscious?
 
@@ -174,7 +190,7 @@ A manifestation leaves no egg and has no creature lineage of its own. A living c
 
 **Space** is where things are and how far apart they stand. **Time** gives events their order and duration. They make movement possible together. A door can link two places because it has a position and a shape. A traveler crosses it in a sequence, from opening the door to reaching the other side.
 
-Verdigris expresses the spatial side of the relationship by giving boundaries, structures, and runes a lasting shape. Chronos expresses timing, sequence, and echoes. Space is a principle of the world rather than a school in the Ten. Chronos keeps Verdigris as its opposing element.
+Verdigris expresses the spatial side of the relationship by giving boundaries, structures, and runes a lasting shape. Chronos expresses timing, sequence, and echoes. Space is a principle of the world rather than a school in the Ten. Chronos represents Time in the existing catalog. The v1 opposition list pairs Metal with Forest.
 
 Their fusion, **Aetheris**, binds a sequence to a form. In the myth, a runic astrolabe can align its rings at a particular moment, and the same alignment returns when the sequence repeats. That gives Aetheris its time-forged identity. The lore establishes timing and structure. Teleportation, time travel, and rollback mechanics would each need their own design. [Chronos and Verdigris](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L137) · [Aetheris](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L219) · [Aetheris lore](../fusion-system-v1.md#35-aetheris--chronos--verdigris)
 
@@ -322,7 +338,7 @@ These earlier words are lore and search vocabulary from this design. Neither ins
 | --- | --- | --- |
 | **Spells** | The spell catalog separates card ID, display name, element, effect, and rank. Decks, sideboards, owned cards, and Spellwrighting use IDs. Deck & Lectern and local duels use the spell-use gate, which preserves use of legacy rank-two cards without an element gate. The Scriptorium lists cards with a price. Live battles currently build a separate server starter deck. [Card catalog and gates](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/spells.ts#L114) · [Deck UI](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/features/deck/DeckLecternPanel.tsx#L27) · [Scriptorium](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/features/shops/AcademyModalHub.tsx#L331) · [Live deck](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/server/wsHub.ts#L547) | Keep card IDs, counts, ordering, Spellwrighting choices, rank requirements, and effect values during the naming pass. Compare live PvP and co-op separately if acquisition or loadout rules change. |
 | **Creatures** | An owned creature stores a stable instance ID, catalog species ID, one element, stage, Bond XP, talents, and other appearance and battle choices. Hatching takes affinity from the result species. The live creature resolver constructs its combat slot using the catalog element. [Creature record](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/lib/storage.ts#L24) · [Hatch result](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/App.tsx#L936) · [Live creature slot](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/server/creatureSelection.ts#L121) | Resolve display names by species ID while preserving nicknames and owner, realm, active selection, stage, Bond XP, talents, branch, chromatic form, and win count. Preserve identity and affinity through evolution. |
-| **Combat calculations** | The matchup helper checks mirror (**0.85×**), the attacker’s declared opposition (**1.25×**), a fusion attacker’s eligible parent opposition (**1.15×**), then neutral (**1.00×**). Spell power uses the source spell element. A prism can change the active element before matchup and shield resolution. Creature strikes apply stage scale and the same matchup helper. [Matchup helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L242) · [Spell calculation](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/combat.ts#L290) · [Creature strike](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/combat.ts#L550) | Freeze the current 15 × 15 directional matrix and calculation order during relabeling. Compare both directions, especially Tide ↔ Spark and Tempest → Spark. Schedule any retuning after a separately reviewed balance change. |
+| **Combat calculations** | The matchup helper checks mirror (**0.85×**), the attacker’s declared opposition (**1.25×**), a fusion attacker’s eligible parent opposition (**1.15×**), then neutral (**1.00×**). Spell power uses the source spell element. A prism can change the active element before matchup and shield resolution. Creature strikes apply stage scale and the same matchup helper. [Matchup helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L242) · [Spell calculation](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/combat.ts#L290) · [Creature strike](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/combat.ts#L550) | Preserve the legacy 15 × 15 matrix as migration evidence. Validate the [owner-confirmed v1 pairs](#v1-elemental-opposition-decision), prism conversions, and parent-derived fusion bonuses against the intended implementation. |
 | **Fusion recipes** | The Hatchery uses the five unordered recipes. Outside those results it can copy one parent's species, including a fusion parent. A paid egg stores its resolved result species and required and completed wins. The inspected reward path advances eggs for local wins and returns early for live PvP and co-op. [Recipe resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/creatures.ts#L297) · [Egg creation](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/features/creatures/CreaturesArborPanel.tsx#L127) · [Duel rewards](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/App.tsx#L911) | Apply the [v1 breeding rules](#v1-creature-and-fusion-rules) when creating new eggs. Honor pending eggs as recorded. Preserve their resolved species and incubation count, and do not charge for them again. Existing creatures retain their earned affinity and history. |
 | **Saves** | Guest bundles use realm-specific `aldervale_guest_<realm>_v1` keys and parse JSON into the expected shape. Signed-in storage loads the owner’s wizards for the selected realm and stores progression, public projection, and companion documents. Guest import has ownership and one-account checks. Cloud creature updates restrict which stored fields can change. [Guest storage](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/lib/storage.ts#L91) · [Cloud load](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/lib/storage.ts#L223) · [Import](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/lib/storage.ts#L296) · [Cloud save transaction](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/lib/storage.ts#L394) · [Creature update contract](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/firestore.rules#L218) | Keep existing keys, document IDs, references, and owner/realm boundaries. Normalize proven legacy data at a shared load boundary before gameplay lookups. Preserve unknown values for recovery. A future change to cloud creature identity fields would need an authorized migration path that respects the current write contract. |
 | **Progression** | At the earlier audit commit, new saves start with all six starter unlocks and an empty fusion list. Rare Trial wins add to `unlockedElements`. After that audit, [PR #107](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/107) merged at [`219a6bd`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/219a6bda1f9b2e01f06fd97350a66ed8f470f0d1) and added matching signature-card and unlock grants on hatch, plus recovery for existing owners. | Preserve rank, trial wins, unlock lists, deck access, quest and term claims, currencies, and realm separation. Reuse the merged grant and verify persistence with the v1 breeding changes. [Issue #105](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/105) tracks the original gap. |
@@ -340,7 +356,7 @@ These earlier words are lore and search vocabulary from this design. Neither ins
 | Check | Evidence required for implementation |
 | --- | --- |
 | Identifiers and labels | Compare old and new spell, species, and element catalogs. All existing references resolve. A saved deck, nickname, active pet, and Spellwrighting choice survive a rename. |
-| Combat parity | Compare all 225 directed matchup cells and deterministic round fixtures for prisms, shields, pierce, creature strikes, and native versus converted spell elements. Check local and live deck construction. |
+| Combat migration | Capture a full directional matrix for the chosen v1 catalog. Verify all five reciprocal pairs and expected changes from the legacy baseline. Run deterministic prism, shield, pierce, and creature strike fixtures. Check local and live deck construction. |
 | Recipe and pending egg parity | Check both input orders for each of the five recipes, a non-fusion pair, an ordinary egg with a fusion parent, and a paid legacy egg just before hatch. Confirm one offspring and no second charge after retry or reload. |
 | Guest and signed-in persistence | Run guest save and reload in the browser, and use the emulator for signed-in reads/writes, guest import, ownership isolation, and the combined egg/creature/reward transaction. Preserve the original source copy when a fixture fails conversion. |
 | Progression and regression | Check Rare Trial and rank gates, all five signature entitlements, no duplicate grants, and the First Spark reward balances before and after reload. Repeat recovery on already-owned fusions and preexisting decks. |
@@ -363,6 +379,7 @@ The [game CI run for the source baseline](https://github.com/vixttha/AlderVale-P
 
 | Question | Decision or next step | Owner decision reference |
 | --- | --- | --- |
+| How should the v1 game catalog represent Earth and carry existing Chronos content? | Resolve saved affinities, spells, creatures, unlocks, and the Aetheris lineage before editing the game catalog. | Pending |
 | Should fusion matchups stay directional? | Compare both attack directions in the 15 × 15 balance review. | Pending |
 | How much fusion consciousness should appear in gameplay? | Review the lore first, then decide whether any dialogue or agency belongs in a later design. | Pending |
 

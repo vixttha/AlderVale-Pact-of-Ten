@@ -1,12 +1,18 @@
 # AlderVale Element Design v1 status
 
-Recorded November 16, 2026. The v1 creature and fusion rules are **decided**. The other design areas remain **proposed**. This index records the written design, the game behavior observed on the pinned baseline, and the decisions still open for review.
+Recorded November 16, 2026. The v1 creature rules and five elemental oppositions are recorded. The new opposition table awaits game implementation. This index records the written design, the game behavior observed on the pinned baseline, and the decisions still open for review.
+
+## v1 elemental oppositions
+
+**Fire ↔ Water · Lightning ↔ Frost · Wind ↔ Earth · Light ↔ Dark · Metal ↔ Forest**
+
+[Owner decision and catalog compatibility](aldervale-element-system-v1.md#v1-elemental-opposition-decision). Light ↔ Dark already matches the existing game. Earth has no current element ID, and the owner list gives Chronos no opposition. The existing matrix is evidence for the old implementation.
 
 ## Design coverage
 
 | Area | Documented outcome | Next evidence |
 | --- | --- | --- |
-| [Identity and roster](aldervale-element-system-v1.md#identity-and-lore) | Six starter elements, four rare elements, and five fusion elements. All fifteen have combat roles, creature lore anchors, and crests. | Review role boundaries and decide how much fusion consciousness appears in gameplay. |
+| [Identity and roster](aldervale-element-system-v1.md#identity-and-lore) | The live game catalog has six starter, four rare, and five fusion entries. All fifteen currently have combat roles, lore anchors, and crests. | Review role boundaries and decide how much fusion consciousness appears in gameplay. |
 | [Combat and spells](aldervale-element-system-v1.md#current-mechanics-and-sources) | Current precedence is 0.85× mirror, 1.25× direct opposition, 1.15× qualifying fusion attack, then 1.00× neutral. Five fusion signature spells have catalog costs and rank gates. | See the [225-cell combat baseline](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/afcd82ec3e2fd5ce134b55984f63ae7a36f5f537/docs/test-vault/aldervale/element-combat-baseline.md) and [regression suite in draft PR #120](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/120). |
 | [Creature lineages and fusion](aldervale-element-system-v1.md#creatures-and-fusion-lineage) | Five current recipes and their three bond stages are documented. The current Hatchery uses two distinct creatures, 80 Florins, and two eligible wins. | Implement and verify the [v1 creature and fusion rules](aldervale-element-system-v1.md#v1-creature-and-fusion-rules). |
 | [4. Creature biology](aldervale-element-system-v1.md#4-creature-biology) | The v1 inheritance rule gives each creature one lifelong affinity. A named fusion recipe produces its own species. The v1 rule allows ordinary offspring from the non-fusion parent of a mixed pair and specifies no offspring for two fusion parents. Instincts can be managed through experience and trust. | Verify that mixed-parent rules apply on new purchases and that paid eggs keep their recorded outcomes. The current fallback can copy a fusion parent's species. |
@@ -30,9 +36,9 @@ Selected November 16, 2026, on the owner's instruction to decide these rules. [F
 
 Creature lineage fusion, [Keen Ink card fusion #70](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/70), and [prestige lineages #47](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/47) have separate scopes.
 
-## Combat baseline
+## Legacy game combat baseline
 
-The roster and recipe audit reconciled this design with the game at [`219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/219a6bda1f9b2e01f06fd97350a66ed8f470f0d1). The earlier registry has a 10 × 10 table for the foundational elements. The [15 × 15 baseline](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/afcd82ec3e2fd5ce134b55984f63ae7a36f5f537/docs/test-vault/aldervale/element-combat-baseline.md) includes the five approved fusion recipes and every attack direction. Fire, Forest, Metal, and Time are earlier wording for Ember, Bramble, Verdigris, and Chronos. Space remains a world principle.
+The roster and recipe audit measured the existing game at [`219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/219a6bda1f9b2e01f06fd97350a66ed8f470f0d1). The earlier registry has a 10 × 10 table for the foundational elements. The [15 × 15 baseline](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/afcd82ec3e2fd5ce134b55984f63ae7a36f5f537/docs/test-vault/aldervale/element-combat-baseline.md) covers every attack direction in that checkout.
 
 The game gives 15 mirror cells 0.85×, 10 direct-opposition cells 1.25×, 10 attacking-fusion cells 1.15×, and 190 neutral cells 1.00×. Tempest → Spark is 1.15×. Spark → Tempest is 1.00×. Fixtures cover both prism directions, matching shields and pierce, area spells, creature stage scaling, and spell-plus-creature resolution in one turn. Current creature strikes preserve the target's shields and prisms. See the [public validation run](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43922033933) for draft PR #120.
 
@@ -60,7 +66,7 @@ The creature and fusion rules are selected. The complete breeding behavior, migr
 ## Next options
 
 1. **Implement the v1 Hatchery rules when scoped.** Update new-egg eligibility, preserve saved eggs, and verify each duel and retry case on public GitHub-hosted runners.
-2. **Review the combat baseline.** Use the [draft test PR](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/120) to review the observed multipliers and damage fixtures ahead of any future balance decision.
+2. **Plan the corrected matchup implementation.** Resolve Earth and existing Chronos content, then validate both directions of each confirmed opposition alongside prism and fusion dependencies. Use the [legacy test PR](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/120) for comparison.
 3. **Review post-merge fusion reward evidence.** Read the exact-checkout CI for merged PR #107 and verify which hatch, reload, and recovery cases it covers.
 4. **Prototype a visual and habitat pair.** Use Ember and Frost to check icons, spell effects, creature silhouettes, and the transition from geothermal shelter to snow. Keep the deliverable scoped to a concept and readability review.
 5. **Prepare the label-only rollout.** Inventory text and UI lookups and select save fixtures that prove existing references still resolve. Schedule the separate breeding and combat changes after the owner's relevant decisions are recorded.

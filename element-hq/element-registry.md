@@ -3,6 +3,8 @@
 **Source baseline:** `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd`  
 **Status:** Source-derived reference. Values below describe the code at that SHA; they are not a new balance approval.
 
+For the owner-confirmed future design, see the [five v1 oppositions](designs/aldervale-element-system-v1.md#v1-elemental-opposition-decision). This historical registry records the existing game's catalog and matchup rules.
+
 ## 1. Element tiers
 
 AlderVale currently defines ten foundational elements and five fusion elements (15 total).
