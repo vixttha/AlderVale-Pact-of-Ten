@@ -182,6 +182,21 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     return out;
   }
 
+  function spectateDuelsForRealm(realmId: RealmId) {
+    return Array.from(duels.values())
+      .filter((d) => d.realmId === realmId && !isDuelComplete(d.state.phase))
+      .map((d) => ({
+        duelId: d.duelId,
+        mode: d.state.mode,
+        round: d.state.round,
+        title: `${d.state.playerTeam[0]?.name ?? 'Wizard'} vs ${d.state.enemyTeam[0]?.name ?? 'Opponent'}`,
+      }));
+  }
+
+  function broadcastRealmSpectateDuels(realmId: RealmId) {
+    broadcastRealm(realmId, { type: 'duels_updated', activeDuels: spectateDuelsForRealm(realmId) });
+  }
+
   function sendDuel(conn: ClientConn, room: LiveDuelRoom, actorId?: string) {
     send(conn, { type: 'duel_state', state: duelView(room.state, actorId), spectator: !actorId, turnDeadline: room.turnDeadline });
   }
@@ -203,20 +218,22 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     room.turnDeadline = null;
     setParticipantsInDuel(room, false);
     const mode = room.state.mode;
-    if (mode !== 'pvp' && mode !== 'coop') return;
-    const winners = room.state.phase === 'victory' ? room.state.playerTeam
-      : mode === 'pvp' && room.state.phase === 'defeat' ? room.state.enemyTeam : [];
-    const awarded = new Set<string>();
-    for (const actor of winners.filter((winner) => winner.hp > 0)) {
-      const participant = room.participants.get(actor.id);
-      const winner = participant ? clients.get(participant.sessionId) : undefined;
-      const uid = winner?.verifiedUid;
-      if (!uid || awarded.has(uid)) continue;
-      awarded.add(uid);
-      void awardLiveVictory(room.realmId, uid, room.duelId, mode)
-        .then((wallet) => send(winner, { type: 'market_wallet', wallet }))
-        .catch(() => send(winner, { type: 'world_notice', text: 'Your shared duel reward could not be saved.' }));
+    if (mode === 'pvp' || mode === 'coop') {
+      const winners = room.state.phase === 'victory' ? room.state.playerTeam
+        : mode === 'pvp' && room.state.phase === 'defeat' ? room.state.enemyTeam : [];
+      const awarded = new Set<string>();
+      for (const actor of winners.filter((winner) => winner.hp > 0)) {
+        const participant = room.participants.get(actor.id);
+        const winner = participant ? clients.get(participant.sessionId) : undefined;
+        const uid = winner?.verifiedUid;
+        if (!uid || awarded.has(uid)) continue;
+        awarded.add(uid);
+        void awardLiveVictory(room.realmId, uid, room.duelId, mode)
+          .then((wallet) => send(winner, { type: 'market_wallet', wallet }))
+          .catch(() => send(winner, { type: 'world_notice', text: 'Your shared duel reward could not be saved.' }));
+      }
     }
+    broadcastRealmSpectateDuels(room.realmId);
   }
 
   function forfeit(room: LiveDuelRoom, actorId: string) {
@@ -398,9 +415,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           send(conn, {
             type: 'zone_snapshot',
             players: getZoneSnapshot(pBound.realmId, pBound.zone, conn),
-            activeDuels: Array.from(duels.values())
-              .filter((d) => d.realmId === pBound.realmId && d.state.phase === 'planning')
-              .map((d) => ({ duelId: d.duelId, mode: d.state.mode, round: d.state.round, title: `${d.state.playerTeam[0]?.name} vs ${d.state.enemyTeam[0]?.name}` })),
+            activeDuels: spectateDuelsForRealm(pBound.realmId),
           });
           broadcastRealmZone(pBound.realmId, pBound.zone, { type: 'player_joined', player: conn.presence }, sessionId);
         } else if (type === 'move' && conn.presence) {
@@ -415,7 +430,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           conn.presence.zone = nextZone;
           if (prevZone !== nextZone) {
             broadcastRealmZone(conn.presence.realmId, prevZone, { type: 'player_left', sessionId });
-            send(conn, { type: 'zone_snapshot', players: getZoneSnapshot(conn.presence.realmId, nextZone, conn), activeDuels: [] });
+            send(conn, { type: 'zone_snapshot', players: getZoneSnapshot(conn.presence.realmId, nextZone, conn), activeDuels: spectateDuelsForRealm(conn.presence.realmId) });
             broadcastRealmZone(conn.presence.realmId, nextZone, { type: 'player_joined', player: conn.presence }, sessionId);
           } else {
             broadcastRealmZone(conn.presence.realmId, nextZone, { type: 'player_moved', sessionId, x: conn.presence.x, y: conn.presence.y, z: conn.presence.z, rotY: conn.presence.rotY, mountId: conn.presence.mountId }, sessionId);
@@ -609,6 +624,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                 cB.duelId = duelId;
                 setParticipantsInDuel(room, true);
                 broadcastDuel(room);
+                broadcastRealmSpectateDuels(realm);
               } else {
                 const duelId = `pvp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
                 const room: LiveDuelRoom = {
@@ -640,6 +656,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                 cB.duelId = duelId;
                 setParticipantsInDuel(room, true);
                 broadcastDuel(room);
+                broadcastRealmSpectateDuels(realm);
               }
             }
           }

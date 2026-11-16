@@ -84,6 +84,7 @@ interface Frame {
   state?: DuelState;
   ticket?: string;
   spectator?: boolean;
+  activeDuels?: { duelId: string }[];
 }
 
 function connect(url: string) {
@@ -192,6 +193,25 @@ describe('Application server', () => {
     expect((await ash.next('duel_state')).state?.phase).toBe('defeat');
     rowan.socket.close();
     ash.socket.close();
+  });
+
+  it('broadcasts live spectate duels across zone travel', async () => {
+    const rowan = await join('Spectate Rowan');
+    const ash = await join('Spectate Ash');
+    const willow = await join('Spectate Willow');
+    rowan.send({ type: 'queue_pvp' });
+    await rowan.next('queue_status');
+    ash.send({ type: 'queue_pvp' });
+    await rowan.next('duel_state');
+    await ash.next('duel_state');
+    const live = await willow.next('duels_updated');
+    expect(live.activeDuels?.length).toBeGreaterThan(0);
+    willow.send({ type: 'move', zone: 'arbor' });
+    const moved = await willow.next('zone_snapshot', (frame) => (frame.activeDuels?.length ?? 0) > 0);
+    expect(moved.activeDuels?.length).toBeGreaterThan(0);
+    rowan.socket.close();
+    ash.socket.close();
+    willow.socket.close();
   });
 
   it('runs a two-player duel with private hands, reconnects a guest and reports each result correctly', async () => {
