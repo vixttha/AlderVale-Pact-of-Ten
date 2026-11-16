@@ -448,12 +448,13 @@ def request_path(url):
 
 def request_public_url(url, method):
     host, port, addresses = validate_external_target(url)
+    scheme = urlsplit(url).scheme.lower()
     path = request_path(url)
     last_error = None
     for address in addresses[:4]:
         connection = None
         try:
-            if parsed.scheme.lower() == "https":
+            if scheme == "https":
                 connection = PinnedHTTPSConnection(
                     host, address, port, EXTERNAL_TIMEOUT_SECONDS, context=ssl.create_default_context()
                 )
@@ -991,6 +992,65 @@ def run_external_link_regression_tests():
 
     redacted = safe_external_display("https://user:pass@example.com/path?token=secret#section")
     require(redacted == "https://example.com/path", "External URL diagnostics exposed credentials, query, or fragment")
+    cases += 1
+
+    original_validate = validate_external_target
+    original_http = PinnedHTTPConnection
+    original_https = PinnedHTTPSConnection
+    request_calls = []
+
+    class FakeResponse:
+        status = 200
+
+        def getheaders(self):
+            return [("Content-Type", "text/plain")]
+
+        def read(self, size):
+            return b"x"
+
+    class FakeHTTPConnection:
+        scheme = "http"
+
+        def __init__(self, host, address, port, timeout, **kwargs):
+            self.host = host
+
+        def request(self, method, path, headers):
+            request_calls.append((self.scheme, method, path, headers))
+
+        def getresponse(self):
+            return FakeResponse()
+
+        def close(self):
+            pass
+
+    class FakeHTTPSConnection(FakeHTTPConnection):
+        scheme = "https"
+
+    try:
+        def fake_validate(url):
+            parsed = urlsplit(url)
+            port = 443 if parsed.scheme == "https" else 80
+            return parsed.hostname, port, ["203.0.113.10"]
+
+        validate_external_target = fake_validate
+        PinnedHTTPConnection = FakeHTTPConnection
+        PinnedHTTPSConnection = FakeHTTPSConnection
+        request_public_url("https://public.example/a%20b?q=x%20y", "HEAD")
+        request_public_url("http://public.example/plain", "GET")
+    finally:
+        validate_external_target = original_validate
+        PinnedHTTPConnection = original_http
+        PinnedHTTPSConnection = original_https
+
+    require(
+        request_calls[0][0:3] == ("https", "HEAD", "/a%20b?q=x%20y"),
+        "HTTPS request selection or encoded path was incorrect",
+    )
+    require(
+        request_calls[1][0:3] == ("http", "GET", "/plain"),
+        "HTTP request selection was incorrect",
+    )
+    require(request_calls[1][3].get("Range") == "bytes=0-0", "GET fallback did not use a bounded range")
     cases += 1
 
     return cases
