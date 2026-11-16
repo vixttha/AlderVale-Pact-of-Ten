@@ -21,11 +21,13 @@ Keep the terminal open and visit [localhost:3000](http://localhost:3000) in a We
 
 ## Choose a realm
 
-| Realm | Progression pace |
+| Realm | Pacing label |
 | --- | --- |
-| **Breeze** | Fast path. Start here for First Spark. |
-| **Horizon** | Balanced progression. |
-| **Everpeak** | Classic progression. |
+| **Breeze** | ~25-Min Fast Path |
+| **Horizon** | ~1-Hr Balanced Path |
+| **Everpeak** | ~3-Hr Classic Saga |
+
+These labels describe progression tuning, not guaranteed completion times.
 
 ## First Spark
 
@@ -44,6 +46,6 @@ Keep the terminal open and visit [localhost:3000](http://localhost:3000) in a We
 
 Run `bun run validate:core` for type checking, rules lint, tests, the production build, and HTTP and WebSocket checks. Public CI also exercises the guest journey in Chromium, Firefox, and WebKit and runs Firestore emulator tests.
 
-- [Validation guide](docs/VALIDATION.md)
-- [Test Vault](docs/test-vault/README.md)
+- [Validation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md)
+- [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md)
 - Open the repository’s **Issues** tab to report a bug. Include the commit or build, browser and operating system, realm, and the steps that reproduce it.

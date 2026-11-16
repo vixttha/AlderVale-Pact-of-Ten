@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "purpose": "Pins the source commit and Git blob SHA-1 for every frozen README or GUIDE snapshot. Add entries only when an approved version is archived.",
+  "public_readme": {
+    "v0.0.1": {
+      "source_commits": {
+        "README.md": "a8c5656929be2fcb30d9d3818245aa7501b0bf59"
+      },
+      "source_paths": {
+        "README.md": "README.md"
+      },
+      "snapshots": {
+        "README.md": "317cd107088d823c7677f0afd9a51b496fa1bd54"
+      }
+    }
+  },
+  "readme_hq": {
+    "v0.0.1": {
+      "source_commits": {
+        "README.md": "ece2b1fe1fd3780e1905b948b976e2d01cff19f3",
+        "GUIDE.md": "1b83bfd5cfe757cee5d3be72128b4f3c9abf3c26"
+      },
+      "source_paths": {
+        "README.md": "README.md",
+        "GUIDE.md": "readme-hq/README.md"
+      },
+      "snapshots": {
+        "README.md": "1f9b917469f7f79a40d55edd45171fba492154af",
+        "GUIDE.md": "a8655ce124c348dffa30c35dc451762d1d8fbd18"
+      }
+    }
+  }
+}

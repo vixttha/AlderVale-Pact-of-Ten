@@ -6,7 +6,7 @@
 
 Lead with the game and a quick start. Use a compact realm table to explain the three pacing choices and a numbered First Spark walkthrough to make the first playthrough easy to follow. Keep troubleshooting one click from the top and make commands easy to scan on narrow screens.
 
-The candidate uses GitHub-rendered Markdown. The links to validation docs and issues are relative to the public repository’s front page. Check those links from the root of the integration branch during review.
+The candidate uses GitHub-rendered Markdown. Shared project documentation links use absolute URLs to `main`, so they resolve while this candidate is viewed from its version workspace and after the README is promoted to the repository root. Recheck them on the integration PR.
 
 ## Review notes
 

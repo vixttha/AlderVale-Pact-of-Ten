@@ -1,0 +1,26 @@
+# README HQ Folder Guide
+
+**Proposed HQ version:** `v0.0.2` (draft; not approved)
+
+Use this folder to maintain the README HQ landing page and review how it has changed. The proposed [HQ landing page](DRAFT.md) is staged separately from the current [published landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md).
+
+## Where to work
+
+| Task | Where to go |
+| --- | --- |
+| Review an HQ version | [HQ version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/README.md) |
+| Draft an HQ revision | [HQ workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/workspace/README.md) |
+| Review the public game README | [Game README version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/README.md) |
+| Draft a game README revision | [Game README workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/README.md) |
+
+## Update README HQ
+
+1. Start from the latest approved snapshot and put proposed landing-page and guide changes, previews, and notes in `readme-hq/workspace/<version>/`. Keep the experiment's diff inside that folder.
+2. After owner approval, update the HQ documents included in the revision. The branch landing page is `/README.md`, and the folder guide is `readme-hq/README.md`.
+3. Archive exact approved copies as `README.md` and `GUIDE.md` in `readme-hq/versions/<version>/`. Record the changes in `CHANGELOG.md`, update the version index and workspace record, and preserve all earlier snapshots.
+4. Update `tools/readme_hq_baselines.json` with each frozen file's source commit, source path, and Git blob SHA-1 in the same commit as the archive and index changes. The validator checks these content identifiers.
+5. Check the [README HQ validation workflow](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/workflows/readme-hq.yml?query=branch%3Areadme-hq). It checks archive and workspace indexes, frozen snapshot checksums, current snapshot parity, and Markdown links across drafts and records.
+
+Public game README updates follow the promotion process on the [published HQ landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md#from-draft-to-public-readme).
+
+This guide is a workspace candidate. The current published guide remains v0.0.1 until v0.0.2 receives owner approval.
