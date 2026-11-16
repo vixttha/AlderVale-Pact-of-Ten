@@ -12,6 +12,10 @@ Start with the [AlderVale first-playable test and evidence guide](aldervale/READ
 
 Record each verified result against the exact commit and GitHub Actions run that executed it.
 
+## Test quality
+
+The [Test Vault law](../../PROJECT_RULES.md#test-vault-reliability-and-reuse) applies to every language and test layer. In review, check the contract or issue, deterministic inputs, representative and known-bad coverage where appropriate, useful diagnostics, and the exact checkout and observed result. Reuse checks across fixtures that share the same contract. Keep known limits in the [coverage index](aldervale/README.md).
+
 ## Evidence labels
 
 | Status | Meaning |

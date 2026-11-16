@@ -140,6 +140,12 @@ and AI work without copying private Notion content.
 Run `node scripts/horizon-check.mjs` to print the milestone status. The normal
 validation jobs continue after the deadline.
 
+## Test Vault reliability and reuse
+
+Every AlderVale Test Vault test must assert a clear behavior or stable contract, use reproducible inputs, and provide enough failure context to diagnose a regression. Separate reusable checks from game-specific fixtures when the same contract applies to multiple assets, levels, or systems. Cover representative success and failure paths appropriate to the risk. Use a known-bad revision or controlled fixture to show that a regression check catches the intended defect when practical, and record any limits. Keep commands, runtime versions, fixtures, and exact-commit evidence inspectable.
+
+Apply this law to every new or changed test across all languages. Review existing tests against it as they are maintained and record any known coverage gaps in the Vault. The [test and evidence guide](docs/test-vault/aldervale/README.md) explains how to record the checks.
+
 ## Operating references
 
 - [Validation guide](docs/VALIDATION.md)

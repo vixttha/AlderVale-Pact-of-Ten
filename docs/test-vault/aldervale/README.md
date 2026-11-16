@@ -1,6 +1,6 @@
 # AlderVale Test Vault v0.0.2
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [33 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [38 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## What runs on AlderVale's public GitHub runners
 
@@ -15,6 +15,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | G13-003, G13-004 | [#13][issue13] | First Spark replay and the three published payout schedules | [Python reference][python], [Ruby catalog][ruby] | Vault catalog | Arbor and Rare Trial in-game completion |
 | G13-005 to G13-009 | [#13][issue13] | Harmony's two paths, mixed events, Rare Trial victory, and one-time payouts across saves | [Guest quest save tests][save] | Core | In-game event eligibility and delivery |
 | G17-001, G21-002 | | Equipped gear persistence, Classic fallback, and Rowan model retry | [Rowan browser suite][human], [lifecycle Vitest][rowan] | Browser, Core | |
+| G21-003 to G21-007 | | Embedded GLB bounds, mesh strides, skin indices and matrices, and animation sampler shape | [Rust asset contract][rust-assets] | Vault catalog | Embedded, non-sparse glTF 2.0 geometry and animation. Rendering and animation feel have separate checks. |
 | G28-003 to G28-005 | | Corrupt save recovery and failed replacement without affecting another realm | [Save tests][save], [guest browser suite][guest] | Core, Browser | |
 | G28-006 | [#22][issue22] | Settings boundaries, corruption and write recovery | [Guest settings Vitest][settings] | Core | Signed-in settings reload |
 | G30-001, G30-003 | [#10][issue10] | Offline HUD and stale-peer removal across reconnect | [Guest browser suite][guest] | Browser | |
@@ -27,6 +28,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [issue10]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/10
 [issue13]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13
 [issue22]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/22
+[rust-assets]: ../../../tests/vault/rust/tests/glb_contract.rs
 [reducer]: ../../../tests/questRewards.test.ts
 [human]: ../../../tools/ci/human.pw.mjs
 [guest]: ../../../tools/ci/guest.pw.mjs
@@ -39,6 +41,10 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [data]: ../../../tests/vault/gameData.test.ts
 [game]: ../../../.github/workflows/validate.yml
 [firestore]: ../../../tools/ci/firestore.check.mjs
+
+### Test quality
+
+Follow the [Test Vault law](../../../PROJECT_RULES.md#test-vault-reliability-and-reuse). For the Rust batch, the same checks read Rowan and controlled valid and malformed GLBs. The reference model also exercises geometry checks on a second asset. The Rust checks cover embedded GLB data and explicitly reject unsupported sparse accessors or required extensions when encountered. If future assets use those features, update the profile and fixtures before including them.
 
 ### Adding a language in batches of five
 
@@ -56,6 +62,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Firestore rules | `npm --prefix tools/ci run test:rules` with Java 21. The full CI lane also runs the Firestore integration tests in the same demo emulator. |
 | Independent rule reference | `python3 tests/vault/first_playable_reference.py -v` with Python 3.12 and Node 24. |
 | Ruby quest catalog | `ruby tests/vault/quest_catalog.rb` with Node 24 and the Ruby bundled on the public Ubuntu runner. |
+| Rust binary asset contract | `cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml` |
 | Project case table | `python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py --catalog docs/test-vault/aldervale/cases.md` |
 
 ## Evidence on verified main

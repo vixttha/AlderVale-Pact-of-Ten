@@ -22,6 +22,11 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | G13-009 | Multiple quest payouts | P0 | Vitest | Persist First Spark and then Harmony on the same wizard. Keep both completion flags, both payouts, and the expected total XP and currencies. Ignore both replays. |
 | G17-001 | Tailor persistence | P1 | Playwright | Claim the Starstitch Brim Hat from the Realm Vault, equip it at the Tailor, and confirm the +10 HP persists after reload. |
 | G21-002 | Rowan fallback and retry | P1 | Vitest and Playwright | Failed Rowan model loading leaves the Classic enrollment path usable. The lifecycle suite checks that a user retry can load the model. |
+| G21-003 | Embedded binary buffer bounds | P1 | Rust / Cargo | Buffer views fit inside the declared binary payload. Invalid lengths, truncated data, and overflowing spans are rejected. |
+| G21-004 | Mesh accessor ranges | P1 | Rust / Cargo | Vertex and index accessors fit their views with the declared stride. Truncated or undersized interleaved data is rejected. |
+| G21-005 | Skinned vertex joint indices | P1 | Rust / Cargo | Each encoded vertex joint index refers to a joint in the mesh node's assigned skin. An out-of-range value is rejected. |
+| G21-006 | Inverse bind matrices | P1 | Rust / Cargo | Declared float MAT4 data covers the skin's joints and contains only finite numbers. Short and non-finite matrix data is rejected. |
+| G21-007 | Animation sampler inputs and outputs | P1 | Rust / Cargo | Keyframe timestamps are finite, nonnegative, and strictly increasing. Sample dimensions and counts match the target and interpolation. |
 | G28-001 | Guest progress retry | P0 | Playwright | Keep a failed progress save visible. After retry and reload, preserve wizard and realm changes and prevent a second claim. |
 | G28-003 | Corrupt guest save | P0 | Vitest | Invalid Breeze save JSON gives first-run defaults. Saving a replacement restores Breeze and preserves an existing Horizon wizard and Term XP. |
 | G28-004 | Browser guest-save recovery | P0 | Playwright | Start with a valid Horizon guest and corrupt Breeze JSON. Enroll in Breeze, reload, and verify both wizards remain in their realms and the Horizon save is byte-for-byte unchanged. |
