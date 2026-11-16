@@ -24,5 +24,5 @@ jobs:
           node-version: '24'
       - name: Record tested checkout
         run: git rev-parse HEAD
-      - name: Run standalone tests
-        run: node --test tests/bugLibrary.test.ts
+      - name: Run standalone library and receipt tests
+        run: node --test tests/bugLibrary.test.ts tests/ciReceipt.test.mjs

@@ -27,7 +27,7 @@ GitHub Issues remains the canonical bug record. This version develops a controll
 
 `bug-library` is the permanent home. Resolve its full SHA (or use the exact SHA of a candidate the owner assigned) before reading the library. Resolve game `main` separately for engineering work. Library candidates target `bug-library`, and proposals for game fixes use their own scoped PRs.
 
-The standalone GitHub Actions workflow runs `node --test tests/bugLibrary.test.ts` on Node.js 24 with no application checkout or package installation. The same regressions cover queue eligibility, conflict assessment and the claim-store contract.
+The standalone GitHub Actions workflow runs `node --test tests/bugLibrary.test.ts tests/ciReceipt.test.mjs` on Node.js 24 with no application checkout or package installation. The same regressions cover queue eligibility, conflict assessment, the claim-store contract, and [CI receipt validation](receipts/FORMAT.md#executable-ci-receipt-checks).
 
 ## Report and triage
 
