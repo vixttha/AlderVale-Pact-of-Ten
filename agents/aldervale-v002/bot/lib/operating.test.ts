@@ -102,7 +102,28 @@ test("optional AI Studio wording does not count as a lead sentence", () => {
   ]);
   assert.equal(mismatch.leadsSentence, false);
   assert.equal(mismatch.aiStudioOperatingLink, true);
+  assert.equal(mismatch.privateSourcesChecked, false);
   assert.match(mismatch.note, /Flag the link/);
+});
+
+test("private sources checked is a public-reply mismatch", () => {
+  const mismatch = scanRoleText([
+    {
+      path: "docs/CHATGPT_PROJECT_INSTRUCTIONS.md",
+      text: "Give the current main SHA, the private sources checked, and the reason the issue fits.",
+    },
+  ]);
+  assert.equal(mismatch.privateSourcesChecked, true);
+  assert.match(mismatch.note, /source class only/);
+});
+
+test("main recipe names sibling workflows that are not validate.yml", () => {
+  const recipe = buildRecipe({
+    branch: "main",
+    workflows: ["graphify.yml", "semgrep.yml", "validate.yml"],
+  });
+  assert.deepEqual(recipe.otherWorkflows, ["graphify.yml", "semgrep.yml"]);
+  assert.match(recipe.checkoutNote, /graphify\.yml, semgrep\.yml/);
 });
 
 test("an AI Studio leads sentence is flagged", () => {
@@ -136,8 +157,22 @@ test("startup reads the main SHA and flags the operating link", async () => {
     "PROJECT_RULES.md":
       "## 4. Tool roles and project records\n\nOwner leads.\n\n## 5. Handoffs and honest completion\n\nStop.\n\n## 6. November 2026 milestone\n\nThe private Notion project is the deadline authority.\n\n## Operating references\n\n- [AI Studio](https://aistudio.google.com/docs/aistudio-build-mode)\n",
     "docs/AGENT_OPERATIONS.md": "## Worker identity and startup receipt\n\n| Worker | id |\n\n## Graphs\n\nSkip.\n",
+    "docs/CHATGPT_PROJECT_INSTRUCTIONS.md":
+      "## Start from current evidence\n\nGive the current main SHA, the private sources checked, and the reason the issue fits.\n\n## Work and verify\n\nStop.\n",
   };
   const report = await readMainStartup(async (url) => {
+    if (url.includes("/contents/.github/workflows")) {
+      return {
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify([
+            { name: "validate.yml", type: "file" },
+            { name: "semgrep.yml", type: "file" },
+            { name: "graphify.yml", type: "file" },
+          ]),
+      };
+    }
     if (url.includes("api.github.com")) {
       return { ok: true, status: 200, text: async () => "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" };
     }
@@ -150,6 +185,8 @@ test("startup reads the main SHA and flags the operating link", async () => {
   assert.equal(report.mainSha, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   assert.equal(report.mismatch.leadsSentence, false);
   assert.equal(report.mismatch.aiStudioOperatingLink, true);
+  assert.equal(report.mismatch.privateSourcesChecked, true);
+  assert.deepEqual(report.workflowsOnMain, ["graphify.yml", "semgrep.yml", "validate.yml"]);
   assert.equal(report.notion.milestoneFit, "unverified");
   assert.equal(report.excerpts.some((excerpt) => excerpt.heading === "## Graphs"), false);
   assert.equal(report.excerpts.some((excerpt) => excerpt.text.includes("Owner leads.")), true);

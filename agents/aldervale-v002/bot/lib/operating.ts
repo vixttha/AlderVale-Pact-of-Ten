@@ -31,7 +31,8 @@ export const operatingBrief: OperatingBrief = {
   evidence: [
     "Call repoStartup before choosing work. It reads AGENTS.md, PROJECT_RULES.md, and docs/AGENT_OPERATIONS.md at the current main SHA.",
     "Record the worker receipt repoStartup returns before editing or handing work off.",
-    "Flag the mismatch repoStartup reports. An aistudio.google.com operating link is a mismatch even when the role text says AI Studio is optional.",
+    "Flag the mismatch repoStartup reports. An aistudio.google.com operating link is a mismatch even when the role text says AI Studio is optional. A sentence that says private sources checked is also a mismatch.",
+    "Name every file in workflowsOnMain. The validate.yml jobs are not the Semgrep or Graphify workflows.",
     "This agent has no Notion connection. Milestone fit stays unverified unless the owner supplies the milestone in this chat.",
     "Call validationRecipe before naming a test command. Use the jobs it returns. Do not stop after the core job when a recipe also lists browser or Firestore jobs.",
     "A green Actions run proves the jobs that passed. It does not prove owner playtest, cloud sign-in, or release acceptance.",

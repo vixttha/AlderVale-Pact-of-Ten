@@ -2,6 +2,7 @@ export const startupFiles = [
   "AGENTS.md",
   "PROJECT_RULES.md",
   "docs/AGENT_OPERATIONS.md",
+  "docs/CHATGPT_PROJECT_INSTRUCTIONS.md",
 ] as const;
 
 export const workerReceipt = [
@@ -16,6 +17,7 @@ export const workerReceipt = [
 export type RoleMismatch = {
   leadsSentence: boolean | null;
   aiStudioOperatingLink: boolean | null;
+  privateSourcesChecked: boolean | null;
   note: string;
 };
 
@@ -23,6 +25,7 @@ export type StartupReport = {
   mainSha: string | null;
   github: "read" | "unavailable";
   files: { path: string; found: boolean }[];
+  workflowsOnMain: string[];
   excerpts: { path: string; heading: string; text: string }[];
   mismatch: RoleMismatch;
   workerReceipt: string[];
@@ -40,6 +43,7 @@ const excerptPlan: { path: (typeof startupFiles)[number]; heading: string }[] = 
   { path: "PROJECT_RULES.md", heading: "## 6. November 2026 milestone" },
   { path: "PROJECT_RULES.md", heading: "## Operating references" },
   { path: "docs/AGENT_OPERATIONS.md", heading: "## Worker identity and startup receipt" },
+  { path: "docs/CHATGPT_PROJECT_INSTRUCTIONS.md", heading: "## Start from current evidence" },
 ];
 
 const notion = {
@@ -66,15 +70,18 @@ export function extractSection(markdown: string, heading: string): string | null
 export function scanRoleText(parts: { path: string; text: string }[]): RoleMismatch {
   const leadsIn: string[] = [];
   const linkIn: string[] = [];
+  const privateIn: string[] = [];
   for (const part of parts) {
     const withoutNegation = part.text.replace(/not the assumed lead/gi, "");
     if (/Google AI Studio leads/i.test(part.text) || /AI Studio leads/i.test(withoutNegation)) {
       leadsIn.push(part.path);
     }
     if (part.text.includes("aistudio.google.com")) linkIn.push(part.path);
+    if (/private sources checked/i.test(part.text)) privateIn.push(part.path);
   }
   const leadsSentence = leadsIn.length > 0;
   const aiStudioOperatingLink = linkIn.length > 0;
+  const privateSourcesChecked = privateIn.length > 0;
   let note: string;
   if (leadsSentence && aiStudioOperatingLink) {
     note =
@@ -88,7 +95,11 @@ export function scanRoleText(parts: { path: string; text: string }[]): RoleMisma
   } else {
     note = "The files read do not say AI Studio leads and do not link aistudio.google.com.";
   }
-  return { leadsSentence, aiStudioOperatingLink, note };
+  if (privateSourcesChecked) {
+    note +=
+      " docs/CHATGPT_PROJECT_INSTRUCTIONS.md still says private sources checked. In a public reply, name the source class only.";
+  }
+  return { leadsSentence, aiStudioOperatingLink, privateSourcesChecked, note };
 }
 
 function unavailable(): StartupReport {
@@ -96,10 +107,12 @@ function unavailable(): StartupReport {
     mainSha: null,
     github: "unavailable",
     files: startupFiles.map((path) => ({ path, found: false })),
+    workflowsOnMain: [],
     excerpts: [],
     mismatch: {
       leadsSentence: null,
       aiStudioOperatingLink: null,
+      privateSourcesChecked: null,
       note: "GitHub was unavailable, so the role text was not read. Do not claim there is no mismatch.",
     },
     workerReceipt: [...workerReceipt],
@@ -171,14 +184,45 @@ export async function readMainStartup(fetchImpl: Fetcher = fetch): Promise<Start
       ? {
           leadsSentence: null,
           aiStudioOperatingLink: null,
+          privateSourcesChecked: null,
           note: "The main SHA was read, but none of the startup files were. Do not claim there is no mismatch.",
         }
       : scanRoleText(readable);
+
+  let workflowsOnMain: string[] = [];
+  try {
+    const listing = await fetchImpl(
+      `https://api.github.com/repos/vixttha/AlderVale-Pact-of-Ten/contents/.github/workflows?ref=${sha}`,
+      {
+        headers: {
+          accept: "application/vnd.github+json",
+          "user-agent": "aldervale-v002",
+        },
+        signal: AbortSignal.timeout(15000),
+      },
+    );
+    if (listing.ok) {
+      const body: unknown = JSON.parse(await listing.text());
+      if (Array.isArray(body)) {
+        workflowsOnMain = body
+          .filter((item): item is { name: string; type: string } => {
+            if (typeof item !== "object" || item === null) return false;
+            const record = item as { name?: unknown; type?: unknown };
+            return record.type === "file" && typeof record.name === "string";
+          })
+          .map((item) => item.name)
+          .sort();
+      }
+    }
+  } catch {
+    workflowsOnMain = [];
+  }
 
   return {
     mainSha: sha,
     github: "read",
     files: loaded.map((file) => ({ path: file.path, found: file.found })),
+    workflowsOnMain,
     excerpts,
     mismatch,
     workerReceipt: [...workerReceipt],

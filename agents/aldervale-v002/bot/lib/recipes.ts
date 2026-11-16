@@ -23,6 +23,7 @@ export type ValidationRecipe = {
   branch: string;
   base: string | null;
   workflows: string[];
+  otherWorkflows: string[];
   checkoutMatches: YesNo;
   checkoutNote: string;
   proves: string;
@@ -222,7 +223,13 @@ export function buildRecipe(input: {
     checkoutNote =
       "No known workflow was selected. Read .github/workflows on this branch before naming a command.";
   } else {
-    checkoutNote = "The commands match the workflow file in this checkout.";
+    checkoutNote = "The commands match the selected workflow in this checkout.";
+  }
+
+  const selected = recipeId === "main" ? mainWorkflow : recipeId === "test-vault" ? vaultWorkflow : "";
+  const otherWorkflows = workflows.filter((name) => name !== selected);
+  if (otherWorkflows.length > 0) {
+    checkoutNote += ` Other workflow files in this checkout are not in the jobs below: ${otherWorkflows.join(", ")}.`;
   }
 
   const pushStarts: YesNo =
@@ -281,6 +288,7 @@ export function buildRecipe(input: {
     branch,
     base,
     workflows,
+    otherWorkflows,
     checkoutMatches,
     checkoutNote,
     proves: proves(jobs),

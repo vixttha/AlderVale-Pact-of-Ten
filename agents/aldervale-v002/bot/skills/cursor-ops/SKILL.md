@@ -6,7 +6,7 @@ description: Operate AlderVale Cursor agent v0.0.2. Use when asked what to do ne
 # Cursor operations v0.0.2
 
 1. Call `operatingBrief` before you assign roles, pick work, or write a public reply.
-2. Call `repoStartup`. Record its worker receipt. Use its main SHA. Flag every mismatch it reports, including an `aistudio.google.com` link when the role text says AI Studio is optional.
+2. Call `repoStartup`. Record its worker receipt. Use its main SHA. Flag every mismatch it reports, including an `aistudio.google.com` link and a “private sources checked” sentence. Name every file in `workflowsOnMain`. `validate.yml` is not Semgrep or Graphify.
 3. If `repoStartup` says GitHub is unavailable, say the startup files were not read. Do not claim there is no mismatch.
 4. This agent has no Notion connection. Milestone fit is unverified unless the owner supplied the milestone in this chat. In public GitHub text, name the source class. Do not name a private page or paste its URL.
 5. Call `validationRecipe` with the branch and, when you know it, the pull request base. Recommend every job in the result. A core job does not cover browser or Firestore jobs.
