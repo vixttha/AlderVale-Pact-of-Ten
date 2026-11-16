@@ -216,6 +216,71 @@ The creature names come from the catalog. Shape and material cues can carry thro
 - **Carry one identity through the scene.** Use a distinct motion and aftermath for each spell. Effects should leave targets and hazards legible, with a lower-motion version that keeps the same gameplay cues. Give each fusion one dominant material and motion so the effect reads as its own element. Aetheris uses timed ring alignment, consistent with the Space and Time mythology.
 - **Review the roster together.** Use the supplied character-creation, symbol-set, and naming reference titles as prompts for how to group and compare elements. AlderVale’s own catalog and creature lore supply the names, shapes, and palette. The proposed cues still need asset production and visual review in-game.
 
+## 7. Elemental world map
+
+**Status** · Proposed world geography and ecology for the Ten. The same watershed links the frozen highlands, the Hearth Valleys, the Canopy, and the Tideborn coast. An element describes a creature's affinity. Its species' shelter, food, water, and nesting needs determine where it can live.
+
+### Regional geography
+
+Snowmelt runs downhill from the frozen heights through Naiad cascade springs, then through the Canopy floodplain to the Tideborn docks and outer coast. Faults carry heat up through one side of the mountains into the Hearth Valleys. Mineral seams cross the slopes and the river cuts through them on its way to the sea. Air currents connect exposed ridges, the Astral Observatory spires, and Academy Cloud-Pier. This is a map of ecological connections; distances and travel routes are still open.
+
+```mermaid
+flowchart TD
+  peaks["Frozen heights"]
+  springs["Naiad cascade springs"]
+  canopy["Canopy floodplain"]
+  coast["Tideborn docks and outer coast"]
+  hearth["Hearth Valleys and warm faults"]
+  forge["Mineral slopes and Dwarf forges"]
+  spires["Astral Observatory spires"]
+  pier["Academy Cloud-Pier"]
+  peaks -->|snowmelt| springs
+  springs -->|river| canopy
+  canopy -->|river mouth| coast
+  peaks ---|geothermal flank| hearth
+  hearth ---|mineral seams| forge
+  peaks ---|ridge updrafts| spires
+  spires ---|cloud currents| pier
+```
+
+The current game defines four campus zones: Central Academy Commons, Duel Amphitheater, Hatchery & Training Arbor, and Personal Sanctuary Dorm. Cloud-Pier is in the Arbor. The wider landforms and wild encounter placements below are proposed. Breeze, Horizon, and Everpeak currently select progression pacing and realm-specific saves. The same geography can underpin all three. [Campus zones](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/world.ts#L4) · [Cloud-Pier scene](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/engine/zoneBuilders.ts#L491) · [Realm configuration](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/realms.ts#L1)
+
+### Habitats of the Ten
+
+The named creatures are catalog anchors. The range and habitat rules specify where each could live in the proposed world. [Creature catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/creatures.ts#L24) · [Visual identity](#6-elemental-visual-identity)
+
+| Element | Main habitat | Other places it can live | Example and limiting conditions |
+| --- | --- | --- | --- |
+| Ember | Hearth Valleys and geothermal foothills | Warm fault pockets and sheltered hearths in the frozen highlands | Hearth Kitsune shelter in warm dens near steady prey. Exposed icefields are crossings, while warm sites can hold residents. |
+| Frost | Frozen heights and shaded Naiad springs | Cold gullies below the snowline and winter meadows | Glacier Stags need cold resting sites and access to unfrozen drinking water. They descend when heavy snow buries forage. |
+| Gale | Exposed ridges and Sky-Avian cloud strata | Coastal cliffs and open river bluffs | Gale Barn-Owls need lift for flight, sheltered nest ledges, and prey below. The wind corridor connects suitable patches. |
+| Bramble | Canopy woodland and damp understory | Floodplain meadows, hedge banks, reed margins, and irrigated courtyards | Mosscap Budlings need moist rooted substrate and cover. Floodplains can support them wherever the ground stays stable between floods. |
+| Tide | Estuary, Tideborn docks, and outer coast | Slow river reaches and deep spring pools | Tidepool Otters need water, food, and a dry den above flood level. Suitable bank habitat supports them inland. |
+| Spark | Exposed storm ridges and rain-wet coastal basalt | Open upland grass and storm-facing woodland edges | Nimbus Lynx hunt in open ground between storms and raise young in protected crevices with an escape route. |
+| Umbra | Deep-root arches and the Dark Elf archive margins | Shaded ravines, caves, and covered ruins | Nocturne Luna-Moths need dim daytime shelter and access to host plants or flowering clearings after dusk. |
+| Sol | Open sun terraces and High Elf battlements | Sunny ridges, dry coast bluffs, and open-country ruins | Suncrest Gryphons use sun-warmed ledges, open airspace, and nearby hunting grounds. Shade and water still matter for resting. |
+| Verdigris | Mineral-bearing slopes, old ore workings, and Dwarf forge districts | Exposed river-cut seams, stone quarries, and maintained workshops | Anvil-Sprite Golems use mineral-rich ground, ore-bearing stone, or forge stock for structural repair. Ordinary bare rock supports passage. |
+| Chronos | Astral Observatory spires and their calibrated grounds | Maintained waystations and ruins with intact timing instruments | Pendulum Automatons need a sheltered mechanism and dependable calibration points. An intact station can sustain a resident away from the spires. |
+
+### Where habitats overlap
+
+- **Where do Metal creatures live?** Metal refers here to **Verdigris**. A golem's range follows accessible minerals and maintained forge sites. It can live in an upland quarry, river-cut outcrop, or inhabited smithing ward.
+- **Are Forest creatures exclusive to forests?** Forest refers here to **Bramble**. A watered meadow edge or garden with stable soil and cover can sustain a resident. A dry stone courtyard can be crossed during dispersal.
+- **Can Fire creatures live in frozen mountains?** Yes. Fire refers here to **Ember**. A warm cave, geothermal fault, or sustained settlement hearth can support Hearth Kitsune if prey remains available. Frost creatures can occupy the adjacent cold slopes. Each keeps its own affinity.
+- **What should the map show?** Mark breeding residents separately from seasonal visitors and travelers. A local refuge can sit inside a broader biome. A creature's presence in that refuge does not by itself establish a breeding population across the whole biome.
+
+### Fusion contact zones
+
+The five known recipes suggest rare habitats at ecological boundaries. These are candidate refuges for the named fusion creatures. Shared terrain alone does not make a Confluence Egg. Inheritance and the five exact pairs still govern which offspring can hatch. [Creature biology](#4-creature-biology) · [Fusion lineage](#creatures-and-fusion-lineage)
+
+| Fusion | Parent affinities | Proposed refuge |
+| --- | --- | --- |
+| Magma | Ember + Bramble | A rooted caldera margin where warm fissures cross moist volcanic soil. Caldera Newts shelter in basalt cracks between heat and cover. |
+| Tempest | Tide + Spark | A storm-surge coast with sheltered deep pools and exposed charged rock. Maelstrom Eels retreat into the pools between surges. |
+| Glacier | Frost + Tide | A glacial outlet with cold shelves, open leads, and dependable fish. Permafrost Seals haul out on shelves beside open water. |
+| Eclipse | Umbra + Sol | Twilight escarpments with shaded dens and exposed sunlit shelves. Corona Caracals move between cover and open hunting ground. |
+| Aetheris | Chronos + Verdigris | Mineral-rich ruins below the Observatory with intact timing fixtures. Astrolabe Dragonets roost where aligned stonework and timed runes meet. |
+
 ## Balance and verification
 
 | Scenario | Expected result | Evidence to collect |

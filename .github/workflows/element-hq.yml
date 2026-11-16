@@ -109,7 +109,7 @@ jobs:
                   raise SystemExit(f"Missing elemental visual sections: {sorted(missing_visual)}")
 
               visual_start = design_lines.index("## 6. Elemental visual identity")
-              visual_end = design_lines.index("## Balance and verification", visual_start + 1)
+              visual_end = design_lines.index("## 7. Elemental world map", visual_start + 1)
               visual_lines = design_lines[visual_start:visual_end]
               palette_start = visual_lines.index("### Palette, emblem, and UI icon")
               art_start = visual_lines.index("### Magic, creatures, and environments")
@@ -125,6 +125,32 @@ jobs:
                           or {row[0] for row in cells} != expected_elements
                           or any(len(row) != columns or not all(row) for row in cells)):
                       raise SystemExit("Elemental visual table must cover each catalog element once with complete cells")
+
+              geography_end = design_lines.index("## Balance and verification", visual_end + 1)
+              geography_lines = design_lines[visual_end:geography_end]
+              geography_headings = [
+                  "### Regional geography",
+                  "### Habitats of the Ten",
+                  "### Where habitats overlap",
+                  "### Fusion contact zones",
+              ]
+              geography_starts = [geography_lines.index(heading) for heading in geography_headings]
+              if geography_starts != sorted(geography_starts):
+                  raise SystemExit("Unexpected elemental world map section order")
+
+              geography_tables = (
+                  (geography_lines[geography_starts[1]:geography_starts[2]], expected_elements - {
+                      "Magma", "Tempest", "Glacier", "Eclipse", "Aetheris",
+                  }, 4),
+                  (geography_lines[geography_starts[3]:], {"Magma", "Tempest", "Glacier", "Eclipse", "Aetheris"}, 3),
+              )
+              for lines, expected, columns in geography_tables:
+                  entries = [line for line in lines if line.startswith("| ")][2:]
+                  rows = [[cell.strip() for cell in line.strip("|").split("|")] for line in entries]
+                  if (len(rows) != len(expected)
+                          or any(len(row) != columns or not all(row) for row in rows)
+                          or {row[0] for row in rows} != expected):
+                      raise SystemExit("Elemental world map must cover each habitat and fusion once")
 
           print(f"Verified Element HQ documents at {head}")
           PY
