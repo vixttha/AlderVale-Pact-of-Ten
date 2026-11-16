@@ -1,0 +1,24 @@
+name: Public hosted runner policy
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require public repository
+        env:
+          REPO_PRIVATE: ${{ github.event.repository.private }}
+        run: |
+          if [ "$REPO_PRIVATE" != "false" ]; then
+            echo "::error::AlderVale must remain public. Stop CI and seek owner approval."
+            exit 1
+          fi
+      - name: Reject local, dynamic, and nonstandard runner labels
+        run: python3 tools/ci/check_runner_policy.py
