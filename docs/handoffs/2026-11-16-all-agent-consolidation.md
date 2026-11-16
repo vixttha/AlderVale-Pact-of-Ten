@@ -5,8 +5,10 @@
 Live verification on 2026-11-16 confirmed [PR #101](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/101)
 merged as `3fa20bc5ed4fecc228cc3733536a589bf75df6a0`. All fourteen
 initial source heads below are ancestors of current game main
-`219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`, including the still-open #33
-and #36. Those open PR states do not mean their package code is absent.
+`219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`, including #33 and #36.
+Those two unchanged proposals targeted the old Test Vault branch; this
+follow-up closed them as included through #101 after checking every changed
+path remains present on main. Their source branches remain available.
 The candidate `3671386156177a7238d928eb66dbf228b401e46b` and merge share
 tree `ad530aa6fd76e4844a4bf57c555f7a1cd5e1ee06`.
 [Post-merge validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43890556938)
@@ -36,7 +38,19 @@ a newly inserted resource was erased. Per-resource locks staged and replaced
 the entire map. The retained patch stages and commits only the locked record.
 All four tests then passed, along with the sixteen existing authorization and
 combat tests. The other cases cover rollback and same-resource ownership
-serialization. Full candidate CI is required before the authorized merge.
+serialization.
+
+The follow-up is [PR #121](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/121).
+Its original head `03bb429a66967c5ce9642428302dfa0891ef5f91` passed
+[all seven hosted jobs](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43923981764).
+Runner policy and Semgrep also passed. Before merging, the final guard found
+main had advanced to `65e90e59eaf69a1551828a7358a0e65587643992` through #116.
+That disjoint combat-only change has its own
+[seven-job hosted receipt](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43922664193).
+The combined tree then passed local typecheck, 117 tests (12 emulator tests
+skipped locally), build and six HTTP/WebSocket checks. This does not imply
+completed hosted validation of the combined SHA. The PR's merge receipt and
+post-merge run links record the final exact-SHA state without replaying work.
 
 This does not resolve [#57](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/57)'s
 decision about the unused endpoint's future, or production authorization
