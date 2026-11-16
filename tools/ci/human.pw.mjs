@@ -54,8 +54,9 @@ test('Rowan and Classic survive guest reloads', async ({ page }) => {
   await expect(world).toHaveAttribute('data-world-avatar-model', 'classic');
 });
 
-test('Rowan keeps gear stats from the Tailor and saves them on reload', async ({ page }) => {
-  test.setTimeout(90_000);
+test('Rowan keeps gear stats from the Tailor and saves them on reload', async ({ page, browserName }) => {
+  // WebKit re-enters the 3D world multiple times with software rendering on CI.
+  test.setTimeout(browserName === 'webkit' ? 150_000 : 120_000);
   await page.goto('/');
   await page.getByRole('textbox').first().fill('Rowan Tailor');
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
@@ -74,7 +75,7 @@ test('Rowan keeps gear stats from the Tailor and saves them on reload', async ({
   const equippedHp = page.getByText(String(baseHp + 10) + ' HP', { exact: true });
   await expect(equippedHp).toBeVisible();
 
-  await page.reload();
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 30_000 });
   await page.getByRole('button', { name: /Enter Aldervale/ }).click();
   await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
   await expect(equippedHp).toBeVisible();

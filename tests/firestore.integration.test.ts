@@ -220,6 +220,7 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     await expect(unpublishTour('breeze', 'rowan-owner', 'rowan')).resolves.toMatchObject({ isPublic: false });
     expect(await listTours('breeze')).toEqual([]);
     await assertFails(getDoc(doc(visitor, path)));
+    expect((await assertSucceeds(getDoc(doc(owner, path)))).get('isPublic')).toBe(false);
   });
 
   it('keeps Sky-Lens paintings private even when the Dorm is public', async () => {
@@ -227,8 +228,8 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     const visitor = player('visitor');
     const path = 'wizards/rowan/private/gallery';
     const { publishTour } = await import('../server/market.ts');
-    await publishTour('breeze', 'rowan-owner', 'rowan');
-    expect((await getDoc(doc(visitor, 'wizards/rowan/sanctuary/layout'))).get('isPublic')).toBe(true);
+    await expect(publishTour('breeze', 'rowan-owner', 'rowan')).resolves.toEqual({ isPublic: true });
+    expect((await assertSucceeds(getDoc(doc(visitor, 'wizards/rowan/sanctuary/layout')))).get('isPublic')).toBe(true);
     await assertSucceeds(setDoc(doc(owner, path), { images: ['data:image/jpeg;base64,AAA'] }));
     expect((await assertSucceeds(getDoc(doc(owner, path)))).get('images')).toHaveLength(1);
     await assertFails(getDoc(doc(visitor, path)));
@@ -258,7 +259,14 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     expect(wallets.map(({ florins }) => florins)).toEqual([233, 125]);
     await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', 10, 5, 'trade-1')).resolves.toEqual(wallets);
     await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', 999999, 0, 'trade-2')).rejects.toThrow('insufficient');
+    for (const invalidOffer of [-1, 1.5, NaN, 1_000_001]) {
+      await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', invalidOffer, 0, 'trade-3')).rejects.toMatchObject({ status: 400 });
+      await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', 0, invalidOffer, 'trade-3')).rejects.toMatchObject({ status: 400 });
+    }
     expect((await listBazaar('breeze', 'rowan-owner')).wallet?.florins).toBe(233);
+    expect((await listBazaar('breeze', 'buyer-owner')).wallet?.florins).toBe(125);
+    const retriedTrade = wallets.map((wallet) => ({ ...wallet, revision: (wallet.revision ?? 0) + 1 }));
+    await expect(settleTrade('breeze', 'rowan-owner', 'buyer-owner', 5, 5, 'trade-3')).resolves.toEqual(retriedTrade);
     const first = await awardLiveVictory('breeze', 'rowan-owner', 'duel-receipt', 'coop');
     const replay = await awardLiveVictory('breeze', 'rowan-owner', 'duel-receipt', 'coop');
     expect(first).toMatchObject({ florins: 353, honorMarks: 8, bondingSeals: 1 });

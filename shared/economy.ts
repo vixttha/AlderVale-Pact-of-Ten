@@ -5,6 +5,14 @@ import { getStarterDeckForElement } from './spells.ts';
 
 export type ResourceId = 'sunleaf' | 'dewglass' | 'starstone' | 'copper_wire' | 'ember_ash';
 
+export const CRAFT_XP_PER_RANK = 100;
+export const CRAFT_XP_PER_TRANSMUTE = 25;
+
+export function craftProgressionAfterGain(craftXp: number, gained: number) {
+  const nextXp = craftXp + gained;
+  return { craftXp: nextXp, craftRank: 1 + Math.floor(nextXp / CRAFT_XP_PER_RANK) };
+}
+
 export interface ResourceDef {
   id: ResourceId;
   name: string;

@@ -11,7 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
       - name: Require public repository
         env:
           REPO_PRIVATE: ${{ github.event.repository.private }}
@@ -22,3 +24,5 @@ jobs:
           fi
       - name: Reject local, dynamic, and nonstandard runner labels
         run: python3 tools/ci/check_runner_policy.py
+      - name: Run Test Vault Python regressions
+        run: python3 -m unittest discover -s tests/vault -p 'test_*.py' -v

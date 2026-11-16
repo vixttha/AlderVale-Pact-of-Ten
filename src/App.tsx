@@ -26,6 +26,7 @@ import { CAMPUS_NPCS, CAMPUS_QUESTS, MOUNTS, ZONES, type CampusNpc, type ZoneId 
 import { computeWizardDerivedStats, type DuelState, type TurnActionInput } from '../shared/combat.ts';
 import { SPECIES_BY_ID } from '../shared/creatures.ts';
 import { applyTermReward, TERM_REWARD_TRACK, type WizardDocument } from '../shared/economy.ts';
+import { isWizardMuted } from '../shared/playerSocial.ts';
 import { RACES } from '../shared/wardrobe.ts';
 import { auth, signInWithGooglePopup, signOutFirebase } from './lib/firebase.ts';
 import {
@@ -166,10 +167,10 @@ export function App() {
   const worldEntry = useRef(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState<{ senderName: string; text: string; elementId: ElementId }[]>([]);
-  const [blockedNames, setBlockedNames] = useState<string[]>([]);
-  const blockedNamesRef = useRef<string[]>(blockedNames);
-  blockedNamesRef.current = blockedNames;
+  const [chatMessages, setChatMessages] = useState<{ senderName: string; senderWizardId?: string; text: string; elementId: ElementId }[]>([]);
+  const [blockedWizardIds, setBlockedWizardIds] = useState<string[]>([]);
+  const blockedWizardIdsRef = useRef<string[]>(blockedWizardIds);
+  blockedWizardIdsRef.current = blockedWizardIds;
   const [tradeSession, setTradeSession] = useState<{
     tradeId: string;
     partnerName: string;
@@ -630,6 +631,8 @@ export function App() {
           } else if (data.type === 'zone_snapshot') {
             setRemotePlayers((data.players as LivePlayerPresence[]).filter(isPeer));
             setActiveLiveDuels((data.activeDuels as typeof activeLiveDuels) ?? []);
+          } else if (data.type === 'duels_updated') {
+            setActiveLiveDuels((data.activeDuels as typeof activeLiveDuels) ?? []);
           } else if (data.type === 'player_joined') {
             const p = data.player as LivePlayerPresence;
             if (isPeer(p)) {
@@ -674,8 +677,9 @@ export function App() {
             const sender = String(data.senderName ?? 'Wizard');
             const text = String(data.text ?? '');
             const sid = String(data.senderSessionId ?? '');
-            setChatMessages((prev) => [...prev.slice(-30), { senderName: sender, text, elementId: (data.elementId as ElementId) ?? 'ember' }]);
-            if (sid && !blockedNamesRef.current.includes(sender)) {
+            const senderWizardId = typeof data.senderWizardId === 'string' ? data.senderWizardId : undefined;
+            setChatMessages((prev) => [...prev.slice(-30), { senderName: sender, senderWizardId, text, elementId: (data.elementId as ElementId) ?? 'ember' }]);
+            if (sid && !isWizardMuted(blockedWizardIdsRef.current, senderWizardId)) {
               seqRef.current += 1;
               setChatBubbleEvent({
                 sessionId: sid,
@@ -1264,7 +1268,9 @@ export function App() {
             </button>
             <button
               onClick={() => {
-                setBlockedNames((b) => [...b, inspectedPlayer.name]);
+                setBlockedWizardIds((blocked) =>
+                  blocked.includes(inspectedPlayer.wizardId) ? blocked : [...blocked, inspectedPlayer.wizardId],
+                );
                 setInspectedPlayer(null);
                 showToast(`Muted ${inspectedPlayer.name}`);
               }}
@@ -1344,7 +1350,7 @@ export function App() {
         <div className="absolute bottom-20 left-3 w-80 storybook-dark-panel rounded-2xl p-3 text-xs space-y-2">
           <div className="max-h-36 overflow-y-auto space-y-1">
             {chatMessages
-              .filter((m) => !blockedNames.includes(m.senderName))
+              .filter((m) => !isWizardMuted(blockedWizardIds, m.senderWizardId))
               .map((m, i) => (
                 <div key={i}>
                   <strong className="text-[#f4c98b]">{m.senderName}:</strong> {m.text}

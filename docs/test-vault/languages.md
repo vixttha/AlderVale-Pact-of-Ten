@@ -1,6 +1,6 @@
 # Languages, formats and test tools
 
-AlderVale currently runs in TypeScript, React, Vite, Node, WebSocket, Three.js, and Firestore. The test library can use additional languages wherever they provide a distinct observation or cover an integration. The table distinguishes languages in the initial CI from optional tools and hypothetical future runtimes.
+AlderVale currently runs in TypeScript, React, Vite, Node, WebSocket, Three.js, and Firestore. The test library can use additional languages wherever they provide a distinct observation or cover an integration. GitHub Actions can run a language when its toolchain is available or can be installed on a standard hosted runner. The table distinguishes existing checks from optional tools and future runtimes.
 
 | Language or format | Useful AlderVale test ideas | Tool or approach | Status |
 |---|---|---|---|
@@ -14,7 +14,7 @@ AlderVale currently runs in TypeScript, React, Vite, Node, WebSocket, Three.js, 
 | GLSL | Compile representative shaders, memory/lifecycle, transparency, clip/color-space behavior | Three.js and Chromium GPU/software contexts | Planned |
 | Bash / POSIX shell | Linux build, process teardown, permission-neutral local smoke, byte checks | ShellCheck, Bats, curl | Useful now |
 | PowerShell | Windows install and startup, quoting/path/case parity, stop and cleanup | Pester, PowerShell | Useful now |
-| Python | Validate asset metadata, compare replay traces, analyze simulation distributions, verify independent API clients | pytest, Hypothesis, stdlib scripts | Optional |
+| Python | Public-runner policy regressions, with asset metadata and replay analysis available as future cases | Standard-library `unittest` | Hosted policy job |
 | SQL | Future relational ledger conservation, constraints, transaction rollbacks, migration equivalence | SQL fixtures, pgTAP for a future PostgreSQL adapter | Conditional |
 | Gherkin | Player-readable acceptance scenarios for onboarding, duels, trading, and Dorm tours | Cucumber bindings to TypeScript or another runner | Optional |
 | OpenAPI / AsyncAPI | Document JSON HTTP routes and live frame contracts and verify examples | Schema validators and TypeScript contract tests | Optional |
@@ -37,6 +37,16 @@ AlderVale currently runs in TypeScript, React, Vite, Node, WebSocket, Three.js, 
 | COBOL / Fortran / Ada / Pascal / Delphi | External integrations, numeric reference comparisons, or legacy file import if a concrete need arises | Compiler/language-native tests and shared JSON fixtures | Conditional |
 | Racket / Common Lisp / Scheme / Prolog | Independent rule oracle or constraint solver for small combat and reward models | Language-native testing and fixture comparisons | Optional modeling |
 
-A new language should provide independent evidence, run an existing external client, or test a runtime the game ships. Start with shared fixtures and the same expected outcomes before adding another runner or dependency.
+## Run Python Vault tests
+
+From the repository root:
+
+```sh
+python3 -m unittest discover -s tests/vault -p 'test_*.py' -v
+```
+
+The existing [Public hosted runner policy workflow](../../.github/workflows/public-runner-policy.yml) runs these tests alongside the [policy checker](../../tools/ci/check_runner_policy.py). The tests use temporary workflow fixtures to check that the policy accepts standard hosted runners and rejects self-hosted and nonstandard labels. They use Python's standard library.
+
+For a new language, add a case that provides independent evidence, exercises an external client, or tests a runtime the game ships. Record the toolchain, fixture, command, and GitHub Actions job in the Vault. Reuse an existing job when it already provides the required runtime.
 
 [Vitest](https://vitest.dev/) · [Playwright](https://playwright.dev/) · [Firebase Emulator Suite](https://firebase.google.com/docs/emulator-suite)
