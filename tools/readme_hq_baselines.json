@@ -23,6 +23,17 @@
       "snapshots": {
         "README.md": "b6fe2eeb2eeaf01110596231c08cf538b97524e2"
       }
+    },
+    "v0.0.3": {
+      "source_commits": {
+        "README.md": "737f5fdd41fbc9694d3001727d023ef91efe421d"
+      },
+      "source_paths": {
+        "README.md": "workspace/v0.0.3/DRAFT.md"
+      },
+      "snapshots": {
+        "README.md": "a73b157800a86a5daea69523e8acd4d863aa0ff1"
+      }
     }
   },
   "readme_hq": {

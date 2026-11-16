@@ -4,6 +4,7 @@
 | --- | --- | --- |
 | v0.0.1 | Approved and archived | [Workspace record](v0.0.1/README.md) |
 | v0.0.2 | Archived (publication review) | [Candidate and review notes](v0.0.2/README.md) |
+| v0.0.3 | Approved and archived | [Candidate and review notes](v0.0.3/README.md) |
 
 Each worker has one write scope: `workspace/<assigned-version>/`, including its draft Markdown, assets, preview files, and notes. Read shared files for context. Keep the HQ front page (`/README.md` on this branch), approved game README archives (`versions/`), other version folders, and main-integration files outside that scope.
 
