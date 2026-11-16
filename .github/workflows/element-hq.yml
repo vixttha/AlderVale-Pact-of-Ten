@@ -130,15 +130,14 @@ jobs:
               fusions = {
                   "Magma": ("Fire", "Forest"), "Tempest": ("Water", "Lightning"),
                   "Glacier": ("Frost", "Water"), "Eclipse": ("Dark", "Light"),
-                  "Aetheris": ("Earth", "Metal"),
               }
               fusion_rows = rows_between("### Creatures and fusion lineage", "### Fusion spell reference", 6)
               recorded_recipes = {row[0]: tuple(row[1].split(" + ")) for row in fusion_rows}
-              if len(fusion_rows) != 5 or recorded_recipes != fusions:
+              if len(fusion_rows) != len(fusions) or recorded_recipes != fusions:
                   raise SystemExit("Fusion recipes diverge from the rebuilt proposal")
 
               labels = list(opposition) + list(fusions)
-              matrix = rows_between("### Proposed directional matrix", "### Spells, shields, and prisms", 16)
+              matrix = rows_between("### Proposed directional matrix", "### Spells, shields, and prisms", len(labels) + 1)
               matrix_header = "| Attacker | " + " | ".join(labels) + " |"
               if matrix_header not in design_text.splitlines() or [row[0] for row in matrix] != labels:
                   raise SystemExit("Matrix must include every v1 attacker and defender in order")
@@ -162,6 +161,9 @@ jobs:
                           expected = "1.00"
                       if actual != expected:
                           raise SystemExit(f"{attacker} -> {defender}: expected {expected}, got {actual}")
+
+              if "Aetheris" in labels or "Chronos" in labels or "Space" in labels:
+                  raise SystemExit("Undecided affinities belong outside the working matrix")
 
               lore = rows_between("### Why are there five opposing pairs?", "### Are the elements conscious?", 2)
               if [row[0] for row in lore] != [f"{a} ↔ {b}" for a, b in pairs]:

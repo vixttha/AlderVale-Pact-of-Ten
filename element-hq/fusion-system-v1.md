@@ -1,6 +1,6 @@
 # Fusion System v1 — design proposal
 
-**Historical proposal.** See the [rebuilt v1 fusion recipes](designs/aldervale-element-system-v1.md#3-fusion-recipes) for all five current design targets, including the Earth + Metal proposal for new Aetheris eggs and how paid eggs carry forward.
+**Historical proposal.** See the [rebuilt v1 fusion recipes](designs/aldervale-element-system-v1.md#3-fusion-recipes) for the four carry-forward candidates and the permanent hatchling design. This document records the Chronos + Metal Aetheris prototype. Aetheris, Chronos, Time, and Space remain open in the new schema.
 
 **Status:** Proposed · requires owner acceptance before gameplay implementation  
 **Source baseline:** `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd`  

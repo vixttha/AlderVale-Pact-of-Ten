@@ -14,7 +14,7 @@ The five reciprocal pairs are the owner's design decision. This document rebuild
 
 ## 1. Element roster
 
-These ten names are the v1 base roster and proposed player-facing labels. Nine existing IDs carry forward under the labels below. Earth receives its own ID. Existing Chronos content stays usable under the legacy compatibility rules in step 8.
+These ten names are the v1 base roster and proposed player-facing labels. Nine existing IDs carry forward under the labels below. Earth receives its own ID. Time and Space remain open design topics. Chronos is a Time-themed element in the development build. Its future role is open.
 
 | Element | Opposes | Game ID | Proposed tier | Combat identity | Creature anchor |
 | --- | --- | --- | --- | --- | --- |
@@ -29,7 +29,7 @@ These ten names are the v1 base roster and proposed player-facing labels. Nine e
 | Metal | Forest | `verdigris` | Rare | Precision, armor, and pierce | Anvil-Sprite Golem |
 | Forest | Metal | `bramble` | Starter | Healing, thorn wards, and sustain | Mosscap Budling |
 
-The proposed starter roster has seven elements and the rare roster has three. Keep current gates for existing elements and add Earth to starter selection once its entry kit is ready. A separate tier contains the five fusions.
+The proposed starter roster has seven elements and the rare roster has three. Keep current gates for existing elements and add Earth to starter selection once its entry kit is ready. The four candidate fusion affinities form a separate design tier. Aetheris remains an open concept.
 
 ## Identity and lore
 
@@ -52,29 +52,28 @@ Matchups use the final attack affinity against the defender. The owner's five pa
 | 3 | The attacking fusion has a parent whose opposite is the defender | 1.15× |
 | 4 | Other matchups | 1.00× |
 
-Chronos mirrors Chronos at 0.85× and resolves at 1.00× against all other affinities in either direction. The directional fusion bonus follows the new parent oppositions. Aetheris deals 1.15× against Wind and Forest using its proposed Earth and Metal parent affinities.
+The directional fusion bonus follows the new parent oppositions. Chronos, Space, and Aetheris have no proposed matchup values in this revision.
 
 ### Proposed directional matrix
 
-Rows attack columns. The 225 cells contain 15 mirrors, 10 direct oppositions, 10 fusion bonuses, and 190 neutral cells.
+Rows attack columns. This working matrix uses ten base affinities and four candidate fusions. Its 196 cells contain 14 mirrors, 10 direct oppositions, 8 fusion bonuses, and 164 neutral cells.
 
-| Attacker | Fire | Water | Lightning | Frost | Wind | Earth | Light | Dark | Metal | Forest | Magma | Tempest | Glacier | Eclipse | Aetheris |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Fire | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Water | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Lightning | 1.00 | 1.00 | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Frost | 1.00 | 1.00 | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Wind | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Earth | 1.00 | 1.00 | 1.00 | 1.00 | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Light | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Dark | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Metal | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Forest | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Magma | 1.00 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.15 | 1.00 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 |
-| Tempest | 1.15 | 1.00 | 1.00 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.00 | 1.00 | 1.00 |
-| Glacier | 1.15 | 1.00 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.00 | 1.00 |
-| Eclipse | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.15 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.00 |
-| Aetheris | 1.00 | 1.00 | 1.00 | 1.00 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 |
+| Attacker | Fire | Water | Lightning | Frost | Wind | Earth | Light | Dark | Metal | Forest | Magma | Tempest | Glacier | Eclipse |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Fire | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Water | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Lightning | 1.00 | 1.00 | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Frost | 1.00 | 1.00 | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Wind | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Earth | 1.00 | 1.00 | 1.00 | 1.00 | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Light | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Dark | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Metal | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.25 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Forest | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.25 | 0.85 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Magma | 1.00 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.15 | 1.00 | 0.85 | 1.00 | 1.00 | 1.00 |
+| Tempest | 1.15 | 1.00 | 1.00 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.00 | 1.00 |
+| Glacier | 1.15 | 1.00 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 | 1.00 |
+| Eclipse | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.15 | 1.15 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.85 |
 
 ### Spells, shields, and prisms
 
@@ -115,7 +114,7 @@ These are calculated targets for a future implementation. Use deterministic hits
 
 ### Creatures and fusion lineage
 
-Use exact unordered recipes. Retain both parent creatures. Four recipes carry the same parent identities forward. Earth + Metal is the proposal for new Aetheris eggs. Legacy Chronos + Metal egg outcomes remain valid.
+These four recipes, shown below under the newer affinity names, exist in the development build and use affinities that carry forward into the new schema. Their place in v1 remains open to design review. Each pair works in either order. Oppositions describe combat matchups, while recipes identify the affinities that can produce a fusion hatchling.
 
 | Fusion | Parent pair | Creature | Species ID | Growth stages | Signature spell |
 | --- | --- | --- | --- | --- | --- |
@@ -123,25 +122,36 @@ Use exact unordered recipes. Retain both parent creatures. Four recipes carry th
 | Tempest | Water + Lightning | Maelstrom Eel | `tempest_serpent` | Spark Fin → Storm Serpent → Sovereign Maelstrom | Sky-Sea Maelstrom |
 | Glacier | Frost + Water | Permafrost Seal | `glacier_bear` | Ice Pup → Rime Guardian → Glacier Monarch | Permafrost Tide |
 | Eclipse | Dark + Light | Corona Caracal | `eclipse_lynx` | Twilight Kit → Corona Lynx → Eclipse Sovereign | Corona Requiem |
-| Aetheris | Earth + Metal | Astrolabe Dragonet | `aetheris_dragonet` | Starlight Wyrm → Gilded Astrolabe → Aetheris Sovereign | Astrolabe Zenith |
+
 
 ### Fusion spell reference
 
-Keep the signature card IDs and minimum ranks of 3 for Magma, Tempest, and Glacier, 5 for Eclipse, and 6 for Aetheris. Keep the matching fusion unlock. Previously earned Aetheris rewards and eligible paid eggs retain the existing entitlement. [Spell catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/spells.ts#L106) · [Merged entitlement PR #107](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/107)
+The development build grants the matching fusion unlock and signature card. Current minimum ranks are 3 for Magma, Tempest, and Glacier and 5 for Eclipse. Aetheris has a rank 6 card in the prototype. Its place in the new schema depends on a separate decision. [Spell catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/spells.ts#L106) · [Merged entitlement PR #107](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/107)
 
 ### v1 creature and fusion rules
 
-New eggs cost 80 Florins. The active wizard must own two distinct valid parent instances in the active realm. Stage 1 parents qualify and the Hatchery requires no Bonding Seal. Every distinct claimed local Solo, Rare Trial, or Spire win advances each pending egg once. Two qualifying wins hatch a new egg. Losses, draws, abandoned matches, spectators, live PvP, live co-op, and repeat claims add no progress. Lead creature participation is optional. Persist one offspring per hatch and grant its fusion card and unlock once, including for paid legacy fusion eggs. Keep rank restrictions and existing deck choices.
+**A fusion hatchling is a permanent third creature.** Two parent creatures contribute to one egg. Each parent keeps its own identity and stays in the roster. The hatchling gets its own species, one permanent fusion affinity, and its own growth stages. It remains a separate creature after the battle or a reload.
+
+1. At the Hatchery, choose two distinct creatures belonging to the active wizard in the active realm. Stage 1 parents qualify and the Hatchery requires no Bonding Seal.
+2. The proposed purchase screen should preview the guaranteed fusion or the possible ordinary outcomes before charging 80 Florins. Save the resulting species when the egg is purchased.
+3. Two distinct claimed local wins hatch the egg. A Solo, Rare Trial, or Spire win advances each pending egg once. Losses, draws, abandoned matches, spectators, live PvP, live co-op, and repeat claims add no progress. Lead creature participation is optional.
+4. Give the hatchling its own roster entry and grant the matching fusion card and unlock once. Keep existing rank restrictions and deck choices.
+
+**Example.** A Fire Hearth Kitsune and Forest Mosscap Budling can produce a Magma Caldera Newt egg. Hatching leaves three creature records in the roster. The newt uses Magma as its own affinity when it fights and evolves.
+
+### What the Hatchery does today
+
+At [`19a9a85b039ad63e8df4d4a104ad9e98f68ae31c`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/19a9a85b039ad63e8df4d4a104ad9e98f68ae31c), the resolver already contains the four recipes above plus the Chronos + Verdigris prototype. The Hatchery charges 80 Florins, stores an egg with the resolved species, and leaves both parents in the roster. A second qualifying win creates a separate creature and the fusion grant helper can add its unlock and card. An unmatched pair currently chooses either parent's species at random, including a fusion parent. The eligibility, preview, and claim safeguards above describe the design target. [Recipe resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/19a9a85b039ad63e8df4d4a104ad9e98f68ae31c/shared/creatures.ts#L297) · [Egg creation](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/19a9a85b039ad63e8df4d4a104ad9e98f68ae31c/src/features/creatures/CreaturesArborPanel.tsx#L127) · [Hatching](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/19a9a85b039ad63e8df4d4a104ad9e98f68ae31c/src/App.tsx#L931) · [Fusion test cases](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/19a9a85b039ad63e8df4d4a104ad9e98f68ae31c/tests/fusionProgression.test.ts#L48)
 
 ## 4. Creature biology
 
 ### Can two different elements produce offspring?
 
-Yes. An exact recipe guarantees its fusion. Other pairs of two base creatures choose either parent's species with equal probability at purchase and save the result. A fusion and a base creature produce the base parent's species. Two fusion creatures are ineligible and incur no charge. The proposal retains existing Chronos creatures and excludes them from new v1 breeding.
+Yes. An exact recipe guarantees its fusion. Other pairs of two base creatures choose either parent's species with equal probability at purchase and save the result. A fusion and a base creature produce the base parent's species. Two fusion creatures are ineligible and incur no charge. Chronos involvement in new breeding is open with the Time design.
 
 ### Can creatures have two elemental affinities?
 
-Each creature has one affinity. A Quarryback Tortoise has Earth. An Astrolabe Dragonet has Aetheris. A fusion's ancestry can shape its appearance and lore.
+Each creature has one affinity. The proposed Quarryback Tortoise has Earth. The prototype Astrolabe Dragonet has Aetheris. A fusion's ancestry can shape its appearance and lore.
 
 ### Can an element change during evolution?
 
@@ -157,7 +167,7 @@ Yes. Bonds, experience, and temperament shape how a creature responds to an elem
 
 ### Design checks
 
-Earth and Metal yield Aetheris in either parent order under the proposal. A paid Aetheris egg from the earlier Chronos + Metal recipe keeps its stored species, required wins, and wins earned. Hatching uses that saved result directly.
+Test a Fire and Forest pair both ways, a fusion and a base parent, two fusion parents, and a stored development egg. Hatching uses the species selected at purchase.
 
 ### Current game implementation
 
@@ -189,7 +199,7 @@ An affinity can briefly take a shape where its conditions sustain it. Earth migh
 
 ### What is the relationship between Space and Time?
 
-Space and time structure the world. Earth gives places stable ground. Metal shapes tools, channels, and boundaries. Aetheris takes its design language from observatories, tuned mechanisms, and stone foundations. Legacy Chronos creatures and spells retain their time association outside the Ten.
+**Open.** Time and Space could become gameplay elements, could be represented outside the element system, or could stay unexplored for now. No role or relationship has been selected. Chronos is the development build's existing Time-themed element. Aetheris is the development build's Chronos + Metal fusion. Neither has a place assigned in the new schema. The earlier Earth + Metal idea has been set aside as an unapproved option.
 
 ## 6. Elemental visual identity
 
@@ -211,7 +221,6 @@ Space and time structure the world. Earth gives places stable ground. Metal shap
 | Tempest | #394A9C | #BCC9FF | Maelstrom Eye | Offset spiral eye | Open off-center eye |
 | Glacier | #22627D | #C4F4FF | Faceted Iceberg | Faceted block over a wave | Hard outline and open base |
 | Eclipse | #71395D | #FFC6DB | Corona Ring | Bright rim around a dark disk | Offset circle edges |
-| Aetheris | #345F69 | #BDF4E7 | Celestial Astrolabe | Concentric rings with a center pin | Strong center and two open gaps |
 
 ### Magic, creatures, and environments
 
@@ -231,7 +240,6 @@ Space and time structure the world. Earth gives places stable ground. Metal shap
 | Tempest | Rolling arcs curl along a water ring | Long eel with lightning fins and a hollow storm-eye marking | Storm-surge coast |
 | Glacier | A heavy tidal front breaks into flat ice plates | Rounded seal body under a faceted dorsal shield | Glacial outlet |
 | Eclipse | A dim disk leaves a bright expanding rim | Dark cat silhouette with a crown rim and bright ear tips | Twilight escarpment |
-| Aetheris | Machined rings settle around a stone core | Stone keel, metal pinions, concentric crest | Ore-bearing observatory ruins |
 
 ### Readability and art review
 
@@ -270,40 +278,39 @@ Fire creatures can shelter in geothermal pockets under snowy mountains. Forest c
 | Tempest | Water + Lightning | Storm-surge coast |
 | Glacier | Frost + Water | Glacial outlet |
 | Eclipse | Dark + Light | Twilight escarpment |
-| Aetheris | Earth + Metal | Ore-bearing observatory ruins |
 
-The proposed Aetheris habitat is a ruined observatory built into ore-bearing stone. A storm-surge coast supports Tempest breeding through Water and Lightning. Their combat oppositions follow the pact.
+A storm-surge coast supports Tempest breeding through Water and Lightning. Their combat oppositions follow the pact.
 
 ## 8. Existing game compatibility
 
 ### Stable IDs and display names
 
-Keep nine existing base IDs and all five fusion IDs. Add `earth` and allocate fresh Earth spell and species IDs. Existing `chronos` wizards, creatures, spells, decks, and unlocks stay usable. Preserve the existing time-themed IDs and behavior except for the explicit v1 matchup rule. Keep Chronos visible to owners of that content. Earth receives a new entry without reassigning existing creatures or spells.
+The game is in development and has no live player migration. Keep nine existing base IDs where convenient, add `earth` as its own affinity, and use local saves and fixtures to catch regressions. Decide whether to retain, convert, or reset affected development fixtures once Time, Space, and Aetheris are resolved.
 
 ### Compatibility audit
 
 | Area | Observed dependency | Migration rule |
 | --- | --- | --- |
 | **Spells** | Cards use affinity IDs and prism destinations come from the opposition helper. [Cards](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/spells.ts#L75) | Keep card IDs, costs, ranks, and existing cards. Add explicit prism destinations before replacing opposition. Give Earth new cards. |
-| **Creatures** | Creature saves store elemental and species identity. The Firestore owner update allowlist omits creature affinity. [Save shape](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/src/lib/storage.ts#L24) · [Rules](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/firestore.rules#L218) | Keep existing affinities and species. Add an Earth species. Keep Chronos creatures usable and honor previously earned Aetheris. |
-| **Combat calculations** | Direct and fusion rules share the catalog. Spells and creature strikes apply distinct modifiers. [Element helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/elements.ts#L242) · [Damage](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/combat.ts#L280) | Use the same versioned rules in client and server. Run v1 matchup, prism, shield, and legacy Chronos checks. |
-| **Fusion recipes** | The existing resolver uses Chronos and Verdigris for Aetheris. [Resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/creatures.ts#L297) | Use Earth and Metal for new Aetheris eggs. Honor paid eggs with their saved identity, result, threshold, and progress. Apply no second fee. |
+| **Creatures** | Creature saves store elemental and species identity. The Firestore owner update allowlist omits creature affinity. [Save shape](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/src/lib/storage.ts#L24) · [Rules](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/firestore.rules#L218) | Add an Earth species and verify that evolving or hatching a creature preserves the correct affinity in development fixtures. |
+| **Combat calculations** | Direct and fusion rules share the catalog. Spells and creature strikes apply distinct modifiers. [Element helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/elements.ts#L242) · [Damage](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/combat.ts#L280) | Use the same versioned rules in client and server. Run the working matchup, prism, and shield checks. Extend them after the open affinities are resolved. |
+| **Fusion recipes** | The existing resolver uses Chronos and Verdigris for Aetheris. [Resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/creatures.ts#L297) | Test the four compatible recipes and saved egg outcomes in development fixtures. Keep the Aetheris recipe decision open. |
 | **Saves** | Guest and cloud saves store element IDs, egg outcomes, decks, and creature references. [Save code](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/src/lib/storage.ts#L24) · [Egg shape](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/economy.ts#L114) | Deploy compatible readers before emitting Earth records. Keep unresolved IDs recoverable. Test any write version for repeated claims, retries, and rollback. |
 | **Progression** | Existing fusion owners and hatch rewards use a shared entitlement helper. [Grant helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/economy.ts#L136) | Reuse the grant and deduplication rules. Preserve earned spells, rank, quests, unlock lists, currencies, and realm boundaries. |
 
 ### Rollout and rollback
 
-1. Add compatible readers and exercise guest and cloud fixture round-trips for existing IDs, Chronos decks, and paid Aetheris eggs. Hold Earth writes until relevant readers support Earth.
+1. Exercise guest and cloud fixture round-trips before changing the catalog. Include current Chronos decks and Aetheris eggs as development regression cases.
 2. Bind explicit prism targets. Validate old and new combat behavior against their respective matrices. Give active encounters their starting ruleset or migrate them under an explicit versioned policy.
-3. Add Earth entry assets, cards, species, labels, and the new-egg resolver. Stage entry and egg readiness together. Verify Aetheris grants and rank gates for existing and new owners.
+3. Add Earth entry assets, cards, species, labels, and the new-egg resolver. Stage entry and egg readiness together. Verify fusion grants and rank gates for the selected v1 lineages.
 4. Run public GitHub-hosted checks on the exact gameplay candidate, including guest and cloud fixture reload. Roll back new Earth entries with a compatible reader in place for already-created Earth saves. Record a reviewed release decision separately.
 
 ### Acceptance checks
 
-- Verify all 225 v1 cells, all five reciprocal pairs, both input orders of every recipe, and the legacy Chronos cases outside the matrix.
+- Verify the 196 working cells, all five reciprocal pairs, and both input orders of the four candidate recipes. Add new cells after deciding the remaining affinities.
 - Verify all three prism destinations, matching shield selection, pierce, and the spell and creature fixtures from step 2.
-- Cover a paid legacy Aetheris egg before and after one win, a new Earth–Metal egg, evolution, repeated claims, reload, and one-time entitlements. Verify rejected purchases keep the player's Florins.
-- Round-trip legacy Chronos and new Earth saves through guest and cloud fixtures. Check deck contents, creature identity, progression, and realm boundaries. Verify the compatible rollback reader.
+- Cover a stored egg before and after one win, a new Magma egg, unchanged parent records, evolution, repeated claims, reload, and one-time entitlements. Verify rejected purchases keep the test wizard's Florins.
+- Round-trip Earth and current development save fixtures. Check deck contents, creature identity, progression, and realm boundaries.
 
 ## Balance and verification
 
@@ -311,4 +318,4 @@ The v1 matrix and fixtures are design expectations. The legacy PR measures the e
 
 ## Open questions and decisions
 
-The five pairs come directly from the owner. The Earth starter kit, Quarryback Tortoise, legacy-only Chronos breeding policy, Earth + Metal recipe for new Aetheris eggs, and unchanged multiplier values are proposed design choices made in this rebuild. Review them before proceeding with gameplay changes.
+The five pairs come directly from the owner. Time, Space, Chronos, and Aetheris are open. The Earth starter kit, Quarryback Tortoise, four carry-forward fusion candidates, and multiplier values are proposals.
