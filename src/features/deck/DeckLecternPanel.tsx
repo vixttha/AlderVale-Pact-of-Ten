@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, Sparkles, Wand2 } from 'lucide-react';
-import { SPELLS, SPELL_BY_ID } from '../../../shared/spells.ts';
+import { SPELLS, SPELL_BY_ID, getSpellUseLockReason } from '../../../shared/spells.ts';
 import { RACES } from '../../../shared/wardrobe.ts';
 import { ELEMENTS } from '../../../shared/elements.ts';
 import type { WizardDocument } from '../../../shared/economy.ts';
@@ -24,8 +24,15 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
   const [goal, setGoal] = useState('How should I combo my blades, prisms, and creature branch for Rank 4 Rare Trials?');
   const [advice, setAdvice] = useState<string | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
+  const spellUnlockState = {
+    rank: wizard.rank,
+    unlockedElements: wizard.progression.unlockedElements,
+    unlockedFusions: wizard.progression.unlockedFusions,
+  };
 
   const toggleDeckCard = (spellId: string, add: boolean) => {
+    const spell = SPELL_BY_ID[spellId];
+    if (add && (!spell || getSpellUseLockReason(spell, spellUnlockState))) return;
     const nextDeck = [...wizard.progression.deck];
     if (add) {
       if (nextDeck.length >= 40) return;
@@ -39,6 +46,8 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
   };
 
   const applySpellwrighting = (spellId: string, branch: 'A' | 'B') => {
+    const spell = SPELL_BY_ID[spellId];
+    if (!spell || getSpellUseLockReason(spell, spellUnlockState)) return;
     if (wizard.currencies.spellShards < 2 || wizard.progression.spellwrighting[spellId] === branch) return;
     onUpdateWizard({
       ...wizard,
@@ -124,6 +133,7 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
               const sp = SPELL_BY_ID[id];
               if (!sp) return null;
               const qty = counts[id] ?? 0;
+              const lockReason = getSpellUseLockReason(sp, spellUnlockState);
               return (
                 <div key={id} className="rounded-xl border border-[#d7c7a9] bg-white/85 p-3 flex flex-col justify-between">
                   <div>
@@ -133,12 +143,13 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
                     </div>
                     <div className="mt-1 font-bold text-sm">{sp.name}</div>
                     <div className="text-[#615346]">{sp.description}</div>
+                    {lockReason && <div className="mt-1 font-bold text-amber-700">Locked: {lockReason}</div>}
                   </div>
                   <div className="mt-2.5 flex items-center justify-between">
                     <span className="font-mono-num font-bold">In Deck: {qty}</span>
                     <div className="flex gap-1.5">
-                      <button onClick={() => toggleDeckCard(id, false)} className="rounded-lg bg-[#efe4ce] px-2.5 py-1 font-bold">-</button>
-                      <button onClick={() => toggleDeckCard(id, true)} className="rounded-lg bg-[#241b16] px-2.5 py-1 font-bold text-[#f4c98b]">+</button>
+                      <button disabled={qty === 0 || wizard.progression.deck.length <= 24} onClick={() => toggleDeckCard(id, false)} className="rounded-lg bg-[#efe4ce] px-2.5 py-1 font-bold disabled:opacity-40">-</button>
+                      <button disabled={Boolean(lockReason) || wizard.progression.deck.length >= 40} onClick={() => toggleDeckCard(id, true)} className="rounded-lg bg-[#241b16] px-2.5 py-1 font-bold text-[#f4c98b] disabled:opacity-40">+</button>
                     </div>
                   </div>
                 </div>
@@ -149,7 +160,7 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
 
         {tab === 'wrighting' && (
           <div className="mt-4 grid gap-3 md:grid-cols-2 text-xs">
-            {SPELLS.filter((s) => wizard.progression.ownedSpellIds.includes(s.id) && (s.wrightA || s.wrightB)).map((sp) => {
+            {SPELLS.filter((s) => wizard.progression.ownedSpellIds.includes(s.id) && (s.wrightA || s.wrightB) && !getSpellUseLockReason(s, spellUnlockState)).map((sp) => {
               const chosen = wizard.progression.spellwrighting[sp.id];
               return (
                 <div key={sp.id} className="rounded-2xl border border-[#d7c7a9] bg-white/85 p-4 space-y-2">
