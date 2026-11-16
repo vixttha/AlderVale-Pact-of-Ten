@@ -100,6 +100,32 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
     });
   };
 
+  const unpublishDormTour = async () => {
+    if (publishing) return;
+    setPublishing(true);
+    setTourNotice('');
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) throw new Error('Sign in with Google to manage your Dorm tour.');
+      const response = await fetch(`/api/tours/${wizard.realmId}/unpublish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ wizardId: wizard.id }),
+      });
+      const result = await response.json();
+      if (!response.ok || result.isPublic !== false) throw new Error(result.error ?? 'Your Dorm could not be unpublished.');
+      onUpdateSanctuary({ ...sanctuary, isPublic: false });
+      setTourNotice('Your Dorm is private again and no longer listed in Public Dorm Tours.');
+      void fetch(`/api/tours/${wizard.realmId}`).then(async (listing) => {
+        if (listing.ok) setTours((await listing.json()).tours);
+      }).catch(() => {});
+    } catch (error) {
+      setTourNotice(error instanceof Error ? error.message : 'Could not unpublish your Dorm.');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const publishDormTour = async () => {
     if (publishing) return;
     setPublishing(true);
@@ -286,11 +312,18 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
 
         {tab === 'tours' && (
           <div className="mt-4 space-y-3 text-xs">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span>Showcase your Dorm publicly inside the {wizard.realmId.toUpperCase()} Realm.</span>
-              <button onClick={publishDormTour} disabled={publishing} className="rounded-xl bg-[#38a3a5] px-4 py-2 font-bold text-white">
-                {publishing ? 'Publishing…' : sanctuary.isPublic ? 'Refresh Tour Listing' : 'Publish My Dorm'}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={publishDormTour} disabled={publishing} className="rounded-xl bg-[#38a3a5] px-4 py-2 font-bold text-white">
+                  {publishing ? 'Saving…' : sanctuary.isPublic ? 'Refresh Tour Listing' : 'Publish My Dorm'}
+                </button>
+                {sanctuary.isPublic && (
+                  <button onClick={unpublishDormTour} disabled={publishing} className="rounded-xl border border-[#c9b796] bg-white/90 px-4 py-2 font-bold text-[#615346]">
+                    Unpublish
+                  </button>
+                )}
+              </div>
             </div>
             {tourNotice && <p role="status">{tourNotice}</p>}
             <div className="grid gap-3 sm:grid-cols-2">

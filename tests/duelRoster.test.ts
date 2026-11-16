@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ElementId } from '../shared/elements.ts';
-import { ownedCreatureToCombatSlot, pickDuelCreatureRoster } from '../shared/combat.ts';
+import { leadCreatureQualifiedForArborWin, ownedCreatureToCombatSlot, pickDuelCreatureRoster, type CombatantState } from '../shared/combat.ts';
 
 type TestPet = {
   id: string;
@@ -37,6 +37,51 @@ describe('pickDuelCreatureRoster', () => {
     const { roster, activeCreatureIdx } = pickDuelCreatureRoster(pets, undefined);
     expect(roster[0]?.id).toBe('pet_a');
     expect(activeCreatureIdx).toBe(0);
+  });
+});
+
+describe('leadCreatureQualifiedForArborWin', () => {
+  const baseCombatant = {
+    id: 'wiz',
+    name: 'Rowan',
+    isPlayer: true,
+    raceId: 'human',
+    element: 'ember',
+    archmasteryElement: 'ember',
+    hp: 400,
+    maxHp: 400,
+    powerPips: 1,
+    regularPips: 1,
+    schoolPips: 1,
+    accuracyBonus: 0,
+    powerBonusPct: 0,
+    piercePct: 0,
+    critPct: 0,
+    blockPct: 0,
+    stunnedTurns: 0,
+    stunBlocks: 0,
+    blades: [],
+    shields: [],
+    traps: [],
+    weaknesses: [],
+    prisms: [],
+    dots: [],
+    statusEffects: [],
+    hand: [],
+    deck: [],
+    discard: [],
+    sideboard: [],
+    spellwrighting: {},
+    creatures: [
+      { id: 'pet_a', speciesId: 'x', nickname: 'A', element: 'ember', stage: 1, chromatic: 'none', branchChoice: 'A', hp: 100, maxHp: 100, talents: [] },
+      { id: 'pet_b', speciesId: 'y', nickname: 'B', element: 'bramble', stage: 1, chromatic: 'none', branchChoice: 'A', hp: 100, maxHp: 100, talents: [] },
+    ],
+    activeCreatureIdx: 1,
+  } satisfies CombatantState;
+
+  it('credits Arbor progress only when the lead is active at victory', () => {
+    expect(leadCreatureQualifiedForArborWin(baseCombatant, 'pet_b')).toBe(true);
+    expect(leadCreatureQualifiedForArborWin(baseCombatant, 'pet_a')).toBe(false);
   });
 });
 

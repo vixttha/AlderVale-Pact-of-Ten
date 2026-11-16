@@ -26,6 +26,7 @@ import {
   isDuelComplete,
   totalAvailablePipsForSchool,
   computeWizardDerivedStats,
+  leadCreatureQualifiedForArborWin,
   ownedCreatureToCombatSlot,
   pickDuelCreatureRoster,
   STATUS_EFFECT_META,
@@ -128,6 +129,7 @@ interface DuelArenaModalProps {
     trialElement?: ElementId;
     completed?: boolean;
     draw?: boolean;
+    leadCreatureWinEligible?: boolean;
   }) => void;
   onClose: () => void;
 }
@@ -385,6 +387,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   const handleClaimExit = (won: boolean) => {
     if (!rewardClaimed && duel && !spectating) {
       setRewardClaimed(true);
+      const me = duel.playerTeam[0];
       onDuelFinished({
         won,
         mode: duel.mode,
@@ -392,6 +395,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
         trialElement: trialTargetElement,
         completed: isDuelComplete(duel.phase),
         draw: duel.phase === 'draw',
+        leadCreatureWinEligible:
+          won && !liveDuelState && !!me && leadCreatureQualifiedForArborWin(me, wizard.activeCreatureId),
       });
     }
     setLocalDuel(null);

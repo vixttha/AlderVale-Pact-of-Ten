@@ -179,6 +179,7 @@ export function App() {
     aLocked: boolean;
     bLocked: boolean;
   } | null>(null);
+  const [incomingTradeInvite, setIncomingTradeInvite] = useState<{ inviteId: string; proposerName: string } | null>(null);
 
   const [settings, setSettings] = useState(loadGuestSettings);
   const settingsRef = useRef(settings);
@@ -691,7 +692,18 @@ export function App() {
             setOverlay({ type: 'duel' });
           } else if (data.type === 'queue_status') {
             showToast(`Joined ${String(data.queue).toUpperCase()} queue (${String(data.count)} waiting in ${activeWizard.realmId})…`);
+          } else if (data.type === 'trade_invite') {
+            setIncomingTradeInvite({
+              inviteId: String(data.inviteId ?? ''),
+              proposerName: String(data.proposerName ?? 'Wizard'),
+            });
+          } else if (data.type === 'trade_invite_sent') {
+            showToast(`Trade invite sent to ${String(data.targetName ?? 'that wizard')}.`);
+          } else if (data.type === 'trade_invite_closed') {
+            setIncomingTradeInvite(null);
+            showToast(String(data.message ?? 'Trade invitation closed.'));
           } else if (data.type === 'trade_update') {
+            setIncomingTradeInvite(null);
             const tr = data.trade as { tradeId: string; aOfferFlorins: number; bOfferFlorins: number; aLocked: boolean; bLocked: boolean };
             setTradeSession({ ...tr, partnerName: String(data.partnerName ?? 'Wizard'), isA: data.isA === true });
           } else if (data.type === 'trade_complete' || data.type === 'market_wallet') {
@@ -873,7 +885,15 @@ export function App() {
     }
   };
 
-  const handleDuelFinished = (res: { won: boolean; mode: DuelState['mode']; spireFloor?: number; trialElement?: ElementId; completed?: boolean; draw?: boolean }) => {
+  const handleDuelFinished = (res: {
+    won: boolean;
+    mode: DuelState['mode'];
+    spireFloor?: number;
+    trialElement?: ElementId;
+    completed?: boolean;
+    draw?: boolean;
+    leadCreatureWinEligible?: boolean;
+  }) => {
     setLiveDuelState(null);
     if (!activeWizard || spectating) return;
     const live = res.mode === 'pvp' || res.mode === 'coop';
@@ -967,8 +987,9 @@ export function App() {
 
     if (res.mode === 'solo') updatedWiz = applySagaEvent(updatedWiz, 'solo-win');
     if (res.mode === 'trial') updatedWiz = applySagaEvent(updatedWiz, 'rare-trial-win');
-    if (lead) updatedWiz = applySagaEvent(updatedWiz, 'lead-creature-win');
-    const updatedLead = lead ? { ...lead, wins: (lead.wins ?? 0) + 1 } : null;
+    const leadWon = lead && res.leadCreatureWinEligible === true;
+    if (leadWon) updatedWiz = applySagaEvent(updatedWiz, 'lead-creature-win');
+    const updatedLead = leadWon ? { ...lead, wins: (lead.wins ?? 0) + 1 } : null;
     setRealmAccount(nextAccount);
     setCreatures([...creatures.map((pet) => pet.id === updatedLead?.id ? updatedLead : pet), ...hatchedPets]);
     persistWizard(updatedWiz, hatchedPets, nextAccount, updatedLead ? [updatedLead] : []);
@@ -1223,8 +1244,9 @@ export function App() {
           <div className="mt-3 flex gap-2">
             <button
               onClick={() => {
-                sendWorld({ type: 'trade_propose', targetSessionId: inspectedPlayer.sessionId });
-                setInspectedPlayer(null);
+                if (sendWorld({ type: 'trade_propose', targetSessionId: inspectedPlayer.sessionId })) {
+                  setInspectedPlayer(null);
+                }
               }}
               className="flex-1 rounded-lg bg-[#38a3a5] py-1.5 font-bold text-white"
             >
@@ -1241,6 +1263,33 @@ export function App() {
               Mute
             </button>
             <button onClick={() => setInspectedPlayer(null)} className="rounded-lg border border-[#d7c7a9] px-2 py-1.5 font-bold">✕</button>
+          </div>
+        </div>
+      )}
+
+      {incomingTradeInvite && (
+        <div className="absolute top-20 right-4 w-72 storybook-panel rounded-2xl p-4 text-xs shadow-2xl space-y-3">
+          <div className="font-display text-base font-bold">Trade invitation</div>
+          <p>{incomingTradeInvite.proposerName} wants to trade Bazaar Florins with you.</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                sendWorld({ type: 'trade_respond', inviteId: incomingTradeInvite.inviteId, accept: true });
+                setIncomingTradeInvite(null);
+              }}
+              className="flex-1 rounded-lg bg-[#2f8a73] py-1.5 font-bold text-white"
+            >
+              Accept
+            </button>
+            <button
+              onClick={() => {
+                sendWorld({ type: 'trade_respond', inviteId: incomingTradeInvite.inviteId, accept: false });
+                setIncomingTradeInvite(null);
+              }}
+              className="rounded-lg border border-[#d7c7a9] px-3 py-1.5 font-bold"
+            >
+              Decline
+            </button>
           </div>
         </div>
       )}
