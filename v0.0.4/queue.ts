@@ -27,11 +27,27 @@ export interface QueueTriage {
   duplicateOf?: number;
   scopeLimits?: string[];
   affectedFiles?: string[];
+  /** Recorded by the coordinator after reviewing linked merges against the pinned main checkout. */
+  mergedFixReview?: MergedFixReview;
+}
+
+export interface MergedFixReview {
+  mainSha: string;
+  pullRequestNumbers: number[];
+  evidence: string[];
+  remainingWork?: {
+    expectedBehavior: string;
+    acceptanceCriteria: string[];
+    affectedFiles?: string[];
+    scopeLimits: string[];
+  };
 }
 
 export interface QueuePullRequest {
   number: number;
   state: "open" | "closed";
+  /** Read from GitHub. Older snapshots may omit this for closed pull requests. */
+  merged?: boolean;
   issueNumbers: number[];
   changedFiles: string[];
   url: string;
@@ -105,6 +121,50 @@ function activePullRequest(issueNumber: number, triage: QueueTriage, pullRequest
     if (pr.issueNumbers.includes(issueNumber)) return true;
     return pr.changedFiles.some((path) => affected.has(path.replace(/\\/g, "/")));
   });
+}
+
+function reconcileLinkedPullRequests(
+  issueNumber: number,
+  triage: QueueTriage,
+  context: QueueContext,
+): { triage: QueueTriage } | { reason: string } {
+  const linkedClosed = context.pullRequests.filter((pr) =>
+    pr.state === "closed" && pr.issueNumbers.includes(issueNumber),
+  );
+  if (linkedClosed.some((pr) => pr.merged === undefined)) {
+    return { reason: "LINKED_PR_MERGE_STATUS_REQUIRED" };
+  }
+
+  const merged = linkedClosed.filter((pr) => pr.merged);
+  if (merged.length === 0) return { triage };
+
+  const review = triage.mergedFixReview;
+  if (!review ||
+      review.mainSha.toLowerCase() !== context.mainSha.toLowerCase() ||
+      !merged.every((pr) => review.pullRequestNumbers.includes(pr.number)) ||
+      review.evidence.length === 0 || review.evidence.some((item) => !item.trim())) {
+    return { reason: "MERGED_FIX_COVERAGE_REVIEW_REQUIRED" };
+  }
+
+  const remaining = review.remainingWork;
+  if (!remaining) return { reason: "NO_REMAINING_WORK_AFTER_MERGE" };
+  if (!remaining.expectedBehavior.trim() ||
+      remaining.acceptanceCriteria.length === 0 ||
+      remaining.acceptanceCriteria.some((item) => !item.trim()) ||
+      remaining.scopeLimits.length === 0 ||
+      remaining.scopeLimits.some((item) => !item.trim())) {
+    return { reason: "MERGED_FIX_FOLLOW_UP_SCOPE_REQUIRED" };
+  }
+
+  return {
+    triage: {
+      ...triage,
+      ...remaining,
+      evidence: review.evidence,
+      affectedFiles: remaining.affectedFiles?.length ? remaining.affectedFiles : triage.affectedFiles,
+      scopeLimits: [...(triage.scopeLimits ?? []), ...remaining.scopeLimits],
+    },
+  };
 }
 
 function packetFor(issue: QueueIssue, triage: QueueTriage, context: QueueContext): TaskPacket {
@@ -207,13 +267,20 @@ export function buildQueue(issues: QueueIssue[], context: QueueContext): QueueRe
       continue;
     }
 
-    const overlap = activePullRequest(issue.number, triage, context.pullRequests);
+    const reconciliation = reconcileLinkedPullRequests(issue.number, triage, context);
+    if ("reason" in reconciliation) {
+      decisions.push({ issueNumber: issue.number, status: "blocked", reason: reconciliation.reason });
+      continue;
+    }
+
+    const remainingTriage = reconciliation.triage;
+    const overlap = activePullRequest(issue.number, remainingTriage, context.pullRequests);
     if (overlap) {
       decisions.push({ issueNumber: issue.number, status: "blocked", reason: "OPEN_PR_ALREADY_COVERS_ISSUE_" + overlap.number });
       continue;
     }
 
-    decisions.push({ issueNumber: issue.number, status: "eligible", reason: "CONFIRMED_AND_IN_SCOPE", packet: packetFor(issue, triage, context) });
+    decisions.push({ issueNumber: issue.number, status: "eligible", reason: "CONFIRMED_AND_IN_SCOPE", packet: packetFor(issue, remainingTriage, context) });
   }
 
   const eligible = decisions
