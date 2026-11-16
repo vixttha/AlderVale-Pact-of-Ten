@@ -1,0 +1,40 @@
+name: README v0.0.3 repository-root render review
+on:
+  push:
+    branches: [docs/readme-v003-root-review]
+permissions:
+  contents: read
+
+jobs:
+  render:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Install isolated browser tools
+        run: |
+          git fetch --no-tags origin main
+          mkdir -p "$RUNNER_TEMP/render-tools"
+          git show 219a6bda1f9b2e01f06fd97350a66ed8f470f0d1:tools/ci/package.json > "$RUNNER_TEMP/render-tools/package.json"
+          git show 219a6bda1f9b2e01f06fd97350a66ed8f470f0d1:tools/ci/package-lock.json > "$RUNNER_TEMP/render-tools/package-lock.json"
+          npm ci --prefix "$RUNNER_TEMP/render-tools" --ignore-scripts --no-audit --no-fund
+          cp tools/review-readme-render.mjs "$RUNNER_TEMP/render-tools/"
+          cd "$RUNNER_TEMP/render-tools"
+          npx playwright install --with-deps chromium
+      - name: Review actual GitHub rendering in four configurations
+        env:
+          README_HEAD: b456112efb7b8e0aca3b9cd283d8c61212000687
+        run: node "$RUNNER_TEMP/render-tools/review-readme-render.mjs"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: aldervale-readme-root-theme-review
+          path: ${{ runner.temp }}/readme-render/
+          retention-days: 1
+          if-no-files-found: ignore
