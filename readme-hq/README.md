@@ -1,6 +1,6 @@
 # README HQ Folder Guide
 
-**Current HQ version:** `v0.0.3` · Owner-approved archive for the `readme-hq` branch.
+**Current HQ version:** `v0.0.4`
 
 This guide documents the [README HQ validator](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/tools/check_readme_hq.py) and how to prepare, validate, and archive a new HQ version.
 
@@ -12,7 +12,7 @@ This guide documents the [README HQ validator](https://github.com/vixttha/AlderV
 | Review HQ workspaces | [HQ workspace index](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/workspace/README.md) |
 | Review the public game README history | [Public README version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/README.md) |
 | Draft a public game README | [Public README workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/README.md) |
-| Review the current approved folder guide | [v0.0.3 guide archive](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/v0.0.3/GUIDE.md) |
+| Review approved folder guide snapshots | [HQ version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/README.md) |
 | Review the validator workflow | [README HQ workflow](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/.github/workflows/readme-hq.yml) |
 | Review the frozen-source manifest | [Baseline manifest](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/tools/readme_hq_baselines.json) |
 
@@ -86,4 +86,4 @@ The guide-coverage guard checks the latest active HQ workspace guide while a ver
 
 README HQ manages its own approved history and the separate public game README workspaces. GitHub Issues tracks engineering work. Notion holds private planning and handoffs.
 
-Keep the `readme-hq` branch separate from the full game `main` branch. It is a sparse documentation branch; do not merge it wholesale into `main`. Refresh and revalidate the [separate public README proposal](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/62) against current `main` before promotion.
+Keep the `readme-hq` branch separate from the full game `main` branch. It is a sparse documentation branch. Publish each approved public README through a dedicated PR to `main` and validate that PR against current `main`.
