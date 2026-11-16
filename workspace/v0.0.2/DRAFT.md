@@ -6,9 +6,9 @@ AlderVale is a 3D browser RPG set at a spellcasting academy among floating islan
 
 [Run locally](#run-locally) · [First playthrough](#first-playthrough) · [How AI helps build AlderVale](#how-ai-helps-build-aldervale) · [Report a bug](#report-a-bug)
 
-![Round one of Rowan’s solo duel in Breeze. Rowan faces a Frost Sky-Duelist, with both fighters’ health and pips shown above the available spell cards.](assets/breeze-first-spark-duel.webp)
+![Rowan stands before the fountain in Breeze’s Central Academy Commons, surrounded by academy characters. The First Spark quest is visible in the HUD.](assets/breeze-campus.webp)
 
-*First Spark in Breeze. In-game capture from build `3fa20bc`.*
+*Breeze’s Central Academy Commons. In-game capture from build `3fa20bc`.*
 
 ## Run locally
 
@@ -29,6 +29,10 @@ Keep the terminal open and visit [http://localhost:3000](http://localhost:3000).
 2. **Enter a duel.** On campus, open **Duel** and select **Frost** under **Solo Academy Skirmishes**. Pick an affordable spell and select **Cast Turn**, or use **Pass (+Gain Pip)** to build pips.
 3. **Claim First Spark.** After winning, select **Claim Rewards & Return**. Open **Active Saga Quest** and check that **First Spark in the Ring** shows **Completed**.
 4. **Resume your wizard.** Reload the page, select the same wizard in Breeze, and choose **Enter Aldervale**. Check that the quest is still complete and your Florin and Spell Shard totals match.
+
+![Round one of Rowan’s solo duel in Breeze. Rowan faces a Frost Sky-Duelist, with both fighters’ health and pips shown above the available spell cards.](assets/breeze-first-spark-duel.webp)
+
+*First Spark in Breeze. In-game capture from build `3fa20bc`.*
 
 ### Choose a realm
 
