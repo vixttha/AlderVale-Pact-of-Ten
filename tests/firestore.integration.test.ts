@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { doc, getDoc, serverTimestamp, setDoc, updateDoc, writeBatch, type Firestore } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where, writeBatch, type Firestore } from 'firebase/firestore';
+import { createStarterWizard } from '../shared/economy.ts';
+import type { GuestRealmBundle } from '../src/lib/storage.ts';
 
 const emulator = process.env.FIRESTORE_EMULATOR_HOST;
 const projectId = process.env.GOOGLE_CLOUD_PROJECT ?? 'demo-aldervale-audit';
@@ -34,6 +36,36 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     ownerId, wizardId: 'rowan', realmId: 'breeze', themeId: 'sunlit_loft', weatherId: 'clear_breeze',
     isPublic: false, items: [], createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   });
+
+  function guestSave(id: string): GuestRealmBundle {
+    const wizard = createStarterWizard({
+      id, ownerId: 'guest_local', realmId: 'breeze', name: 'Guest Rowan', raceId: 'human',
+      elementId: 'ember', sculpt: {} as Parameters<typeof createStarterWizard>[0]['sculpt'],
+    });
+    return {
+      account: { uid: 'guest_local', realmId: 'breeze', wizardIds: [id], unlockedRaces: ['human', 'dwarf'],
+        termXp: 120, claimedTermTiers: [2], sharedVault: ['guest-gear'] },
+      wizards: [wizard],
+      creatures: { [id]: [{
+        id: wizard.activeCreatureId, ownerId: 'guest_local', wizardId: id, realmId: 'breeze',
+        speciesId: 'cinder_kitsune', nickname: 'Cinder', elementId: 'ember',
+        stage: 1, chromatic: 'none', branchChoice: 'A', bondXp: 0, wins: 0, talents: [],
+      }] },
+      sanctuaries: { [id]: { ...dorm('guest_local'), wizardId: id, realmId: 'breeze', gardens: [] } },
+      gallery: { [id]: ['data:image/jpeg;base64,AAA'] },
+    };
+  }
+
+  function cloudRealm(uid: string) {
+    return { uid, realmId: 'breeze' as const, wizardIds: [], unlockedRaces: ['human' as const],
+      termXp: 0, claimedTermTiers: [], sharedVault: [] };
+  }
+
+  function seedRealm(database: Firestore, account: ReturnType<typeof cloudRealm>) {
+    return setDoc(doc(database, 'accounts', account.uid, 'realms', account.realmId), {
+      ...account, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+  }
 
   it('commits owner, public projection, starter pet and dorm together', async () => {
     const db = player('rowan-owner');
@@ -93,26 +125,70 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
   }, 20_000);
 
   it('retains guest claims and merges vault items when migrating a wizard', async () => {
-    const { createStarterWizard } = await import('../shared/economy.ts');
-    const { createCloudWizards } = await import('../src/lib/storage.ts');
+    const { migrateGuestWizards } = await import('../src/lib/storage.ts');
     const owner = player('migration-owner');
-    const wizard = createStarterWizard({
-      id: 'guest-wizard', ownerId: 'migration-owner', realmId: 'breeze',
-      name: 'Guest Wizard', raceId: 'human', elementId: 'ember',
-      sculpt: {} as Parameters<typeof createStarterWizard>[0]['sculpt'],
-    });
-    const accountRef = doc(owner, 'accounts', wizard.ownerId, 'realms', wizard.realmId);
-    const account = { uid: wizard.ownerId, realmId: wizard.realmId, wizardIds: [], unlockedRaces: ['human' as const], termXp: 60 };
+    const guest = guestSave('guest-wizard');
+    const [wizard] = guest.wizards;
+    const account = { ...cloudRealm('migration-owner'), termXp: 60, claimedTermTiers: [1], sharedVault: ['cloud-gear'] };
+    const accountRef = doc(owner, 'accounts', account.uid, 'realms', account.realmId);
     await setDoc(accountRef, {
-      ...account, claimedTermTiers: [1], sharedVault: ['cloud-gear'], createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+      ...account, unlockedRaces: ['human', 'high_elf'], createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
     });
-    await createCloudWizards({ ...account, claimedTermTiers: [2], sharedVault: ['guest-gear'] },
-      [{ wizard, pets: [], sanctuary: null }], owner);
+    await expect(migrateGuestWizards(account, guest, owner)).resolves.toBe('saved');
     expect((await getDoc(accountRef)).data()).toMatchObject({
-      wizardIds: [wizard.id], claimedTermTiers: [1, 2], sharedVault: ['cloud-gear', 'guest-gear'],
+      wizardIds: [wizard.id], claimedTermTiers: [1, 2], sharedVault: ['cloud-gear', 'guest-gear'], termXp: 120,
+      unlockedRaces: ['human', 'high_elf', 'dwarf'],
     });
-    expect((await getDoc(doc(owner, 'wizards', wizard.id))).exists()).toBe(true);
+    expect((await getDoc(doc(owner, 'wizards', wizard.id))).data()).toMatchObject({ ownerId: account.uid, activeCreatureId: wizard.activeCreatureId });
+    expect((await getDoc(doc(owner, 'wizards', wizard.id, 'creatures', wizard.activeCreatureId))).get('ownerId')).toBe(account.uid);
+    expect((await getDoc(doc(owner, 'wizards', wizard.id, 'sanctuary', 'layout'))).get('isPublic')).toBe(false);
+    expect((await getDoc(doc(owner, 'wizards', wizard.id, 'private', 'gallery'))).get('images')).toEqual(guest.gallery?.[wizard.id]);
+    expect(wizard.ownerId).toBe('guest_local');
+    await expect(migrateGuestWizards(account, guest, owner)).resolves.toBe('skipped');
   });
+
+  it('lets a second account enroll when a legacy guest save contains an already-imported wizard', async () => {
+    const { createCloudWizards, migrateGuestWizards } = await import('../src/lib/storage.ts');
+    const first = cloudRealm('guest-link-first');
+    const second = cloudRealm('guest-link-second');
+    const firstDb = player(first.uid);
+    const secondDb = player(second.uid);
+    const guest = guestSave('guest-link-original');
+    const [original] = guest.wizards;
+    await seedRealm(firstDb, first);
+    await createCloudWizards(first, [{ wizard: { ...original, ownerId: first.uid }, pets: [], sanctuary: null }], firstDb);
+    const firstRef = doc(firstDb, 'wizards', original.id);
+    const firstSave = (await getDoc(firstRef)).data();
+    const secondRealm = doc(secondDb, 'accounts', second.uid, 'realms', second.realmId);
+    await seedRealm(secondDb, second);
+
+    const freshGuestWizard = guestSave('guest-link-unclaimed').wizards[0];
+    guest.wizards.push(freshGuestWizard);
+    await expect(migrateGuestWizards(second, guest, secondDb)).resolves.toBe('already-linked');
+    expect((await getDoc(secondRealm)).data()).toMatchObject(second);
+    expect((await getDoc(doc(secondDb, 'publicWizards', freshGuestWizard.id))).exists()).toBe(false);
+
+    const newWizard = { ...freshGuestWizard, ownerId: second.uid, name: 'Second Rowan' };
+    await createCloudWizards(second, [{ wizard: newWizard, pets: [], sanctuary: null }], secondDb);
+    expect((await getDoc(secondRealm)).get('wizardIds')).toEqual([newWizard.id]);
+    const secondWizards = await getDocs(query(collection(secondDb, 'wizards'), where('ownerId', '==', second.uid)));
+    expect(secondWizards.docs.map((saved) => saved.id)).toEqual([newWizard.id]);
+    expect((await getDoc(firstRef)).data()).toEqual(firstSave);
+    expect((await getDoc(doc(secondDb, 'publicWizards', original.id))).get('ownerId')).toBe(first.uid);
+  });
+
+  it('imports a guest bundle into exactly one account during concurrent sign-ins', async () => {
+    const { migrateGuestWizards } = await import('../src/lib/storage.ts');
+    const guest = guestSave('guest-link-race');
+    const accounts = ['guest-race-first', 'guest-race-second'].map(cloudRealm);
+    const databases = accounts.map(({ uid }) => player(uid));
+    await Promise.all(accounts.map((account, index) => seedRealm(databases[index], account)));
+    const results = await Promise.all(accounts.map((account, index) => migrateGuestWizards(account, guest, databases[index])));
+    expect(results.sort()).toEqual(['already-linked', 'saved']);
+    const lists = await Promise.all(accounts.map(({ uid }, index) =>
+      getDocs(query(collection(databases[index], 'wizards'), where('ownerId', '==', uid)))));
+    expect(lists.map((list) => list.size).sort()).toEqual([0, 1]);
+  }, 20_000);
 
   it('saves preference fields to the owning account without overwriting unchanged settings', async () => {
     const { saveCloudSettings } = await import('../src/lib/storage.ts');
