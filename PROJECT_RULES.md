@@ -17,6 +17,26 @@ repository and the private Notion project so the two remain consistent.
   private Notion content, personal information, credentials, tokens, or secret
   values into commits, issues, artifacts, logs, prompts, or public pages.
 
+### Creator privacy
+
+- The existing public GitHub profile is approved for AlderVale development.
+  Its public handle may appear in repository links and normal GitHub
+  attribution for commits, issues, pull requests, and Actions. Use a
+  GitHub-provided noreply address for commits published from that profile.
+- Keep the creator's real-life identity and private information out of the
+  game, source, assets, docs, credits, issue and PR content, test fixtures,
+  prompts, logs, artifacts, and service integrations. This includes legal
+  names, private contact details, private profiles, identifying photos, home
+  location, biography, personal files, and credentials. Use project labels
+  and synthetic fixtures.
+- Keep any provider-required administrative or identity-verification
+  information private. Keep personal credentials out of the game runtime,
+  CI, and public configuration. Before publishing or deploying, review
+  player-facing content and service settings for private information.
+- Develop in the current public repository with standard hosted runners.
+  Evaluate the release platform separately, including which administrative
+  details the provider requires and what it displays to players.
+
 ## 2. Free project budget
 
 - The target is zero additional project spending. The owner has identified only
