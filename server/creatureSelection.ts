@@ -107,7 +107,7 @@ export function toCombatCreatureSlot(selection: StoredCreatureSelection): Combat
   const branchChoice = selection.branchChoice === "B" ? "B" : "A";
   const talents = Array.isArray(selection.talents)
     ? [...new Set(selection.talents.filter((value): value is string =>
-        typeof value === "string" && validTalentIds.has(value)))].slice(0, 3)
+        typeof value === "string" && validTalentIds.has(value)))].slice(0, 12)
     : [];
   const nickname = typeof selection.nickname === "string"
     ? selection.nickname.trim().slice(0, 24)
