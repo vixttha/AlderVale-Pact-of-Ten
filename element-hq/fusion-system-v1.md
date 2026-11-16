@@ -147,7 +147,7 @@ Suggested awareness arc:
 - **Stage 2 — Awakening:** expresses preferences, curiosity, and simple intentions; recognizes both parent lineages without being controlled by them.
 - **Stage 3 — Sovereignty:** has a mature, independent point of view and can communicate clearly. It may disagree respectfully with its wizard while remaining bonded.
 
-This is a lore proposal only. The current creature data does not implement a consciousness field, dialogue system, or AI agency.
+This is a lore proposal only. No consciousness field or fusion-specific dialogue/agency is represented in the inspected creature data.
 
 ## 5. Current implementation facts and gaps
 
