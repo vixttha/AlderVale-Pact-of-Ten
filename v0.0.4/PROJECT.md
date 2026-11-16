@@ -3,7 +3,7 @@
 **Status:** Architecture and acceptance-plan candidate · not released · owner acceptance pending  
 **Tracking issue:** [#65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65)  
 **Working branch:** `bug-library-v0.0.4-level-2`  
-**Baseline:** `3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21` (`main`)
+**Verified baseline:** `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd` (`main`, 2026-11-16)
 
 ## Owner-confirmed direction
 
@@ -59,10 +59,10 @@ The owner authorizes automatic investigation and preparation of fixes for all co
 
 ## Current baseline and planning fit
 
-Current verified main baseline at project setup: `3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21`.
+Current verified main baseline for this candidate: `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd`. Earlier `3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21` is historical only; see conflict record `AV-CONFLICT-001`.
 
-**Milestone fit unverified** for implementation beyond documentation and planning. The active private milestone remains the authority. This branch records the expanded design only; implementation of orchestration or broader backlog work must not start if it falls outside the active milestone or standing project law.
+**Milestone fit unverified.** The private active milestone could not be independently retrieved in the fresh-session test. This candidate therefore limits implementation to the owner-directed v0.0.4 queue/conflict workflow and the explicitly scoped Issue #75 pilot. Do not expand to unrelated backlog work until milestone fit is verified.
 
 ## Acceptance state
 
-Architecture and acceptance plan are prepared for owner review. v0.0.4 is not accepted or released. No merge, release, issue closure, automatic dispatch service, or background execution is authorized by this document.
+Architecture, queue implementation, conflict-recording implementation and pilot evidence are prepared for owner review. v0.0.4 is not accepted or released. No merge, release, issue closure, automatic dispatch service, or background execution is authorized by this document.

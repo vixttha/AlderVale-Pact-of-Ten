@@ -69,3 +69,27 @@ Examples: contradictory product requirements, owner decisions, project laws, pri
 - Keep original evidence and prior failed attempts.
 - If a conflict is only a duplicate report, link it to the canonical record rather than creating a second issue.
 - A conflict resolution is not complete until its linked regression/integration evidence is recorded and the owner accepts the outcome.
+
+
+## Conflict record contract
+
+Each conflict record must include:
+- stable ID and canonical GitHub tracking issue;
+- conflict category and concise statement;
+- at least two source types, exact references and revision identifiers;
+- the observed incompatibility and impact;
+- governing authority and why it applies;
+- whether owner decision is required;
+- proposed resolution and exact evidence;
+- regression/validation evidence and unresolved gaps.
+
+The executable \`conflicts.ts\` assessor rejects records without two revision-pinned sources. It permits only unambiguous documentation, mechanical, code-contract or test-evidence corrections when current main or an accepted requirement clearly governs. Product intent, project-law ambiguity, active milestone scope and security/privacy conflicts are escalated. An agent's own output or external page is never governing authority.
+
+## Pilot record: AV-CONFLICT-001
+
+The v0.0.4 candidate and tracking issue originally identified \`3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21\` as current main. Live GitHub main and PR #83's base resolved to \`a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd\`. The old SHA is valid historical evidence, but not the current engineering baseline.
+
+**Authority:** live GitHub main at the verified full SHA.  
+**Resolution:** reconcile the PR branch with current main; update the project baseline and preserve the older SHA as historical context.  
+**Owner decision:** not required; this is a documentation/source-provenance correction, not a product or project-law choice.  
+**Record:** \`records/conflicts/AV-CONFLICT-001.md\`.

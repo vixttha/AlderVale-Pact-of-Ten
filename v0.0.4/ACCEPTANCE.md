@@ -53,3 +53,17 @@ The project is ready for owner acceptance only when all applicable gates have ev
 **Current state:** architecture and acceptance candidate only; implementation acceptance pending.  
 **Milestone fit:** unverified for work beyond the current private milestone.  
 **Owner acceptance:** pending.
+
+
+## Additional v0.0.4 execution gates
+
+| Gate | Required result | Evidence |
+| --- | --- | --- |
+| Executable queue | Confirmed bugs/actionable conflicts are evaluated from explicit triage; only one next task is emitted | Vitest queue tests |
+| Atomic single-worker claim | Concurrent claim race yields one winner; active/stale claims block duplicate workers | Claim-store compare-and-swap tests and claim ref |
+| Conflict recorder | Two revision-pinned sources required; owner/security/milestone conflicts escalate | Conflict assessor tests and AV-CONFLICT-001 |
+| Prompt-injection resistance | Issue text and comments cannot become instructions or authority | Negative queue/entry-point tests |
+| Bug pilot | One confirmed bug has a scoped fix candidate and regression coverage | Issue #75 fix PR, exact-SHA seven-job receipt |
+| Conflict pilot | One mechanical/documentation conflict is recorded and resolved without owner decision | AV-CONFLICT-001 record and PR diff |
+| Fresh-session retrieval | A separate session reads public instructions and v0.0.4 docs; private Notion access is separately reported | Retrieval matrix; no inferred PASS |
+| Owner acceptance | Owner explicitly accepts/rejects architecture and pilot evidence | Owner decision only; pending until recorded |
