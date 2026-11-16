@@ -4,7 +4,7 @@ Version 0.0.4 is not accepted by documentation completion alone. Each gate needs
 
 | Gate | Required result | Evidence / disposition |
 | --- | --- | --- |
-| A. Version foundation | Dedicated branch, project charter, architecture, workflow, acceptance contract; v0.0.2/v0.0.3 preserved | Branch commit and file review |
+| A. Version foundation | Dedicated branch, project charter, architecture, workflow, triage standard, acceptance contract; v0.0.2/v0.0.3 preserved | Branch commit and file review |
 | B. Intake and triage | Duplicate-search protocol and complete triage schema; test against known issues without creating duplicates | Issue search links and triage examples |
 | C. Investigation safety | Main-SHA pinning, repository instructions, overlap checks, milestone-fit handling, and cost/privacy gates | Reproducible dry-run checklist |
 | D. Evidence receipts | Base/head/tested/merged SHAs and per-job results captured distinctly; missing evidence never passes | Unit fixtures for summary/receipt parsing and an Actions run |
@@ -36,5 +36,5 @@ Version 0.0.4 is not accepted by documentation completion alone. Each gate needs
 - Current state: project foundation only; not accepted.
 - Tracking issue: [#65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65).
 - Version branch baseline: `46c504ffdbd343df825398c403d3a0417acb9e82`.
-- Milestone fit: unverified for the broader implementation; active Notion milestone currently targets the guest first-playable loop.
+- Milestone fit: unverified for broader implementation; private milestone details are not reproduced here.
 - Owner acceptance: pending.
