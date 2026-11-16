@@ -79,100 +79,97 @@ jobs:
               if status not in tracked or f"]({status})" not in guide:
                   raise SystemExit(f"Branch guide must link to the tracked {status}")
 
-              biology_headings = {
-                  "## 4. Creature biology",
-                  "### Can two different elements produce offspring?",
-                  "### Can creatures have two elemental affinities?",
-                  "### Can an element change during evolution?",
-                  "### Are some elements genetically rare?",
-                  "### Can creatures resist their natural elemental instincts?",
-              }
-              design_headings = set(Path(design).read_text(encoding="utf-8").splitlines())
-              if missing_biology := biology_headings - design_headings:
-                  raise SystemExit(f"Missing creature biology sections: {sorted(missing_biology)}")
-
-              mythology_headings = {
-                  "## 5. Elemental mythology",
-                  "### Where did the elements originate?",
-                  "### Why are there five opposing pairs?",
-                  "### Are the elements conscious?",
-                  "### Can they manifest physically?",
-                  "### What is the relationship between Space and Time?",
-              }
-              if missing_mythology := mythology_headings - design_headings:
-                  raise SystemExit(f"Missing elemental mythology sections: {sorted(missing_mythology)}")
-
-              design_lines = Path(design).read_text(encoding="utf-8").splitlines()
-              visual_headings = {
-                  "## 6. Elemental visual identity",
-                  "### Palette, emblem, and UI icon",
-                  "### Magic, creatures, and environments",
-                  "### Readability and art review",
-              }
-              if missing_visual := visual_headings - design_headings:
-                  raise SystemExit(f"Missing elemental visual sections: {sorted(missing_visual)}")
-
-              visual_start = design_lines.index("## 6. Elemental visual identity")
-              visual_end = design_lines.index("## 7. Elemental world map", visual_start + 1)
-              visual_lines = design_lines[visual_start:visual_end]
-              palette_start = visual_lines.index("### Palette, emblem, and UI icon")
-              art_start = visual_lines.index("### Magic, creatures, and environments")
-              review_start = visual_lines.index("### Readability and art review")
-              expected_elements = {
-                  "Ember", "Frost", "Gale", "Bramble", "Tide", "Spark", "Umbra", "Sol",
-                  "Verdigris", "Chronos", "Magma", "Tempest", "Glacier", "Eclipse", "Aetheris",
-              }
-              for start, end, columns in ((palette_start, art_start, 6), (art_start, review_start, 4)):
-                  table = [line for line in visual_lines[start:end] if line.startswith("| ")][2:]
-                  cells = [[cell.strip() for cell in line.strip("|").split("|")] for line in table]
-                  if (len(cells) != len(expected_elements)
-                          or {row[0] for row in cells} != expected_elements
-                          or any(len(row) != columns or not all(row) for row in cells)):
-                      raise SystemExit("Elemental visual table must cover each catalog element once with complete cells")
-
-              geography_end = design_lines.index("## 8. Existing game compatibility", visual_end + 1)
-              geography_lines = design_lines[visual_end:geography_end]
-              geography_headings = [
-                  "### Regional geography",
-                  "### Habitats of the Ten",
-                  "### Where habitats overlap",
-                  "### Fusion contact zones",
-              ]
-              geography_starts = [geography_lines.index(heading) for heading in geography_headings]
-              if geography_starts != sorted(geography_starts):
-                  raise SystemExit("Unexpected elemental world map section order")
-
-              geography_tables = (
-                  (geography_lines[geography_starts[1]:geography_starts[2]], expected_elements - {
-                      "Magma", "Tempest", "Glacier", "Eclipse", "Aetheris",
-                  }, 4),
-                  (geography_lines[geography_starts[3]:], {"Magma", "Tempest", "Glacier", "Eclipse", "Aetheris"}, 3),
+              design_text = Path(design).read_text(encoding="utf-8")
+              status_text = Path(status).read_text(encoding="utf-8")
+              steps = (
+                  "Element roster", "Combat and spells", "Fusion recipes", "Creature biology",
+                  "Elemental mythology", "Elemental visual identity", "Elemental world map",
+                  "Existing game compatibility",
               )
-              for lines, expected, columns in geography_tables:
-                  entries = [line for line in lines if line.startswith("| ")][2:]
-                  rows = [[cell.strip() for cell in line.strip("|").split("|")] for line in entries]
-                  if (len(rows) != len(expected)
-                          or any(len(row) != columns or not all(row) for row in rows)
-                          or {row[0] for row in rows} != expected):
-                      raise SystemExit("Elemental world map must cover each habitat and fusion once")
+              for number, step in enumerate(steps, 1):
+                  heading = f"## {number}. {step}"
+                  if design_text.splitlines().count(heading) != 1:
+                      raise SystemExit(f"Expected one design section {heading}")
+                  anchor = f"#{number}-{step.lower().replace(' ', '-')}"
+                  if f"aldervale-element-system-v1.md{anchor})" not in status_text:
+                      raise SystemExit(f"Missing status index link to {heading}")
 
-              compatibility_end = design_lines.index("## Balance and verification", geography_end + 1)
-              compatibility = design_lines[geography_end:compatibility_end]
-              compatibility_headings = {
-                  "### Stable IDs and display names",
-                  "### Compatibility audit",
-                  "### Rollout and rollback",
-                  "### Acceptance checks",
+              def rows_between(start_heading, end_heading, columns):
+                  after_start = design_text.split(start_heading + "\n", 1)
+                  if len(after_start) != 2 or end_heading + "\n" not in after_start[1]:
+                      raise SystemExit(f"Missing section bounds for {start_heading}")
+                  body = after_start[1].split(end_heading + "\n", 1)[0]
+                  lines = [line for line in body.splitlines() if line.startswith("| ")][2:]
+                  rows = [[value.strip() for value in line.strip("|").split("|")] for line in lines]
+                  if not rows or any(len(row) != columns or not all(row) for row in rows):
+                      raise SystemExit(f"Invalid table under {start_heading}")
+                  return rows
+
+              pairs = (
+                  ("Fire", "Water"), ("Lightning", "Frost"), ("Wind", "Earth"),
+                  ("Light", "Dark"), ("Metal", "Forest"),
+              )
+              opposition = {element: other for a, b in pairs for element, other in ((a, b), (b, a))}
+              pair_rows = rows_between("## v1 elemental opposition decision", "## 1. Element roster", 3)
+              if [tuple(row[:2]) for row in pair_rows] != list(pairs):
+                  raise SystemExit("The design diverges from the five owner-confirmed pairs")
+
+              roster = rows_between("## 1. Element roster", "## Identity and lore", 6)
+              if len(roster) != 10 or {row[0]: row[1] for row in roster} != opposition:
+                  raise SystemExit("Base roster does not match the five reciprocal pairs")
+              ids = {row[0]: row[2] for row in roster}
+              if len(set(ids.values())) != 10 or ids["Earth"] != "`earth`" or "`chronos`" in ids.values():
+                  raise SystemExit("Earth and Chronos must have separate identities")
+
+              fusions = {
+                  "Magma": ("Fire", "Forest"), "Tempest": ("Water", "Lightning"),
+                  "Glacier": ("Frost", "Water"), "Eclipse": ("Dark", "Light"),
+                  "Aetheris": ("Earth", "Metal"),
               }
-              if missing_compatibility := compatibility_headings - set(compatibility):
-                  raise SystemExit(f"Missing compatibility sections: {sorted(missing_compatibility)}")
-              audit_start = compatibility.index("### Compatibility audit")
-              audit_end = compatibility.index("### Rollout and rollback", audit_start + 1)
-              audit_rows = [line.split("|")[1].strip("* ") for line in compatibility[audit_start:audit_end]
-                            if line.startswith("| **")]
-              expected_audit_rows = {"Spells", "Creatures", "Combat calculations", "Fusion recipes", "Saves", "Progression"}
-              if len(audit_rows) != len(expected_audit_rows) or set(audit_rows) != expected_audit_rows:
-                  raise SystemExit("Compatibility audit must cover each game area once")
+              fusion_rows = rows_between("### Creatures and fusion lineage", "### Fusion spell reference", 6)
+              recorded_recipes = {row[0]: tuple(row[1].split(" + ")) for row in fusion_rows}
+              if len(fusion_rows) != 5 or recorded_recipes != fusions:
+                  raise SystemExit("Fusion recipes diverge from the rebuilt proposal")
+
+              labels = list(opposition) + list(fusions)
+              matrix = rows_between("### Proposed directional matrix", "### Spells, shields, and prisms", 16)
+              matrix_header = "| Attacker | " + " | ".join(labels) + " |"
+              if matrix_header not in design_text.splitlines() or [row[0] for row in matrix] != labels:
+                  raise SystemExit("Matrix must include every v1 attacker and defender in order")
+              for attacker, *values in matrix:
+                  for defender, actual in zip(labels, values):
+                      if attacker == defender:
+                          expected = "0.85"
+                      elif opposition.get(attacker) == defender:
+                          expected = "1.25"
+                      elif any(opposition[parent] == defender for parent in fusions.get(attacker, ())):
+                          expected = "1.15"
+                      else:
+                          expected = "1.00"
+                      if actual != expected:
+                          raise SystemExit(f"{attacker} -> {defender}: expected {expected}, got {actual}")
+
+              lore = rows_between("### Why are there five opposing pairs?", "### Are the elements conscious?", 2)
+              if [row[0] for row in lore] != [f"{a} ↔ {b}" for a, b in pairs]:
+                  raise SystemExit("Mythology must use the five confirmed oppositions")
+
+              coverage = (
+                  ("### Palette, emblem, and UI icon", "### Magic, creatures, and environments", 6, labels),
+                  ("### Magic, creatures, and environments", "### Readability and art review", 4, labels),
+                  ("### Habitats of the Ten", "### Where habitats overlap", 4, list(opposition)),
+                  ("### Fusion contact zones", "## 8. Existing game compatibility", 3, list(fusions)),
+                  ("### Compatibility audit", "### Rollout and rollback", 3,
+                   ["**Spells**", "**Creatures**", "**Combat calculations**", "**Fusion recipes**",
+                    "**Saves**", "**Progression**"]),
+              )
+              for first, last, columns, names in coverage:
+                  table_rows = rows_between(first, last, columns)
+                  if len(table_rows) != len(names) or {row[0] for row in table_rows} != set(names):
+                      raise SystemExit(f"Incorrect coverage under {first}")
+
+              habitat_fusions = rows_between("### Fusion contact zones", "## 8. Existing game compatibility", 3)
+              if {row[0]: tuple(row[1].split(" + ")) for row in habitat_fusions} != fusions:
+                  raise SystemExit("Habitat parent pairs must match fusion recipes")
 
           print(f"Verified Element HQ documents at {head}")
           PY

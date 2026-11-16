@@ -1,5 +1,7 @@
 # Element HQ v1
 
+**Historical workspace notes.** The [rebuilt v1 design](designs/aldervale-element-system-v1.md) and [status index](designs/aldervale-element-design-status.md) are the current references. The inventory and status notes below describe the original snapshot.
+
 **Status:** Design workspace · proposed material · not owner-accepted as a gameplay specification  
 **Working branch:** `element-hq-v1`  
 **Baseline:** `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd` (`main`)  

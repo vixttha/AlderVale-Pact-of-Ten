@@ -6,12 +6,12 @@ Element HQ is the design reference for the mechanics and lore behind AlderVale�
 
 | Document | Use it for |
 | --- | --- |
-| [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the project’s populated mechanics and lore reference, with current rules and proposed decisions. |
+| [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the project’s populated mechanics and lore reference, built around the five owner-confirmed opposition pairs. |
 | [Element Design v1 status](element-hq/designs/aldervale-element-design-status.md) | Review all eight design areas, open decisions, verification evidence, and next options. |
 | [Element design template](element-hq/templates/element-design.md) | Draft an element, fusion, or change to an existing rule. |
 | [Workspace notes](element-hq/README.md) | Read the original scope and design questions. |
-| [Element registry](element-hq/element-registry.md) | Look up the elements, matchup matrix, status effects, and spell snapshot. |
-| [Fusion System v1](element-hq/fusion-system-v1.md) | Read the proposed fusion rules, creature lineages, and open decisions. |
+| [Element registry](element-hq/element-registry.md) | Look up the historical game catalog, matchup matrix, statuses, and spell snapshot. |
+| [Fusion System v1](element-hq/fusion-system-v1.md) | Read the historical fusion proposal and its link to the rebuilt rules. |
 
 ## Record a design
 
