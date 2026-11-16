@@ -294,6 +294,10 @@ def run_regression_tests(root):
             path = fixture / relative
             path.write_text(read(path) + "\n<!-- regression mutation -->\n", encoding="utf-8")
 
+    def change_hq_front_page_only(fixture):
+        path = fixture / "README.md"
+        path.write_text(read(path) + "\n<!-- regression mutation -->\n", encoding="utf-8")
+
     def remove_public_workspace_row(fixture):
         path = fixture / "workspace" / "README.md"
         lines = [line for line in read(path).splitlines() if not line.startswith("| v0.0.2 |")]
@@ -308,14 +312,6 @@ def run_regression_tests(root):
         path = fixture / "workspace" / "v0.0.2" / "DRAFT.md"
         path.write_text(read(path) + "\n[Broken regression fixture](missing-target.md)\n", encoding="utf-8")
 
-    def stale_public_workspace_pointer(fixture):
-        path = fixture / "README.md"
-        content = read(path)
-        old = "workspace/v0.0.2/README.md"
-        new = "workspace/v0.0.1/README.md"
-        require(old in content, "Regression fixture could not find the public workspace pointer")
-        path.write_text(content.replace(old, new, 1), encoding="utf-8")
-
     def stale_candidate_draft_pointer(fixture):
         path = fixture / "readme-hq" / "workspace" / "v0.0.2" / "DRAFT.md"
         content = read(path)
@@ -326,10 +322,10 @@ def run_regression_tests(root):
 
     add_case("public frozen README drift", "snapshot checksum mismatch", change_public_snapshot)
     add_case("HQ guide and live guide drift together", "snapshot checksum mismatch", change_hq_snapshot_and_live_guide)
+    add_case("HQ front page drift", "HQ front page differs from latest HQ snapshot", change_hq_front_page_only)
     add_case("public workspace index omission", "workspace index must list each version folder exactly once", remove_public_workspace_row)
     add_case("HQ workspace index omission", "workspace index must list each version folder exactly once", remove_hq_workspace_row)
     add_case("broken link inside DRAFT.md", "broken link to", add_broken_draft_link)
-    add_case("stale public workspace pointer", "latest public README workspace", stale_public_workspace_pointer)
     add_case("stale HQ candidate draft pointer", "directly link to the current public README draft", stale_candidate_draft_pointer)
 
     for name, expected_message, mutate in cases:
