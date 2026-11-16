@@ -2,7 +2,7 @@
 
 **Proposed HQ version:** `v0.0.2` (draft; not approved)
 
-Use this folder to maintain the README HQ landing page and review how it has changed. The proposed [HQ landing page](DRAFT.md) is staged separately from the current [published landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md).
+Use this folder to maintain the README HQ landing page and review how it has changed. The proposed [HQ landing page](DRAFT.md) is staged separately from the current [current branch landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md).
 
 ## Where to work
 
@@ -15,12 +15,12 @@ Use this folder to maintain the README HQ landing page and review how it has cha
 
 ## Update README HQ
 
-1. Start from the latest approved snapshot and put proposed landing-page and guide changes, previews, and notes in `readme-hq/workspace/<version>/`. Keep the experiment's diff inside that folder.
+1. Start from the latest archived baseline and put proposed landing-page and guide changes, previews, and notes in `readme-hq/workspace/<version>/`. Keep the experiment's diff inside that folder.
 2. After owner approval, update the HQ documents included in the revision. The branch landing page is `/README.md`, and the folder guide is `readme-hq/README.md`.
 3. Archive exact approved copies as `README.md` and `GUIDE.md` in `readme-hq/versions/<version>/`. Record the changes in `CHANGELOG.md`, update the version index and workspace record, and preserve all earlier snapshots.
-4. Update `tools/readme_hq_baselines.json` with each frozen file's source commit, source path, and Git blob SHA-1 in the same commit as the archive and index changes. The validator checks these content identifiers.
-5. Check the [README HQ validation workflow](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/workflows/readme-hq.yml?query=branch%3Areadme-hq). It checks archive and workspace indexes, frozen snapshot checksums, current snapshot parity, and Markdown links across drafts and records.
+4. Update `tools/readme_hq_baselines.json` with each frozen file's source commit, source path, and Git blob SHA-1 in the same commit as the archive and index changes. The validator verifies the archived snapshot blob SHA-1 values and checks that source commit/path entries are present and well-formed. It does not fetch the recorded historical source commit and path to independently verify the source file.
+5. Check the [README HQ validation workflow](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/workflows/readme-hq.yml?query=branch%3Areadme-hq). It checks archive and workspace indexes, frozen snapshot checksums, current snapshot parity, draft pointers, and branch-local relative Markdown links across drafts and records. It does not verify absolute links to `main` or external URLs.
 
-Public game README updates follow the promotion process on the [published HQ landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md#from-draft-to-public-readme).
+Public game README updates follow the promotion process on the [current branch HQ landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md#from-draft-to-public-readme).
 
-This guide is a workspace candidate. The current published guide remains v0.0.1 until v0.0.2 receives owner approval.
+This guide is a workspace candidate. The branch's current guide remains the v0.0.1 baseline until v0.0.2 receives owner approval.
