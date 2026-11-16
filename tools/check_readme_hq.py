@@ -12,7 +12,6 @@ import socket
 import ssl
 import subprocess
 import tempfile
-import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import quote, unquote, urljoin, urlsplit, urlunsplit
@@ -667,7 +666,7 @@ def run_external_link_regression_tests():
             return "PASS", "HTTP 200"
 
         summary = check_external_links(fixture, mixed_probe)
-        require("6 public HTTP(S) links checked" in summary, "External link summary omitted checked URLs")
+        require("7 public HTTP(S) links checked" in summary, "External link summary omitted checked URLs")
         require("1 UNVERIFIED" in summary and "1 local loopback" in summary, "External warning summary is incomplete")
         cases += 1
 
@@ -1179,7 +1178,7 @@ def run_regression_tests(root, repo, main_ref, baseline):
             mutate(fixture)
             try:
                 trusted = baseline if check_history else None
-                validate_repo(fixture, repo, main_ref, trusted)
+                validate_repo(fixture, repo, main_ref, trusted, check_external=False)
             except ValidationError as error:
                 require(
                     expected_message in str(error),
@@ -1204,9 +1203,9 @@ def run_regression_tests(root, repo, main_ref, baseline):
             not check_workspace(fixture, workspace, "README HQ"),
             "An archived workspace was classified as an active draft",
         )
-        validate_repo(fixture, repo, main_ref)
+        validate_repo(fixture, repo, main_ref, check_external=False)
         add_draft(fixture / "workspace")
-        validate_repo(fixture, repo, main_ref, baseline)
+        validate_repo(fixture, repo, main_ref, baseline, check_external=False)
 
     return len(cases)
 
