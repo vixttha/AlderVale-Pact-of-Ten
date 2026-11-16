@@ -17,6 +17,12 @@ for file in sorted(files):
     for n, line in enumerate(content.splitlines(), 1):
         if re.match(r"^\s*runs-on\s*:", line):
             value = line.split(":", 1)[1].strip()
+            if value == "${{ matrix.os }}":
+                matrices = re.findall(r"^\s*os:\s*\[([^\]]+)\]", content, re.MULTILINE)
+                candidates = [v.strip() for group in matrices for v in group.split(",")]
+                if not candidates or any(not re.fullmatch(r"(ubuntu|windows|macos)-(latest|[0-9]+(?:\.[0-9]+)?)", v) for v in candidates):
+                    errors.append(f"{file.relative_to(root)}:{n}: unsafe matrix.os values")
+                continue
             if not re.fullmatch(r"(ubuntu|windows|macos)-(latest|[0-9]+(?:\.[0-9]+)?)", value):
                 errors.append(f"{file.relative_to(root)}:{n}: unapproved runs-on {value!r}")
     if re.search(r"\bself-hosted\b", content, re.IGNORECASE):
