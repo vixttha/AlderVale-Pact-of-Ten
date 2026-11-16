@@ -20,7 +20,8 @@ export interface QueueTriage {
   acceptanceCriteria: string[];
   severity: Severity;
   confidence: "high" | "medium" | "low";
-  explicitOwnerScope?: boolean;
+  /** A trusted coordinator must verify this reference against an actual owner instruction. */
+  ownerAuthorizationRef?: string;
   ownerDecisionRequired?: boolean;
   securitySensitive?: boolean;
   duplicateOf?: number;
@@ -94,7 +95,7 @@ const SEVERITY_ORDER: Record<Severity, number> = {
 };
 
 function hasLabel(issue: QueueIssue, label: string): boolean {
-  return issue.labels.some((value) => value.toLowerCase() === label);
+  return issue.labels.some((value) => value.trim().toLowerCase() === label);
 }
 
 function activePullRequest(issueNumber: number, triage: QueueTriage, pullRequests: QueuePullRequest[]): QueuePullRequest | undefined {
@@ -128,32 +129,47 @@ function packetFor(issue: QueueIssue, triage: QueueTriage, context: QueueContext
 export function buildQueue(issues: QueueIssue[], context: QueueContext): QueueResult {
   const decisions: QueueDecision[] = [];
   const now = Date.parse(context.now ?? new Date().toISOString());
+  const validNow = Number.isFinite(now);
   const validMain = FULL_SHA.test(context.mainSha);
 
   for (const issue of issues) {
-    if (issue.state !== "open") continue;
-
     const triage = context.triage[issue.number];
     const labelledWork = hasLabel(issue, "bug") || hasLabel(issue, "conflict");
+
+    if (issue.state !== "open") {
+      if (triage || labelledWork) {
+        decisions.push({ issueNumber: issue.number, status: "ignored", reason: "CLOSED_ISSUE" });
+      }
+      continue;
+    }
+
     if (!triage && !labelledWork) continue;
     if (!triage) {
       decisions.push({ issueNumber: issue.number, status: "blocked", reason: "TRIAGE_RECORD_REQUIRED" });
       continue;
     }
 
-    if (triage.duplicateOf) {
-      decisions.push({ issueNumber: issue.number, status: "duplicate", reason: "DUPLICATE_OF_" + triage.duplicateOf });
+    if (triage.duplicateOf !== undefined) {
+      if (!Number.isInteger(triage.duplicateOf) || triage.duplicateOf < 1 || triage.duplicateOf === issue.number) {
+        decisions.push({ issueNumber: issue.number, status: "blocked", reason: "INVALID_DUPLICATE_TARGET" });
+      } else {
+        decisions.push({ issueNumber: issue.number, status: "duplicate", reason: "DUPLICATE_OF_" + triage.duplicateOf });
+      }
       continue;
     }
     if (!validMain) {
       decisions.push({ issueNumber: issue.number, status: "blocked", reason: "FULL_MAIN_SHA_REQUIRED" });
       continue;
     }
+    if (!validNow) {
+      decisions.push({ issueNumber: issue.number, status: "blocked", reason: "INVALID_QUEUE_TIME" });
+      continue;
+    }
     if (context.milestoneFit === "out-of-scope") {
       decisions.push({ issueNumber: issue.number, status: "blocked", reason: "OUTSIDE_ACTIVE_MILESTONE" });
       continue;
     }
-    if (context.milestoneFit === "unverified" && !triage.explicitOwnerScope) {
+    if (context.milestoneFit === "unverified" && !triage.ownerAuthorizationRef?.trim()) {
       decisions.push({ issueNumber: issue.number, status: "blocked", reason: "MILESTONE_FIT_UNVERIFIED" });
       continue;
     }
@@ -184,7 +200,7 @@ export function buildQueue(issues: QueueIssue[], context: QueueContext): QueueRe
       decisions.push({
         issueNumber: issue.number,
         status: "claimed",
-        reason: Number.isFinite(expires) && expires <= now
+        reason: !Number.isFinite(expires) || expires <= now
           ? "STALE_CLAIM_REQUIRES_COORDINATOR_RECOVERY"
           : "ACTIVE_WORKER_CLAIM",
       });
@@ -209,7 +225,12 @@ export function buildQueue(issues: QueueIssue[], context: QueueContext): QueueRe
       if (severity !== 0) return severity;
       const leftIssue = issues.find((issue) => issue.number === left.issueNumber);
       const rightIssue = issues.find((issue) => issue.number === right.issueNumber);
-      return Date.parse(leftIssue?.createdAt ?? "") - Date.parse(rightIssue?.createdAt ?? "");
+      const leftCreated = Date.parse(leftIssue?.createdAt ?? "");
+      const rightCreated = Date.parse(rightIssue?.createdAt ?? "");
+      if (Number.isFinite(leftCreated) && Number.isFinite(rightCreated) && leftCreated !== rightCreated) {
+        return leftCreated - rightCreated;
+      }
+      return left.issueNumber - right.issueNumber;
     });
 
   return { decisions, next: eligible[0]?.packet ?? null };
@@ -230,13 +251,23 @@ export type ClaimResult =
   | { acquired: false; reason: "ACTIVE_WORKER_CLAIM" | "STALE_CLAIM_REQUIRES_COORDINATOR_RECOVERY" | "CLAIM_RACE_LOST" | "INVALID_CLAIM" };
 
 export async function acquireClaim(store: ClaimStore, next: WorkerClaim, now = new Date().toISOString()): Promise<ClaimResult> {
-  if (!FULL_SHA.test(next.baseSha) || !next.worker.trim() || !next.workBranch.trim() || !next.claimId.trim()) {
+  const nowMs = Date.parse(now);
+  const expiryMs = Date.parse(next.expiresAt);
+  if (!Number.isInteger(next.issueNumber) || next.issueNumber < 1 ||
+      next.status !== "active" ||
+      !FULL_SHA.test(next.baseSha) ||
+      !next.worker.trim() ||
+      !next.workBranch.trim() ||
+      !next.claimId.trim() ||
+      !Number.isFinite(nowMs) ||
+      !Number.isFinite(expiryMs) ||
+      expiryMs <= nowMs) {
     return { acquired: false, reason: "INVALID_CLAIM" };
   }
   const current = await store.read(next.issueNumber);
   if (current.claim?.status === "active") {
     const expiry = Date.parse(current.claim.expiresAt);
-    if (!Number.isFinite(expiry) || expiry > Date.parse(now)) {
+    if (!Number.isFinite(expiry) || expiry > nowMs) {
       return { acquired: false, reason: "ACTIVE_WORKER_CLAIM" };
     }
     return { acquired: false, reason: "STALE_CLAIM_REQUIRES_COORDINATOR_RECOVERY" };
@@ -252,12 +283,13 @@ export async function releaseClaim(
   claimId: string,
   releasedAt: string,
 ): Promise<boolean> {
+  if (!Number.isInteger(issueNumber) || issueNumber < 1 || !Number.isFinite(Date.parse(releasedAt))) return false;
   const current = await store.read(issueNumber);
-  if (!current.claim || current.claim.claimId !== claimId || current.claim.status !== "active") return false;
+  if (!current.claim || current.revision !== expectedRevision ||
+      current.claim.claimId !== claimId || current.claim.status !== "active") return false;
   const released: WorkerClaim = { ...current.claim, status: "released", expiresAt: releasedAt };
   return store.compareAndSwap(issueNumber, expectedRevision, released);
 }
-
 
 export function claimRefName(issueNumber: number): string {
   if (!Number.isInteger(issueNumber) || issueNumber < 1) throw new Error("A positive issue number is required");
