@@ -121,8 +121,9 @@ test('failed model loading leaves the Classic fallback and enrollment usable', a
 });
 
 test('a guest wins as Rowan and keeps First Spark and its rewards after reload', async ({ page }) => {
-  // This flow renders Rowan again after a full reload on software WebGL.
-  test.setTimeout(135_000);
+  // Both 3D world entries render Rowan on software WebGL. Individual assertions
+  // retain the usual timeout so an absent control still fails promptly.
+  test.setTimeout(180_000);
   const errors = [];
   const wizardName = 'Rowan Duelist';
   const questName = 'First Spark in the Ring';
@@ -141,7 +142,7 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
     };
   }, wizardName);
   const expectFirstSparkCompleted = async () => {
-    await page.getByRole('button', { name: /Active Saga Quest/ }).click();
+    await page.getByRole('button', { name: /Active Saga Quest/ }).click({ timeout: 15_000 });
     const cardHeader = page.getByText(questName, { exact: true }).locator('..');
     await expect(cardHeader.getByText('Completed', { exact: true })).toBeVisible();
   };
@@ -155,14 +156,18 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
   expect(starter).toMatchObject({ realmId: 'breeze', completedQuests: [], level: 1, xp: 0 });
 
   await page.getByRole('button', { name: 'Duel', exact: true }).click();
+  // Use a repeatable opening hand and combat rolls for this persistence check.
+  // The game still resolves the actual fight and awards rewards through the UI.
+  await page.evaluate(() => { Math.random = () => 0.5; });
   await page.getByRole('button', { name: 'Frost', exact: true }).click();
   await page.getByRole('button', { name: /2× Speed OFF/ }).click();
   await expect(page.getByText('Round 1', { exact: true })).toBeVisible();
   const cast = page.getByRole('button', { name: 'Cast Turn', exact: true });
   const pass = page.getByRole('button', { name: 'Pass (+Gain Pip)', exact: true });
-  const exit = page.getByRole('button', { name: /Claim Rewards & Return|Return to Campus/ });
+  const claimVictory = page.getByRole('button', { name: 'Claim Rewards & Return', exact: true });
+  const defeat = page.getByRole('button', { name: 'Return to Campus', exact: true });
 
-  for (let round = 1; round <= 15; round++) {
+  for (let round = 1; round <= 6; round++) {
     const nextRound = page.getByText('Round ' + (round + 1), { exact: true });
     for (const spell of ['Foxfire Volley', 'Cinder Dart']) {
       const card = page.getByRole('button', { name: new RegExp(spell) }).first();
@@ -171,11 +176,11 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
     }
     if (await cast.isEnabled()) await cast.click();
     else await pass.click();
-    await expect(exit.or(nextRound).first()).toBeVisible();
-    if (await exit.isVisible()) break;
+    await expect(claimVictory.or(defeat).or(nextRound).first()).toBeVisible();
+    expect(await defeat.isVisible(), `Rowan should still be in the fight after round ${round}`).toBe(false);
+    if (await claimVictory.isVisible()) break;
     await expect(pass).toBeEnabled();
   }
-  const claimVictory = page.getByRole('button', { name: 'Claim Rewards & Return', exact: true });
   await expect(claimVictory).toBeVisible();
   await claimVictory.click();
   // Breeze solo payout (298 XP, 163F, 2 shards) plus First Spark (90 XP, 110F, 3 shards).
