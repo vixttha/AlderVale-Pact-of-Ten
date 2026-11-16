@@ -2,7 +2,7 @@
 
 **Proposed HQ version:** `v0.0.2` (draft; not approved)
 
-Use this folder to maintain the README HQ landing page and review how it has changed. The proposed [HQ landing page](DRAFT.md) is staged separately from the current [current branch landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md).
+Use this folder to maintain the README HQ landing page and review how it has changed. The proposed [HQ landing page](DRAFT.md) is staged separately from the branch's current [landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/README.md).
 
 ## Where to work
 
