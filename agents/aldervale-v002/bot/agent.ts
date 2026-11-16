@@ -8,4 +8,11 @@ export default defineAgent({
       { id: "fast", value: "true" },
     ],
   },
+  local: {
+    workspaceDir: "../..",
+  },
+  tools: ["read", "grep", "glob", "ls"],
+  hosting: {
+    egressDomains: ["api.github.com", "raw.githubusercontent.com"],
+  },
 });

@@ -6,6 +6,7 @@
   "description": "AlderVale Cursor agent v0.0.2",
   "scripts": {
     "check": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test bot/lib/operating.test.ts",
     "dev": "agent-sdk dev"
   },
   "dependencies": {
