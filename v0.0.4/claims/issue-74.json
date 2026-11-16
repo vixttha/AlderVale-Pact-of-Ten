@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "issueNumber": 74,
   "claimId": "AV-CLAIM-74-20261116-02",
-  "status": "active",
+  "status": "released",
   "worker": "ChatGPT AlderVale project assistant",
   "host": "ChatGPT",
   "model": "unverified",
@@ -11,6 +11,6 @@
   "baseSha": "219a6bda1f9b2e01f06fd97350a66ed8f470f0d1",
   "workBranch": "fix/deterministic-combat-effect-ids",
   "claimedAt": "2026-11-16T17:50:21.000Z",
-  "expiresAt": "2026-11-16T18:50:21.000Z",
-  "note": "Owner requested continued work on #74. Strengthen the existing PR regression to compare the full resolved combat state."
+  "expiresAt": "2026-11-16T18:03:24.000Z",
+  "note": "PR #116 head 783ec4ff24e3423fd4a8234f599cbc1cb0a77ccb passed 7/7 first-attempt public validation. Delivered for owner merge review."
 }
