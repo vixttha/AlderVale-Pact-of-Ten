@@ -68,6 +68,10 @@ export interface CombatCreatureSlot {
   talents: string[];
 }
 
+export function getCreatureCombatHp(stage: CombatCreatureSlot['stage']): number {
+  return 190 + stage * 45;
+}
+
 export interface CombatantState {
   id: string;
   name: string;
