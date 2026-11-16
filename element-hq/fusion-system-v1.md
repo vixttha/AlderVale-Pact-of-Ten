@@ -5,6 +5,8 @@
 **Working branch:** `element-hq-v1`  
 **Scope:** Elemental lineage fusion and fusion creatures. This is not the same mechanic as in-hand spell/enchant fusion.
 
+**Later decision** · The [v1 creature and fusion rules](designs/aldervale-element-system-v1.md#v1-creature-and-fusion-rules) supersede this historical proposal for the roster, inherited affinity, purchase prerequisites, incubation, and paid eggs. Stage 1 parents qualify in v1 and the Hatchery requires no Bonding Seal.
+
 ## 1. Executive decision proposal
 
 Keep the five fusion elements already present in AlderVale. Treat each as a stable, independent elemental identity born from a rare resonance between two compatible parent elements.
