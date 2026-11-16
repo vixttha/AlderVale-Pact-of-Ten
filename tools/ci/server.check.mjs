@@ -58,10 +58,11 @@ async function waitFor(peer, type) {
   throw new Error(`Missing ${type}: ${JSON.stringify(peer.messages)}`);
 }
 
-async function join(peer, wizardId, realmId) {
+async function join(peer, wizardId, realmId, activeCreature = {}) {
   peer.socket.send(JSON.stringify({ type: 'join_world', presence: {
     wizardId, ownerId: `guest_${wizardId}`, name: wizardId, realmId, zone: 'hub',
     raceId: 'human', elementId: 'ember', level: 1, rank: 1, x: 0, y: 0, z: 0,
+    ...activeCreature,
   } }));
   await waitFor(peer, 'world_joined');
   const snapshot = await waitFor(peer, 'zone_snapshot');
@@ -111,4 +112,75 @@ test('three real sockets exchange same-realm chat without crossing realms', asyn
   const left = waitFor(bob, 'player_left');
   alice.socket.close();
   assert.ok((await left).sessionId);
+});
+
+
+function selectedCreature(state, wizardId) {
+  const fighter = [...state.playerTeam, ...state.enemyTeam].find((actor) => actor.id === wizardId);
+  assert.ok(fighter, 'Expected live fighter for ' + wizardId);
+  const creature = fighter.creatures[fighter.activeCreatureIdx];
+  assert.ok(creature, 'Expected active creature for ' + wizardId);
+  return {
+    speciesId: creature.speciesId,
+    element: creature.element,
+    stage: creature.stage,
+    chromatic: creature.chromatic,
+    branchChoice: creature.branchChoice,
+    talents: creature.talents,
+  };
+}
+
+const selectionA = {
+  activeCreatureId: 'pet-rime-stag',
+  activeCreatureSpeciesId: 'rime_stag',
+  activeCreatureNickname: 'Winter Crown',
+  activeCreatureStage: 3,
+  activeCreatureChromatic: 'dawn',
+  activeCreatureBranchChoice: 'B',
+  activeCreatureTalents: ['tal_sturdy', 'tal_may_blade'],
+};
+const selectionB = {
+  activeCreatureId: 'pet-zephyr-owl',
+  activeCreatureSpeciesId: 'zephyr_owl',
+  activeCreatureNickname: 'Storm Courier',
+  activeCreatureStage: 2,
+  activeCreatureChromatic: 'dusk',
+  activeCreatureBranchChoice: 'A',
+  activeCreatureTalents: ['tal_spellproof'],
+};
+
+test('live PvP builds each fighter from its validated selected creature', async () => {
+  const a = await connect();
+  const b = await connect();
+  await join(a, 'pvp-creature-a', 'breeze', selectionA);
+  await join(b, 'pvp-creature-b', 'breeze', selectionB);
+  a.socket.send(JSON.stringify({ type: 'queue_pvp' }));
+  b.socket.send(JSON.stringify({ type: 'queue_pvp' }));
+  const [aDuel, bDuel] = await Promise.all([waitFor(a, 'duel_state'), waitFor(b, 'duel_state')]);
+  assert.deepEqual(selectedCreature(aDuel.state, a.wizardId), {
+    speciesId: 'rime_stag', element: 'frost', stage: 3, chromatic: 'dawn', branchChoice: 'B',
+    talents: ['tal_sturdy', 'tal_may_blade'],
+  });
+  assert.deepEqual(selectedCreature(bDuel.state, b.wizardId), {
+    speciesId: 'zephyr_owl', element: 'gale', stage: 2, chromatic: 'dusk', branchChoice: 'A',
+    talents: ['tal_spellproof'],
+  });
+});
+
+test('live co-op builds both player fighters from their selected creatures', async () => {
+  const a = await connect();
+  const b = await connect();
+  await join(a, 'coop-creature-a', 'horizon', selectionA);
+  await join(b, 'coop-creature-b', 'horizon', selectionB);
+  a.socket.send(JSON.stringify({ type: 'queue_coop' }));
+  b.socket.send(JSON.stringify({ type: 'queue_coop' }));
+  const [aDuel, bDuel] = await Promise.all([waitFor(a, 'duel_state'), waitFor(b, 'duel_state')]);
+  assert.deepEqual(selectedCreature(aDuel.state, a.wizardId), {
+    speciesId: 'rime_stag', element: 'frost', stage: 3, chromatic: 'dawn', branchChoice: 'B',
+    talents: ['tal_sturdy', 'tal_may_blade'],
+  });
+  assert.deepEqual(selectedCreature(bDuel.state, b.wizardId), {
+    speciesId: 'zephyr_owl', element: 'gale', stage: 2, chromatic: 'dusk', branchChoice: 'A',
+    talents: ['tal_spellproof'],
+  });
 });

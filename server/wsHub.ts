@@ -1,18 +1,18 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { randomUUID } from 'node:crypto';
 import { verifyFirebaseBearerToken } from './authVerify.ts';
-import { ownedWizard, settleTrade, awardLiveVictory, RequestError } from './market.ts';
+import { ownedWizard, ownedActiveCreature, settleTrade, awardLiveVictory, RequestError } from './market.ts';
+import { resolveLiveCombatCreature, sanitizeGuestCreatureSelection } from './creatureSelection.ts';
 import { duelView, readDuelAction } from './duelView.ts';
 import { ELEMENTS } from '../shared/elements.ts';
 import { RACES } from '../shared/wardrobe.ts';
 import { ZONES } from '../shared/world.ts';
-import { SPECIES_BY_ID } from '../shared/creatures.ts';
 import type { Server } from 'node:http';
 import type { RealmId } from '../shared/realms.ts';
 import type { ZoneId } from '../shared/world.ts';
 import type { ElementId } from '../shared/elements.ts';
 import type { BeastClanId, RaceId, WizardSculpt } from '../shared/wardrobe.ts';
-import { resolveDuelRound, isDuelComplete, chooseAiAction, drawUpToSeven, type DuelState, type TurnActionInput, type CombatantState } from '../shared/combat.ts';
+import { resolveDuelRound, isDuelComplete, chooseAiAction, drawUpToSeven, type DuelState, type TurnActionInput, type CombatantState, type CombatCreatureSlot } from '../shared/combat.ts';
 import { getStarterDeckForElement } from '../shared/spells.ts';
 
 export type EmoteId = 'wave' | 'cheer' | 'meditate' | 'cast';
@@ -35,9 +35,13 @@ export interface LivePlayerPresence {
   z: number;
   rotY: number;
   mountId: string | null;
+  activeCreatureId: string;
   activeCreatureSpeciesId: string;
+  activeCreatureNickname: string;
   activeCreatureStage: 1 | 2 | 3;
   activeCreatureChromatic: 'none' | 'dawn' | 'dusk';
+  activeCreatureBranchChoice: 'A' | 'B';
+  activeCreatureTalents: string[];
   sculpt?: WizardSculpt;
   equipped?: Record<'headgear' | 'torso' | 'back' | 'footwear' | 'staff', string>;
   stitching?: Record<'headgear' | 'torso' | 'back' | 'footwear' | 'staff', string | null>;
@@ -328,12 +332,14 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           conn.joining = true;
           try {
             let identity: string;
+            let activeCreatureId = typeof p.activeCreatureId === 'string' ? p.activeCreatureId : '';
             let name = p.name.trim().slice(0, 24) || 'Alder Initiate';
             const realm = p.realmId;
             if (typeof msg.idToken === 'string') {
               const principal = await verifyFirebaseBearerToken(`Bearer ${msg.idToken}`);
               if (!principal?.emailVerified) throw new RequestError(401, 'Sign in again to connect to AlderVale.');
               const wizard = await ownedWizard(principal.uid, p.wizardId, realm);
+              activeCreatureId = wizard.activeCreatureId;
               conn.verifiedUid = principal.uid;
               identity = wizard.id;
               name = wizard.name;
@@ -351,16 +357,14 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
               throw new RequestError(409, 'This wizard already has a live session.');
             }
             const spawn = ZONES[p.zone].spawnPos;
+            const selectedCreature = sanitizeGuestCreatureSelection({ ...p, activeCreatureId });
             conn.presence = {
-              ...p, sessionId, wizardId: identity, ownerId: '', name, realmId: realm, zone: p.zone,
+              ...p, ...selectedCreature, sessionId, wizardId: identity, ownerId: '', name, realmId: realm, zone: p.zone,
               raceId: p.raceId, elementId: p.elementId,
               level: Number.isFinite(p.level) ? Math.min(50, Math.max(1, Number(p.level))) : 1,
               rank: Number.isFinite(p.rank) ? Math.min(20, Math.max(1, Number(p.rank))) : 1,
               titleBadge: typeof p.titleBadge === 'string' ? p.titleBadge.slice(0, 40) : '',
               x: spawn[0], y: spawn[1], z: spawn[2], rotY: 0, mountId: null, inDuel: false,
-              activeCreatureSpeciesId: p.activeCreatureSpeciesId && Object.hasOwn(SPECIES_BY_ID, p.activeCreatureSpeciesId) ? p.activeCreatureSpeciesId : 'cinder_kitsune',
-              activeCreatureStage: p.activeCreatureStage === 2 || p.activeCreatureStage === 3 ? p.activeCreatureStage : 1,
-              activeCreatureChromatic: p.activeCreatureChromatic === 'dawn' || p.activeCreatureChromatic === 'dusk' ? p.activeCreatureChromatic : 'none',
             };
             conn.duelElement = p.elementId;
             conn.duelRace = p.raceId;
@@ -421,11 +425,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           if (patch) {
             if (patch.raceId && Object.hasOwn(RACES, patch.raceId)) conn.presence.raceId = patch.raceId;
             if (patch.elementId && Object.hasOwn(ELEMENTS, patch.elementId)) conn.presence.elementId = patch.elementId;
-            if (patch.activeCreatureSpeciesId && Object.hasOwn(SPECIES_BY_ID, patch.activeCreatureSpeciesId)) {
-              conn.presence.activeCreatureSpeciesId = patch.activeCreatureSpeciesId;
-            }
-            if (patch.activeCreatureStage === 1 || patch.activeCreatureStage === 2 || patch.activeCreatureStage === 3) conn.presence.activeCreatureStage = patch.activeCreatureStage;
-            if (patch.activeCreatureChromatic === 'dawn' || patch.activeCreatureChromatic === 'dusk' || patch.activeCreatureChromatic === 'none') conn.presence.activeCreatureChromatic = patch.activeCreatureChromatic;
+            Object.assign(conn.presence, sanitizeGuestCreatureSelection({ ...conn.presence, ...patch }));
             if (typeof patch.titleBadge === 'string') conn.presence.titleBadge = patch.titleBadge.slice(0, 40);
             if (typeof patch.level === 'number' && Number.isInteger(patch.level) && patch.level >= 1 && patch.level <= 50) conn.presence.level = patch.level;
             if (typeof patch.rank === 'number' && Number.isInteger(patch.rank) && patch.rank >= 1 && patch.rank <= 20) conn.presence.rank = patch.rank;
@@ -487,7 +487,21 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                 room.spectators.delete(sA);
                 room.spectators.delete(sB);
               }
-              const makeFighter = (p: LivePlayerPresence, { duelElement, duelRace }: ClientConn): CombatantState => {
+              const presenceA = cA.presence;
+              const presenceB = cB.presence;
+              let creatureA: CombatCreatureSlot;
+              let creatureB: CombatCreatureSlot;
+              try {
+                [creatureA, creatureB] = await Promise.all([
+                  resolveLiveCombatCreature({ verifiedUid: cA.verifiedUid, wizardId: presenceA.wizardId, realmId: presenceA.realmId, guestSelection: presenceA }, ownedActiveCreature),
+                  resolveLiveCombatCreature({ verifiedUid: cB.verifiedUid, wizardId: presenceB.wizardId, realmId: presenceB.realmId, guestSelection: presenceB }, ownedActiveCreature),
+                ]);
+              } catch {
+                send(cA, { type: 'world_notice', text: 'Your selected creature could not be verified. Reconnect and try again.' });
+                send(cB, { type: 'world_notice', text: 'Your selected creature could not be verified. Reconnect and try again.' });
+                return;
+              }
+              const makeFighter = (p: LivePlayerPresence, { duelElement, duelRace }: ClientConn, creature: CombatCreatureSlot): CombatantState => {
                 const f: CombatantState = {
                   id: p.wizardId,
                   name: p.name,
@@ -519,7 +533,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                   discard: [],
                   sideboard: ['uni_enchant_keen', 'frost_tower_ward'],
                   spellwrighting: {},
-                  creatures: [{ id: 'p1', speciesId: 'cinder_kitsune', nickname: 'Academy Partner', element: 'ember', stage: 1, chromatic: 'none', branchChoice: 'A', hp: 220, maxHp: 220, talents: [] }],
+                  creatures: [creature],
                   activeCreatureIdx: 0,
                 };
                 drawUpToSeven(f);
@@ -575,7 +589,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                     round: 1,
                     turnTimerSeconds: 30,
                     arenaBubble: null,
-                    playerTeam: [makeFighter(cA.presence, cA), makeFighter(cB.presence, cB)],
+                    playerTeam: [makeFighter(presenceA, cA, creatureA), makeFighter(presenceB, cB, creatureB)],
                     enemyTeam: [boss],
                     firstTeam: 'player',
                     phase: 'planning',
@@ -606,8 +620,8 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                     round: 1,
                     turnTimerSeconds: 30,
                     arenaBubble: null,
-                    playerTeam: [makeFighter(cA.presence, cA)],
-                    enemyTeam: [makeFighter(cB.presence, cB)],
+                    playerTeam: [makeFighter(presenceA, cA, creatureA)],
+                    enemyTeam: [makeFighter(presenceB, cB, creatureB)],
                     firstTeam: Math.random() < 0.5 ? 'player' : 'enemy',
                     phase: 'planning',
                     logs: [`Live 1v1 Duel started! ${cA.presence.name} vs ${cB.presence.name} (Fair PvP 650 HP scaling)`],

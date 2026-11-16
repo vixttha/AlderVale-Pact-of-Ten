@@ -584,7 +584,7 @@ export function App() {
           const current = currentPresence.current;
           const wizard = current.activeWizard;
           if (!wizard || wizard.id !== initialWizard.id) return;
-          const pet = current.creatures.find((creature) => creature.id === wizard.activeCreatureId);
+          const pet = current.creatures.find((creature) => creature.id === wizard.activeCreatureId) ?? current.creatures[0];
           if (!idToken && !guestTicket) {
             try { guestTicket = sessionStorage.getItem(ticketKey); } catch { /* optional reconnect storage */ }
           }
@@ -594,8 +594,10 @@ export function App() {
               wizardId: wizard.id, name: wizard.name, realmId: wizard.realmId, zone: current.zone,
               raceId: wizard.raceId, beastClan: wizard.beastClan, elementId: wizard.elementId,
               level: wizard.level, rank: wizard.rank, titleBadge: wizard.progression.titleBadge,
-              mountId: wizard.progression.equippedMountId, activeCreatureSpeciesId: pet?.speciesId,
+              mountId: wizard.progression.equippedMountId, activeCreatureId: pet?.id ?? wizard.activeCreatureId,
+              activeCreatureSpeciesId: pet?.speciesId, activeCreatureNickname: pet?.nickname,
               activeCreatureStage: pet?.stage, activeCreatureChromatic: pet?.chromatic,
+              activeCreatureBranchChoice: pet?.branchChoice, activeCreatureTalents: pet?.talents ?? [],
               sculpt: wizard.sculpt, equipped: wizard.wardrobe.equipped, stitching: wizard.stitching,
             },
           }));
@@ -773,9 +775,13 @@ export function App() {
           rank: activeWizard.rank,
           titleBadge: activeWizard.progression.titleBadge,
           mountId: activeWizard.progression.equippedMountId,
+          activeCreatureId: activePetForSync?.id ?? activeWizard.activeCreatureId,
           activeCreatureSpeciesId: activePetForSync?.speciesId ?? 'cinder_kitsune',
+          activeCreatureNickname: activePetForSync?.nickname ?? 'Academy Partner',
           activeCreatureStage: activePetForSync?.stage ?? 1,
           activeCreatureChromatic: activePetForSync?.chromatic ?? 'none',
+          activeCreatureBranchChoice: activePetForSync?.branchChoice ?? 'A',
+          activeCreatureTalents: activePetForSync?.talents ?? [],
           sculpt: activeWizard.sculpt,
           equipped: activeWizard.wardrobe.equipped,
           stitching: activeWizard.stitching,
@@ -793,9 +799,13 @@ export function App() {
     activeWizard?.sculpt,
     activeWizard?.wardrobe.equipped,
     activeWizard?.stitching,
+    activePetForSync?.id,
     activePetForSync?.speciesId,
+    activePetForSync?.nickname,
     activePetForSync?.stage,
     activePetForSync?.chromatic,
+    activePetForSync?.branchChoice,
+    activePetForSync?.talents,
   ]);
 
   const triggerEmote = useCallback(
