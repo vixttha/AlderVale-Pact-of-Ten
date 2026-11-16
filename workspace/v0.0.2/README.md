@@ -1,15 +1,18 @@
-# README v0.0.2 workspace
+# Public game README v0.0.2 workspace
 
-**Draft for review.** [Open the public README candidate](DRAFT.md). [Compare with approved v0.0.1](../../versions/v0.0.1/README.md).
+**Draft for review.** [Open the candidate](DRAFT.md) · [Compare with approved v0.0.1](../../versions/v0.0.1/README.md)
 
-## Design
+## This revision
 
-Lead with the game and a quick start. Use a compact realm table to explain the three pacing choices and a numbered First Spark walkthrough to make the first playthrough easy to follow. Keep troubleshooting one click from the top and make commands easy to scan on narrow screens.
+- Opens with AlderVale’s game premise, current local guest build, and next actions.
+- Keeps the complete clone-and-run commands, Breeze walkthrough, realm pacing labels, recovery notes, and public issue reporting.
+- Adds an AI-assisted development example grounded in the First Spark browser test and its public runner evidence.
 
-The candidate uses GitHub-rendered Markdown. Shared project documentation links use absolute URLs to `main`, so they resolve while this candidate is viewed from its version workspace and after the README is promoted to the repository root. Recheck them on the integration PR.
+## Source and review
 
-## Review notes
-
-- Source for the three pacing labels: `shared/realms.ts` at main commit `f44a00cda3a568f60ae27012488f6bf704088fcf`. The labels describe game tuning and do not predict completion times.
-- Compare the setup and playthrough with the approved baseline. Verify dark and light themes, narrow layouts, heading navigation, and code-block copying in the GitHub render before approval.
-- Place visual experiments and their assets in this folder. Use the Woodland Fantasy direction for the public landing page. Use a production-approved wordmark or a screenshot from the verified build for a visual header, and describe meaningful images in alt text.
+- Copy baseline for game behavior and setup: `main` at `3fa20bc5ed4fecc228cc3733536a589bf75df6a0`. The public v0.0.1 README reached `main` through [PR #62](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/62).
+- Runtime requirements come from `package.json`. Realm pacing labels come from `shared/realms.ts`. The First Spark controls and reload assertions are exercised by `tools/ci/human.pw.mjs` at that baseline.
+- [GitHub Actions run 43890556938](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43890556938) passed all seven jobs at that game SHA. The First Spark case passed in all three browser jobs. This evidence covers the tested guest journey.
+- The draft uses section links and absolute public documentation links so the same Markdown works from this workspace and the repository root. Run the HQ validator on the draft and recheck links and GitHub rendering on the eventual integration candidate.
+- Gameplay imagery is pending. Use a real capture from a verified build, record the source commit, and add descriptive alt text. The approved workmark is a concept reference. If a production wordmark is used later, review its export in both GitHub themes.
+- Review the draft on desktop and narrow layouts in GitHub light and dark themes before publication.

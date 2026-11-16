@@ -1,51 +1,61 @@
 # AlderVale: Pact of Ten
 
-**A spellcasting academy among floating islands.**
+AlderVale is a 3D browser RPG set at a spellcasting academy among floating islands. Create a wizard, explore the campus, and build a deck for turn-based duels.
 
-Create a wizard, explore a 3D campus, and build a deck for turn-based duels. The first playable lets you take Rowan into Breeze, win a solo skirmish, and keep your First Spark rewards after a reload.
+**In development · Local guest play.** Start in Breeze, earn your first quest rewards in a solo duel, and return to the same wizard after a reload.
 
-[Quick start](#quick-start) · [Choose a realm](#choose-a-realm) · [First Spark](#first-spark) · [Troubleshooting](#troubleshooting) · [Development](#development)
+[Run locally](#run-locally) · [First playthrough](#first-playthrough) · [How AI helps build AlderVale](#how-ai-helps-build-aldervale) · [Report a bug](#report-a-bug)
 
-## Quick start
+## Run locally
 
-**In development · Local guest play**
-
-You’ll need Git, Node.js **24.12.0 or newer**, and Bun **1.4.4**. Clone the repository from GitHub’s **Code** menu, then run these commands from the cloned directory.
+You’ll need Git, Node.js **24.12.0 or later**, Bun **1.4.4**, and a browser with **WebGL 2** for the 3D campus.
 
 ```bash
+git clone https://github.com/vixttha/AlderVale-Pact-of-Ten.git
+cd AlderVale-Pact-of-Ten
 bun install --frozen-lockfile
 bun run dev
 ```
 
-Keep the terminal open and visit [localhost:3000](http://localhost:3000) in a WebGL 2-capable browser. Guest play requires neither a Google sign-in nor an API key.
+Keep the terminal open and visit [http://localhost:3000](http://localhost:3000). Guest play works without a Google account or an API key.
 
-## Choose a realm
+## First playthrough
 
-| Realm | Pacing label |
+1. **Create your wizard.** Choose **Breeze**, enter a wizard name, and pick **Alder Human** with the **Rowan** appearance. Select **Begin Academy Journey**.
+2. **Enter a duel.** On campus, open **Duel** and select **Frost** under **Solo Academy Skirmishes**. Pick an affordable spell and select **Cast Turn**, or use **Pass (+Gain Pip)** to build pips.
+3. **Claim First Spark.** After winning, select **Claim Rewards & Return**. Open **Active Saga Quest** and check that **First Spark in the Ring** shows **Completed**.
+4. **Resume your wizard.** Reload the page, select the same wizard in Breeze, and choose **Enter Aldervale**. Check that the quest is still complete and your Florin and Spell Shard totals match.
+
+### Choose a realm
+
+| Realm | In-game pacing label |
 | --- | --- |
 | **Breeze** | ~25-Min Fast Path |
 | **Horizon** | ~1-Hr Balanced Path |
 | **Everpeak** | ~3-Hr Classic Saga |
 
-These labels describe progression tuning, not guaranteed completion times.
+The labels describe progression tuning. Actual playtime varies.
 
-## First Spark
+## How AI helps build AlderVale
 
-1. **Create your wizard.** Choose **Breeze**, enter a name, select **Human** with the **Rowan** appearance, and choose **Begin Academy Journey**.
-2. **Enter a solo duel.** Open **Duel**, then select **Frost** under **Solo Academy Skirmishes**. Use **Cast Turn** with a spell you can afford, or **Pass (+Gain Pip)** to build pips.
-3. **Claim your rewards.** After a win, select **Claim Rewards & Return**. Check **Active Saga Quest** for **First Spark in the Ring** marked **Completed**.
-4. **Resume after reload.** Reopen the same wizard in Breeze with **Enter Aldervale**. Check the quest and confirm your Florin and Spell Shard totals match.
+AlderVale is a public record of AI-assisted game development. AI assists with implementation, debugging, and test design. Project decisions and release approvals stay under human control.
+
+**First Spark, from duel to saved progress.** The AI-assisted test work made the browser scenario repeatable while keeping the actual game controls, combat, and reward logic. It checks that Rowan earns the expected payout and that the same wizard, completed quest, Florins, and Spell Shards survive a reload. The scenario passed in Chromium, Firefox, and WebKit on build `3fa20bc`. [Test changes](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/61) · [Build validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43890556938)
 
 ## Troubleshooting
 
-- **3D world unavailable.** Use **Retry 3D**. The wizard and menus stay available.
-- **Guest progress could not be saved.** Allow browser site storage and select **Retry save** before reloading or closing the tab.
-- **Wizard missing after reload.** Use the same browser profile, address, and realm. Clearing site data removes local guest saves.
+- **3D world unavailable.** Try **Retry 3D**. You can still access your wizard and menus.
+- **Guest save failed.** Allow browser site storage, then select **Retry save** before reloading or closing the tab.
+- **Wizard missing after reload.** Use the same browser profile, URL, and realm. Clearing site data removes local guest saves.
 
-## Development
+## Validation
 
-Run `bun run validate:core` for type checking, rules lint, tests, the production build, and HTTP and WebSocket checks. Public CI also exercises the guest journey in Chromium, Firefox, and WebKit and runs Firestore emulator tests.
+Run `bun run validate:core` for type checking, rules lint, tests, the production build, and HTTP and WebSocket checks. GitHub Actions also runs guest journeys in Chromium, Firefox, and WebKit and checks Firestore rules in an emulator.
 
 - [Validation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md)
 - [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md)
-- Open the repository’s **Issues** tab to report a bug. Include the commit or build, browser and operating system, realm, and the steps that reproduce it.
+- [GitHub Actions](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions)
+
+## Report a bug
+
+Search [GitHub Issues](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues) first. Include the build or commit, browser, operating system, realm, steps to reproduce, and what you expected to happen.
