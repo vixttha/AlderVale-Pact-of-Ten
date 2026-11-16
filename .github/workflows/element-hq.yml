@@ -69,12 +69,18 @@ jobs:
               "## Balance and verification",
               "## Open questions and decisions",
           }
+          rebuilt_design_branch = os.environ["GITHUB_REF"] == "refs/heads/aldervale-element-design-v1"
           for path in (template, design):
+              required = sections
+              if path == design and rebuilt_design_branch:
+                  required = (sections - {"## Proposed mechanics", "## Creatures and fusion lineage"}) | {
+                      "### Proposed mechanics", "### Creatures and fusion lineage",
+                  }
               headings = set(Path(path).read_text(encoding="utf-8").splitlines())
-              if missing_sections := sections - headings:
+              if missing_sections := required - headings:
                   raise SystemExit(f"{path} is missing sections: {sorted(missing_sections)}")
 
-          if os.environ["GITHUB_REF"] == "refs/heads/aldervale-element-design-v1":
+          if rebuilt_design_branch:
               status = "element-hq/designs/aldervale-element-design-status.md"
               if status not in tracked or f"]({status})" not in guide:
                   raise SystemExit(f"Branch guide must link to the tracked {status}")
@@ -136,6 +142,14 @@ jobs:
               matrix_header = "| Attacker | " + " | ".join(labels) + " |"
               if matrix_header not in design_text.splitlines() or [row[0] for row in matrix] != labels:
                   raise SystemExit("Matrix must include every v1 attacker and defender in order")
+              prism_rows = rows_between("### Spells, shields, and prisms", "#### Earth starter kit", 3)
+              if prism_rows != [
+                  ["Thermal Prism", "Fire", "Frost"],
+                  ["Coral Prism", "Water", "Lightning"],
+                  ["Nimbus Prism", "Lightning", "Water"],
+              ]:
+                  raise SystemExit("Existing prism destinations must be specified explicitly")
+
               for attacker, *values in matrix:
                   for defender, actual in zip(labels, values):
                       if attacker == defender:

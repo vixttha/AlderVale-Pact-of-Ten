@@ -86,6 +86,8 @@ Give each prism card an explicit destination so its effect and text stay aligned
 | Coral Prism | Water | Lightning |
 | Nimbus Prism | Lightning | Water |
 
+#### Earth starter kit
+
 Earth's proposed starter kit uses the existing attack and shield mechanics. Initial Earth source power is 1.00. Final deck composition and new card IDs belong to implementation.
 
 | Card | Unlock | Effect |
