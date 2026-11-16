@@ -756,6 +756,21 @@ def run_regression_tests(root, repo, main_ref, baseline):
         index.write_text(f"{read(index)}\n{row}\n", encoding="utf-8")
         return folder
 
+    def advance_hq_public_draft_pointer(fixture, version):
+        workspace = fixture / "readme-hq/workspace"
+        drafts = check_workspace(fixture, workspace, "README HQ")
+        require(drafts, "Regression fixture has no active README HQ draft")
+        candidate = workspace / drafts[0] / "DRAFT.md"
+        content = read(candidate)
+        updated = re.sub(
+            r"\.\./\.\./\.\./workspace/v\d+\.\d+\.\d+/DRAFT\.md",
+            f"../../../workspace/{version}/DRAFT.md",
+            content,
+            count=1,
+        )
+        require(updated != content, "Regression fixture could not advance the HQ public-draft pointer")
+        candidate.write_text(updated, encoding="utf-8")
+
     def change_public_snapshot(fixture):
         path = fixture / "versions" / "v0.0.1" / "README.md"
         path.write_text(read(path) + "\n<!-- regression mutation -->\n", encoding="utf-8")
@@ -778,7 +793,9 @@ def run_regression_tests(root, repo, main_ref, baseline):
         path.write_text(WORKSPACE_ROW_RE.sub("", read(path), count=1), encoding="utf-8")
 
     def add_broken_draft_link(fixture):
-        path = add_draft(fixture / "workspace") / "DRAFT.md"
+        folder = add_draft(fixture / "workspace")
+        advance_hq_public_draft_pointer(fixture, folder.name)
+        path = folder / "DRAFT.md"
         path.write_text(read(path) + "\n[Broken regression fixture](missing-target.md)\n", encoding="utf-8")
 
     def stale_candidate_draft_pointer(fixture):
@@ -801,7 +818,9 @@ def run_regression_tests(root, repo, main_ref, baseline):
         (fixture / MANIFEST_PATH).write_text(json.dumps(manifest), encoding="utf-8")
 
     def add_broken_main_link(fixture):
-        path = add_draft(fixture / "workspace") / "DRAFT.md"
+        folder = add_draft(fixture / "workspace")
+        advance_hq_public_draft_pointer(fixture, folder.name)
+        path = folder / "DRAFT.md"
         link = f"https://github.com{REPO_PREFIX}blob/main/docs/readme-hq-missing-fixture.md"
         path.write_text(read(path) + f"\n[Missing main path]({link})\n", encoding="utf-8")
 
