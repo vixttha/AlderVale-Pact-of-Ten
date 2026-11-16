@@ -128,7 +128,7 @@ function match(a, b, mode) {
   return Promise.all([exchange(a, request, outcomes), exchange(b, request, outcomes)]);
 }
 
-function checkSelection(state, player, expected, element) {
+function checkSelection(state, player, expected, element, hp) {
   const fighter = [...state.playerTeam, ...state.enemyTeam].find((actor) => actor.id === player.wizardId);
   assert.ok(fighter, 'Expected fighter for ' + player.wizardId);
   const creature = fighter.creatures[fighter.activeCreatureIdx];
@@ -136,6 +136,8 @@ function checkSelection(state, player, expected, element) {
   const { id, speciesId, nickname, stage, chromatic, branchChoice, talents } = creature;
   assert.equal(id, player.creatureId);
   assert.equal(creature.element, element);
+  assert.equal(creature.hp, hp);
+  assert.equal(creature.maxHp, hp);
   assert.deepEqual({ speciesId, nickname, stage, chromatic, branchChoice, talents }, expected);
 }
 
@@ -147,20 +149,28 @@ for (const [mode, realm] of [['pvp', 'breeze'], ['coop', 'horizon']]) {
     for (const result of await match(a, b, mode)) {
       assert.equal(result.type, 'duel_state', result.text);
       assert.equal(result.state.mode, mode);
-      checkSelection(result.state, players[0], storedSelections[0], 'frost');
-      checkSelection(result.state, players[1], storedSelections[1], 'gale');
+      checkSelection(result.state, players[0], storedSelections[0], 'frost', 325);
+      checkSelection(result.state, players[1], storedSelections[1], 'gale', 280);
     }
   });
 }
 
-test('authenticated matchmaking rejects a stored selection with inconsistent ownership', { timeout: 45000 }, async (context) => {
-  const players = await Promise.all(storedSelections.map((selection) => createPlayer('everpeak', selection)));
-  const [first, second] = players;
-  await first.creatureRef.update({ ownerId: second.uid });
-  const [a, b] = await Promise.all(players.map((player) => join(context, player)));
+const mismatchedOwnership = [
+  ['owner', (second) => ({ ownerId: second.uid })],
+  ['wizard', (second) => ({ wizardId: second.wizardId })],
+  ['realm', () => ({ realmId: 'breeze' })],
+];
 
-  for (const result of await match(a, b, 'pvp')) {
-    assert.equal(result.type, 'world_notice', 'A duel must not start with an unverified stored selection');
-    assert.equal(result.text, rejectedSelection);
-  }
-});
+for (const [field, mismatch] of mismatchedOwnership) {
+  test('authenticated matchmaking rejects a stored selection with a mismatched ' + field, { timeout: 45000 }, async (context) => {
+    const players = await Promise.all(storedSelections.map((selection) => createPlayer('everpeak', selection)));
+    const [first, second] = players;
+    await first.creatureRef.update(mismatch(second));
+    const [a, b] = await Promise.all(players.map((player) => join(context, player)));
+
+    for (const result of await match(a, b, 'pvp')) {
+      assert.equal(result.type, 'world_notice', 'A duel must not start with an unverified stored selection');
+      assert.equal(result.text, rejectedSelection);
+    }
+  });
+}
