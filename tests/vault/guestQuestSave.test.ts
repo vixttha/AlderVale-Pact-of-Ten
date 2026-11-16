@@ -51,6 +51,107 @@ describe('Vault: guest quest rewards and realm saves', () => {
 
   afterEach(() => vi.unstubAllGlobals());
 
+  function reloadWizard(wizard: ReturnType<typeof createGuestWizard>) {
+    const bundle = loadGuestRealm(wizard.realmId);
+    const result = saveGuestRealm(wizard.realmId, {
+      ...bundle,
+      account: { ...bundle.account, wizardIds: [wizard.id] },
+      wizards: [wizard],
+    });
+    expect(result).toBe(true);
+    const saved = loadGuestRealm(wizard.realmId);
+    expect(saved.account.wizardIds).toEqual([wizard.id]);
+    expect(saved.wizards).toHaveLength(1);
+    return saved.wizards[0];
+  }
+
+  it('G13-005 counts a saved lead-creature win toward the second-win Harmony reward', () => {
+    const guest = createGuestWizard('horizon');
+    const first = applySagaEvent(guest, 'lead-creature-win');
+    expect(first.progression.questWins.q_bond_arbor).toBe(1);
+    expect(first.progression.completedQuests).toEqual([]);
+    expect(first.currencies).toEqual(guest.currencies);
+    expect(first.xp).toBe(guest.xp);
+
+    const reloaded = reloadWizard(first);
+    expect(reloaded.progression.questWins.q_bond_arbor).toBe(1);
+    const completed = applySagaEvent(reloaded, 'lead-creature-win');
+
+    expect(completed.progression.completedQuests).toEqual(['q_bond_arbor']);
+    expect(completed.progression.questWins.q_bond_arbor).toBe(2);
+    expect(completed.currencies).toEqual({
+      ...guest.currencies,
+      florins: guest.currencies.florins + 160,
+      spellShards: guest.currencies.spellShards + 4,
+    });
+    expect(completed).toMatchObject({ level: 1, xp: 140 });
+    expect(reloadWizard(completed)).toEqual(completed);
+    expect(loadGuestRealm('breeze').wizards).toEqual([]);
+  });
+
+  it('G13-006 persists a Rune-Catch event reward and ignores a replay after reload', () => {
+    const guest = createGuestWizard();
+    const completed = applySagaEvent(guest, 'rune-catch');
+
+    expect(completed.progression.completedQuests).toEqual(['q_bond_arbor']);
+    expect(completed.progression.questWins).toEqual({});
+    expect(completed.currencies.florins - guest.currencies.florins).toBe(160);
+    expect(completed.currencies.spellShards - guest.currencies.spellShards).toBe(4);
+    expect(completed).toMatchObject({ level: 1, xp: 140 });
+
+    const saved = reloadWizard(completed);
+    expect(saved).toEqual(completed);
+    expect(applySagaEvent(saved, 'rune-catch')).toBe(saved);
+  });
+
+  it('G13-007 preserves partial Harmony progress across a route switch and pays once', () => {
+    const guest = createGuestWizard();
+    const partial = reloadWizard(applySagaEvent(guest, 'lead-creature-win'));
+    expect(partial.progression.questWins.q_bond_arbor).toBe(1);
+
+    const completed = applySagaEvent(partial, 'rune-catch');
+    const saved = reloadWizard(completed);
+    expect(saved.progression.completedQuests).toEqual(['q_bond_arbor']);
+    expect(saved.progression.questWins.q_bond_arbor).toBe(1);
+    expect(saved.currencies.florins - guest.currencies.florins).toBe(160);
+    expect(saved.currencies.spellShards - guest.currencies.spellShards).toBe(4);
+    expect(applySagaEvent(saved, 'lead-creature-win')).toBe(saved);
+  });
+
+  it('G13-008 persists the Rare Trial victory reward and ignores a replay after reload', () => {
+    const guest = { ...createGuestWizard('everpeak'), level: 7, rank: 4 };
+    const completed = applySagaEvent(guest, 'rare-trial-win');
+
+    expect(completed.progression.completedQuests).toEqual(['q_rare_trial']);
+    expect(completed.currencies).toEqual({
+      ...guest.currencies,
+      florins: guest.currencies.florins + 320,
+      spellShards: guest.currencies.spellShards + 8,
+    });
+    expect(completed).toMatchObject({ level: 7, rank: 4, xp: 260 });
+
+    const saved = reloadWizard(completed);
+    expect(saved).toEqual(completed);
+    expect(applySagaEvent(saved, 'rare-trial-win')).toBe(saved);
+  });
+
+  it('G13-009 keeps a saved quest reward when a different quest completes', () => {
+    const guest = createGuestWizard();
+    const first = reloadWizard(applySagaEvent(guest, 'solo-win'));
+    const both = reloadWizard(applySagaEvent(first, 'rune-catch'));
+
+    expect(both.progression.completedQuests).toEqual(['q_first_duel', 'q_bond_arbor']);
+    expect(both.currencies).toEqual({
+      ...guest.currencies,
+      florins: guest.currencies.florins + 270,
+      spellShards: guest.currencies.spellShards + 7,
+    });
+    expect(both).toMatchObject({ level: 2, rank: 1, xp: 83 });
+    expect(applySagaEvent(both, 'solo-win')).toBe(both);
+    expect(applySagaEvent(both, 'rune-catch')).toBe(both);
+    expect(loadGuestRealm('breeze').account.termXp).toBe(0);
+  });
+
   it('G13-001 grants the quest rewards once and retains them with the guest wizard after reload', () => {
     const quest = CAMPUS_QUESTS.find(({ id }) => id === 'q_first_duel');
     if (!quest) throw new Error('First Spark quest is missing from the campus catalog');
