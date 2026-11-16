@@ -8,7 +8,7 @@ AlderVale’s home for the public README’s approved versions, changelogs, and 
 | [Public README workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/README.md) | Find the folder assigned to a game README version and review its draft. |
 | [README HQ’s own history and workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/README.md) | Review changes to this front page and how the archive is organized. |
 
-**Latest approved public README:** [v0.0.1](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/v0.0.1/README.md), prepared for `main` in [PR #62](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/62).
+**Current archived public README baseline:** [v0.0.1](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/v0.0.1/README.md). **Separate integration proposal:** [PR #62](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/62) (Draft and unmerged; refresh and revalidate against current `main` before any promotion).
 
 **Current public README draft:** [v0.0.2 draft](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/v0.0.2/DRAFT.md) · [Workspace notes](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/v0.0.2/README.md).
 
