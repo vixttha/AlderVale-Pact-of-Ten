@@ -2,13 +2,13 @@
   "schema_version": 1,
   "repository": "vixttha/AlderVale-Pact-of-Ten",
   "source_ref": "refs/heads/main",
-  "source_commit": "3fa20bc5ed4fecc228cc3733536a589bf75df6a0",
+  "source_commit": "93abf6eb09e6ac06d44f22e0d1a23cee85fc713d",
   "graphify_version": "0.9.109",
   "extraction": "code-only",
-  "graph_sha256": "9a0f8bcb7278ac8d2ec7ef631b3f06bdc2ca65ed36f49a7162dd807ff5b8b287",
-  "nodes": 1292,
-  "edges": 2919,
+  "graph_sha256": "6e3dad1ad11d3ccea1248d71127acb011f97ed91b264dabded67accac53d52a7",
+  "nodes": 1255,
+  "edges": 2861,
   "mcp_verified": true,
   "mcp_source_lookup": "src/App.tsx",
-  "workflow_run": "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43890557068"
+  "workflow_run": "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43906243193"
 }
