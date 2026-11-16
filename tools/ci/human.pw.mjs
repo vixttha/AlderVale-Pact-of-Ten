@@ -121,6 +121,36 @@ test('failed model loading leaves the Classic fallback and enrollment usable', a
   expect(errors).toEqual([]);
 });
 
+async function winBreezeSoloDuel(page, maxRounds = 6) {
+  await page.getByRole('button', { name: 'Duel', exact: true }).click();
+  // Keep the opening hand and combat rolls repeatable while playing the real duel.
+  await page.evaluate(() => { Math.random = () => 0.5; });
+  await page.getByRole('button', { name: 'Frost', exact: true }).click();
+  await page.getByRole('button', { name: /2× Speed OFF/ }).click();
+  await expect(page.getByText('Round 1', { exact: true })).toBeVisible();
+  const cast = page.getByRole('button', { name: 'Cast Turn', exact: true });
+  const pass = page.getByRole('button', { name: 'Pass (+Gain Pip)', exact: true });
+  const victory = page.getByRole('button', { name: 'Claim Rewards & Return', exact: true });
+  const defeat = page.getByRole('button', { name: 'Return to Campus', exact: true });
+
+  for (let round = 1; round <= maxRounds; round++) {
+    const nextRound = page.getByText(`Round ${round + 1}`, { exact: true });
+    for (const spell of ['Foxfire Volley', 'Cinder Dart']) {
+      const card = page.getByRole('button', { name: new RegExp(spell) }).first();
+      if (await card.isVisible()) await card.click();
+      if (await cast.isEnabled()) break;
+    }
+    if (await cast.isEnabled()) await cast.click();
+    else await pass.click();
+    await expect(victory.or(defeat).or(nextRound).first()).toBeVisible();
+    expect(await defeat.isVisible(), `The wizard should still be in the fight after round ${round}`).toBe(false);
+    if (await victory.isVisible()) break;
+    await expect(pass).toBeEnabled();
+  }
+  await expect(victory).toBeVisible();
+  await victory.click();
+}
+
 test('a guest wins as Rowan and keeps First Spark and its rewards after reload', async ({ page }) => {
   // Both 3D world entries render Rowan on software WebGL. Individual assertions
   // retain the usual timeout so an absent control still fails promptly.
@@ -156,34 +186,7 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
   const starter = await readWizard();
   expect(starter).toMatchObject({ realmId: 'breeze', completedQuests: [], level: 1, xp: 0 });
 
-  await page.getByRole('button', { name: 'Duel', exact: true }).click();
-  // Use a repeatable opening hand and combat rolls for this persistence check.
-  // The game still resolves the actual fight and awards rewards through the UI.
-  await page.evaluate(() => { Math.random = () => 0.5; });
-  await page.getByRole('button', { name: 'Frost', exact: true }).click();
-  await page.getByRole('button', { name: /2× Speed OFF/ }).click();
-  await expect(page.getByText('Round 1', { exact: true })).toBeVisible();
-  const cast = page.getByRole('button', { name: 'Cast Turn', exact: true });
-  const pass = page.getByRole('button', { name: 'Pass (+Gain Pip)', exact: true });
-  const claimVictory = page.getByRole('button', { name: 'Claim Rewards & Return', exact: true });
-  const defeat = page.getByRole('button', { name: 'Return to Campus', exact: true });
-
-  for (let round = 1; round <= 6; round++) {
-    const nextRound = page.getByText('Round ' + (round + 1), { exact: true });
-    for (const spell of ['Foxfire Volley', 'Cinder Dart']) {
-      const card = page.getByRole('button', { name: new RegExp(spell) }).first();
-      if (await card.isVisible()) await card.click();
-      if (await cast.isEnabled()) break;
-    }
-    if (await cast.isEnabled()) await cast.click();
-    else await pass.click();
-    await expect(claimVictory.or(defeat).or(nextRound).first()).toBeVisible();
-    expect(await defeat.isVisible(), `Rowan should still be in the fight after round ${round}`).toBe(false);
-    if (await claimVictory.isVisible()) break;
-    await expect(pass).toBeEnabled();
-  }
-  await expect(claimVictory).toBeVisible();
-  await claimVictory.click();
+  await winBreezeSoloDuel(page);
   // Breeze solo payout (298 XP, 163F, 2 shards) plus First Spark (90 XP, 110F, 3 shards).
   await expect(page.getByText(`Victory! +388 XP, +273 Florins, +5 Spell Shards! Quest completed: ${questName}.`, {
     exact: true,
@@ -211,3 +214,63 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
   expect(await readWizard()).toEqual(rewarded);
   expect(errors).toEqual([]);
 });
+
+const prestigeScenarios = [
+  {
+    lineage: 'draconic_kin', startingLevel: 8, startingRank: 4, startingXp: 870,
+    speciesId: 'cinder_drake', elementId: 'ember', stage: 3, expectedRank: 5, expectedXp: 40,
+  },
+  {
+    lineage: 'astral_kin', startingLevel: 12, startingRank: 6, startingXp: 2060,
+    speciesId: 'magma_salamander', elementId: 'magma', stage: 1, expectedRank: 7, expectedXp: 90,
+  },
+];
+
+for (const scenario of prestigeScenarios) {
+  test(`a guest saves ${scenario.lineage} when a win meets its rank and creature requirements (#47)`, async ({ page }) => {
+    test.setTimeout(180_000);
+    const saveKey = 'aldervale_guest_breeze_v1';
+    const wizardName = 'Prestige Rowan';
+    await page.goto('/');
+    await page.getByRole('textbox').first().fill(wizardName);
+    await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+    await expect(page.getByRole('button', { name: 'Duel', exact: true })).toBeVisible();
+    await page.evaluate(({ saveKey, scenario }) => {
+      const save = JSON.parse(localStorage.getItem(saveKey));
+      const wizard = save.wizards[0];
+      Object.assign(wizard, { level: scenario.startingLevel, rank: scenario.startingRank, xp: scenario.startingXp });
+      const creatures = save.creatures[wizard.id];
+      creatures.push({
+        ...creatures[0], id: 'previously-owned-prestige-creature', nickname: 'Prestige companion',
+        speciesId: scenario.speciesId, elementId: scenario.elementId, stage: scenario.stage,
+      });
+      localStorage.setItem(saveKey, JSON.stringify(save));
+    }, { saveKey, scenario });
+    await page.reload();
+    await page.getByRole('button', { name: 'Enter Aldervale', exact: true }).click();
+
+    const readProgress = () => page.evaluate((key) => {
+      const { account, wizards } = JSON.parse(localStorage.getItem(key));
+      const wizard = wizards[0];
+      return {
+        rank: wizard.rank, xp: wizard.xp, wizardsEggs: wizard.progression.eggs,
+        completedQuests: wizard.progression.completedQuests, lineages: account.unlockedRaces,
+      };
+    }, saveKey);
+    const before = await readProgress();
+    expect(before).toMatchObject({ rank: scenario.startingRank, wizardsEggs: [], completedQuests: [] });
+    expect(before.lineages).not.toContain(scenario.lineage);
+    await winBreezeSoloDuel(page, 10);
+
+    // For the Drake, the base 298 XP stops below Rank 5; First Spark's 90 XP crosses it.
+    // For the fusion, the creature was already owned and no egg hatches on this win.
+    const expected = {
+      rank: scenario.expectedRank, xp: scenario.expectedXp, wizardsEggs: [],
+      completedQuests: ['q_first_duel'], lineages: [...before.lineages, scenario.lineage],
+    };
+    await expect.poll(readProgress).toEqual(expected);
+    await page.reload();
+    await expect(page.getByText(wizardName, { exact: true })).toBeVisible();
+    expect(await readProgress()).toEqual(expected);
+  });
+}
