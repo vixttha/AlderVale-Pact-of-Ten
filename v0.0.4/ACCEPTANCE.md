@@ -1,40 +1,72 @@
 # Bug Library v0.0.4 — Acceptance Plan
 
-Version 0.0.4 is not accepted by documentation completion alone. Each gate needs an inspectable result and the owner makes the final acceptance decision.
+Version 0.0.4 is not accepted by documentation completion alone. Each gate requires inspectable evidence. The owner makes the final acceptance decision. No merge or release is authorized by this plan.
 
-| Gate | Required result | Evidence / disposition |
+| Gate | Required result | Evidence |
 | --- | --- | --- |
-| A. Version foundation | Dedicated branch, project charter, architecture, workflow, triage standard, acceptance contract; v0.0.2/v0.0.3 preserved | Branch commit and file review |
-| B. Intake and triage | Duplicate-search protocol and complete triage schema; test against known issues without creating duplicates | Issue search links and triage examples |
-| C. Investigation safety | Main-SHA pinning, repository instructions, overlap checks, milestone-fit handling, and cost/privacy gates | Reproducible dry-run checklist |
-| D. Evidence receipts | Base/head/tested/merged SHAs and per-job results captured distinctly; missing evidence never passes | Unit fixtures for summary/receipt parsing and an Actions run |
-| E. Lifecycle enforcement | Partial coverage remains open; fixed requires merged fix + required CI + regression coverage | Dry-run against #13 and #35 |
-| F. Cross-tool handoff | Notion updated from verified GitHub receipts; no false claim of automatic CI sync | Private handoff readback |
-| G. Audit workflow | On-request Color Team OPS review can be invoked and its result recorded accurately | Actual bounded audit receipt; otherwise pending |
-| H. Operational acceptance | Fresh-session walkthrough of intake → triage → investigation → candidate → evidence → owner decision | Recorded walkthrough and owner review |
+| A. Safe version foundation | Standalone working branch starts from verified Bug Library history and targets `bug-library`; v0.0.2, v0.0.3 and the earlier v0.0.4 history are preserved; game assignments pin live `main` separately | Branch SHA and exact diff review |
+| B. Shared agent entry | Provider-neutral entry point identifies pinned startup docs, issue/PR retrieval, handoff fields and capability limits | Fresh-session walkthrough with at least two available LLM hosts where actually connected; unavailable hosts marked |
+| C. Bug intake and dedupe | Open and closed issue search reuses canonical bug records; tentative reports do not become confirmed | Dry-run on existing open, closed and duplicate examples; no duplicate issue created |
+| D. Conflict intake and classification | Conflict types, authority hierarchy, evidence record and escalation rules work | Fixtures for PR overlap, client/server contract mismatch, requirement conflict, agent disagreement and conflicting test receipts |
+| E. Level 2 eligibility and dispatch | Confirmed, in-scope bugs automatically become eligible for investigation/fix preparation; recorded actionable conflicts become eligible for investigation/resolution preparation; one worker per item | Queue dry-run with claimed, blocked, duplicate, out-of-scope and ready items |
+| F. Safe worker execution | Worker pins base SHA, checks overlap, reproduces, prepares minimal fix/resolution and regression tests on isolated branch | One bug candidate and one conflict-resolution candidate; no main changes |
+| G. Authority protection | Owner decision conflicts stop before disputed changes; no automatic issue creation, closure, merge, release, scope expansion or settings changes | Negative tests and audit of worker actions |
+| H. Exact-SHA validation | Base/head/tested/merged SHAs separated; all jobs and attempts preserved; partial/flaky/skipped/wrong-SHA evidence cannot pass | Receipt fixtures and actual public-runner run for changed code |
+| I. Knowledge reuse | Accepted fix/conflict notes preserve cause, source refs, chosen resolution, tests and limitations | A second fresh LLM session retrieves and correctly applies prior knowledge |
+| J. Notion handoff | Private handoff reflects verified GitHub state, milestone fit and owner decisions; synced views are not treated as canonical | Readback of updated private handoff |
+| K. Operational walkthrough | Fresh-session end-to-end exercise from queue pickup to owner decision | Recorded worker/host/model/actor/refs, exact evidence and owner review |
 
-## Required regression fixtures
+## Required fixtures
 
-- **#35 — verified merged fix:** ensure a receipt records both hosted attempts and distinguishes emulator-backed sign-in from production Google sign-in.
-- **#13 — partial coverage:** ensure First Spark PASS does not close the issue while Arbor and Rare Trial reward paths remain unverified.
-- **Missing evidence:** a browser report with no matching First Spark test must produce “Evidence missing or ambiguous,” never “Passed.”
-- **Flaky / skipped / canceled:** each outcome remains distinct and does not satisfy a fixed gate.
-- **Wrong checkout:** a receipt whose tested SHA does not match the candidate cannot be attached to that candidate as a PASS.
-- **Duplicate intake:** matching open or closed issue is linked/reused; no duplicate issue is created.
+### Bug fixtures
 
-## Explicit non-goals
+- #13: First Spark coverage must not imply Arbor and Rare Trial paths pass.
+- #35: preserve the merged fix receipt and distinguish emulator-backed auth from production Google sign-in.
+- A tentative report must not be dispatched as a confirmed bug.
+- A duplicate of an open or closed issue must link to the canonical issue.
+- A wrong-SHA, skipped, canceled, flaky or missing test cannot satisfy a fix gate.
 
-- No new bug database or duplicate Notion issue tracker.
-- No autonomous bug closure, merge, release, or unattended issue creation.
-- No always-on service, scheduled agent, webhook, CI-to-Notion automation, or remote MCP backend.
-- No paid API, hosting, model, larger runner, storage expansion, or external metered service.
-- No production Firebase credentials or live player data in CI.
-- No claim that CI proves production login, gameplay quality, multiplayer security, or release readiness.
+### Conflict fixtures
 
-## Acceptance record
+- Two PRs overlap on the same contract: detect overlap, prevent parallel edits, prepare an integration plan.
+- Firestore rules and application/server behavior disagree: identify both sides and require emulator/security regression evidence.
+- Two accepted requirements contradict: stop and prepare an owner decision brief.
+- Two LLMs produce incompatible conclusions: compare sources and evidence; do not choose by provider identity or confidence tone.
+- A branch has broad unrelated deletions relative to current main: reject it as an unsafe integration candidate.
+- A mechanical merge conflict with a deterministic intended result: resolve only on an isolated branch and run regression tests.
+- Conflicting CI attempts: preserve each run/attempt; do not erase a failure because a later retry passed.
 
-- Current state: project foundation only; not accepted.
-- Tracking issue: [#65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65).
-- Version branch baseline: `46c504ffdbd343df825398c403d3a0417acb9e82`.
-- Milestone fit: unverified for broader implementation; private milestone details are not reproduced here.
-- Owner acceptance: pending.
+## Cost, privacy and runner acceptance
+
+- No additional spend, paid API, hosting, model, service, larger/GPU runner or automatic overage.
+- Standard public GitHub-hosted runners only.
+- No new always-on backend, scheduler, webhook, remote MCP server or autonomous fleet.
+- No production secrets or live player data in CI.
+- GitHub remains public; Notion remains private.
+- No assumed CI-to-Notion synchronization.
+- No local/self-hosted runner requirement.
+
+## Completion and non-goals
+
+The project is ready for owner acceptance only when all applicable gates have evidence and remaining gaps are explicit. A provider integration is not claimed unless connected and tested. An LLM's retrieval of repository docs is not persistent model training. Automated investigation and fix preparation do not authorize merge, closure or release.
+
+**Current state:** standalone implementation candidate; implementation acceptance pending.  
+**Milestone fit:** unverified for work beyond the current private milestone.  
+**Owner acceptance:** pending.
+
+
+## Additional v0.0.4 execution gates
+
+| Gate | Required result | Evidence |
+| --- | --- | --- |
+| Executable queue | Confirmed bugs/actionable conflicts are evaluated from explicit triage; only one next task is emitted | Standalone Node.js queue tests |
+| Atomic single-worker claim | Concurrent claim race yields one winner; active/stale claims block duplicate workers | Claim-store compare-and-swap tests and claim ref |
+| Conflict recorder | Two revision-pinned sources required; owner/security/milestone conflicts escalate | Conflict assessor tests and AV-CONFLICT-001 |
+| Prompt-injection resistance | Issue text and comments cannot become instructions or authority | Negative queue/entry-point tests |
+| Bug pilot | One confirmed bug has a scoped fix candidate and regression coverage | Issue #75 fix PR, exact-SHA seven-job receipt |
+| Conflict pilot | One mechanical/documentation conflict is recorded and resolved without owner decision | AV-CONFLICT-001 record and PR diff |
+| Fresh-session retrieval | A separate session reads public instructions and v0.0.4 docs; private Notion access is separately reported | Retrieval matrix; no inferred PASS |
+| Owner acceptance | Owner explicitly accepts/rejects architecture and pilot evidence | Owner decision only; pending until recorded |
+
+
+Additional pilot records: \`AV-CONFLICT-002\` verifies the flat atomic claim-ref naming convention; \`records/bugfixes/ISSUE-75.md\` records the first bug-fixing assignment. Both remain owner-acceptance pending until their exact-candidate evidence is complete.

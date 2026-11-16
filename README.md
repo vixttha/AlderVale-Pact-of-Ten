@@ -1,6 +1,6 @@
 # AlderVale Bug Library
 
-**Library version 0.0.4 · in development · not released**
+**Library version 0.0.4 · standalone candidate · owner acceptance pending**
 
 Start with [open bugs](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues?q=is%3Aissue+is%3Aopen+label%3Abug), search [all issues](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues?q=is%3Aissue) for duplicates, or browse [closed bugs](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues?q=is%3Aissue+is%3Aclosed+label%3Abug).
 
@@ -10,10 +10,18 @@ GitHub Issues remains the canonical bug record. This version develops a controll
 
 - [Project charter](v0.0.4/PROJECT.md)
 - [Architecture](v0.0.4/ARCHITECTURE.md)
+- [Agent entry point](v0.0.4/AGENT_ENTRYPOINT.md)
+- [Conflict management](v0.0.4/CONFLICTS.md)
 - [Operating workflow](v0.0.4/WORKFLOW.md)
 - [Triage standard](v0.0.4/TRIAGE.md)
 - [Acceptance plan](v0.0.4/ACCEPTANCE.md)
 - [Tracking issue #65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65)
+
+## Branch and validation
+
+`bug-library` is the permanent home. Resolve its full SHA (or use the exact SHA of a candidate the owner assigned) before reading the library. Resolve game `main` separately for engineering work. Library candidates target `bug-library`, and proposals for game fixes use their own scoped PRs.
+
+The standalone GitHub Actions workflow runs `node --test tests/bugLibrary.test.ts` on Node.js 24 with no application checkout or package installation. The same regressions cover queue eligibility, conflict assessment and the claim-store contract.
 
 ## Report and triage
 

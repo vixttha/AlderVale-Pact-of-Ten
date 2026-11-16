@@ -1,0 +1,28 @@
+name: Bug Library validation
+on:
+  pull_request:
+    branches: [bug-library]
+  push:
+    branches: [bug-library, bug-library-v0.0.4-standalone]
+permissions:
+  contents: read
+concurrency:
+  group: bug-library-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  library:
+    if: github.event.repository.private == false
+    name: Queue, claim and conflict regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Record tested checkout
+        run: git rev-parse HEAD
+      - name: Run standalone tests
+        run: node --test tests/bugLibrary.test.ts

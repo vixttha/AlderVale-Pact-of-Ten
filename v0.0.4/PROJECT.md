@@ -1,65 +1,69 @@
-# Bug Library v0.0.4 — Project Charter
+# AlderVale Bug Library v0.0.4 — Bug & Conflict Resolution
 
-**Status:** In development · not released  
-**Version branch:** `bug-library-v0.0.4`  
+**Status:** Standalone implementation candidate · owner acceptance pending  
 **Tracking issue:** [#65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65)  
-**Baseline:** `46c504ffdbd343df825398c403d3a0417acb9e82` (v0.0.3 documentation branch; acceptance remains pending)  
-**Repository baseline at project start:** `3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21` (`main`)
+**Working branch:** `bug-library-v0.0.4-standalone` (target: permanent `bug-library`)  
+**Library starting tree:** `712bd55b015138a4d7ab2d64708140c46d40d117`  
+**Implementation source:** `3fa20bc5ed4fecc228cc3733536a589bf75df6a0`
+
+## Owner-confirmed direction
+
+Level 2 coordinated LLM workers. Automatically investigate and prepare scoped fixes for all confirmed bugs, and investigate/prepare resolutions for recorded conflicts. This authorization does not permit merge, release, issue closure, unapproved issue creation, project-law changes, or silent product decisions.
 
 ## Purpose
 
-Make bug handling repeatable and agent-assisted from discovery through verified resolution, without surrendering owner authority or creating a new paid service.
+Provide one provider-neutral, reusable operating system through which available LLMs can retrieve shared project knowledge, take a bounded work item, investigate it, prepare a repair or conflict resolution, validate the candidate, and return evidence for owner acceptance.
 
-The system coordinates existing tools rather than introducing a separate bug database:
+This is not a new bug database, an always-on agent fleet, or a new backend.
 
-- GitHub Issues is the canonical defect record.
-- ChatGPT investigates, triages, prepares scoped changes, checks evidence, and drafts receipts.
-- GitHub pull requests carry implementation review; standard public GitHub Actions runners validate candidate commits.
-- Notion remains the private coordination, milestone, and handoff surface.
-- Color Team OPS is an on-request audit capability using its existing staging-only installation. An audit is recorded only when actually run.
-- The project owner controls priorities, scope, implementation acceptance, closure, merge, and release.
+## System responsibilities
 
-## Autonomy boundary
+- **GitHub Issues:** canonical public record for bugs and recorded conflicts; issue state, labels, comments, links and history live here.
+- **GitHub PRs:** proposed source changes and technical conflict resolutions.
+- **GitHub Actions:** standard public hosted validation on exact candidate checkouts.
+- **Repository agent docs:** provider-neutral entry point, task packet, operating contract and durable engineering knowledge.
+- **Notion:** private milestones, decisions, coordination, dashboard and handoffs; not a second issue tracker.
+- **ChatGPT / available LLMs:** coordinator, investigators, builders and validators according to verified capabilities. Providers are interchangeable; no provider is assumed connected.
+- **Color Team OPS:** bounded, on-request audit only; record only an actual invocation and its evidence.
+- **Owner:** sole authority for priorities, scope changes, product decisions, acceptance, issue closure, merge and release.
 
-**Allowed within an authorized scope:** read and compare issues/PRs, detect duplicates, gather source evidence, propose severity and reproduction, prepare a scoped branch/PR, run authorized checks, analyze failures, and draft exact-SHA receipts.
+## Level 2 authorization
 
-**Owner decision required:** new or expanded implementation scope, acceptance of gameplay/security claims, marking a bug fixed/closing it, merging PRs, releases, new connections or permissions, public sharing changes, and any spending.
+The owner authorizes automatic investigation and preparation of fixes for all confirmed bugs already recorded in GitHub, and preparation of resolutions for recorded conflicts, subject to these bounds:
 
-Routine edits and checks may reuse existing authorization only for the same scope and target. No unattended merge, release, or bug closure.
+1. Work must fit the active owner-approved milestone and repository laws.
+2. A confirmed bug may proceed from triage to scoped investigation and fix preparation without asking for a separate per-bug implementation approval, provided its acceptance criteria are clear and the change stays within existing product decisions.
+3. A conflict may be investigated automatically. A mechanical code/merge conflict may be resolved on an isolated worker branch when the intended result is unambiguous and within existing scope.
+4. Conflicts involving owner decisions, product intent, security/privacy boundaries, project laws, incompatible acceptance criteria, or unclear data ownership must be escalated with options; an LLM must not choose the governing rule.
+5. Newly discovered findings may be documented on an existing canonical issue or prepared as an issue draft. Creating a new GitHub issue remains a separately authorized action under the current no-unattended-issue-creation rule.
+6. One active implementation worker per work item. No concurrent edits to the same paths without an explicit integration plan.
+7. Workers may create scoped branches and PRs and run authorized checks. They may not merge, close issues, publish releases, change repository settings, widen permissions, or incur spending.
 
-## Version 0.0.4 deliverables
+## Project boundaries
 
-1. Intake and duplicate-search procedure.
-2. Evidence-based triage schema and severity/confidence guidance.
-3. Single-lane investigation and implementation workflow.
-4. Exact-checkout validation receipt standard.
-5. Canonical issue lifecycle and closure gate.
-6. Notion handoff protocol that explicitly records verified GitHub receipts without assuming CI-to-Notion sync.
-7. Color Team OPS on-request audit handoff and evidence record.
-8. Reproducible acceptance tests and a solo-owner operational walkthrough.
+- Keep GitHub public and Notion private.
+- Zero additional project spending. No paid model/API, hosting, larger/GPU runner, paid service or automatic overage.
+- Standard GitHub-hosted public runners only; no local/self-hosted runner requirement.
+- No new always-on backend, scheduler, webhook, remote MCP service, autonomous fleet, or assumed CI-to-Notion sync.
+- No production secrets or player data in CI.
+- Preserve v0.0.2, v0.0.3 and the original v0.0.4 branch/history. The older v0.0.4 branch is not to be merged as-is because it diverges from current main and its comparison includes broad application/CI deletions.
+- The standalone branch owns the v0.0.4 implementation and validation. Game `main` supplies the engineering baseline for game assignments.
 
-See [architecture](ARCHITECTURE.md), [workflow](WORKFLOW.md), [triage standard](TRIAGE.md), and [acceptance](ACCEPTANCE.md).
+## Documents
 
-## Constraints
+- [Architecture](ARCHITECTURE.md)
+- [Provider-neutral agent entry point](AGENT_ENTRYPOINT.md)
+- [Operating workflow](WORKFLOW.md)
+- [Bug triage standard](TRIAGE.md)
+- [Conflict management standard](CONFLICTS.md)
+- [Acceptance plan](ACCEPTANCE.md)
 
-- Keep the GitHub repository public and Notion private.
-- Additional project spending: zero.
-- Use standard public GitHub-hosted runners only; no paid larger/GPU runners or self-hosted runners.
-- CI must not require paid AI APIs, production secrets, or live production accounts.
-- No new always-on backend, webhook service, scheduler, or CI-to-Notion integration in this version.
-- Preserve v0.0.2/v0.0.3 branches and historical receipts.
-- Keep creator and private details out of public issues, code, logs, and receipts.
+## Historical pilot baseline and planning fit
 
-## Current known bug evidence carried forward
+Verified game main baseline for the original pilot: `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd`. Earlier `3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21` is historical only; see conflict record `AV-CONFLICT-001`.
 
-- [#35](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/35): merged fix PR #60; two hosted attempts are documented in the v0.0.3 receipt. Production Google sign-in remains outside that evidence.
-- [#13](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13): partial First Spark coverage; Arbor and Rare Trial reward paths remain unverified. The issue stays open.
-- [#64](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/64): merged verification-summary workflow. Seven hosted jobs passed on the PR merge checkout; the post-merge main run is tracked separately.
+**Milestone fit unverified.** The private active milestone could not be independently retrieved in the fresh-session test. This candidate therefore limits implementation to the owner-directed v0.0.4 queue/conflict workflow and the explicitly scoped Issue #75 pilot. Do not expand to unrelated backlog work until milestone fit is verified.
 
-## Milestone fit
+## Acceptance state
 
-**Milestone fit unverified** for the broader v0.0.4 implementation. This branch establishes the owner-directed project plan and acceptance contract; implementation beyond the currently authorized scope needs a confirmed owner scope/extension. Private planning details remain in Notion and are not reproduced in this public charter.
-
-## Release rule
-
-This branch is a project candidate, not a released product. v0.0.4 is accepted only after every required acceptance item is evidenced, all material gaps are disclosed, and the owner explicitly accepts the result. The permanent `bug-library` branch remains the current published library line until a v0.0.4 candidate is accepted.
+Architecture, queue implementation, conflict-recording implementation and pilot evidence are prepared for owner review. v0.0.4 is not accepted or released. No merge, release, issue closure, automatic dispatch service, or background execution is authorized by this document.
