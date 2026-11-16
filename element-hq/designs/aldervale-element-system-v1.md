@@ -160,6 +160,62 @@ Verdigris expresses the spatial side of the relationship by giving boundaries, s
 
 Their fusion, **Aetheris**, binds a sequence to a form. In the myth, a runic astrolabe can align its rings at a particular moment, and the same alignment returns when the sequence repeats. That gives Aetheris its time-forged identity. The lore establishes timing and structure. Teleportation, time travel, and rollback mechanics would each need their own design. [Chronos and Verdigris](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L137) · [Aetheris](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L219) · [Aetheris lore](../fusion-system-v1.md#35-aetheris--chronos--verdigris)
 
+## 6. Elemental visual identity
+
+**Status** · Proposed visual direction for the Ten and the five fusions. The existing primary colors, glows, and crest names are the starting point. The icon simplifications, effects, creature details, and environments below are art directions.
+
+### Palette, emblem, and UI icon
+
+Use the primary color on the badge or main material. Use the glow as a secondary accent for light, seams, and effects. The full crest can appear on banners, spell seals, and character creation. At small UI sizes, retain the identifying silhouette in the icon column. [Element catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/elements.ts#L24) · [Current ElementCrest component](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/lib/elementIcons.tsx#L15)
+
+| Element | Tier | Primary / glow | Full emblem | Small UI icon | Proposed glyph ink on primary |
+| --- | --- | --- | --- | --- | --- |
+| Ember | Starter | `#d9532f` / `#ff8a4c` | Flame Diamond | Tall flame diamond with a pinched waist | `#fffdf7` |
+| Frost | Starter | `#3b82c4` / `#8bd3ff` | Six-Point Crystal | Sharp six-point crystal with an open center | `#fffdf7` |
+| Gale | Starter | `#3b9b8f` / `#7de2d1` | Twin Pinion Spiral | Two open plumes sweeping around a shared center | `#fffdf7` |
+| Bramble | Starter | `#4b8f44` / `#8cd46e` | Thorn Tri-Leaf | Three separate thorn-tipped leaves from one base | `#fffdf7` |
+| Tide | Starter | `#256fa8` / `#5cc4ff` | Cresting Wave Ring | Two broad wave crests with a small sail above | `#fffdf7` |
+| Spark | Starter | `#8a52c7` / `#c699ff` | Jagged Bolt | One angular bolt with a clear diagonal break | `#fffdf7` |
+| Umbra | Rare | `#524175` / `#a389e0` | Crescent Nocturne | Side-facing crescent with one detached star | `#fffdf7` |
+| Sol | Rare | `#d4901c` / `#ffd166` | Solar Starburst | Eight pointed rays around a solid center | `#151414` |
+| Verdigris | Rare | `#2f8a73` / `#7ef0cb` | Forged Anvil Hex | Flat anvil bar on one thick central stem | `#fffdf7` |
+| Chronos | Rare | `#9c6644` / `#f4c98b` | Twin Hourglass | Two stacked chambers joined at a narrow waist | `#fffdf7` |
+| Magma | Fusion | `#b83b1d` / `#ff7033` | Cracked Caldera | Low volcanic peak split by one angular fault | `#fffdf7` |
+| Tempest | Fusion | `#4f5fd1` / `#98a6ff` | Maelstrom Eye | Open storm ring with a bolt through its eye | `#fffdf7` |
+| Glacier | Fusion | `#2f95b8` / `#aef2ff` | Faceted Iceberg | Broad five-sided iceberg with one interior facet | `#fffdf7` |
+| Eclipse | Fusion | `#7d3c68` / `#ff96c5` | Corona Ring | Circular dark disk with an offset crescent rim | `#fffdf7` |
+| Aetheris | Fusion | `#5a8f99` / `#d1fff7` | Celestial Astrolabe | Crosshair over two concentric rings | `#fffdf7` |
+
+### Magic, creatures, and environments
+
+The creature names come from the catalog. Shape and material cues can carry through all evolution stages while preserving the creature’s affinity. Environments are proposed scene treatments. Existing setting references anchor the direction where the creature lore supplies one. [Creature catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/creatures.ts#L24) · [Creature biology](#4-creature-biology) · [Elemental mythology](#5-elemental-mythology)
+
+| Element | Magical effects | Creature design language | Environmental appearance |
+| --- | --- | --- | --- |
+| Ember | A lick of flame gathers inward, bursts outward, and trails scattered embers. | Hearth Kitsune. Low fox shape, upturned plume tail, soot-tipped fur, warm muzzle. | Hearth Valleys direction. Kiln brick, soot-dark stone, and high warm light above low ash. |
+| Frost | A thin ice seam locks into branching crystals, then sheds dry shards at impact. | Glacier Stag. Tall, upright stance, angular branching antlers, powdery winter coat. | Naiad spring direction. Fine frost on ledges, narrow icicles, crisp shadows on pale stone. |
+| Gale | Two curling ribbons sweep past the caster, then pull loose feather streaks into a wake. | Gale Barn-Owl. Broad feather fans, tapered wings, light chest, long gliding poses. | Sky-Avians’ cloud strata direction. Wind-cut rock, bent banners, and drifting seeds. |
+| Bramble | Three thorn shoots unfurl from the ground and close into a woven ward. | Mosscap Budling. Rounded moss cap, forked root feet, thorn silhouettes, and soft leaf undersides. | Canopy greenhouse direction. Root bridges, latticed vines, soil underfoot, and dew on leaves. |
+| Tide | A rolling sheet rises with a soft foam edge, sweeps past, and recedes in ripples. | Tidepool Otter. Long, low body, webbed feet, slick coat, and a paddlelike tail. | Tideborn dock direction. Wet timber, horizontal tide marks, tidepools, and broken reflections. |
+| Spark | A hard zigzag jumps between points in short, stepped bursts; a static fringe lingers. | Nimbus Lynx. A crouched springing pose, pointed ear tufts, and forked whiskers. | Cloud-storm direction. Charged grass tips and branching traces on dark, rain-wet basalt. |
+| Umbra | A soft shadow contracts around a crescent, with motes disappearing at its center. | Nocturne Luna-Moth. Broad cloak-shaped wings, crescent markings, and velvet surfaces. | Dark Elf archive direction. Low lanterns under deep root arches and ink-dark pockets beyond their reach. |
+| Sol | Evenly spaced rays open from a center, hold for a beat, then recede together. | Suncrest Gryphon. Tall plumed head, broad wings, bright feather tips, and a proud upright stance. | High Elf battlement direction. Pale masonry, gilt edges, and strong sun shafts across open stairs. |
+| Verdigris | Straight rune strokes meet at right angles; flat plates lock into place like a ward. | Anvil-Sprite Golem. Blocky limbs, squared joints, dark copper seams, and matte patina. | Dwarf forge direction. Braced pillars, copper staining around rivets, and squared chisel marks. |
+| Chronos | A bronze arc ticks through distinct positions, leaving two evenly spaced echoes. | Pendulum Automaton. Tall, narrow chassis, exposed pendulum, and repeated articulated rings. | Astral Observatory spire direction. Brass transit markers, stepped shadows, and evenly spaced floor marks. |
+| Magma | A glowing fault opens in a heavy crust; heat seeps out as the edges harden. | Caldera Newt. Low body, thick basalt plates, molten seams, and root-shaped cracks. | Caldera direction. Black terraces, heavy broken crust, and low heat-lit vents. |
+| Tempest | A rotating surge surrounds a calm center while arcs branch sideways along its rim. | Maelstrom Eel. Serpentine body, swept fins, storm bands, and branching luminous lines. | Storm coast direction. Circular surge pools, wind-driven spray, and arcs over wet rock. |
+| Glacier | A wide ice slab rises slowly; layered facets shear off in a single heavy slide. | Permafrost Seal. Broad flippers, rounded mass, blue translucent slabs, and blunt faceted edges. | Glacial coast direction. Wide crevasses, opaque shelves, and blue sediment bands in clear ice. |
+| Eclipse | A dark disk passes across a steady rim; a narrow corona remains at peak occlusion. | Corona Caracal. Long ear tufts, matte dark coat, and a narrow luminous edge on ears and tail. | Twilight direction. Paired shadow bands, dark stones with thin lit rims, and a low horizon halo. |
+| Aetheris | Concentric rings align in timed steps until their runes form one precise axis. | Astrolabe Dragonet. Long wing spars, ring joints, brass settings, and fine green-white inlays. | Observatory ruin direction. Nested rings, axial sightlines, and runes that align across separate structures. |
+
+### Readability and art review
+
+- **Make the element readable in shape and text.** Pair the crest with the element name in character creation, tooltips, and the compendium. Give icon-only controls an accessible name. On a light or dark screen, use a neutral outline or container when the filled badge blends into its surroundings. Keep selection, warnings, and rarity visible through labels or shapes.
+- **Check functional contrast.** Use at least 3:1 for essential icon parts against their actual background and 4.5:1 for normal-size labels. Sol’s current ivory-on-gold glyph has approximately 2.64:1 contrast against its catalog primary, so the proposal uses dark ink for Sol. The other 14 proposed ivory glyphs clear 3:1 against their listed primaries in the flat color calculation. Review contrast again with outlines, fills, disabled states, and theme backgrounds applied. [WCAG 2.2, Use of Color](https://www.w3.org/TR/WCAG22/#use-of-color) · [Contrast Minimum](https://www.w3.org/TR/WCAG22/#contrast-minimum) · [Non-text Contrast](https://www.w3.org/TR/WCAG22/#non-text-contrast)
+- **Compare similar elements at small sizes.** Review Ember vs. Magma, Frost vs. Glacier, Tide vs. Tempest, Spark vs. Tempest, Umbra vs. Eclipse, and Chronos vs. Aetheris in grayscale and with color-vision simulation. Let the tall diamond, wide slab, horizontal wave, straight bolt, detached star, and crosshair carry their respective identities at 16 px and 24 px. Review the finished icons in the character selector and battle HUD on both themes.
+- **Carry one identity through the scene.** Use a distinct motion and aftermath for each spell. Effects should leave targets and hazards legible, with a lower-motion version that keeps the same gameplay cues. Give each fusion one dominant material and motion so the effect reads as its own element. Aetheris uses timed ring alignment, consistent with the Space and Time mythology.
+- **Review the roster together.** Use the supplied character-creation, symbol-set, and naming reference titles as prompts for how to group and compare elements. AlderVale’s own catalog and creature lore supply the names, shapes, and palette. The proposed cues still need asset production and visual review in-game.
+
 ## Balance and verification
 
 | Scenario | Expected result | Evidence to collect |

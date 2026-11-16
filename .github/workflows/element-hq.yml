@@ -98,5 +98,33 @@ jobs:
               if missing_mythology := mythology_headings - design_headings:
                   raise SystemExit(f"Missing elemental mythology sections: {sorted(missing_mythology)}")
 
+              design_lines = Path(design).read_text(encoding="utf-8").splitlines()
+              visual_headings = {
+                  "## 6. Elemental visual identity",
+                  "### Palette, emblem, and UI icon",
+                  "### Magic, creatures, and environments",
+                  "### Readability and art review",
+              }
+              if missing_visual := visual_headings - design_headings:
+                  raise SystemExit(f"Missing elemental visual sections: {sorted(missing_visual)}")
+
+              visual_start = design_lines.index("## 6. Elemental visual identity")
+              visual_end = design_lines.index("## Balance and verification", visual_start + 1)
+              visual_lines = design_lines[visual_start:visual_end]
+              palette_start = visual_lines.index("### Palette, emblem, and UI icon")
+              art_start = visual_lines.index("### Magic, creatures, and environments")
+              review_start = visual_lines.index("### Readability and art review")
+              expected_elements = {
+                  "Ember", "Frost", "Gale", "Bramble", "Tide", "Spark", "Umbra", "Sol",
+                  "Verdigris", "Chronos", "Magma", "Tempest", "Glacier", "Eclipse", "Aetheris",
+              }
+              for start, end, columns in ((palette_start, art_start, 6), (art_start, review_start, 4)):
+                  table = [line for line in visual_lines[start:end] if line.startswith("| ")][2:]
+                  cells = [[cell.strip() for cell in line.strip("|").split("|")] for line in table]
+                  if (len(cells) != len(expected_elements)
+                          or {row[0] for row in cells} != expected_elements
+                          or any(len(row) != columns or not all(row) for row in cells)):
+                      raise SystemExit("Elemental visual table must cover each catalog element once with complete cells")
+
           print(f"Verified Element HQ documents at {head}")
           PY
