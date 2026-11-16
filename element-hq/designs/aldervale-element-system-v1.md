@@ -1,6 +1,6 @@
 # AlderVale: Pact of Ten — Element Design v1
 
-The five reciprocal pairs are the owner's design decision. This document rebuilds the eight design steps around them. The game observations are pinned to [`658fe21de482f66754d2bc45088bcc9668668f6d`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/658fe21de482f66754d2bc45088bcc9668668f6d). The proposed tuning, fusion changes, and migration rules are ready for design review.
+**The elemental system has exactly ten base elements. Time and Space are outside the elemental system. Chronos is excluded from the v1 elemental roster and recipes.** The five reciprocal pairs are the owner's design decision. This document rebuilds the eight design steps around them. The game observations are pinned to [`658fe21de482f66754d2bc45088bcc9668668f6d`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/658fe21de482f66754d2bc45088bcc9668668f6d). The proposed tuning, fusion changes, and migration rules are ready for design review.
 
 ## v1 elemental opposition decision
 
@@ -14,7 +14,7 @@ The five reciprocal pairs are the owner's design decision. This document rebuild
 
 ## 1. Element roster
 
-These ten names are the v1 base roster and proposed player-facing labels. Nine existing IDs carry forward under the labels below. Earth receives its own ID. Time and Space remain open design topics. Chronos is a Time-themed element in the development build. Its future role is open.
+These ten names are the v1 base roster and proposed player-facing labels. Nine existing IDs carry forward under the labels below. Earth receives its own ID. The ten elements listed here are the complete base roster. The pre-redesign game catalog is recorded under Current mechanics and sources.
 
 | Element | Opposes | Game ID | Proposed tier | Combat identity | Creature anchor |
 | --- | --- | --- | --- | --- | --- |
@@ -29,7 +29,7 @@ These ten names are the v1 base roster and proposed player-facing labels. Nine e
 | Metal | Forest | `verdigris` | Rare | Precision, armor, and pierce | Anvil-Sprite Golem |
 | Forest | Metal | `bramble` | Starter | Healing, thorn wards, and sustain | Mosscap Budling |
 
-The proposed starter roster has seven elements and the rare roster has three. Keep current gates for existing elements and add Earth to starter selection once its entry kit is ready. The four candidate fusion affinities form a separate design tier. Aetheris remains an open concept.
+The proposed starter roster has seven elements and the rare roster has three. Keep current gates for existing elements and add Earth to starter selection once its entry kit is ready. The four candidate Hatchery fusions are derived offspring affinities. They add zero base elements.
 
 ## Identity and lore
 
@@ -52,7 +52,7 @@ Matchups use the final attack affinity against the defender. The owner's five pa
 | 3 | The attacking fusion has a parent whose opposite is the defender | 1.15× |
 | 4 | Other matchups | 1.00× |
 
-The directional fusion bonus follows the new parent oppositions. Chronos, Space, and Aetheris have no proposed matchup values in this revision.
+The directional fusion bonus follows the new parent oppositions. The matrix covers the ten base elements and four derived fusion candidates.
 
 ### Proposed directional matrix
 
@@ -126,7 +126,7 @@ These four recipes, shown below under the newer affinity names, exist in the dev
 
 ### Fusion spell reference
 
-The development build grants the matching fusion unlock and signature card. Current minimum ranks are 3 for Magma, Tempest, and Glacier and 5 for Eclipse. Aetheris has a rank 6 card in the prototype. Its place in the new schema depends on a separate decision. [Spell catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/spells.ts#L106) · [Merged entitlement PR #107](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/107)
+The development build grants the matching fusion unlock and signature card. Current minimum ranks are 3 for Magma, Tempest, and Glacier and 5 for Eclipse. The old Chronos-derived Aetheris recipe and signature card belong to the development prototype. [Spell catalog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/spells.ts#L106) · [Merged entitlement PR #107](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/107)
 
 ### v1 creature and fusion rules
 
@@ -147,11 +147,11 @@ At [`19a9a85b039ad63e8df4d4a104ad9e98f68ae31c`](https://github.com/vixttha/Alder
 
 ### Can two different elements produce offspring?
 
-Yes. An exact recipe guarantees its fusion. Other pairs of two base creatures choose either parent's species with equal probability at purchase and save the result. A fusion and a base creature produce the base parent's species. Two fusion creatures are ineligible and incur no charge. Chronos involvement in new breeding is open with the Time design.
+Yes. An exact recipe guarantees its fusion. Other pairs of two base creatures choose either parent's species with equal probability at purchase and save the result. A fusion and a base creature produce the base parent's species. Two fusion creatures are ineligible and incur no charge. Eligible elemental parents come from the ten base affinities and the candidate fusions under these breeding rules.
 
 ### Can creatures have two elemental affinities?
 
-Each creature has one affinity. The proposed Quarryback Tortoise has Earth. The prototype Astrolabe Dragonet has Aetheris. A fusion's ancestry can shape its appearance and lore.
+Each creature has one affinity. The proposed Quarryback Tortoise has Earth. A Caldera Newt has Magma. A fusion's ancestry can shape its appearance and lore.
 
 ### Can an element change during evolution?
 
@@ -199,7 +199,7 @@ An affinity can briefly take a shape where its conditions sustain it. Earth migh
 
 ### What is the relationship between Space and Time?
 
-**Open.** Time and Space could become gameplay elements, could be represented outside the element system, or could stay unexplored for now. No role or relationship has been selected. Chronos is the development build's existing Time-themed element. Aetheris is the development build's Chronos + Metal fusion. Neither has a place assigned in the new schema. The earlier Earth + Metal idea has been set aside as an unapproved option.
+**Time and Space are outside the elemental system.** Any future lore or gameplay involving them belongs outside the ten-element roster, matchup matrix, and elemental Hatchery recipes. The old Chronos + Metal Aetheris recipe is development history.
 
 ## 6. Elemental visual identity
 
@@ -285,7 +285,7 @@ A storm-surge coast supports Tempest breeding through Water and Lightning. Their
 
 ### Stable IDs and display names
 
-The game is in development and has no live player migration. Keep nine existing base IDs where convenient, add `earth` as its own affinity, and use local saves and fixtures to catch regressions. Decide whether to retain, convert, or reset affected development fixtures once Time, Space, and Aetheris are resolved.
+The game is in development and has no live player migration. Keep nine existing base IDs where convenient, add `earth` as its own affinity, and use local saves and fixtures to catch regressions. Test the ten-element catalog using development fixtures. Old prototype identifiers may appear in historical test data.
 
 ### Compatibility audit
 
@@ -293,8 +293,8 @@ The game is in development and has no live player migration. Keep nine existing 
 | --- | --- | --- |
 | **Spells** | Cards use affinity IDs and prism destinations come from the opposition helper. [Cards](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/spells.ts#L75) | Keep card IDs, costs, ranks, and existing cards. Add explicit prism destinations before replacing opposition. Give Earth new cards. |
 | **Creatures** | Creature saves store elemental and species identity. The Firestore owner update allowlist omits creature affinity. [Save shape](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/src/lib/storage.ts#L24) · [Rules](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/firestore.rules#L218) | Add an Earth species and verify that evolving or hatching a creature preserves the correct affinity in development fixtures. |
-| **Combat calculations** | Direct and fusion rules share the catalog. Spells and creature strikes apply distinct modifiers. [Element helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/elements.ts#L242) · [Damage](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/combat.ts#L280) | Use the same versioned rules in client and server. Run the working matchup, prism, and shield checks. Extend them after the open affinities are resolved. |
-| **Fusion recipes** | The existing resolver uses Chronos and Verdigris for Aetheris. [Resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/creatures.ts#L297) | Test the four compatible recipes and saved egg outcomes in development fixtures. Keep the Aetheris recipe decision open. |
+| **Combat calculations** | Direct and fusion rules share the catalog. Spells and creature strikes apply distinct modifiers. [Element helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/elements.ts#L242) · [Damage](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/combat.ts#L280) | Use the same versioned rules in client and server. Run the working matchup, prism, and shield checks. Keep the fixture matrix aligned with the ten base elements and the candidate fusions. |
+| **Fusion recipes** | The existing resolver uses Chronos and Verdigris for Aetheris. [Resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/creatures.ts#L297) | Test the four compatible recipes and saved egg outcomes in development fixtures. Keep the Chronos-derived prototype outside v1. |
 | **Saves** | Guest and cloud saves store element IDs, egg outcomes, decks, and creature references. [Save code](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/src/lib/storage.ts#L24) · [Egg shape](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/economy.ts#L114) | Deploy compatible readers before emitting Earth records. Keep unresolved IDs recoverable. Test any write version for repeated claims, retries, and rollback. |
 | **Progression** | Existing fusion owners and hatch rewards use a shared entitlement helper. [Grant helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/658fe21de482f66754d2bc45088bcc9668668f6d/shared/economy.ts#L136) | Reuse the grant and deduplication rules. Preserve earned spells, rank, quests, unlock lists, currencies, and realm boundaries. |
 
@@ -307,7 +307,7 @@ The game is in development and has no live player migration. Keep nine existing 
 
 ### Acceptance checks
 
-- Verify the 196 working cells, all five reciprocal pairs, and both input orders of the four candidate recipes. Add new cells after deciding the remaining affinities.
+- Verify the 196 working cells, all five reciprocal pairs, and both input orders of the four candidate recipes. Keep Time, Space, and Chronos outside the element table.
 - Verify all three prism destinations, matching shield selection, pierce, and the spell and creature fixtures from step 2.
 - Cover a stored egg before and after one win, a new Magma egg, unchanged parent records, evolution, repeated claims, reload, and one-time entitlements. Verify rejected purchases keep the test wizard's Florins.
 - Round-trip Earth and current development save fixtures. Check deck contents, creature identity, progression, and realm boundaries.
@@ -318,4 +318,4 @@ The v1 matrix and fixtures are design expectations. The legacy PR measures the e
 
 ## Open questions and decisions
 
-The five pairs come directly from the owner. Time, Space, Chronos, and Aetheris are open. The Earth starter kit, Quarryback Tortoise, four carry-forward fusion candidates, and multiplier values are proposals.
+The owner confirmed the five pairs and excluded Time and Space from the elemental system. Chronos and its Aetheris recipe are historical prototype entries. The Earth starter kit, Quarryback Tortoise, four carry-forward fusion candidates, and multiplier values are proposals.

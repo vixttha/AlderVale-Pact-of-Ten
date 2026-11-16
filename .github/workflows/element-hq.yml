@@ -125,7 +125,7 @@ jobs:
                   raise SystemExit("Base roster does not match the five reciprocal pairs")
               ids = {row[0]: row[2] for row in roster}
               if len(set(ids.values())) != 10 or ids["Earth"] != "`earth`" or "`chronos`" in ids.values():
-                  raise SystemExit("Earth and Chronos must have separate identities")
+                  raise SystemExit("The base roster must contain ten IDs with Earth and without Chronos")
 
               fusions = {
                   "Magma": ("Fire", "Forest"), "Tempest": ("Water", "Lightning"),
@@ -162,8 +162,11 @@ jobs:
                       if actual != expected:
                           raise SystemExit(f"{attacker} -> {defender}: expected {expected}, got {actual}")
 
-              if "Aetheris" in labels or "Chronos" in labels or "Space" in labels:
-                  raise SystemExit("Undecided affinities belong outside the working matrix")
+              outside_schema = {"Time", "Space", "Chronos", "Aetheris"}
+              if outside_schema.intersection(labels):
+                  raise SystemExit("Time, Space, and their prototype entries belong outside the matrix")
+              if "Time and Space are outside the elemental system." not in design_text:
+                  raise SystemExit("The specification must state the owner-confirmed element boundary")
 
               lore = rows_between("### Why are there five opposing pairs?", "### Are the elements conscious?", 2)
               if [row[0] for row in lore] != [f"{a} ↔ {b}" for a, b in pairs]:

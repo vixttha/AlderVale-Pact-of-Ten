@@ -1,6 +1,6 @@
 # Fusion System v1 — design proposal
 
-**Historical proposal.** See the [rebuilt v1 fusion recipes](designs/aldervale-element-system-v1.md#3-fusion-recipes) for the four carry-forward candidates and the permanent hatchling design. This document records the Chronos + Metal Aetheris prototype. Aetheris, Chronos, Time, and Space remain open in the new schema.
+**Historical proposal.** See the [rebuilt v1 fusion recipes](designs/aldervale-element-system-v1.md#3-fusion-recipes) for the four carry-forward candidates and the permanent hatchling design. This document records the Chronos + Metal Aetheris prototype. Time and Space are outside the elemental system. Chronos and its Aetheris recipe are historical prototype content.
 
 **Status:** Proposed · requires owner acceptance before gameplay implementation  
 **Source baseline:** `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd`  
