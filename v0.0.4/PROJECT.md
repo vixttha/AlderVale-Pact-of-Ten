@@ -3,7 +3,7 @@
 **Status:** In development · not released  
 **Version branch:** `bug-library-v0.0.4`  
 **Tracking issue:** [#65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65)  
-**Baseline:** `46c504ffdbd343df825398c403d3a0417acb9e82` (accepted v0.0.3 library branch)  
+**Baseline:** `46c504ffdbd343df825398c403d3a0417acb9e82` (v0.0.3 documentation branch; acceptance remains pending)  
 **Repository baseline at project start:** `3f7a39c7c8dcb2ff5e9ce6dfd316649546171e21` (`main`)
 
 ## Purpose
@@ -38,7 +38,7 @@ Routine edits and checks may reuse existing authorization only for the same scop
 7. Color Team OPS on-request audit handoff and evidence record.
 8. Reproducible acceptance tests and a solo-owner operational walkthrough.
 
-See [architecture](ARCHITECTURE.md), [workflow](WORKFLOW.md), and [acceptance](ACCEPTANCE.md).
+See [architecture](ARCHITECTURE.md), [workflow](WORKFLOW.md), [triage standard](TRIAGE.md), and [acceptance](ACCEPTANCE.md).
 
 ## Constraints
 
@@ -54,11 +54,11 @@ See [architecture](ARCHITECTURE.md), [workflow](WORKFLOW.md), and [acceptance](A
 
 - [#35](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/35): merged fix PR #60; two hosted attempts are documented in the v0.0.3 receipt. Production Google sign-in remains outside that evidence.
 - [#13](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13): partial First Spark coverage; Arbor and Rare Trial reward paths remain unverified. The issue stays open.
-- [#64](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/64): merged verification-summary workflow. Seven hosted jobs passed on the PR merge checkout; see the linked Actions receipt in the coordinator handoff.
+- [#64](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/64): merged verification-summary workflow. Seven hosted jobs passed on the PR merge checkout; the post-merge main run is tracked separately.
 
 ## Milestone fit
 
-The active private Notion milestone currently centers on the guest first-playable loop through 2026-11-18. **Milestone fit unverified** for the broader v0.0.4 implementation. This branch establishes the owner-directed project plan and acceptance contract; implementation beyond the active milestone needs a confirmed scope/extension.
+**Milestone fit unverified** for the broader v0.0.4 implementation. This branch establishes the owner-directed project plan and acceptance contract; implementation beyond the currently authorized scope needs a confirmed owner scope/extension. Private planning details remain in Notion and are not reproduced in this public charter.
 
 ## Release rule
 
