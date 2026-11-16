@@ -26,7 +26,7 @@ WORKSPACE_ROW_RE = re.compile(
 LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+[^)]*)?\)")
 REFERENCE_LINK_RE = re.compile(r"^\s{0,3}\[[^\]]+\]:\s*(?:<([^>]+)>|(\S+))", re.MULTILINE)
 AUTOLINK_RE = re.compile(r"<(https?://[^>\s]+)>", re.IGNORECASE)
-HTML_HREF_RE = re.compile(r"""\bhref\s*=\s*(['"])(.*?)\1""", re.IGNORECASE)
+HTML_URL_ATTR_RE = re.compile(r"""\b(?:href|src|poster|action)\s*=\s*(['"])(.*?)\1""", re.IGNORECASE)
 BARE_URL_RE = re.compile(r"(?i)(?<![\w\"'=])https?://[^\s<>\x60\[\]()]+")
 MAX_EXTERNAL_LINKS = 200
 MAX_REDIRECTS = 5
@@ -244,7 +244,7 @@ def markdown_links(markdown):
         for match in REFERENCE_LINK_RE.finditer(markdown)
     )
     values.extend(match.group(1) for match in AUTOLINK_RE.finditer(markdown))
-    values.extend(match.group(2) for match in HTML_HREF_RE.finditer(markdown))
+    values.extend(match.group(2) for match in HTML_URL_ATTR_RE.finditer(markdown))
     values.extend(match.group(0) for match in BARE_URL_RE.finditer(markdown))
 
     result = []
@@ -554,7 +554,11 @@ def collect_external_links(root):
                 unsupported.append(f"{relative}: malformed URL")
                 continue
             scheme = parsed.scheme.lower()
-            if scheme in {"", "mailto", "tel"}:
+            if not scheme and parsed.netloc:
+                scheme = "https"
+            elif scheme in {"mailto", "tel"}:
+                continue
+            elif not scheme:
                 continue
             if scheme not in {"http", "https"}:
                 unsupported.append(f"{relative}: unsupported URL scheme {scheme}")
@@ -830,18 +834,22 @@ def run_external_link_regression_tests():
                     "<https://autolink.example/path>",
                     "[reference]: https://reference.example/path",
                     '<a href="https://html.example/path">HTML link</a>',
+                    '<img src="https://image.example/picture.png">',
+                    "[Protocol relative](//relative.example/path)",
                     "Bare URL: https://bare.example/path.",
                 ]
             ),
             encoding="utf-8",
         )
         links, skipped = collect_external_links(fixture)
-        require(len(links) == 7, f"Markdown URL extraction expected 7 unique links, found {len(links)}")
+        require(len(links) == 9, f"Markdown URL extraction expected 9 unique links, found {len(links)}")
         require(skipped == 1, "The localhost development example was not skipped")
         require("https://good.example/path" in links, "Inline Markdown links were not extracted")
         require("https://reference.example/path" in links, "Reference links were not extracted")
         require("https://autolink.example/path" in links, "Autolinks were not extracted")
         require("https://html.example/path" in links, "HTML href links were not extracted")
+        require("https://image.example/picture.png" in links, "HTML src links were not extracted")
+        require("https://relative.example/path" in links, "Protocol-relative links were not normalized")
         cases += 1
 
         def mixed_probe(url):
@@ -850,7 +858,7 @@ def run_external_link_regression_tests():
             return "PASS", "HTTP 200"
 
         summary = check_external_links(fixture, mixed_probe)
-        require("7 public HTTP(S) links checked" in summary, "External link summary omitted checked URLs")
+        require("9 public HTTP(S) links checked" in summary, "External link summary omitted checked URLs")
         require("1 UNVERIFIED" in summary and "1 local loopback" in summary, "External warning summary is incomplete")
         cases += 1
 
