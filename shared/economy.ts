@@ -1,12 +1,66 @@
 import type { ElementId } from './elements.ts';
 import type { RealmId } from './realms.ts';
 import type { BeastClanId, RaceId, WizardSculpt } from './wardrobe.ts';
+import { GEAR_BY_ID } from './wardrobe.ts';
 import { getStarterDeckForElement } from './spells.ts';
 
 export type ResourceId = 'sunleaf' | 'dewglass' | 'starstone' | 'copper_wire' | 'ember_ash';
 
 export const CRAFT_XP_PER_RANK = 100;
 export const CRAFT_XP_PER_TRANSMUTE = 25;
+
+export type GearEquipSlot = keyof WizardDocument['wardrobe']['equipped'];
+const GEAR_SLOTS: GearEquipSlot[] = ['headgear', 'torso', 'back', 'footwear', 'staff'];
+
+export function canWearGear(
+  wizard: Pick<WizardDocument, 'wardrobe'>,
+  bazaarGear: Record<string, number> | null | undefined,
+  gearId: string,
+): boolean {
+  if (!gearId || !GEAR_BY_ID[gearId]) return false;
+  return wizard.wardrobe.ownedGearIds.includes(gearId) || (bazaarGear?.[gearId] ?? 0) > 0;
+}
+
+export function visibleEquippedGearIds(
+  wizard: Pick<WizardDocument, 'wardrobe'>,
+  bazaarGear: Record<string, number> | null | undefined,
+): string[] {
+  return GEAR_SLOTS.map((slot) => wizard.wardrobe.equipped[slot]).filter((gearId) => canWearGear(wizard, bazaarGear, gearId));
+}
+
+function fallbackGearForSlot(
+  wizard: Pick<WizardDocument, 'wardrobe'>,
+  bazaarGear: Record<string, number> | null | undefined,
+  slot: GearEquipSlot,
+): string {
+  for (const gearId of wizard.wardrobe.ownedGearIds) {
+    if (GEAR_BY_ID[gearId]?.slot === slot && canWearGear(wizard, bazaarGear, gearId)) return gearId;
+  }
+  for (const [gearId, count] of Object.entries(bazaarGear ?? {})) {
+    if (count > 0 && GEAR_BY_ID[gearId]?.slot === slot) return gearId;
+  }
+  return wizard.wardrobe.equipped[slot];
+}
+
+/** Returns an updated wizard when escrow removes wearable Bazaar gear from a slot; otherwise null. */
+export function pruneEquippedWardrobe(
+  wizard: WizardDocument,
+  bazaarGear: Record<string, number> | null | undefined,
+): WizardDocument | null {
+  const equipped = { ...wizard.wardrobe.equipped };
+  let changed = false;
+  for (const slot of GEAR_SLOTS) {
+    const current = equipped[slot];
+    if (canWearGear(wizard, bazaarGear, current)) continue;
+    const next = fallbackGearForSlot(wizard, bazaarGear, slot);
+    if (next !== current) {
+      equipped[slot] = next;
+      changed = true;
+    }
+  }
+  if (!changed) return null;
+  return { ...wizard, wardrobe: { ...wizard.wardrobe, equipped } };
+}
 
 export function craftProgressionAfterGain(craftXp: number, gained: number) {
   const nextXp = craftXp + gained;

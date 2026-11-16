@@ -25,7 +25,7 @@ import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { CAMPUS_NPCS, CAMPUS_QUESTS, MOUNTS, ZONES, type CampusNpc, type ZoneId } from '../shared/world.ts';
 import { computeWizardDerivedStats, type DuelState, type TurnActionInput } from '../shared/combat.ts';
 import { SPECIES_BY_ID } from '../shared/creatures.ts';
-import { applyTermReward, TERM_REWARD_TRACK, type WizardDocument } from '../shared/economy.ts';
+import { applyTermReward, pruneEquippedWardrobe, TERM_REWARD_TRACK, visibleEquippedGearIds, type WizardDocument } from '../shared/economy.ts';
 import { isWizardMuted } from '../shared/playerSocial.ts';
 import { RACES } from '../shared/wardrobe.ts';
 import { auth, signInWithGooglePopup, signOutFirebase } from './lib/firebase.ts';
@@ -151,9 +151,7 @@ export function App() {
   const [turnDeadline, setTurnDeadline] = useState<number | null>(null);
   const [worldConnected, setWorldConnected] = useState(false);
   const [wallet, setWallet] = useState<MarketAccount | null>(null);
-  const updateWallet = useCallback((next: MarketAccount) => {
-    setWallet((current) => !current || (next.revision ?? 0) >= (current.revision ?? 0) ? next : current);
-  }, []);
+  const persistWizardRef = useRef<(next: WizardDocument, pets?: OwnedCreature[], account?: RealmAccountState, updatedPets?: OwnedCreature[]) => void>(() => {});
   const currentPresence = useRef({ activeWizard, creatures, zone });
   currentPresence.current = { activeWizard, creatures, zone };
   const realmLoad = useRef(0);
@@ -341,6 +339,19 @@ export function App() {
     },
     [fbUser, showToast, updateGuestProgress],
   );
+  persistWizardRef.current = persistWizard;
+
+  const updateWallet = useCallback((next: MarketAccount) => {
+    setWallet((current) => {
+      const accepted = !current || (next.revision ?? 0) >= (current.revision ?? 0) ? next : current;
+      const wizard = currentPresence.current.activeWizard;
+      if (wizard) {
+        const pruned = pruneEquippedWardrobe(wizard, accepted.gear);
+        if (pruned) persistWizardRef.current(pruned);
+      }
+      return accepted;
+    });
+  }, []);
 
   const claimTermTier = async (tier: number) => {
     if (!activeWizard) throw new Error('Open a wizard first.');
@@ -1064,7 +1075,7 @@ export function App() {
     level: activeWizard.level,
     raceId: activeWizard.raceId,
     element: activeWizard.elementId,
-    equippedGearIds: Object.values(activeWizard.wardrobe.equipped),
+    equippedGearIds: visibleEquippedGearIds(activeWizard, wallet?.gear),
     socketedRunestoneIds: activeWizard.wardrobe.socketedRunestones,
     creatureTalents: activePet?.talents ?? [],
   });
@@ -1450,6 +1461,7 @@ export function App() {
           worldConnected={worldConnected}
           activeLiveDuels={activeLiveDuels}
           solo2xDefault={settings.solo2xDefault}
+          bazaarGear={wallet?.gear}
           onStartLocalDuel={() => {}}
           onUpdateLocalDuel={() => {}}
           onSubmitLiveAction={(action: TurnActionInput) => {

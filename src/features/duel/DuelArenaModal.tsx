@@ -36,7 +36,7 @@ import {
   type StatusEffectKind,
   type TurnActionInput,
 } from '../../../shared/combat.ts';
-import type { WizardDocument } from '../../../shared/economy.ts';
+import { visibleEquippedGearIds, type WizardDocument } from '../../../shared/economy.ts';
 import type { OwnedCreature } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
 import { academyAudio } from '../../engine/audioSynth.ts';
@@ -116,6 +116,7 @@ interface DuelArenaModalProps {
   worldConnected: boolean;
   activeLiveDuels: { duelId: string; mode: string; round: number; title: string }[];
   solo2xDefault: boolean;
+  bazaarGear?: Record<string, number> | null;
   onStartLocalDuel: (state: DuelState) => void;
   onUpdateLocalDuel: (state: DuelState | null) => void;
   onSubmitLiveAction: (action: TurnActionInput) => boolean;
@@ -143,6 +144,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   worldConnected,
   activeLiveDuels,
   solo2xDefault,
+  bazaarGear,
   onStartLocalDuel,
   onUpdateLocalDuel,
   onSubmitLiveAction,
@@ -200,7 +202,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
           level: wizard.level,
           raceId: wizard.raceId,
           element: wizard.elementId,
-          equippedGearIds: Object.values(wizard.wardrobe.equipped),
+          equippedGearIds: visibleEquippedGearIds(wizard, bazaarGear),
           socketedRunestoneIds: wizard.wardrobe.socketedRunestones,
           creatureTalents: activeTalents,
         });
