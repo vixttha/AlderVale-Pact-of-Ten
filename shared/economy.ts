@@ -1,6 +1,7 @@
 import type { ElementId } from './elements.ts';
 import type { RealmId } from './realms.ts';
 import type { BeastClanId, RaceId, WizardSculpt } from './wardrobe.ts';
+import { SPECIES_BY_ID } from './creatures.ts';
 import { getStarterDeckForElement } from './spells.ts';
 
 export type ResourceId = 'sunleaf' | 'dewglass' | 'starstone' | 'copper_wire' | 'ember_ash';
@@ -129,6 +130,47 @@ export function applyTermReward(wizard: WizardDocument, tier: TermTierReward): W
       ? { ...wizard.wardrobe, ownedGearIds: [...wizard.wardrobe.ownedGearIds, reward.cosmeticId] }
       : wizard.wardrobe,
     progression: tier.tier === 8 ? { ...wizard.progression, rebirthSeals: wizard.progression.rebirthSeals + 1 } : wizard.progression,
+  };
+}
+
+export function grantFusionSpells(
+  wizard: WizardDocument,
+  creatures: readonly {
+    speciesId: string;
+    ownerId: string;
+    wizardId: string;
+    realmId: RealmId;
+  }[],
+): WizardDocument {
+  const currentFusions = wizard.progression.unlockedFusions ?? [];
+  const currentSpells = wizard.progression.ownedSpellIds;
+  const unlockedFusions = new Set(currentFusions);
+  const ownedSpellIds = new Set(currentSpells);
+  let changed = false;
+
+  for (const creature of creatures) {
+    if (creature.ownerId !== wizard.ownerId || creature.wizardId !== wizard.id || creature.realmId !== wizard.realmId) continue;
+    const species = SPECIES_BY_ID[creature.speciesId];
+    if (!species?.isFusionOnly) continue;
+
+    if (!unlockedFusions.has(species.element)) {
+      unlockedFusions.add(species.element);
+      changed = true;
+    }
+    if (!ownedSpellIds.has(species.innatePactCardId)) {
+      ownedSpellIds.add(species.innatePactCardId);
+      changed = true;
+    }
+  }
+
+  if (!changed) return wizard;
+  return {
+    ...wizard,
+    progression: {
+      ...wizard.progression,
+      unlockedFusions: [...unlockedFusions],
+      ownedSpellIds: [...ownedSpellIds],
+    },
   };
 }
 

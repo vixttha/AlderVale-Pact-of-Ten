@@ -291,3 +291,53 @@ test('the Commons fountain blocks walking, still refills, and fleeing gives accu
   await expect(page.getByText('You left the duel.', { exact: true })).toBeVisible();
   await expect(page.getByText(/top off your Flasks/)).toHaveCount(0);
 });
+
+test('an existing fusion is recovered once and its card respects rank in Deck & Lectern', async ({ page }) => {
+  await installGuestSaveFailure(page);
+  await page.goto('/');
+  await page.getByRole('textbox').first().fill('Fusion Rowan');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+
+  const seedFusion = async (rank) => page.evaluate(({ key, rank }) => {
+    const save = JSON.parse(localStorage.getItem(key));
+    const wizard = save.wizards[0];
+    wizard.rank = rank;
+    if (rank === 2) {
+      delete wizard.progression.unlockedFusions;
+      const [starter] = save.creatures[wizard.id];
+      save.creatures[wizard.id].push({
+        ...starter, id: 'fusion-audit-newt', speciesId: 'magma_salamander',
+        elementId: 'magma', nickname: 'Caldera Newt',
+      });
+    }
+    localStorage.setItem(key, JSON.stringify(save));
+  }, { key: breezeSaveKey, rank });
+
+  const reopenDeck = async () => {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: /Enter Aldervale/ }).click();
+    await page.getByRole('button', { name: 'Deck & Lectern' }).click();
+    return page.locator('div.flex.flex-col.justify-between').filter({
+      has: page.getByText('Tectonic Eruption', { exact: true }),
+    });
+  };
+
+  await seedFusion(2);
+  const lockedCard = await reopenDeck();
+  await expect(lockedCard.getByText('Locked: Rank 3 required', { exact: true })).toBeVisible();
+  await expect(lockedCard.getByRole('button', { name: '+', exact: true })).toBeDisabled();
+  await expect.poll(async () => (await readBreezeSave(page)).wizards[0].progression.unlockedFusions).toEqual(['magma']);
+
+  await seedFusion(3);
+  const usableCard = await reopenDeck();
+  const addCard = usableCard.getByRole('button', { name: '+', exact: true });
+  await expect(addCard).toBeEnabled();
+  await addCard.click();
+  await expect(usableCard.getByText('In Deck: 1', { exact: true })).toBeVisible();
+  const reloadedCard = await reopenDeck();
+  await expect(reloadedCard.getByText('In Deck: 1', { exact: true })).toBeVisible();
+  const { progression } = (await readBreezeSave(page)).wizards[0];
+  expect(progression.unlockedFusions).toEqual(['magma']);
+  expect(progression.ownedSpellIds.filter((id) => id === 'magma_tectonic')).toHaveLength(1);
+});

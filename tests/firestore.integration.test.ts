@@ -89,15 +89,24 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     }));
   });
 
-  it('commits multiple hatchlings and wizard egg changes together', async () => {
+  it('commits multiple hatchlings and wizard egg changes with a fusion card and unlock', async () => {
     const db = player('rowan-owner');
     const batch = writeBatch(db);
-    batch.update(doc(db, 'wizards/rowan'), { 'progression.eggs': [], updatedAt: serverTimestamp() });
-    batch.set(doc(db, 'wizards/rowan/creatures/hatch-one'), pet('rowan-owner'));
-    batch.set(doc(db, 'wizards/rowan/creatures/hatch-two'), pet('rowan-owner'));
+    const wizardRef = doc(db, 'wizards/rowan');
+    batch.update(wizardRef, {
+      'progression.eggs': [], 'progression.unlockedFusions': ['magma'],
+      'progression.ownedSpellIds': ['magma_tectonic'], updatedAt: serverTimestamp(),
+    });
+    batch.set(doc(wizardRef, 'creatures/hatch-one'), {
+      ...pet('rowan-owner'), speciesId: 'magma_salamander', nickname: 'Caldera Newt', elementId: 'magma',
+    });
+    batch.set(doc(wizardRef, 'creatures/hatch-two'), pet('rowan-owner'));
     await assertSucceeds(batch.commit());
-    expect((await getDoc(doc(db, 'wizards/rowan/creatures/hatch-one'))).exists()).toBe(true);
-    expect((await getDoc(doc(db, 'wizards/rowan/creatures/hatch-two'))).exists()).toBe(true);
+    expect((await getDoc(doc(wizardRef, 'creatures/hatch-one'))).data()).toMatchObject({ elementId: 'magma' });
+    expect((await getDoc(doc(wizardRef, 'creatures/hatch-two'))).exists()).toBe(true);
+    expect((await getDoc(wizardRef)).get('progression')).toMatchObject({
+      eggs: [], unlockedFusions: ['magma'], ownedSpellIds: ['magma_tectonic'],
+    });
   });
 
   it('applies a concurrent Term claim to the wizard exactly once', async () => {
