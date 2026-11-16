@@ -40,7 +40,11 @@ jobs:
             printf 'Event: %s\n' "$GITHUB_EVENT_NAME"
             printf 'Run / attempt: %s / %s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
             printf 'Base: %s\nHead: %s\n' "${PR_BASE_SHA:-n/a}" "${PR_HEAD_SHA:-n/a}"
-            if python3 test-vault/validate_catalog.py; then
+            catalog_args=()
+            if [[ -e test-vault/topics.json || -L test-vault/topics.json ]]; then
+              catalog_args+=(--topics test-vault/topics.json)
+            fi
+            if python3 test-vault/validate_catalog.py "${catalog_args[@]}"; then
               printf 'Catalog result: PASS\n'
             else
               printf 'Catalog result: FAIL\n'

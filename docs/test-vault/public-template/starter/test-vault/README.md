@@ -4,7 +4,7 @@ The Test Vault tracks what a project intends to test and the evidence for cases 
 
 ## Install in an existing repository
 
-Copy this directory's contents into your repository root, including the hidden `.github` directory. Review any filename collisions before copying. This kit contains these files:
+From the source kit's `starter/` directory, copy both `test-vault/` and `.github/workflows/test-vault.yml` into the same paths in your target repository. Review any filename collisions before copying. This kit contains these files:
 
 - `test-vault/README.md`
 - `test-vault/cases.md`
@@ -22,9 +22,9 @@ The command runs with Python's standard library. It should find one starter case
 
 ## Add your cases
 
-Copy the five-column table in [cases.md](cases.md). Use an uppercase topic followed by a hyphen and at least three digits. Examples include `CLI-001`, `HTTP-GET-001`, and `G13-001`. IDs are unique across all case tables. Keep all five cells populated and use `P0`, `P1`, or `P2` for priority. Escape literal table pipes as `\|`. Format code blocks outside the tables.
+Copy the five-column table in [cases.md](cases.md). Use an uppercase topic followed by a hyphen and at least three digits. Examples include `CLI-001`, `HTTP-GET-001`, and `G13-001`. IDs are unique across all case tables. Keep all five cells populated and use `P0`, `P1`, or `P2` for priority. Escape literal table pipes as `\|`. Put a Markdown divider row directly under each table header. Use fenced code blocks outside the tables for examples.
 
-For a project with a topic registry, supply a JSON array of unique topic IDs, for example `["CLI", "HTTP-GET"]`. Check that each registered topic has a case and every case uses a registered topic:
+To enforce topic coverage in CI, add `test-vault/topics.json` as a JSON array of unique topic IDs, for example `["CLI", "HTTP-GET"]`. The included workflow checks that each registered topic has a case and every case uses a registered topic. To run the same check locally:
 
 ```sh
 python3 test-vault/validate_catalog.py --topics test-vault/topics.json

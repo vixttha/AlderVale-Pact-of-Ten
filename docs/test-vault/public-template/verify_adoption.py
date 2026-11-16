@@ -102,12 +102,19 @@ def copy_and_check(sample, target):
     command = [sys.executable, str(VALIDATOR)]
     run(command, target, includes="1 unique cases across 1 topics")
     case_path = target / "test-vault/cases.md"
+    topics_path = target / "test-vault/topics.json"
     row = check_project(sample, target)
     catalog = HEADER + DIVIDER + "   " + row
-    case_path.write_text(catalog, encoding="utf-8")
     topic = row.split("|")[1].strip().rsplit("-", 1)[0]
-    (target / "topics.json").write_text(f'["{topic}"]\n', encoding="utf-8")
-    run(command + ["--topics", "topics.json"], target, includes="1 unique cases across 1 topics")
+    topics_path.write_text(f'["{topic}"]\n', encoding="utf-8")
+    case_path.write_text(HEADER + row, encoding="utf-8")
+    run(command, target, result=1, includes="expected a Markdown table divider")
+    for fence in ("```", "~~~"):
+        example = f"{fence}markdown\n{HEADER}{DIVIDER}{row}{fence}\n\n"
+        case_path.write_text(example + catalog, encoding="utf-8")
+        run(command, target, includes="1 unique cases across 1 topics")
+    case_path.write_text(catalog, encoding="utf-8")
+    run(workflow_step, target, env=env, includes="Catalog result: PASS")
     case_path.write_text(catalog + "  " + row.replace("| P0 |", "| P9 |"), encoding="utf-8")
     run(command, target, result=1, includes="invalid case row")
     run(workflow_step, target, env=env, result=1, includes="Catalog result: FAIL")
@@ -116,9 +123,9 @@ def copy_and_check(sample, target):
     case_path.write_text(catalog + row, encoding="utf-8")
     run(command, target, result=1, includes="duplicate case")
     case_path.write_text(catalog, encoding="utf-8")
-    (target / "topics.json").write_text('["OTHER"]\n', encoding="utf-8")
-    run(command + ["--topics", "topics.json"], target, result=1, includes=f"unknown topics: {topic}")
-    print(f"PASS: {sample} accepted a clean install and rejected invalid cases and topic drift.")
+    topics_path.write_text('["OTHER"]\n', encoding="utf-8")
+    run(workflow_step, target, env=env, result=1, includes=f"unknown topics: {topic}")
+    print(f"PASS: {sample} checked workflow topic drift, fenced examples, dividers, invalid priorities, and duplicate IDs.")
 
 
 def check_aldervale():
