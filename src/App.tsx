@@ -583,7 +583,7 @@ export function App() {
           const current = currentPresence.current;
           const wizard = current.activeWizard;
           if (!wizard || wizard.id !== initialWizard.id) return;
-          const pet = current.creatures.find((creature) => creature.id === wizard.activeCreatureId);
+          const pet = current.creatures.find((creature) => creature.id === wizard.activeCreatureId) ?? current.creatures[0];
           if (!idToken && !guestTicket) {
             try { guestTicket = sessionStorage.getItem(ticketKey); } catch { /* optional reconnect storage */ }
           }

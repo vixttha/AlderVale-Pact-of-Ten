@@ -79,7 +79,7 @@ describe("live creature selection", () => {
       activeCreatureStage: 3,
       activeCreatureChromatic: "dawn",
       activeCreatureBranchChoice: "B",
-      activeCreatureTalents: ["tal_sturdy", "tal_may_blade", "tal_spellproof"],
+      activeCreatureTalents: ["tal_sturdy", "tal_may_blade", "tal_spellproof", "tal_may_heal"],
     });
     expect(buildGuestCombatCreatureSlot(selection).element).toBe("frost");
   });
@@ -100,5 +100,6 @@ describe("live creature selection", () => {
     expect(isOwnedCreatureDocument({ ownerId: "u", wizardId: "w", realmId: "breeze" }, "u", "w", "breeze")).toBe(true);
     expect(isOwnedCreatureDocument({ ownerId: "other", wizardId: "w", realmId: "breeze" }, "u", "w", "breeze")).toBe(false);
     expect(isOwnedCreatureDocument({ ownerId: "u", wizardId: "other", realmId: "breeze" }, "u", "w", "breeze")).toBe(false);
+    expect(isOwnedCreatureDocument({ ownerId: "u", wizardId: "w", realmId: "horizon" }, "u", "w", "breeze")).toBe(false);
   });
 });

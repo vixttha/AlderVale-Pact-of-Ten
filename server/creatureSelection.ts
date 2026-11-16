@@ -75,7 +75,7 @@ export function sanitizeGuestCreatureSelection(
   const branchChoice = input.activeCreatureBranchChoice === "B" ? "B" : "A";
   const talents = Array.isArray(input.activeCreatureTalents)
     ? [...new Set(input.activeCreatureTalents.filter((value): value is string =>
-        typeof value === "string" && validTalentIds.has(value)))].slice(0, 3)
+        typeof value === "string" && validTalentIds.has(value)))].slice(0, 12)
     : [];
   const nickname = typeof input.activeCreatureNickname === "string"
     ? input.activeCreatureNickname.trim().slice(0, 24)
