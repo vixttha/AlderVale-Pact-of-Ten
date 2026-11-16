@@ -34,6 +34,14 @@ EXTERNAL_TIMEOUT_SECONDS = 8
 COMMIT_RE = re.compile(r"[0-9a-f]{40}")
 ARCHIVES = {"public_readme": "versions", "readme_hq": "readme-hq/versions"}
 MANIFEST_PATH = "tools/readme_hq_baselines.json"
+GUIDE_COVERAGE = {
+    "source provenance": ("source commit", "source path", "Git blob SHA-1"),
+    "current-main links": ("origin/main", "main SHA", "heading fragments"),
+    "external URL discovery": ("reference links", "autolinks", "bare URLs", "HTML"),
+    "redirect and destination safety": ("bounded redirects", "public IP", "loopback", "TLS"),
+    "result classification": ("UNVERIFIED", "PASS", "HTTP 403"),
+    "diagnostic redaction": ("credentials", "query strings", "fragments"),
+}
 
 
 class ValidationError(Exception):
@@ -641,6 +649,26 @@ def check_external_links(root, probe=None):
     )
 
 
+def check_guide_coverage(root, hq, hq_drafts, hq_snapshot):
+    if hq_drafts:
+        guide = hq / "workspace" / hq_drafts[0] / "GUIDE.md"
+        require(guide.is_file(), "Latest README HQ draft has no GUIDE.md")
+    else:
+        guide = hq_snapshot / "GUIDE.md"
+
+    content = read(guide).casefold()
+    missing = [
+        category
+        for category, phrases in GUIDE_COVERAGE.items()
+        if any(phrase.casefold() not in content for phrase in phrases)
+    ]
+    label = guide.relative_to(root).as_posix()
+    require(
+        not missing,
+        f"{label} omits implemented validator coverage: {', '.join(missing)}",
+    )
+
+
 def validate_repo(root, repo, main_ref, baseline=None, check_external=True):
     manifest = read_manifest(root)
     if baseline:
@@ -655,6 +683,7 @@ def validate_repo(root, repo, main_ref, baseline=None, check_external=True):
         root, repo, hq, ("README.md", "GUIDE.md", "CHANGELOG.md"), manifest["readme_hq"], "README HQ"
     )
     hq_drafts = check_workspace(root, hq / "workspace", "README HQ")
+    check_guide_coverage(root, hq, hq_drafts, hq_snapshot)
 
     require(
         (root / "README.md").read_bytes() == (hq_snapshot / "README.md").read_bytes(),
@@ -693,7 +722,7 @@ def validate_repo(root, repo, main_ref, baseline=None, check_external=True):
     return (
         f"public README {public_version} and README HQ {hq_version} archives, "
         "both workspace indexes, frozen snapshot checksums and Git sources, snapshot parity, "
-        "draft pointers, and branch-local and current-main Markdown links; "
+        "draft pointers, validator guide coverage, and branch-local and current-main Markdown links; "
         f"{external_summary}"
     )
 
@@ -704,16 +733,45 @@ def run_regression_tests(root, repo, main_ref, baseline):
     def add_case(name, expected_message, mutate, *, check_history=False):
         cases.append((name, expected_message, mutate, check_history))
 
-    def add_draft(workspace):
+    def add_draft(workspace, *, include_guide=False, public_draft_version=None):
         version = "v999999.0.0"
         folder = workspace / version
         folder.mkdir()
-        for name in ("README.md", "DRAFT.md"):
-            (folder / name).write_text("# Regression draft\n", encoding="utf-8")
+        (folder / "README.md").write_text("# Regression workspace record\n", encoding="utf-8")
+        draft = "# Regression draft\n"
+        if public_draft_version:
+            draft += f"\n[Current public README draft](../../../workspace/{public_draft_version}/DRAFT.md)\n"
+        (folder / "DRAFT.md").write_text(draft, encoding="utf-8")
+        if include_guide:
+            guide_sources = [
+                item / "GUIDE.md"
+                for item in workspace.iterdir()
+                if item.is_dir() and item != folder and (item / "GUIDE.md").is_file()
+            ]
+            require(guide_sources, "Regression fixture has no guide to copy")
+            source = sorted(guide_sources, key=lambda item: version_key(item.parent.name), reverse=True)[0]
+            shutil.copyfile(source, folder / "GUIDE.md")
         index = workspace / "README.md"
         row = f"| {version} | Draft | [Workspace]({version}/README.md) |"
         index.write_text(f"{read(index)}\n{row}\n", encoding="utf-8")
         return folder
+
+    def advance_hq_public_draft_pointer(fixture, version):
+        workspace = fixture / "readme-hq/workspace"
+        drafts = check_workspace(fixture, workspace, "README HQ")
+        if not drafts:
+            add_draft(workspace, include_guide=True, public_draft_version=version)
+            return
+        candidate = workspace / drafts[0] / "DRAFT.md"
+        content = read(candidate)
+        updated = re.sub(
+            r"\.\./\.\./\.\./workspace/v\d+\.\d+\.\d+/DRAFT\.md",
+            f"../../../workspace/{version}/DRAFT.md",
+            content,
+            count=1,
+        )
+        require(updated != content, "Regression fixture could not advance the HQ public-draft pointer")
+        candidate.write_text(updated, encoding="utf-8")
 
     def change_public_snapshot(fixture):
         path = fixture / "versions" / "v0.0.1" / "README.md"
@@ -737,12 +795,32 @@ def run_regression_tests(root, repo, main_ref, baseline):
         path.write_text(WORKSPACE_ROW_RE.sub("", read(path), count=1), encoding="utf-8")
 
     def add_broken_draft_link(fixture):
-        path = add_draft(fixture / "workspace") / "DRAFT.md"
+        folder = add_draft(fixture / "workspace")
+        advance_hq_public_draft_pointer(fixture, folder.name)
+        path = folder / "DRAFT.md"
         path.write_text(read(path) + "\n[Broken regression fixture](missing-target.md)\n", encoding="utf-8")
 
     def stale_candidate_draft_pointer(fixture):
         add_draft(fixture / "workspace")
-        add_draft(fixture / "readme-hq/workspace")
+        add_draft(fixture / "readme-hq/workspace", include_guide=True)
+
+    def remove_guide_phrase(fixture, phrase):
+        workspace = fixture / "readme-hq/workspace"
+        drafts = check_workspace(fixture, workspace, "README HQ")
+        if drafts:
+            folder = workspace / drafts[0]
+        else:
+            public_drafts = check_workspace(fixture, fixture / "workspace", "public README")
+            folder = add_draft(
+                workspace,
+                include_guide=True,
+                public_draft_version=public_drafts[0] if public_drafts else None,
+            )
+        guide = folder / "GUIDE.md"
+        content = read(guide)
+        updated = re.sub(re.escape(phrase), "omitted", content, flags=re.IGNORECASE)
+        require(updated != content, f"Regression fixture could not remove guide phrase: {phrase}")
+        guide.write_text(updated, encoding="utf-8")
 
     def change_source(fixture, path):
         manifest = read_manifest(fixture)
@@ -750,7 +828,9 @@ def run_regression_tests(root, repo, main_ref, baseline):
         (fixture / MANIFEST_PATH).write_text(json.dumps(manifest), encoding="utf-8")
 
     def add_broken_main_link(fixture):
-        path = add_draft(fixture / "workspace") / "DRAFT.md"
+        folder = add_draft(fixture / "workspace")
+        advance_hq_public_draft_pointer(fixture, folder.name)
+        path = folder / "DRAFT.md"
         link = f"https://github.com{REPO_PREFIX}blob/main/docs/readme-hq-missing-fixture.md"
         path.write_text(read(path) + f"\n[Missing main path]({link})\n", encoding="utf-8")
 
@@ -776,6 +856,36 @@ def run_regression_tests(root, repo, main_ref, baseline):
     )
     add_case("broken link inside DRAFT.md", "broken link to", add_broken_draft_link)
     add_case("stale HQ candidate draft pointer", "directly link to the current public README draft", stale_candidate_draft_pointer)
+    add_case(
+        "guide understates source provenance",
+        "implemented validator coverage: source provenance",
+        lambda fixture: remove_guide_phrase(fixture, "Git blob SHA-1"),
+    )
+    add_case(
+        "guide understates current-main links",
+        "implemented validator coverage: current-main links",
+        lambda fixture: remove_guide_phrase(fixture, "heading fragments"),
+    )
+    add_case(
+        "guide understates external URL discovery",
+        "implemented validator coverage: external URL discovery",
+        lambda fixture: remove_guide_phrase(fixture, "bare URLs"),
+    )
+    add_case(
+        "guide understates redirect safety",
+        "implemented validator coverage: redirect and destination safety",
+        lambda fixture: remove_guide_phrase(fixture, "bounded redirects"),
+    )
+    add_case(
+        "guide understates result classification",
+        "implemented validator coverage: result classification",
+        lambda fixture: remove_guide_phrase(fixture, "UNVERIFIED"),
+    )
+    add_case(
+        "guide understates diagnostic redaction",
+        "implemented validator coverage: diagnostic redaction",
+        lambda fixture: remove_guide_phrase(fixture, "query strings"),
+    )
     add_case("missing recorded source", "recorded source is missing", lambda fixture: change_source(fixture, "missing-source.md"))
     add_case("wrong recorded source", "recorded source does not match", lambda fixture: change_source(fixture, "docs/VALIDATION.md"))
     add_case("broken link to main", "broken main link", add_broken_main_link)
@@ -825,8 +935,12 @@ def run_regression_tests(root, repo, main_ref, baseline):
             not check_workspace(fixture, workspace, "README HQ"),
             "An archived workspace was classified as an active draft",
         )
-        validate_repo(fixture, repo, main_ref, check_external=False)
         add_draft(fixture / "workspace")
+        add_draft(
+            workspace,
+            include_guide=True,
+            public_draft_version="v999999.0.0",
+        )
         validate_repo(fixture, repo, main_ref, baseline, check_external=False)
 
     return len(cases)
