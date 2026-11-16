@@ -26,6 +26,9 @@ import {
   isDuelComplete,
   totalAvailablePipsForSchool,
   computeWizardDerivedStats,
+  leadCreatureQualifiedForArborWin,
+  ownedCreatureToCombatSlot,
+  pickDuelCreatureRoster,
   STATUS_EFFECT_META,
   type CombatantState,
   type DuelState,
@@ -126,6 +129,7 @@ interface DuelArenaModalProps {
     trialElement?: ElementId;
     completed?: boolean;
     draw?: boolean;
+    leadCreatureWinEligible?: boolean;
   }) => void;
   onClose: () => void;
 }
@@ -188,7 +192,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   }, [duel?.duelId, duel?.round, duel?.phase, turnDeadline]);
 
   function buildPlayerCombatant(gearlessSpire = false): CombatantState {
-    const activeTalents = creatures.find((c) => c.id === wizard.activeCreatureId)?.talents ?? [];
+    const { roster: duelRoster, activeCreatureIdx } = pickDuelCreatureRoster(creatures, wizard.activeCreatureId);
+    const activeTalents = duelRoster[activeCreatureIdx]?.talents ?? creatures[0]?.talents ?? [];
     const stats = gearlessSpire
       ? { maxHp: 460, powerPct: 5, accuracyBonus: 2, piercePct: 2, critPct: 10, blockPct: 8 }
       : computeWizardDerivedStats({
@@ -246,19 +251,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
       discard: [],
       sideboard: wizard.progression.sideboard.filter(isSpellUsable),
       spellwrighting: { ...wizard.progression.spellwrighting },
-      creatures: creatures.slice(0, 3).map((pet) => ({
-        id: pet.id,
-        speciesId: pet.speciesId,
-        nickname: pet.nickname,
-        element: pet.elementId,
-        stage: pet.stage,
-        chromatic: pet.chromatic,
-        branchChoice: pet.branchChoice,
-        hp: 190 + pet.stage * 45,
-        maxHp: 190 + pet.stage * 45,
-        talents: pet.talents,
-      })),
-      activeCreatureIdx: 0,
+      creatures: duelRoster.map((pet) => ownedCreatureToCombatSlot(pet)),
+      activeCreatureIdx,
     };
     drawUpToSeven(c);
     return c;
@@ -405,6 +399,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   const handleClaimExit = (won: boolean) => {
     if (!rewardClaimed && duel && !spectating) {
       setRewardClaimed(true);
+      const me = duel.playerTeam[0];
       onDuelFinished({
         won,
         mode: duel.mode,
@@ -412,6 +407,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
         trialElement: trialTargetElement,
         completed: isDuelComplete(duel.phase),
         draw: duel.phase === 'draw',
+        leadCreatureWinEligible:
+          won && !liveDuelState && !!me && leadCreatureQualifiedForArborWin(me, wizard.activeCreatureId),
       });
     }
     setLocalDuel(null);
