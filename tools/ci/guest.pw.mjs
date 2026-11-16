@@ -145,8 +145,9 @@ test('title and world remain usable with WebGL unavailable', async ({ page }) =>
   expect(errors).toEqual([]);
 });
 
-test('guest settings survive reload and the HUD shows offline after a lost connection', async ({ page }) => {
-  test.setTimeout(90_000);
+test('guest settings survive reload and the HUD shows offline after a lost connection', async ({ page, browserName }) => {
+  // WebKit re-enters the 3D world multiple times with software rendering on CI.
+  test.setTimeout(browserName === 'webkit' ? 150_000 : 90_000);
   let realmSocket;
   let refuseReconnect = false;
   await page.routeWebSocket('**/ws', (socket) => {
@@ -170,7 +171,7 @@ test('guest settings survive reload and the HUD shows offline after a lost conne
   await page.getByRole('slider', { name: /Spell & UI Chimes/ }).press('End');
   await page.getByRole('slider', { name: /Camera Orbit/ }).press('End');
   await page.getByRole('checkbox', { name: /Default 2× Speed/ }).check();
-  await page.reload();
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 30_000 });
   await page.getByRole('button', { name: /Enter Aldervale/ }).click();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(page.getByRole('slider', { name: /Acoustic Harp/ })).toHaveValue('0');
