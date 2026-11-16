@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "issueNumber": 74,
-  "claimId": "AV-CLAIM-74-20261116-01",
-  "status": "released",
+  "claimId": "AV-CLAIM-74-20261116-02",
+  "status": "active",
   "worker": "ChatGPT AlderVale project assistant",
   "host": "ChatGPT",
   "model": "unverified",
@@ -10,7 +10,7 @@
   "githubActor": "vixttha",
   "baseSha": "219a6bda1f9b2e01f06fd97350a66ed8f470f0d1",
   "workBranch": "fix/deterministic-combat-effect-ids",
-  "claimedAt": "2026-11-16T17:21:32.000Z",
-  "expiresAt": "2026-11-16T17:45:23.000Z",
-  "note": "Draft PR #116 and 7/7 hosted validation after macOS retry (run 43917743510) delivered for owner review. Issue #74 remains open."
+  "claimedAt": "2026-11-16T17:50:21.000Z",
+  "expiresAt": "2026-11-16T18:50:21.000Z",
+  "note": "Owner requested continued work on #74. Strengthen the existing PR regression to compare the full resolved combat state."
 }
