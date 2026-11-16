@@ -6,6 +6,7 @@ Element HQ is the design reference for the mechanics and lore behind AlderValeâ€
 
 | Document | Use it for |
 | --- | --- |
+| [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the projectâ€™s populated mechanics and lore reference, with current rules and proposed decisions. |
 | [Element design template](element-hq/templates/element-design.md) | Draft an element, fusion, or change to an existing rule. |
 | [Workspace notes](element-hq/README.md) | Read the original scope and design questions. |
 | [Element registry](element-hq/element-registry.md) | Look up the elements, matchup matrix, status effects, and spell snapshot. |

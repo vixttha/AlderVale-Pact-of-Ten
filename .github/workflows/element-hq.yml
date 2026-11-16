@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Check branch contents and template
+      - name: Check branch contents, template, and design
         run: |
           python3 - <<'PY'
           import os
@@ -37,11 +37,13 @@ jobs:
 
           workflow = ".github/workflows/element-hq.yml"
           template = "element-hq/templates/element-design.md"
+          design = "element-hq/designs/aldervale-element-system-v1.md"
           documents = {
               "element-hq/README.md",
               "element-hq/element-registry.md",
               "element-hq/fusion-system-v1.md",
               template,
+              design,
           }
           tracked = set(git("ls-files", "-z").rstrip("\0").split("\0"))
           missing = (documents | {"README.md", workflow}) - tracked
@@ -59,7 +61,6 @@ jobs:
               if f"]({path})" not in guide:
                   raise SystemExit(f"Branch guide is missing its link to {path}")
 
-          headings = set(Path(template).read_text(encoding="utf-8").splitlines())
           sections = {
               "## Identity and lore",
               "## Current mechanics and sources",
@@ -68,8 +69,10 @@ jobs:
               "## Balance and verification",
               "## Open questions and decisions",
           }
-          if sections - headings:
-              raise SystemExit(f"Missing template sections: {sorted(sections - headings)}")
+          for path in (template, design):
+              headings = set(Path(path).read_text(encoding="utf-8").splitlines())
+              if missing_sections := sections - headings:
+                  raise SystemExit(f"{path} is missing sections: {sorted(missing_sections)}")
 
           print(f"Verified Element HQ documents at {head}")
           PY
