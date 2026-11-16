@@ -91,7 +91,10 @@ export const mainJobs: CheckJob[] = [
       "node --test tools/ci/server.check.mjs",
       "node scripts/asset-report.mjs",
     ],
-    notes: ["node scripts/asset-report.mjs runs on the Linux core job only."],
+    notes: [
+      "Linux also checks the asset report and the standalone agent packages with their own lockfiles and no model calls.",
+      'Windows also runs & ".\\AlderVale Play\\Play AlderVale.cmd" --smoke --checkout.',
+    ],
   },
   {
     id: "browser",

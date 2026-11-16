@@ -64,6 +64,16 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: node scripts/asset-report.mjs >> "$GITHUB_STEP_SUMMARY"
+      - name: Validate standalone agent packages without model calls
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in agents/aldervale-loop agents/aldervale-v002; do
+            npm ci --prefix "$package" --ignore-scripts --no-audit --no-fund
+            npm run check --prefix "$package"
+          done
+          npm test --prefix agents/aldervale-v002
 
       - name: Write verification summary
         if: ${{ always() && steps.evidence_node.outcome == 'success' }}

@@ -52,7 +52,7 @@ budgets. The combined settings and gear tests use 150 seconds on WebKit and
 root causes are solved. Root Vitest now excludes standalone agents/** tests
 so Node test files do not get miscollected (the #38 integration conflict).
 
-## Required remaining work before merge
+## Work identified at the initial checkpoint
 
 1. Read current AGENTS.md, PROJECT_RULES.md, docs/AGENT_OPERATIONS.md and nested
    agents/*/AGENTS.md before editing those packages. Root now references the
@@ -116,3 +116,12 @@ expected behavior and adding proportionate regression evidence.
 At this checkpoint the fourteen histories are present, but combined validation,
 the remaining additive/local reconciliation and the final main merge are NOT
 complete. Continue from the branch, not by replaying the initial merges.
+
+## Integration follow-up
+
+- The refreshed #83 head `05fdc3fe2536b623ff42896506fbe68a128ec251` brings in the same main baseline. Its Bug Library files and `AGENTS.md` match the pinned source. The integration keeps the v0.0.3 ChatGPT instructions and their Bug Library section. The Bug Library's product acceptance remains pending.
+- The public game README brought in through #62 is byte-identical to the v0.0.1 archive (blob `317cd107088d823c7677f0afd9a51b496fa1bd54`). [README HQ](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/e32fdf4a38ea2a5903b71d9df8f2de40ae04f99c) keeps the frozen v0.0.2 archives and validator. [PR #100](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/100) remains a v0.0.3 proposal targeting that workspace.
+- [Element HQ](../element-hq/README.md) imports the public design documents and template from `a5f7d733a6a4f9b79c378203536aca5c84f1b412`. [Notion Agent](../notion-agent/README.md) imports its public profile and templates from `1e9bdd538f71cd39d98c2255550c152e445ef211`. The [Bug Library v0.0.3 archive](../bug-library/v0.0.3/README.md) preserves the published records from `46c504ffdbd343df825398c403d3a0417acb9e82`.
+- The voice branch contains an empty tree. Published Graphify snapshots stay on their archive branch. Earlier reproduction and superseded game branches remain in Git history. Runtime files under `src/`, `shared/`, and `server/` match the main baseline.
+- The public-runner workflow keeps the seven game jobs, adds standalone agent checks to the existing Linux job, and keeps the Windows launcher smoke. The legacy game-running Test Vault workflow remains available on `AlderVale-test-Vault`; the integration keeps the distinct adoption fixtures and language checks. Brand jobs use pinned dependencies and one-day artifacts.
+- The handoff described uncommitted resource-store and creature-test files from another machine. Their contents were unavailable in the repository and attached transcript. They require that original patch or a published branch for reconciliation.

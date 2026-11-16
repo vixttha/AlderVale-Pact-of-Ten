@@ -83,10 +83,14 @@ test("unknown workflows produce no commands", () => {
   assert.equal(recipe.actions.pushStarts, "no");
 });
 
-test("this checkout has the Test Vault workflow and not validate.yml", () => {
+test("the main checkout discovers its validation and Test Vault adoption workflows", () => {
   const workflows = checkoutWorkflows();
-  assert.ok(workflows.includes("aldervale-test-vault.yml"));
-  assert.equal(workflows.includes("validate.yml"), false);
+  assert.ok(workflows.includes("validate.yml"));
+  assert.ok(workflows.includes("test-vault-template.yml"));
+  const recipe = buildRecipe({ branch: "main", workflows });
+  assert.equal(recipe.recipeId, "main");
+  assert.equal(recipe.checkoutMatches, "yes");
+  assert.ok(recipe.otherWorkflows.includes("test-vault-template.yml"));
 });
 
 test("optional AI Studio wording does not count as a lead sentence", () => {

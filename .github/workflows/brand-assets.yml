@@ -8,26 +8,31 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: aldervale-brand-assets-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build-and-validate:
-    # Standard GitHub-hosted Linux runner; free for public repositories.
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.12'
       - name: Install deterministic rendering dependencies
-        run: python -m pip install --disable-pip-version-check cairosvg pillow
+        run: python -m pip install --disable-pip-version-check --only-binary=:all: --no-deps -r tools/branding/requirements.txt
       - name: Build PNG deliverables
         run: python tools/branding/build_brand_assets.py
       - name: Validate assets
         run: python tools/branding/validate_brand_assets.py
       - name: Upload review artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: aldervale-brand-assets
           path: dist/branding/
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1

@@ -9,7 +9,7 @@ This directory contains the editable SVG source artwork for the selected AlderVa
 ## Build and validation
 Run:
 ```sh
-python -m pip install cairosvg pillow
+python -m pip install -r tools/branding/requirements.txt
 python tools/branding/build_brand_assets.py
 python tools/branding/validate_brand_assets.py
 ```

@@ -27,9 +27,17 @@ The validation workflow runs seven independent jobs:
   Sky-Lens galleries, and server-side Bazaar and trade settlement.
 
 The Linux core job writes built asset sizes, SHA-256 hashes, and GLB header checks
-to the job summary. Browser failures retain reports/traces for one day. The test
-tool dependencies live separately in tools/ci so AI Studio's application manifest
-and Bun lockfile are unchanged.
+to the job summary. It also type-checks the standalone agent packages using their
+own npm lockfiles and runs their available deterministic Node tests. These checks
+use no model credentials or live model calls. The Windows core job also smoke-tests
+the owner-play launcher in checkout mode. Browser failures retain reports/traces
+for one day. The test tool dependencies live separately in tools/ci so AI Studio's
+application manifest and Bun lockfile are unchanged.
+
+The Test Vault adoption workflow runs its copy-in fixtures and AlderVale language
+catalog checks. The legacy npm/audit-emulator workflow stays on the standalone
+`AlderVale-test-Vault` branch. Brand asset PRs render and validate PNG exports
+with pinned dependencies and one-day review artifacts.
 
 ## Run locally
 
