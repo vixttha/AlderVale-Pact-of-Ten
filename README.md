@@ -11,6 +11,7 @@ GitHub Issues remains the canonical bug record. This version develops a controll
 - [Project charter](v0.0.4/PROJECT.md)
 - [Architecture](v0.0.4/ARCHITECTURE.md)
 - [Operating workflow](v0.0.4/WORKFLOW.md)
+- [Triage standard](v0.0.4/TRIAGE.md)
 - [Acceptance plan](v0.0.4/ACCEPTANCE.md)
 - [Tracking issue #65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65)
 
