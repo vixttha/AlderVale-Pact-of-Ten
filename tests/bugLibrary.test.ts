@@ -292,6 +292,31 @@ describe("Bug Library conflict recording", () => {
     assert.deepStrictEqual(assessConflict({ ...mechanicalConflict, category: "milestone" }), { status: "escalated", reason: "MILESTONE_AUTHORITY_UNAVAILABLE" });
   });
 
+  it("rejects floating and abbreviated Git revisions in either conflict source", () => {
+    for (const position of [0, 1]) {
+      for (const revision of ["main", "HEAD", "refs/heads/main", "refs/tags/v0.0.4", sha.slice(0, 12), sha + "\n"]) {
+        const sources = mechanicalConflict.sources.map((source, index) =>
+          index === position ? { ...source, revision } : source,
+        );
+        assert.deepStrictEqual(
+          assessConflict({ ...mechanicalConflict, sources }),
+          { status: "blocked", reason: "INSUFFICIENT_PROVENANCE" },
+          `source ${position + 1}, revision ${JSON.stringify(revision)}`,
+        );
+      }
+    }
+  });
+
+  it("accepts full commit SHAs for GitHub, repository files and hosted checkouts", () => {
+    const sources: ConflictRecord["sources"] = [
+      ...mechanicalConflict.sources,
+      { sourceType: "test-run", reference: "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43906150943/attempts/1", revision: "1ea336d623483e1501736403d6ddc13759b8638b", statement: "The library tests passed on the recorded checkout." },
+    ];
+    assert.strictEqual(assessConflict({ ...mechanicalConflict, sources }).status, "prepared");
+    sources[2] = { ...sources[2], revision: "main" };
+    assert.strictEqual(assessConflict({ ...mechanicalConflict, sources }).reason, "INSUFFICIENT_PROVENANCE");
+  });
+
   it("rejects a conflict record without two revision-pinned sources", () => {
     assert.deepStrictEqual(assessConflict({ ...mechanicalConflict, sources: [mechanicalConflict.sources[0]] }), { status: "blocked", reason: "INSUFFICIENT_PROVENANCE" });
   });
