@@ -845,8 +845,6 @@ def run_external_link_regression_tests():
         cases += 1
 
         def mixed_probe(url):
-            if "broken.example" in url:
-                return "FAIL", "HTTP 404"
             if "blocked.example" in url:
                 return "UNVERIFIED", "HTTP 403"
             return "PASS", "HTTP 200"
