@@ -3,7 +3,7 @@
 ## 0.0.4 · in development
 
 - Started the controlled autonomous bug-management project on `bug-library-v0.0.4`.
-- Added the project charter, architecture, operating workflow, and acceptance plan.
+- Added the project charter, architecture, operating workflow, triage standard, and acceptance plan.
 - Tracking issue: [#65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65).
 - Not released; owner acceptance and required evidence are pending.
 
