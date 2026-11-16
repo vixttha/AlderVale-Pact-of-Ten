@@ -1,9 +1,10 @@
-# AlderVale Test Vault
+# AlderVale Test Vault v0.0.2
 
 The Test Vault is the project's catalog of executable regression tests and the player or system risks they protect. Keep tests close to the lowest layer that can prove the behavior; add a browser or emulator test when the defect crosses a real UI, storage, network, or authorization boundary.
 
-The Vault builds on the gameplay candidate in PR #27. The catalogs describe broader coverage, including cases that still need fixtures, deployments, or manual playthroughs.
+Start with the [AlderVale first-playable test and evidence guide](aldervale/README.md). The broader catalogs include cases that still need fixtures, deployments, or manual playthroughs.
 
+- [AlderVale first-playable cases](aldervale/cases.md)
 - [Public Test Vault v0.0.2 template and test ideas](public-template/README.md)
 - [Game and player journeys](game-catalog.md)
 - [Engineering and release](engineering-catalog.md)
@@ -106,4 +107,4 @@ The Playwright configuration starts the built application server for the test an
 
 ## Acceptance boundaries
 
-Automated checks do not by themselves prove Google sign-in, production Firebase behavior, deployment correctness, GPU performance on player hardware, full multiplayer security, gameplay quality, or release readiness. The owner's Rowan playthrough and signed-in production smoke remain separate acceptance requirements for PR #27.
+Automated checks do not by themselves prove Google sign-in, production Firebase behavior, deployment correctness, GPU performance on player hardware, full multiplayer security, gameplay quality, or release readiness. Record the owner's Rowan playthrough and any signed-in production smoke separately from automated results.

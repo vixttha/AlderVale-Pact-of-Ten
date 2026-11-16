@@ -73,3 +73,5 @@ jobs:
           set -o pipefail
           printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)" | tee -a "$GITHUB_STEP_SUMMARY"
           python3 docs/test-vault/public-template/verify_adoption.py --aldervale-only 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py \
+            --catalog docs/test-vault/aldervale/cases.md 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
