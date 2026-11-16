@@ -276,10 +276,17 @@ def workspace_target(root, file, url, github):
     return None
 
 
+
+def parse_link_url(href, label):
+    try:
+        return urlsplit(href)
+    except ValueError as error:
+        raise ValidationError(f"{label} has a malformed URL {href}: {error}") from error
+
 def links_to(root, file, relative_path):
     expected = root / relative_path
     for href in markdown_links(read(file)):
-        url = urlsplit(href)
+        url = parse_link_url(href, file.relative_to(root))
         target = workspace_target(root, file, url, github_target(url))
         if target is not None and target.resolve() == expected:
             return True
@@ -289,7 +296,7 @@ def links_to(root, file, relative_path):
 def check_links(root, repo, main_ref, file):
     label = file.relative_to(root)
     for href in markdown_links(read(file)):
-        url = urlsplit(href)
+        url = parse_link_url(href, label)
         github = github_target(url)
         if github and github[1] == "main":
             kind, _, path = github
@@ -947,6 +954,14 @@ def run_external_link_regression_tests():
         pass
     else:
         raise ValidationError("A private IP literal was accepted as an external destination")
+    cases += 1
+
+    try:
+        parse_link_url("https://[malformed/path", "README.md")
+    except ValidationError as error:
+        require("README.md" in str(error) and "malformed URL" in str(error), "Malformed URL lacked a useful source diagnostic")
+    else:
+        raise ValidationError("A malformed IPv6-style URL was accepted")
     cases += 1
 
     return cases
