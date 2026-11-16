@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "issueNumber": 47,
   "claimId": "AV-CLAIM-47-20261116-01",
-  "status": "active",
+  "status": "released",
   "worker": "ChatGPT AlderVale project assistant",
   "host": "ChatGPT",
   "model": "unverified",
   "sessionId": "unavailable",
-  "githubActor": "unverified",
+  "githubActor": "vixttha",
   "baseSha": "93abf6eb09e6ac06d44f22e0d1a23cee85fc713d",
   "workBranch": "fix/guest-prestige-lineages",
   "claimedAt": "2026-11-16T16:37:30.000Z",
-  "expiresAt": "2026-11-16T17:37:30.000Z",
-  "note": "Owner requested debugging and scoped fixes before the guest playthrough. Verify final-rank and owned-creature lineage eligibility on guest saves."
+  "expiresAt": "2026-11-16T16:56:45.000Z",
+  "note": "Draft PR #113 validated 7/7 on public GitHub runners, run 43910139863. Candidate prepared for owner review. Issue #47 remains open."
 }
