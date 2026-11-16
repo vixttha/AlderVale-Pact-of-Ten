@@ -29,7 +29,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Review actual GitHub rendering in four configurations
         env:
-          README_HEAD: b456112efb7b8e0aca3b9cd283d8c61212000687
+          README_HEAD: 086d234e5a848a6587ed6076d326365d99889767
         run: node "$RUNNER_TEMP/render-tools/review-readme-render.mjs"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
