@@ -12,7 +12,7 @@ Before creating a bug issue:
 
 ## 2. Triage record
 
-Use this minimum record in the canonical GitHub issue:
+Use this minimum record in the canonical GitHub issue and apply the [triage standard](TRIAGE.md):
 
 | Field | Required evidence |
 | --- | --- |
