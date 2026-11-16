@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "issueNumber": 105,
+  "claimId": "AV-CLAIM-105-20261116-01",
+  "status": "active",
+  "worker": "ChatGPT Head/Worker",
+  "host": "chatgpt.com",
+  "model": "GPT-6",
+  "sessionId": "unavailable",
+  "githubActor": "unverified",
+  "baseSha": "3fa20bc5ed4fecc228cc3733536a589bf75df6a0",
+  "workBranch": "codex/fix-105-fusion-progression",
+  "claimedAt": "2026-11-16T15:04:29Z",
+  "expiresAt": "2026-11-16T16:04:29Z",
+  "note": "Owner explicitly requested issue filing, a card-acquisition decision, a fix PR, and a return to first-playable acceptance."
+}
