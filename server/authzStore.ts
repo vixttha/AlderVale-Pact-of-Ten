@@ -69,10 +69,11 @@ export class TransactionalResourceStore {
 
     await prev;
 
-    // Staging map guarantees rollback on any thrown error inside transaction
+    // Stage only the locked resource so other transactions retain their writes.
     const staged = new Map<string, ProtectedResourceRecord>();
-    for (const [k, v] of this.records.entries()) {
-      staged.set(k, { ...v, permissions: [...v.permissions] });
+    const current = this.records.get(resourceId);
+    if (current) {
+      staged.set(resourceId, { ...current, permissions: [...current.permissions] });
     }
 
     const tx: TransactionContext = {
@@ -105,7 +106,6 @@ export class TransactionalResourceStore {
 
     try {
       const result = await fn(tx);
-      this.records.clear();
       for (const [k, v] of staged.entries()) {
         this.records.set(k, v);
       }

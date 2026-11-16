@@ -1,5 +1,55 @@
 # All-agent consolidation handoff
 
+## Current status: initial consolidation merged
+
+Live verification on 2026-11-16 confirmed [PR #101](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/101)
+merged as `3fa20bc5ed4fecc228cc3733536a589bf75df6a0`. All fourteen
+initial source heads below are ancestors of current game main
+`219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`, including the still-open #33
+and #36. Those open PR states do not mean their package code is absent.
+The candidate `3671386156177a7238d928eb66dbf228b401e46b` and merge share
+tree `ad530aa6fd76e4844a4bf57c555f7a1cd5e1ee06`.
+[Post-merge validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43890556938)
+passed all seven jobs on the merge SHA.
+[Current-main validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43917481646)
+also passed all seven jobs on `219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`.
+
+The checkpoint sections below are historical, not a request to replay merges.
+Later accepted main changes govern: notably #109 moved Bug Library v0.0.4
+to its standalone branch; #110 published README v0.0.2; #107 and #113
+integrated subsequent gameplay fixes. Preserve these decisions.
+
+### Local resource-store follow-up
+
+Worker `codex-resource-consolidation`, Codex on Windows, model unverified,
+task `/root/finish_consolidation`, authenticated GitHub actor `vixttha`.
+Baseline: `219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`.
+Working branch: `codex/resource-isolation-consolidation-2026-11-16`.
+Scope: retain the unpublished resource-store isolation patch and four tests
+from the original working copy under the owner's consolidation authorization.
+The original dirty checkout remains untouched.
+
+Contrary to the earlier unavailable-patch note below, those files were
+accessible on this machine. On the baseline, the four-test suite failed
+two cases: concurrent writes lost another resource's committed update, and
+a newly inserted resource was erased. Per-resource locks staged and replaced
+the entire map. The retained patch stages and commits only the locked record.
+All four tests then passed, along with the sixteen existing authorization and
+combat tests. The other cases cover rollback and same-resource ownership
+serialization. Full candidate CI is required before the authorized merge.
+
+This does not resolve [#57](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/57)'s
+decision about the unused endpoint's future, or production authorization
+issue #82. It changes no authentication, editable-field or ownership policy.
+The unpublished local duel-selection helper overlaps the merged duel roster
+implementation and its tests; it is retained in the original working copy.
+Generated installation and Graphify output are excluded.
+
+At this refresh, #103, #104, #112, #115, #116, #118 and #120 are subsequent
+open work, outside the original consolidation snapshot. #102's latest delta
+is a test-only correction already covered by #101's stronger settlement
+regression. No source branch is deleted or replayed by this follow-up.
+
 ## Owner authorization and outcome
 
 The owner explicitly asked to combine all open work from all agents in the
@@ -13,7 +63,7 @@ Integration branch: `codex/all-agent-consolidation-2026-11-16`.
 Starting main: `295a25c7facabf7d350c951817ba0a1af7b1612a`.
 Worker: `codex-alderwatch`; Codex on Windows; exact model variant unverified.
 The integration uses an isolated managed worktree. Preserve the original dirty
-owner checkout. Main has NOT yet received this consolidation.
+owner checkout. At this historical checkpoint, main had not received the consolidation.
 
 ## Completed in this checkpoint
 
