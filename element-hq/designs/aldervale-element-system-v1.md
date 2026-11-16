@@ -77,6 +77,45 @@ The five parent pairs, species, and stage names below are defined in the [creatu
 
 Bond stage is **1 below 100 XP**, **2 at 100–299 XP**, and **3 at 300 XP or more**. Stage names and thresholds are source-backed. Stage-specific visuals and dialogue remain open for review. [Bond stage helper](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/295a25c7facabf7d350c951817ba0a1af7b1612a/shared/creatures.ts#L307)
 
+## 4. Creature biology
+
+**Status** · Proposed v1 lore and inheritance rules. Each creature hatches with one elemental affinity. Parentage, evolution stage, and learned behavior describe different parts of its identity.
+
+### Can two different elements produce offspring?
+
+Yes. Same-element non-fusion parents pass on their shared affinity. For two different non-fusion elements, an exact match in the five-pair lineage table produces its named fusion species through a Confluence Egg, with the same result in either parent order. Other pairings that produce an ordinary egg pass on one parent's species and its affinity. The parents remain separate creatures, and the offspring has its own identity.
+
+Fusion-only species originate from their named recipes. In the proposed v1 Hatchery, a fusion creature paired with a non-fusion creature can pass on the non-fusion parent's species through an ordinary egg. Two fusion parents have no v1 Hatchery outcome. This keeps recursive and three-element fusions outside v1.
+
+### Can creatures have two elemental affinities?
+
+No. Each creature has one innate affinity and one element for combat matchups. Both parents can leave visible or behavioral traces in an offspring. A Caldera Newt can have a root-like pattern in its shell and seek out heat, while **Magma** governs its combat matchups. Its Ember and Bramble ancestry describes where it came from.
+
+### Can an element change during evolution?
+
+No. Evolution develops the creature's body, abilities, and relationship with its element while keeping the affinity it hatched with. A Caldera Newt is Magma at all three stages, from Cinder Tadpole to Obsidian Caldera. A Frost or Tide creature stays in its own lineage when it evolves. Glacier begins at the hatch of a qualifying Frost–Tide Confluence Egg.
+
+### Are some elements genetically rare?
+
+Yes. In the lore, Umbra, Sol, Verdigris, and Chronos occur in fewer established creature lineages. A rare affinity stays with the offspring when the corresponding parent's species is inherited. Ordinary offspring inherit an existing parental element. Fusion rarity comes from the specific compatible pairs and the conditions that make a Confluence Egg possible. The matching fusion species is guaranteed once its conditions are met. Rates in the wild and the final Hatchery costs and prerequisites remain open.
+
+### Can creatures resist their natural elemental instincts?
+
+Yes. Elemental instincts are tendencies a creature can learn to manage through experience, temperament, and the trust it builds with its wizard. An Ember creature might instinctively flare when startled and learn to hold its flame around hatchlings. A Glacier creature that prefers stillness might cross a rushing river to rescue a companion. In a fusion, the Confluence can influence what the creature senses. The creature decides how to act. These are rules for characterization and lore scenes. Any combat obedience or refusal mechanic would need its own design.
+
+### Design checks
+
+| Case | Proposed v1 outcome |
+| --- | --- |
+| Ember + Bramble, in either order | Magma Caldera Newt with one affinity. Both parents remain. |
+| Gale + Tide | If the pairing produces an ordinary egg, its species and affinity come from one parent. |
+| Magma + Ember, or Magma + Tempest | Magma + Ember can produce an ordinary Ember offspring. Magma + Tempest has no eligible Hatchery outcome. |
+| Caldera Newt evolves or suppresses an impulse | Stage or behavior may change. Its Magma affinity stays the same. |
+
+### Current game implementation
+
+The inspected game at [`93abf6e`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d) assigns one affinity from the resulting species on hatch. The five exact unordered pairs are implemented. Any other eligible Hatchery pair currently picks one parent's species at random, so a pairing with a fusion parent can copy that fusion species today. Rune-Catch updates Bond XP, stage, and talents while retaining the existing affinity. The creature record stores one element. The inheritance restrictions, in-world rarity, and portrayal of instinct above are proposed design rules. [Fusion resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/shared/creatures.ts#L297) · [Hatchery fallback](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/features/creatures/CreaturesArborPanel.tsx#L127) · [Hatch reward](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/App.tsx#L936) · [Bond training](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/features/creatures/CreaturesArborPanel.tsx#L71) · [Creature record](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/93abf6eb09e6ac06d44f22e0d1a23cee85fc713d/src/lib/storage.ts#L24)
+
 ## Balance and verification
 
 | Scenario | Expected result | Evidence to collect |

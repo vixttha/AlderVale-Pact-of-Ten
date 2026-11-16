@@ -2,7 +2,7 @@ name: Element HQ documents
 
 on:
   push:
-    branches: [element-hq-v1]
+    branches: [element-hq-v1, aldervale-element-design-v1]
 
 permissions:
   contents: read
@@ -73,6 +73,19 @@ jobs:
               headings = set(Path(path).read_text(encoding="utf-8").splitlines())
               if missing_sections := sections - headings:
                   raise SystemExit(f"{path} is missing sections: {sorted(missing_sections)}")
+
+          if os.environ["GITHUB_REF"] == "refs/heads/aldervale-element-design-v1":
+              biology_headings = {
+                  "## 4. Creature biology",
+                  "### Can two different elements produce offspring?",
+                  "### Can creatures have two elemental affinities?",
+                  "### Can an element change during evolution?",
+                  "### Are some elements genetically rare?",
+                  "### Can creatures resist their natural elemental instincts?",
+              }
+              design_headings = set(Path(design).read_text(encoding="utf-8").splitlines())
+              if missing_biology := biology_headings - design_headings:
+                  raise SystemExit(f"Missing creature biology sections: {sorted(missing_biology)}")
 
           print(f"Verified Element HQ documents at {head}")
           PY
