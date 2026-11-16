@@ -68,17 +68,17 @@ describe('Vault: guest quest rewards and realm saves', () => {
   it('G13-005 counts a saved lead-creature win toward the second-win Harmony reward', () => {
     const guest = createGuestWizard('horizon');
     const first = applySagaEvent(guest, 'lead-creature-win');
-    expect(first.progression.questWins.q_bond_arbor).toBe(1);
+    expect(first.progression.questWins?.q_bond_arbor).toBe(1);
     expect(first.progression.completedQuests).toEqual([]);
     expect(first.currencies).toEqual(guest.currencies);
     expect(first.xp).toBe(guest.xp);
 
     const reloaded = reloadWizard(first);
-    expect(reloaded.progression.questWins.q_bond_arbor).toBe(1);
+    expect(reloaded.progression.questWins?.q_bond_arbor).toBe(1);
     const completed = applySagaEvent(reloaded, 'lead-creature-win');
 
     expect(completed.progression.completedQuests).toEqual(['q_bond_arbor']);
-    expect(completed.progression.questWins.q_bond_arbor).toBe(2);
+    expect(completed.progression.questWins?.q_bond_arbor).toBe(2);
     expect(completed.currencies).toEqual({
       ...guest.currencies,
       florins: guest.currencies.florins + 160,
@@ -107,12 +107,12 @@ describe('Vault: guest quest rewards and realm saves', () => {
   it('G13-007 preserves partial Harmony progress across a route switch and pays once', () => {
     const guest = createGuestWizard();
     const partial = reloadWizard(applySagaEvent(guest, 'lead-creature-win'));
-    expect(partial.progression.questWins.q_bond_arbor).toBe(1);
+    expect(partial.progression.questWins?.q_bond_arbor).toBe(1);
 
     const completed = applySagaEvent(partial, 'rune-catch');
     const saved = reloadWizard(completed);
     expect(saved.progression.completedQuests).toEqual(['q_bond_arbor']);
-    expect(saved.progression.questWins.q_bond_arbor).toBe(1);
+    expect(saved.progression.questWins?.q_bond_arbor).toBe(1);
     expect(saved.currencies.florins - guest.currencies.florins).toBe(160);
     expect(saved.currencies.spellShards - guest.currencies.spellShards).toBe(4);
     expect(applySagaEvent(saved, 'lead-creature-win')).toBe(saved);

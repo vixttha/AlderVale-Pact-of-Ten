@@ -11,7 +11,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | G01-001, G09-001, G13-001 | [#13][issue13] | Guest enrollment, First Spark victory, and reward persistence | [Browser journey][human], [save tests][save] | Browser, Core | Owner desktop result |
 | G01-002, G02-001, G28-001 | | Enrollment retry, realm separation, and failed saves | [Guest browser suite][guest] | Browser | |
 | G04-001 to G04-003 | | XP thresholds, rollover, rank, and caps | [Vitest][xp], [Python reference][python] | Core, Vault catalog | |
-| G13-002 | [#13][issue13] | Other campus quest completion paths | [Reward-test draft PR #86][rewards-pr] | Core | In-game Arbor and Rare Trial completion |
+| G13-002 | [#13][issue13] | Harmony and Rare Trial quest award logic | [Quest reducer tests][reducer] | Core | In-game Arbor and Rare Trial completion |
 | G13-003, G13-004 | [#13][issue13] | First Spark replay and the three published payout schedules | [Python reference][python], [Ruby catalog][ruby] | Vault catalog | Arbor and Rare Trial in-game completion |
 | G13-005 to G13-009 | [#13][issue13] | Harmony's two paths, mixed events, Rare Trial victory, and one-time payouts across saves | [Guest quest save tests][save] | Core | In-game event eligibility and delivery |
 | G17-001, G21-002 | | Equipped gear persistence, Classic fallback, and Rowan model retry | [Rowan browser suite][human], [lifecycle Vitest][rowan] | Browser, Core | |
@@ -27,7 +27,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [issue10]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/10
 [issue13]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13
 [issue22]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/22
-[rewards-pr]: https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/86
+[reducer]: ../../../tests/questRewards.test.ts
 [human]: ../../../tools/ci/human.pw.mjs
 [guest]: ../../../tools/ci/guest.pw.mjs
 [save]: ../../../tests/vault/guestQuestSave.test.ts

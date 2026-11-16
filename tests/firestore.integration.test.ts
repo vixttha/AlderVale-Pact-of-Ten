@@ -213,16 +213,21 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     const path = 'wizards/rowan/sanctuary/layout';
     await assertFails(getDoc(doc(visitor, path)));
     await assertFails(getDoc(doc(owner, 'worldRealms/breeze/wallets/rowan-owner')));
-    const { publishTour, listTours } = await import('../server/market.ts');
+    const { publishTour, unpublishTour, listTours } = await import('../server/market.ts');
     await expect(publishTour('breeze', 'rowan-owner', 'rowan')).resolves.toEqual({ isPublic: true });
-    expect(await listTours('breeze')).toMatchObject([{ wizardId: 'rowan' }]);
+    expect(await listTours('breeze')).toMatchObject([{ wizardId: 'rowan', ratingAvg: null, ratingCount: 0 }]);
     expect((await assertSucceeds(getDoc(doc(visitor, path)))).get('isPublic')).toBe(true);
+    await expect(unpublishTour('breeze', 'rowan-owner', 'rowan')).resolves.toMatchObject({ isPublic: false });
+    expect(await listTours('breeze')).toEqual([]);
+    await assertFails(getDoc(doc(visitor, path)));
   });
 
   it('keeps Sky-Lens paintings private even when the Dorm is public', async () => {
     const owner = player('rowan-owner');
     const visitor = player('visitor');
     const path = 'wizards/rowan/private/gallery';
+    const { publishTour } = await import('../server/market.ts');
+    await publishTour('breeze', 'rowan-owner', 'rowan');
     expect((await getDoc(doc(visitor, 'wizards/rowan/sanctuary/layout'))).get('isPublic')).toBe(true);
     await assertSucceeds(setDoc(doc(owner, path), { images: ['data:image/jpeg;base64,AAA'] }));
     expect((await assertSucceeds(getDoc(doc(owner, path)))).get('images')).toHaveLength(1);

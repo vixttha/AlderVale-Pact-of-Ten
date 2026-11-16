@@ -18,7 +18,7 @@ function source() {
   mesh.add(bone);
   mesh.bind(new THREE.Skeleton([bone]));
   scene.add(mesh);
-  const animations = ['Idle_Subtle', 'Walk', 'Run_Anime', 'Jump_air', 'Victory', 'Sitting_Idle'].map(
+  const animations = ['Idle_Subtle', 'Walk', 'Sprint', 'Jump_air', 'Victory', 'Sitting_Idle'].map(
     (name) => new THREE.AnimationClip(name, 1, [new THREE.NumberKeyframeTrack('pelvis.position[y]', [0, 1], [0, 0.1])]),
   );
   return { scene, animations, mesh };
@@ -63,7 +63,7 @@ describe('Rowan imported human', () => {
     const destroyMaterial = vi.spyOn(asset.mesh.material as THREE.Material, 'dispose');
     const instance = prepareRowanInstance(asset, sculpt);
     instance.update(0.1, { moving: true, speedScalar: 1.35 });
-    expect(instance.currentClip).toBe('Run_Anime');
+    expect(instance.currentClip).toBe('Sprint');
     instance.update(0.1, { moving: false, jumping: true });
     expect(instance.currentClip).toBe('Jump_air');
     instance.update(0.1, { moving: false, emote: 'cheer' });
@@ -81,11 +81,11 @@ describe('Rowan imported human', () => {
   it('uses known source clips for idle walking sprint jumping and meditation', () => {
     expect(selectRowanClip({ moving: false })).toBe('Idle_Subtle');
     expect(selectRowanClip({ moving: true })).toBe('Walk');
-    expect(selectRowanClip({ moving: true, speedScalar: 1.35 })).toBe('Run_Anime');
+    expect(selectRowanClip({ moving: true, speedScalar: 1.35 })).toBe('Sprint');
     expect(selectRowanClip({ moving: false, emote: 'meditate' })).toBe('Sitting_Idle');
   });
   it('interrupts stationary emotes when the player starts walking or sprinting', () => {
     expect(selectRowanClip({ moving: true, emote: 'meditate' })).toBe('Walk');
-    expect(selectRowanClip({ moving: true, speedScalar: 1.35, emote: 'wave' })).toBe('Run_Anime');
+    expect(selectRowanClip({ moving: true, speedScalar: 1.35, emote: 'wave' })).toBe('Sprint');
   });
 });

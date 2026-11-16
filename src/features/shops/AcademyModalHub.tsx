@@ -2,7 +2,7 @@ import type { PlayerSettings } from '../../../shared/settings.ts';
 import React, { useEffect, useState } from 'react';
 import { ShoppingBag, ScrollText, Shield, Sliders, Map, Store, Sparkles } from 'lucide-react';
 import { MODULAR_GEAR, RACES } from '../../../shared/wardrobe.ts';
-import { SPELLS } from '../../../shared/spells.ts';
+import { SPELLS, getSpellShopLockReason } from '../../../shared/spells.ts';
 import { MOUNTS, CAMPUS_QUESTS, ZONES, type ZoneId } from '../../../shared/world.ts';
 import { RESOURCES, TERM_REWARD_TRACK, type ResourceId, type WizardDocument } from '../../../shared/economy.ts';
 import { CREATURE_SPECIES } from '../../../shared/creatures.ts';
@@ -59,6 +59,11 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   const [notice, setNotice] = useState<string | null>(null);
 
   const dwarfDiscount = RACES[wizard.raceId].passiveBonus.craftDiscountPct ? 0.88 : 1.0;
+  const spellUnlockState = {
+    rank: wizard.rank,
+    unlockedElements: wizard.progression.unlockedElements,
+    unlockedFusions: wizard.progression.unlockedFusions,
+  };
 
   useEffect(() => {
     if (tab !== 'bazaar' && tab !== 'social') return;
@@ -98,6 +103,8 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   };
 
   const buySpell = (spellId: string, price: number) => {
+    const spell = SPELLS.find((entry) => entry.id === spellId);
+    if (!spell || getSpellShopLockReason(spell, spellUnlockState)) return;
     if (wizard.currencies.florins < price || wizard.progression.ownedSpellIds.includes(spellId)) return;
     onUpdateWizard({
       ...wizard,
@@ -324,17 +331,18 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {SPELLS.filter((s) => s.priceFlorins).map((s) => {
                   const owned = wizard.progression.ownedSpellIds.includes(s.id);
+                  const lockReason = getSpellShopLockReason(s, spellUnlockState);
                   return (
                     <div key={s.id} className="flex items-center justify-between rounded-xl bg-[#fbf6ec] border border-[#d7c7a9] p-2">
                       <span className="inline-flex items-center gap-1.5 font-bold">
                         <ElementCrest elementId={s.element} size={13} /> {s.name}
                       </span>
                       <button
-                        disabled={owned || wizard.currencies.florins < (s.priceFlorins ?? 0)}
+                        disabled={owned || Boolean(lockReason) || wizard.currencies.florins < (s.priceFlorins ?? 0)}
                         onClick={() => buySpell(s.id, s.priceFlorins ?? 100)}
                         className="rounded-lg bg-[#38a3a5] px-2.5 py-1 font-bold text-white disabled:opacity-45"
                       >
-                        {owned ? 'Learned' : `${s.priceFlorins}F`}
+                        {owned ? 'Learned' : lockReason ?? `${s.priceFlorins}F`}
                       </button>
                     </div>
                   );
