@@ -18,7 +18,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { ELEMENTS, ELEMENT_LIST, type ElementId } from '../../../shared/elements.ts';
-import { SPELL_BY_ID, getStarterDeckForElement } from '../../../shared/spells.ts';
+import { SPELL_BY_ID, getStarterDeckForElement, getTrialGuardianDeckForElement, getSpellUseLockReason } from '../../../shared/spells.ts';
 import {
   drawUpToSeven,
   resolveDuelRound,
@@ -200,7 +200,19 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
           creatureTalents: activeTalents,
         });
 
-    const deckList = gearlessSpire ? getStarterDeckForElement(wizard.elementId) : [...wizard.progression.deck];
+    const spellUnlockState = {
+      rank: wizard.rank,
+      unlockedElements: wizard.progression.unlockedElements,
+      unlockedFusions: wizard.progression.unlockedFusions,
+    };
+    const isSpellUsable = (spellId: string) => {
+      const spell = SPELL_BY_ID[spellId];
+      return Boolean(spell && !getSpellUseLockReason(spell, spellUnlockState));
+    };
+    const starterDeck = getStarterDeckForElement(wizard.elementId).filter(isSpellUsable);
+    const fallbackDeck = starterDeck.length > 0 ? starterDeck : getStarterDeckForElement('ember');
+    const deckList = gearlessSpire ? [...starterDeck] : wizard.progression.deck.filter(isSpellUsable);
+    while (deckList.length < 24) deckList.push(fallbackDeck[deckList.length % fallbackDeck.length] ?? 'ember_cinder_dart');
     const shuffled = [...deckList].sort(() => Math.random() - 0.5);
 
     const c: CombatantState = {
@@ -232,7 +244,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
       hand: [],
       deck: shuffled,
       discard: [],
-      sideboard: [...wizard.progression.sideboard],
+      sideboard: wizard.progression.sideboard.filter(isSpellUsable),
       spellwrighting: { ...wizard.progression.spellwrighting },
       creatures: creatures.slice(0, 3).map((pet) => ({
         id: pet.id,
@@ -263,7 +275,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
         : mode === 'spire'
           ? 380 + (spireFloor ?? 1) * 95
           : 340 + wizard.level * 55;
-    const enemyDeck = getStarterDeckForElement(el);
+    const enemyDeck = mode === 'trial' ? getTrialGuardianDeckForElement(el) : getStarterDeckForElement(el);
     const enemy: CombatantState = {
       id: `npc_foe_${Date.now()}`,
       name:

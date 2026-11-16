@@ -1,4 +1,4 @@
-import type { ElementId } from './elements.ts';
+import { ELEMENTS, type ElementId } from './elements.ts';
 import type { StatusEffectKind } from './combat.ts';
 
 export type SpellKind =
@@ -39,6 +39,8 @@ export interface SpellDefinition {
   wrightB?: { label: string; bonusEffect: 'extra_blade' | 'extra_shield' | 'pierce_15' | 'heal_120' };
   description: string;
   unlockRank: number;
+  /** Requires the wizard to unlock this rare or fusion element before use. */
+  requiresElementUnlock?: boolean;
   priceFlorins?: number;
 }
 
@@ -86,34 +88,83 @@ export const SPELLS: SpellDefinition[] = [
   { id: 'uni_reshuffle', name: 'Archivist Reshuffle', element: 'chronos', pipCost: 4, kind: 'reshuffle', accuracy: 100, baseValue: 1, description: 'Recycles all discarded main-deck spells.', unlockRank: 2, priceFlorins: 180 },
   { id: 'uni_enchant_keen', name: 'Keen Ink Enchant', element: 'sol', pipCost: 0, kind: 'enchant', accuracy: 100, baseValue: 65, description: 'In-Hand Fusion: Adds +65 Base Power & +8% Acc to an attack card.', unlockRank: 2, priceFlorins: 140 },
 
+  // RARE ELEMENT STARTERS (rank 1; prestige wizards still need a usable native attack)
+  { id: 'umbra_shadow_needle', name: 'Shadow Needle', element: 'umbra', pipCost: 1, kind: 'attack', accuracy: 86, baseValue: 92, description: 'A precise shard of dusk for new Umbra adepts.', unlockRank: 1 },
+  { id: 'sol_sunbeam', name: 'Sunbeam Dart', element: 'sol', pipCost: 1, kind: 'attack', accuracy: 88, baseValue: 92, description: 'A focused ray of dawn for new Sol adepts.', unlockRank: 1 },
+  { id: 'verdigris_copper_shard', name: 'Copper Shard', element: 'verdigris', pipCost: 1, kind: 'attack', accuracy: 87, baseValue: 90, description: 'A quick runic shard for new Verdigris adepts.', unlockRank: 1 },
+  { id: 'chronos_echo_bolt', name: 'Echo Bolt', element: 'chronos', pipCost: 1, kind: 'attack', accuracy: 85, baseValue: 94, description: 'A measured strike through a single moment.', unlockRank: 1 },
+
   // RARE ELEMENTS (Rank 4 + Trial)
-  { id: 'umbra_velvet_drain', name: 'Velvet Leech', element: 'umbra', pipCost: 4, kind: 'drain', accuracy: 83, baseValue: 340, description: 'Drains 340 Umbra damage; heals 50% back.', unlockRank: 4, priceFlorins: 220 },
-  { id: 'umbra_hex_veil', name: 'Dusk Weakness', element: 'umbra', pipCost: 1, kind: 'weakness', accuracy: 100, baseValue: 35, description: 'Reduces foe next attack by 35%.', unlockRank: 4, priceFlorins: 160 },
-  { id: 'sol_dawn_lance', name: 'Dawnbrand Spear', element: 'sol', pipCost: 5, kind: 'attack', accuracy: 87, baseValue: 485, description: 'Piercing solar beam forged above the clouds.', unlockRank: 4, priceFlorins: 240 },
-  { id: 'sol_auric_banner', name: 'Golden Pact Banner', element: 'sol', pipCost: 1, kind: 'blade', accuracy: 100, baseValue: 45, description: 'Grants +45% universal damage blade to your team.', unlockRank: 4, priceFlorins: 190 },
-  { id: 'verdigris_anvil', name: 'Runeforge Hammer', element: 'verdigris', pipCost: 5, kind: 'attack', accuracy: 85, baseValue: 470, wrightB: { label: '+15% Pierce', bonusEffect: 'pierce_15' }, description: 'Ignores 20% shields and crushes wards.', unlockRank: 4, priceFlorins: 240 },
-  { id: 'verdigris_copper_wall', name: 'Patina Bulwark', element: 'verdigris', pipCost: 1, kind: 'shield', accuracy: 100, baseValue: 65, description: 'Blocks 65% of incoming strike.', unlockRank: 4, priceFlorins: 180 },
-  { id: 'chronos_pendulum', name: 'Grand Pendulum', element: 'chronos', pipCost: 6, kind: 'attack', accuracy: 86, baseValue: 560, description: 'Strikes across echoes of time.', unlockRank: 4, priceFlorins: 260 },
+  { id: 'umbra_velvet_drain', name: 'Velvet Leech', element: 'umbra', pipCost: 4, kind: 'drain', accuracy: 83, baseValue: 340, description: 'Drains 340 Umbra damage; heals 50% back.', unlockRank: 4, requiresElementUnlock: true, priceFlorins: 220 },
+  { id: 'umbra_hex_veil', name: 'Dusk Weakness', element: 'umbra', pipCost: 1, kind: 'weakness', accuracy: 100, baseValue: 35, description: 'Reduces foe next attack by 35%.', unlockRank: 4, requiresElementUnlock: true, priceFlorins: 160 },
+  { id: 'sol_dawn_lance', name: 'Dawnbrand Spear', element: 'sol', pipCost: 5, kind: 'attack', accuracy: 87, baseValue: 485, description: 'Piercing solar beam forged above the clouds.', unlockRank: 4, requiresElementUnlock: true, priceFlorins: 240 },
+  { id: 'sol_auric_banner', name: 'Golden Pact Banner', element: 'sol', pipCost: 1, kind: 'blade', accuracy: 100, baseValue: 45, description: 'Grants +45% universal damage blade to your team.', unlockRank: 4, requiresElementUnlock: true, priceFlorins: 190 },
+  { id: 'verdigris_anvil', name: 'Runeforge Hammer', element: 'verdigris', pipCost: 5, kind: 'attack', accuracy: 85, baseValue: 470, wrightB: { label: '+15% Pierce', bonusEffect: 'pierce_15' }, description: 'Ignores 20% shields and crushes wards.', unlockRank: 4, requiresElementUnlock: true, priceFlorins: 240 },
+  { id: 'verdigris_copper_wall', name: 'Patina Bulwark', element: 'verdigris', pipCost: 1, kind: 'shield', accuracy: 100, baseValue: 65, description: 'Blocks 65% of incoming strike.', unlockRank: 4, requiresElementUnlock: true, priceFlorins: 180 },
+  { id: 'chronos_pendulum', name: 'Grand Pendulum', element: 'chronos', pipCost: 6, kind: 'attack', accuracy: 86, baseValue: 560, description: 'Strikes across echoes of time.', unlockRank: 4, requiresElementUnlock: true, priceFlorins: 260 },
 
   // SECRET FUSION ELEMENTS
-  { id: 'magma_tectonic', name: 'Tectonic Eruption', element: 'magma', pipCost: 5, kind: 'aoe', accuracy: 85, baseValue: 490, dotDamage: 140, dotTurns: 2, description: 'Fusion Spell: Shatters the arena floor in liquid rock.', unlockRank: 3 },
-  { id: 'tempest_maelstrom', name: 'Sky-Sea Maelstrom', element: 'tempest', pipCost: 6, kind: 'aoe', accuracy: 82, baseValue: 610, description: 'Fusion Spell: Monsoon waves charged with lightning.', unlockRank: 3 },
-  { id: 'glacier_abyss', name: 'Permafrost Tide', element: 'glacier', pipCost: 5, kind: 'attack', accuracy: 88, baseValue: 470, description: 'Fusion Spell: Freezes armor and shields alike.', unlockRank: 3 },
-  { id: 'eclipse_twilight', name: 'Corona Requiem', element: 'eclipse', pipCost: 6, kind: 'drain', accuracy: 86, baseValue: 590, description: 'Fusion Spell: Lunar shadow & solar crown siphon.', unlockRank: 5 },
-  { id: 'aetheris_astrolabe', name: 'Astrolabe Zenith', element: 'aetheris', pipCost: 7, kind: 'attack', accuracy: 90, baseValue: 690, description: 'Fusion Spell: Masterwork beam of brass & star-time.', unlockRank: 6 },
+  { id: 'magma_tectonic', name: 'Tectonic Eruption', element: 'magma', pipCost: 5, kind: 'aoe', accuracy: 85, baseValue: 490, dotDamage: 140, dotTurns: 2, description: 'Fusion Spell: Shatters the arena floor in liquid rock.', unlockRank: 3, requiresElementUnlock: true },
+  { id: 'tempest_maelstrom', name: 'Sky-Sea Maelstrom', element: 'tempest', pipCost: 6, kind: 'aoe', accuracy: 82, baseValue: 610, description: 'Fusion Spell: Monsoon waves charged with lightning.', unlockRank: 3, requiresElementUnlock: true },
+  { id: 'glacier_abyss', name: 'Permafrost Tide', element: 'glacier', pipCost: 5, kind: 'attack', accuracy: 88, baseValue: 470, description: 'Fusion Spell: Freezes armor and shields alike.', unlockRank: 3, requiresElementUnlock: true },
+  { id: 'eclipse_twilight', name: 'Corona Requiem', element: 'eclipse', pipCost: 6, kind: 'drain', accuracy: 86, baseValue: 590, description: 'Fusion Spell: Lunar shadow & solar crown siphon.', unlockRank: 5, requiresElementUnlock: true },
+  { id: 'aetheris_astrolabe', name: 'Astrolabe Zenith', element: 'aetheris', pipCost: 7, kind: 'attack', accuracy: 90, baseValue: 690, description: 'Fusion Spell: Masterwork beam of brass & star-time.', unlockRank: 6, requiresElementUnlock: true },
 ];
 
 export const SPELL_BY_ID: Record<string, SpellDefinition> = Object.fromEntries(SPELLS.map((s) => [s.id, s]));
 
+export interface SpellUnlockState {
+  rank: number;
+  unlockedElements: readonly ElementId[];
+  unlockedFusions: readonly ElementId[];
+}
+
+/** Returns the purchase lock for rank and rare/fusion element progression. */
+export function getSpellShopLockReason(spell: SpellDefinition, state: SpellUnlockState): string | null {
+  if (state.rank < spell.unlockRank) return `Rank ${spell.unlockRank} required`;
+  if (!spell.requiresElementUnlock) return null;
+
+  const element = ELEMENTS[spell.element];
+  if (element.tier === 'rare' && !state.unlockedElements.includes(spell.element)) {
+    return `Complete the ${element.name} Rare Trial`;
+  }
+  if (element.tier === 'fusion' && !state.unlockedFusions.includes(spell.element)) {
+    return `Unlock ${element.name} Fusion`;
+  }
+  return null;
+}
+
+/** Keeps legacy rank-two starter cards usable while gating rank-three+ and trial/fusion cards. */
+export function getSpellUseLockReason(spell: SpellDefinition, state: SpellUnlockState): string | null {
+  if (spell.unlockRank <= 2 && !spell.requiresElementUnlock) return null;
+  return getSpellShopLockReason(spell, state);
+}
+
+const DAMAGE_SPELL_KINDS = new Set<SpellKind>(['attack', 'aoe', 'drain']);
+
 export function getStarterDeckForElement(element: ElementId): string[] {
-  const ownSpells = SPELLS.filter((s) => s.element === element && s.unlockRank <= 2).map((s) => s.id);
+  const ownSpells = SPELLS
+    .filter((s) => s.element === element && s.unlockRank <= 2 && s.kind !== 'enchant' && s.kind !== 'reshuffle')
+    .map((s) => s.id);
+  const fallbackDamage = SPELLS
+    .filter((s) => s.element === element && DAMAGE_SPELL_KINDS.has(s.kind))
+    .sort((a, b) => a.unlockRank - b.unlockRank)
+    .slice(0, 1)
+    .map((s) => s.id);
+  const starterSpells = ownSpells.length > 0 ? ownSpells : fallbackDamage;
   const deck: string[] = [];
-  for (const id of ownSpells) {
-    deck.push(id, id, id);
-  }
+  for (const id of starterSpells) deck.push(id, id, id);
   deck.push('uni_stun_ward', 'uni_ember_prism', 'bramble_dryad_bloom', 'frost_tower_ward');
-  while (deck.length < 24) {
-    deck.push(ownSpells[deck.length % ownSpells.length] ?? 'ember_cinder_dart');
-  }
+  const filler = starterSpells.length > 0 ? starterSpells : ['ember_cinder_dart'];
+  while (deck.length < 24) deck.push(filler[deck.length % filler.length]);
   return deck.slice(0, 26);
+}
+
+/** Trial guardians receive only native damage cards, including their rank-gated element spells. */
+export function getTrialGuardianDeckForElement(element: ElementId): string[] {
+  const damageSpellIds = SPELLS
+    .filter((spell) => spell.element === element && DAMAGE_SPELL_KINDS.has(spell.kind))
+    .map((spell) => spell.id);
+  if (damageSpellIds.length === 0) return getStarterDeckForElement(element);
+  return Array.from({ length: 26 }, (_, index) => damageSpellIds[index % damageSpellIds.length]);
 }
