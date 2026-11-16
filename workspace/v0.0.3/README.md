@@ -1,6 +1,8 @@
 # Public game README v0.0.3 workspace
 
-**Draft for owner review.** [Open the candidate](DRAFT.md) · [Compare with the published v0.0.2 archive](../../versions/v0.0.2/README.md)
+**Approved and archived on 2026-11-16.** [Source draft](DRAFT.md) · [Approved README](../../versions/v0.0.3/README.md) · [Changelog](../../versions/v0.0.3/CHANGELOG.md)
+
+[PR #124](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/124) tracks publication to `main`.
 
 - Use Workmark v1, surface the Windows launcher and source setup, and explain how the two local addresses store guest saves.
 - Keep the campus and duel screenshots from v0.0.2 and separate the player walkthrough from development links.
