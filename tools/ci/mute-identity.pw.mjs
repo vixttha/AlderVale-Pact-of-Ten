@@ -62,7 +62,7 @@ test('muting one player does not hide a different player with the same display n
   await page.goto('/');
   await page.getByRole('textbox').first().fill('Mute Test Rowan');
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
-  await expect(page.getByText('1 Online', { exact: true })).toBeVisible();
+  await expect(page.getByText('3 Online', { exact: true })).toBeVisible();
 
   const twins = page.getByRole('button', { name: 'Twin Lv.1', exact: true });
   await expect(twins).toHaveCount(2, { timeout: 20_000 });
