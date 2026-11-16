@@ -430,13 +430,192 @@ class PinnedHTTPSConnection(PinnedConnectionMixin, http.client.HTTPSConnection):
     _secure = True
 
 
+
 def request_public_url(url, method):
     host, port, addresses = validate_external_target(url)
     parsed = urlsplit(url)
-    path = quote(parsed.path or "/", safe="/%:@!
-def validate_repo(root, repo, main_ref, baseline=None, check_external=True):'()*+,;=-._~")
+    path = quote(parsed.path or "/", safe="/:@-._~")
     if parsed.query:
-        path += "?" + quote(parsed.query, safe="=&;%:@/?+,-._~!
+        path += "?" + quote(parsed.query, safe="=&%/:?@-._~+")
+    last_error = None
+    for address in addresses[:4]:
+        connection = None
+        try:
+            if parsed.scheme.lower() == "https":
+                connection = PinnedHTTPSConnection(
+                    host, address, port, EXTERNAL_TIMEOUT_SECONDS, context=ssl.create_default_context()
+                )
+            else:
+                connection = PinnedHTTPConnection(host, address, port, EXTERNAL_TIMEOUT_SECONDS)
+            headers = {
+                "User-Agent": "AlderVale-README-HQ-Link-Checker/1.0",
+                "Accept": "*/*",
+                "Connection": "close",
+            }
+            if method == "GET":
+                headers["Range"] = "bytes=0-0"
+            connection.request(method, path, headers=headers)
+            response = connection.getresponse()
+            result = response.status, {key.lower(): value for key, value in response.getheaders()}
+            if method == "GET":
+                response.read(1)
+            return result
+        except ssl.SSLCertVerificationError:
+            raise
+        except (OSError, http.client.HTTPException) as error:
+            last_error = error
+        finally:
+            if connection is not None:
+                connection.close()
+    if last_error is not None:
+        raise last_error
+    raise OSError("No public address could be reached")
+
+
+def probe_external_url(url, transport=None, target_validator=None):
+    """Return PASS, FAIL or UNVERIFIED; validate every redirect before connecting."""
+    transport = transport or request_public_url
+    target_validator = target_validator or validate_external_target
+    current = url
+    method = "HEAD"
+    seen = set()
+
+    for redirect_count in range(MAX_REDIRECTS + 1):
+        key = (urlunsplit(urlsplit(current)._replace(fragment="")), method)
+        if key in seen:
+            return "FAIL", "redirect loop detected"
+        seen.add(key)
+        try:
+            target_validator(current)
+            status, headers = transport(current, method)
+        except socket.gaierror:
+            return "FAIL", "DNS lookup failed"
+        except ssl.SSLCertVerificationError:
+            return "FAIL", "TLS certificate verification failed"
+        except ValidationError as error:
+            return "FAIL", str(error)
+        except (TimeoutError, socket.timeout):
+            return "UNVERIFIED", "connection timed out"
+        except (OSError, http.client.HTTPException):
+            return "UNVERIFIED", "network or HTTP protocol error"
+
+        location = headers.get("location") or headers.get("Location")
+        if status in {301, 302, 303, 307, 308} and location:
+            if redirect_count >= MAX_REDIRECTS:
+                return "FAIL", "too many redirects"
+            current = urljoin(current, location)
+            method = "HEAD"
+            continue
+
+        if method == "HEAD" and status in {403, 405, 501}:
+            method = "GET"
+            continue
+        if 200 <= status < 300 or status == 304:
+            return "PASS", f"HTTP {status}"
+        if status in {401, 403, 408, 425, 429} or 500 <= status < 600:
+            return "UNVERIFIED", f"HTTP {status} did not permit a reliable automated check"
+        if status in {404, 410}:
+            return "FAIL", f"HTTP {status}"
+        if 300 <= status < 400:
+            return "UNVERIFIED", f"HTTP {status} returned no usable redirect"
+        if 400 <= status < 500:
+            return "FAIL", f"HTTP {status}"
+        return "UNVERIFIED", f"unexpected HTTP {status}"
+
+    return "FAIL", "too many redirects"
+
+
+def safe_external_display(url):
+    parsed = urlsplit(url)
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, "", ""))
+
+
+def collect_external_links(root):
+    """Collect unique public HTTP(S) URLs, excluding links checked against Git refs."""
+    links = {}
+    skipped_loopback = 0
+    unsupported = []
+    markdown_files = (
+        file for file in root.rglob("*.md") if ".git" not in file.parts and "__pycache__" not in file.parts
+    )
+    for file in sorted(markdown_files):
+        relative = file.relative_to(root).as_posix()
+        for href in markdown_links(read(file)):
+            try:
+                parsed = urlsplit(href)
+            except ValueError:
+                unsupported.append(f"{relative}: malformed URL")
+                continue
+            scheme = parsed.scheme.lower()
+            if scheme in {"", "mailto", "tel"}:
+                continue
+            if scheme not in {"http", "https"}:
+                unsupported.append(f"{relative}: unsupported URL scheme {scheme}")
+                continue
+            github = github_target(parsed)
+            if github and github[1] in {"main", "readme-hq"}:
+                continue
+            if is_loopback_host(parsed.hostname):
+                skipped_loopback += 1
+                continue
+            normalized = urlunsplit((scheme, parsed.netloc, parsed.path, parsed.query, ""))
+            if len(normalized) > 2048:
+                unsupported.append(f"{relative}: URL exceeds 2048 characters")
+                continue
+            links.setdefault(normalized, set()).add(relative)
+
+    require(not unsupported, "Unsupported Markdown URL(s): " + "; ".join(unsupported[:10]))
+    require(len(links) <= MAX_EXTERNAL_LINKS, f"External URL count exceeds the safety limit of {MAX_EXTERNAL_LINKS}")
+    return links, skipped_loopback
+
+
+def check_external_links(root, probe=None):
+    """Check all public HTTP(S) Markdown links; blocked sites remain explicitly unverified."""
+    probe = probe or probe_external_url
+    links, skipped_loopback = collect_external_links(root)
+    if not links:
+        return f"0 public HTTP(S) links; {skipped_loopback} local loopback examples skipped"
+
+    def run_one(item):
+        url, sources = item
+        try:
+            status, detail = probe(url)
+        except Exception as error:
+            status, detail = "UNVERIFIED", f"checker exception: {type(error).__name__}"
+        return url, sources, status, detail
+
+    with ThreadPoolExecutor(max_workers=min(8, len(links))) as executor:
+        results = list(executor.map(run_one, sorted(links.items())))
+
+    failures = []
+    warnings = []
+    passed = 0
+    for url, sources, status, detail in results:
+        source_list = ", ".join(sorted(sources))
+        if status == "PASS":
+            passed += 1
+        elif status == "UNVERIFIED":
+            warnings.append((url, source_list, detail))
+        else:
+            failures.append((url, source_list, detail))
+
+    for url, sources, detail in warnings:
+        print(f"WARNING: external URL unverified: {safe_external_display(url)} ({detail}); referenced by {sources}")
+    require(
+        not failures,
+        "Broken or unsafe external URL(s): "
+        + "; ".join(
+            f"{safe_external_display(url)} ({detail}; {sources})"
+            for url, sources, detail in failures[:10]
+        ),
+    )
+    return (
+        f"{len(links)} public HTTP(S) links checked: {passed} PASS, "
+        f"{len(warnings)} UNVERIFIED, {skipped_loopback} local loopback examples skipped"
+    )
+
+
+def validate_repo(root, repo, main_ref, baseline=None, check_external=True):
     manifest = read_manifest(root)
     if baseline:
         check_frozen_history(root, repo, baseline, manifest)
