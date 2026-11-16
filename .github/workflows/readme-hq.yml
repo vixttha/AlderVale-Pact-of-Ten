@@ -19,10 +19,10 @@ jobs:
     if: github.event.repository.private == false
     name: Version archives and links
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Check archive structure and navigation
+      - name: Check archives, current-main links, and external URLs
         run: python3 tools/check_readme_hq.py
