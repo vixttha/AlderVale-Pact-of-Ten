@@ -6,10 +6,10 @@
 
 - Replaces the stale v0.0.2 validator limitations with the behavior implemented by the current validator.
 - Documents frozen-source provenance checks using the recorded source commit, source path, and Git blob SHA-1.
-- Documents fresh \`origin/main\` resolution, exact main SHA receipts, target type checks, and heading-fragment validation.
+- Documents fresh `origin/main` resolution, exact main SHA receipts, target type checks, and heading-fragment validation.
 - Documents external URL discovery across Markdown, bare URLs, protocol-relative URLs, and HTML attributes.
 - Explains bounded redirects, public DNS validation, pinned public IP connections, TLS verification, loopback/private-target rejection, and bounded HEAD/GET probing.
-- Defines \`PASS\`, failure, and \`UNVERIFIED\` outcomes, including diagnostic redaction.
+- Defines `PASS`, failure, and `UNVERIFIED` outcomes, including diagnostic redaction.
 - Explains the public GitHub-hosted README HQ workflow and the owner-controlled archive boundary.
 
 ## Validator regression guard
@@ -25,4 +25,4 @@
 - README HQ v0.0.1 archives remain unchanged.
 - The public game README and its separate v0.0.2 draft remain unchanged.
 - The approved version history and baseline manifest are not advanced until explicit owner acceptance.
-- No change is made to \`main\`; no merge, public README promotion, or release is included.
+- No change is made to `main`; no merge, public README promotion, or release is included.

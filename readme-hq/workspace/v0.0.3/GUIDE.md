@@ -1,9 +1,9 @@
 # README HQ Folder Guide
 
-**Proposed HQ version:** \`v0.0.3\`
-**Review state:** Draft for owner review. v0.0.2 remains the latest approved and archived HQ version on \`readme-hq\`.
+**Proposed HQ version:** `v0.0.3`
+**Review state:** Draft for owner review. v0.0.2 remains the latest approved and archived HQ version on `readme-hq`.
 
-This guide proposal documents the validator currently implemented in [\`tools/check_readme_hq.py\`](../../../tools/check_readme_hq.py). It does not change the approved v0.0.2 archive. The live folder guide remains v0.0.2 until the owner accepts a new archive.
+This guide proposal documents the validator currently implemented in [`tools/check_readme_hq.py`](../../../tools/check_readme_hq.py). It does not change the approved v0.0.2 archive. The live folder guide remains v0.0.2 until the owner accepts a new archive.
 
 ## Where to work
 
@@ -19,7 +19,7 @@ This guide proposal documents the validator currently implemented in [\`tools/ch
 
 ## What the validator checks
 
-The README HQ workflow runs \`python3 tools/check_readme_hq.py\` on a standard public GitHub-hosted \`ubuntu-latest\` runner. It runs on pushes to \`readme-hq\`, pull requests targeting \`readme-hq\`, and manual workflow dispatch. The job has a finite timeout, read-only repository contents permission, and concurrency cancellation. It skips execution when the repository is private.
+The README HQ workflow runs `python3 tools/check_readme_hq.py` on a standard public GitHub-hosted `ubuntu-latest` runner. It runs on pushes to `readme-hq`, pull requests targeting `readme-hq`, and manual workflow dispatch. The job has a finite timeout, read-only repository contents permission, and concurrency cancellation. It skips execution when the repository is private.
 
 The validator checks the following areas.
 
@@ -34,22 +34,22 @@ The validator checks the following areas.
 
 ### 2. Branch-local and current-main navigation
 
-- Relative Markdown links and absolute links into the \`readme-hq\` branch are resolved against the exact validation checkout. Paths that escape the repository or point to missing files/directories fail.
+- Relative Markdown links and absolute links into the `readme-hq` branch are resolved against the exact validation checkout. Paths that escape the repository or point to missing files/directories fail.
 - Heading fragments are checked against generated Markdown heading slugs.
-- At the start of every hosted run, the validator fetches \`origin/main\` rather than relying on a pinned, stale main commit. The log records the exact main SHA used for that run.
-- GitHub links to \`main\` are checked against that fetched main SHA. The validator verifies whether the target is a file or directory and checks heading fragments against the target file at that same main SHA.
+- At the start of every hosted run, the validator fetches `origin/main` rather than relying on a pinned, stale main commit. The log records the exact main SHA used for that run.
+- GitHub links to `main` are checked against that fetched main SHA. The validator verifies whether the target is a file or directory and checks heading fragments against the target file at that same main SHA.
 - A main-branch link is therefore verified against the main revision used by that run, not against the README HQ branch's older base.
 
 ### 3. External URL discovery
 
 The validator extracts external destinations from:
 
-- Inline and reference Markdown links.
+- Inline Markdown links and reference links.
 - Markdown autolinks and bare URLs.
 - Protocol-relative URLs.
-- HTML \`href\`, \`src\`, \`poster\`, and \`action\` attributes.
+- HTML `href`, `src`, `poster`, and `action` attributes.
 
-It deduplicates destinations, checks a bounded number of links, and skips local loopback examples such as \`localhost\` rather than treating them as public links.
+It deduplicates destinations, checks a bounded number of links, and skips local loopback examples such as `localhost` rather than treating them as public links.
 
 ### 4. External request safety
 
@@ -57,16 +57,16 @@ It deduplicates destinations, checks a bounded number of links, and skips local 
 - DNS destinations must resolve to public IP addresses. Private, loopback, reserved-local, and otherwise non-public destinations are rejected.
 - The connection is pinned to a validated public IP address while preserving the original hostname for the Host header and TLS certificate verification.
 - TLS certificate verification remains enabled.
-- Redirects are bounded; every redirect target is revalidated before another request is made. A redirect to a private or loopback destination is blocked.
+- The checker follows bounded redirects (up to five hops); every redirect target is revalidated before another request is made. A redirect to a private or loopback destination is blocked.
 - The checker starts with HEAD. When a server rejects HEAD with 403, 405, or 501, it uses a bounded GET fallback with a one-byte range request.
 - Network concurrency and per-request timeouts are bounded.
 
 ### 5. Result classification and diagnostics
 
-- Successful 2xx responses and 304 are reported as \`PASS\`.
+- Successful 2xx responses and 304 are reported as `PASS`.
 - Missing pages (404 or 410), unsafe destinations, DNS failures, TLS certificate failures, redirect loops, and other definitive client errors are reported as failures.
-- Access blocks and inconclusive responses, including a remaining HTTP 403 after the bounded GET fallback, 401, 408, 425, 429, server errors, timeouts, and network/protocol errors, are reported as \`UNVERIFIED\`.
-- \`UNVERIFIED\` is not a pass. It means the automated checker could not establish that the destination is healthy; it remains visible in the run output.
+- Access blocks and inconclusive responses, including a remaining HTTP 403 after the bounded GET fallback, 401, 408, 425, 429, server errors, timeouts, and network/protocol errors, are reported as `UNVERIFIED`.
+- `UNVERIFIED` is not a pass. It means the automated checker could not establish that the destination is healthy; it remains visible in the run output.
 - Credentials in URLs are rejected. Diagnostics redact credentials, query strings, and fragments so tokens or private query values are not printed.
 - Local loopback examples are reported as skipped development examples, not as verified public destinations.
 
@@ -78,17 +78,17 @@ The guide-coverage guard checks the latest active HQ workspace guide while a ver
 
 ## Creating and approving an HQ version
 
-1. Create a version folder under \`readme-hq/workspace/<version>/\`. Keep the proposed landing page in \`DRAFT.md\`, the proposed folder guide in \`GUIDE.md\`, the proposed changelog in \`CHANGELOG.md\`, and the workspace record in \`README.md\`.
-2. Keep the workspace index row at \`Draft\` while the owner reviews it. A draft is not an approved version and must not be added to the archive version index or frozen-source manifest.
-3. After explicit owner acceptance, copy the approved landing page and guide byte for byte into \`readme-hq/versions/<version>/\`. Add the changelog, update the approved version index, update the live root README and folder guide, and add source commit/path/blob entries to the manifest in the same archive commit.
+1. Create a version folder under `readme-hq/workspace/<version>/`. Keep the proposed landing page in `DRAFT.md`, the proposed folder guide in `GUIDE.md`, the proposed changelog in `CHANGELOG.md`, and the workspace record in `README.md`.
+2. Keep the workspace index row at `Draft` while the owner reviews it. A draft is not an approved version and must not be added to the archive version index or frozen-source manifest.
+3. After explicit owner acceptance, copy the approved landing page and guide byte for byte into `readme-hq/versions/<version>/`. Add the changelog, update the approved version index, update the live root README and folder guide, and add source commit/path/blob entries to the manifest in the same archive commit.
 4. Change the workspace row to an archived status, retain the source record, and preserve all earlier archives and changelogs.
 5. Run the README HQ workflow on the exact proposed archive commit. Review the checkout SHA, prior archive baseline, main SHA, test summary, and any UNVERIFIED external destinations.
-6. A branch archive does not merge into \`main\`, publish the public game README, or declare a game release. Those actions require separate owner authorization.
+6. A branch archive does not merge into `main`, publish the public game README, or declare a game release. Those actions require separate owner authorization.
 
 ## Scope boundaries
 
 README HQ manages its own approved history and the separate public game README workspaces. It does not own gameplay changes or bug closure. GitHub Issues remain the canonical engineering tracker; Notion remains the private planning and handoff space.
 
-Keep the \`readme-hq\` branch separate from the full game \`main\` branch. It is a sparse documentation branch; do not merge it wholesale into \`main\`. PR #62 is a separate public README integration proposal and must be refreshed and revalidated against current \`main\` before any promotion.
+Keep the `readme-hq` branch separate from the full game `main` branch. It is a sparse documentation branch; do not merge it wholesale into `main`. PR #62 is a separate public README integration proposal and must be refreshed and revalidated against current `main` before any promotion.
 
 This proposed v0.0.3 guide is not active until the owner accepts the version. The v0.0.2 archive and its changelog remain frozen.
