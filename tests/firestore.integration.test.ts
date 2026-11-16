@@ -226,6 +226,8 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     const owner = player('rowan-owner');
     const visitor = player('visitor');
     const path = 'wizards/rowan/private/gallery';
+    const { publishTour } = await import('../server/market.ts');
+    await publishTour('breeze', 'rowan-owner', 'rowan');
     expect((await getDoc(doc(visitor, 'wizards/rowan/sanctuary/layout'))).get('isPublic')).toBe(true);
     await assertSucceeds(setDoc(doc(owner, path), { images: ['data:image/jpeg;base64,AAA'] }));
     expect((await assertSucceeds(getDoc(doc(owner, path)))).get('images')).toHaveLength(1);
