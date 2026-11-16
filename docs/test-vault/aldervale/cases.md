@@ -41,4 +41,9 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | E15-002 | Quest text and giver links | P1 | Ruby and Node.js | Read the shipped quest catalog as UTF-8 JSON, reject empty or damaged display text, and resolve each quest giver to exactly one campus NPC. |
 | E24-001 | Browser compatibility | P0 | GitHub Actions and Playwright | Run the guest and Rowan suites in Chromium, Firefox, and WebKit and retain each attempt's results. |
 | E24-002 | Core compatibility | P0 | GitHub Actions and Bun | Run the frozen install, lint, unit tests, build, and server integration on Ubuntu, Windows, and macOS. |
+| E24-003 | Launcher paths with spaces | P0 | PowerShell | Install and start the Windows game from a checkout inside a parent folder with spaces. |
+| E24-004 | Exact launcher revision | P0 | PowerShell | Match the startup receipt's full commit SHA to the actual checkout. |
+| E24-005 | Launcher without Node | P1 | PowerShell | Show Node installation guidance, exit 1 and skip installation under a restricted PATH. |
+| E24-006 | Failed launcher update recovery | P0 | PowerShell | Start the saved build after an unavailable fetch and keep its revision receipt. |
+| E24-007 | Occupied launcher port | P1 | PowerShell | Explain the port collision, exit 1 and keep the previous working-build receipt. |
 | E34-002 | Isolated test services | P0 | GitHub Actions, browser fixtures, and Firestore emulator | Run the guest suite with external hosts blocked and Firestore checks against the `demo-aldervale-ci` emulator. |

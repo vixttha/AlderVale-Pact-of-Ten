@@ -57,9 +57,18 @@ jobs:
       - name: Real HTTP and WebSocket integration
         id: server_test
         run: node --test tools/ci/server.check.mjs
-      - name: Install and start the Windows owner-play build
+      - name: Verify Windows owner-play launcher contracts
         if: runner.os == 'Windows'
-        run: '& ".\AlderVale Play\Play AlderVale.cmd" --smoke --checkout'
+        shell: pwsh
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          "Base: $env:PR_BASE_SHA" | Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          "Head: $env:PR_HEAD_SHA" | Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          "Run / attempt: $env:GITHUB_RUN_ID / $env:GITHUB_RUN_ATTEMPT" | Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          & ./tests/vault/powershell/launcher-contracts.ps1 *>&1 |
+            Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
       - name: Asset sizes and GLB integrity
         if: runner.os == 'Linux'
         shell: bash
