@@ -10,8 +10,8 @@ permissions:
   contents: read
 jobs:
   build-and-validate:
-    # Uses the owner's registered self-hosted Linux runner; no paid GitHub-hosted minutes.
-    runs-on: [self-hosted, linux, x64]
+    # Standard GitHub-hosted Linux runner; free for public repositories.
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
