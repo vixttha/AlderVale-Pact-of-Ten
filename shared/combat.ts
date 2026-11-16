@@ -537,7 +537,7 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
               actor.discard.push(baseId);
             }
 
-            executeSpellEffect(next, actor, target, spell, isEnchanted, coopResonance, rng, roundLogs);
+            executeSpellEffect(next, actor, target, spell, isEnchanted, coopResonance && next.playerTeam.includes(actor), rng, roundLogs);
           }
         }
       }
