@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "issueNumber": 74,
+  "claimId": "AV-CLAIM-74-20261116-01",
+  "status": "active",
+  "worker": "ChatGPT AlderVale project assistant",
+  "host": "ChatGPT",
+  "model": "unverified",
+  "sessionId": "unavailable",
+  "githubActor": "unverified",
+  "baseSha": "219a6bda1f9b2e01f06fd97350a66ed8f470f0d1",
+  "workBranch": "fix/deterministic-combat-effect-ids",
+  "claimedAt": "2026-11-16T17:21:32.000Z",
+  "expiresAt": "2026-11-16T18:21:32.000Z",
+  "note": "Owner requested continued bug fixing after the two progression merges. Scope: deterministic spellwright and creature effect IDs in shared combat, with existing safe regression fixtures."
+}
