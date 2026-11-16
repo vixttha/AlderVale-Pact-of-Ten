@@ -54,7 +54,11 @@ export function assessConflict(record: ConflictRecord): ConflictAssessment {
     return { status: "blocked", reason: "INSUFFICIENT_PROVENANCE" };
   }
 
-  if (record.ownerDecisionRequired || record.governingAuthority === "owner-decision") {
+  if (record.ownerDecisionRequired ||
+      record.governingAuthority === "owner-decision" ||
+      record.category === "product-intent" ||
+      record.category === "project-law" ||
+      record.governingAuthority === "project-law") {
     return { status: "escalated", reason: "OWNER_DECISION_REQUIRED" };
   }
   if (record.category === "security-privacy") {
@@ -62,9 +66,6 @@ export function assessConflict(record: ConflictRecord): ConflictAssessment {
   }
   if (record.category === "milestone" || record.governingAuthority === "active-milestone") {
     return { status: "escalated", reason: "MILESTONE_AUTHORITY_UNAVAILABLE" };
-  }
-  if (record.category === "product-intent" || record.category === "project-law") {
-    return { status: "blocked", reason: "AMBIGUOUS_PRODUCT_OR_LAW_CONFLICT" };
   }
   if (!record.proposedResolution.trim() || record.resolutionEvidence.length === 0) {
     return { status: "blocked", reason: "MISSING_RESOLUTION_EVIDENCE" };
