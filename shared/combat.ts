@@ -810,3 +810,10 @@ export function chooseAiAction(ai: CombatantState, foes: CombatantState[]): Turn
     creatureAction: ai.creatures[ai.activeCreatureIdx]?.hp > 0 ? 'skill' : 'none',
   };
 }
+
+/** True when the wizard's lead was the active fighter at duel end (local Arbor win credit). */
+export function leadCreatureQualifiedForArborWin(me: CombatantState, leadCreatureId: string): boolean {
+  const leadIdx = me.creatures.findIndex((pet) => pet.id === leadCreatureId);
+  if (leadIdx < 0) return false;
+  return me.creatures[me.activeCreatureIdx]?.id === leadCreatureId;
+}

@@ -268,3 +268,17 @@ export async function publishTour(realm: RealmId, uid: string, wizardId: unknown
     return { isPublic: true };
   });
 }
+
+export async function unpublishTour(realm: RealmId, uid: string, wizardId: unknown) {
+  if (!isDocumentId(wizardId)) throw new RequestError(400, 'Invalid wizard');
+  const layout = cloudDb.collection('wizards').doc(wizardId).collection('sanctuary').doc('layout');
+  const listing = realmRef(realm).collection('dormTours').doc(wizardId);
+  return cloudDb.runTransaction(async (tx) => {
+    const [wizard, snapshot] = await Promise.all([ownedWizard(uid, wizardId, realm, tx), tx.get(layout)]);
+    const dorm = snapshot.data();
+    if (!dorm || dorm.ownerId !== uid || dorm.realmId !== realm) throw new RequestError(404, 'Dorm layout unavailable');
+    tx.update(layout, { isPublic: false, updatedAt: FieldValue.serverTimestamp() });
+    tx.delete(listing);
+    return { isPublic: false, wizardName: wizard.name };
+  });
+}
