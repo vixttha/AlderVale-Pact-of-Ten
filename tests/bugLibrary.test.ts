@@ -8,6 +8,7 @@ import {
   type ClaimStore,
   type QueueContext,
   type QueueIssue,
+  type QueuePullRequest,
   type QueueTriage,
   type WorkerClaim,
 } from "../v0.0.4/queue.ts";
@@ -90,7 +91,99 @@ describe("Bug Library queue", () => {
     assert.strictEqual(result.decisions[0].reason, "OPEN_PR_ALREADY_COVERS_ISSUE_100");
   });
 
-  it("does not dispatch a partial First Spark record as a confirmed bug", () => {
+  const pr92 = {
+    number: 92, state: "closed", merged: true, issueNumbers: [75], changedFiles: ["server/wsHub.ts"],
+    url: "https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/92",
+  } satisfies QueuePullRequest;
+  const releasedClaim: WorkerClaim = {
+    issueNumber: 75, claimId: "claim-75", status: "released", worker: "worker-a",
+    expiresAt: "2026-11-16T12:00:00.000Z", baseSha: sha, workBranch: "fix/issue-75",
+  };
+  const mergedContext = (patch: Partial<QueueContext> = {}) => context({
+    pullRequests: [pr92], claims: [releasedClaim], ...patch,
+  });
+  const mergedReview = {
+    mainSha: sha,
+    pullRequestNumbers: [92],
+    evidence: ["https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43882668187"],
+  };
+
+  it("blocks stale confirmed triage after the linked fix merged and the claim was released", () => {
+    const result = buildQueue([issue(75)], mergedContext());
+    assert.strictEqual(result.next, null);
+    assert.strictEqual(result.decisions[0].reason, "MERGED_FIX_COVERAGE_REVIEW_REQUIRED");
+  });
+
+  it("requires explicit merge status for a linked closed PR and permits an explicitly unmerged PR", () => {
+    for (const merged of [undefined, false]) {
+      const result = buildQueue([issue(75)], mergedContext({ pullRequests: [{ ...pr92, merged }] }));
+      if (merged === undefined) {
+        assert.strictEqual(result.next, null);
+        assert.strictEqual(result.decisions[0].reason, "LINKED_PR_MERGE_STATUS_REQUIRED");
+      } else {
+        assert.strictEqual(result.next?.issueNumber, 75);
+      }
+    }
+  });
+
+  it("leaves an open issue out of the implementation queue when its merge review finds no remaining work", () => {
+    const result = buildQueue([issue(75)], mergedContext({ triage: { 75: bugTriage({ mergedFixReview: mergedReview }) } }));
+    assert.strictEqual(result.next, null);
+    assert.strictEqual(result.decisions[0].reason, "NO_REMAINING_WORK_AFTER_MERGE");
+  });
+
+  it("requires fresh coverage evidence for the pinned main SHA and every linked merge", () => {
+    const triage = { 75: bugTriage({ mergedFixReview: mergedReview }) };
+    const cases = [
+      mergedContext({ mainSha: "93abf6eb09e6ac06d44f22e0d1a23cee85fc713d", triage }),
+      mergedContext({ pullRequests: [pr92, { ...pr92, number: 94 }], triage }),
+      mergedContext({ triage: { 75: bugTriage({ mergedFixReview: { ...mergedReview, evidence: [" "] } }) } }),
+    ];
+    for (const input of cases) {
+      const result = buildQueue([issue(75)], input);
+      assert.strictEqual(result.next, null);
+      assert.strictEqual(result.decisions[0].reason, "MERGED_FIX_COVERAGE_REVIEW_REQUIRED");
+    }
+  });
+
+  it("requires a documented scope for any post-merge assignment", () => {
+    const mergedFixReview = { ...mergedReview, remainingWork: {
+      expectedBehavior: "Verify stored selection during authenticated matchmaking.",
+      acceptanceCriteria: ["The authenticated session uses the stored creature."],
+      scopeLimits: [],
+    } };
+    const result = buildQueue([issue(75)], mergedContext({ triage: { 75: bugTriage({ mergedFixReview }) } }));
+    assert.strictEqual(result.next, null);
+    assert.strictEqual(result.decisions[0].reason, "MERGED_FIX_FOLLOW_UP_SCOPE_REQUIRED");
+  });
+
+  it("assigns only the authenticated matchmaking follow-up after a coverage review", () => {
+    const remainingWork = {
+      expectedBehavior: "Verify that authenticated matchmaking uses the stored selection.",
+      acceptanceCriteria: ["Authenticated matchmaking uses the stored creature in the emulator."],
+      affectedFiles: ["tests/authenticatedMatchmaking.test.ts"],
+      scopeLimits: ["Authenticated matchmaking verification only."],
+    };
+    const triage = { 75: bugTriage({
+      affectedFiles: ["server/wsHub.ts"],
+      scopeLimits: ["Use the emulator."],
+      mergedFixReview: { ...mergedReview, remainingWork },
+    }) };
+    const otherPR = { ...pr92, number: 99, state: "open" as const, merged: false, issueNumbers: [] };
+    const result = buildQueue([issue(75)], mergedContext({ triage, pullRequests: [pr92, otherPR] }));
+    assert.strictEqual(result.next?.issueNumber, 75);
+    assert.strictEqual(result.next?.expectedBehavior, remainingWork.expectedBehavior);
+    assert.deepStrictEqual(result.next?.acceptanceCriteria, remainingWork.acceptanceCriteria);
+    assert.deepStrictEqual(result.next?.evidence, mergedReview.evidence);
+    assert.deepStrictEqual(result.next?.scopeLimits, ["Use the emulator.", ...remainingWork.scopeLimits]);
+
+    const overlapping = { ...otherPR, changedFiles: remainingWork.affectedFiles };
+    const blocked = buildQueue([issue(75)], mergedContext({ triage, pullRequests: [pr92, overlapping] }));
+    assert.strictEqual(blocked.next, null);
+    assert.strictEqual(blocked.decisions[0].reason, "OPEN_PR_ALREADY_COVERS_ISSUE_99");
+  });
+
+ () => {
     const result = buildQueue([issue(13)], context({
       triage: { 13: bugTriage({ status: "blocked", expectedBehavior: "First Spark is covered; Arbor and Rare Trial remain unverified." }) },
     }));
