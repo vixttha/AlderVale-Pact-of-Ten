@@ -1,5 +1,12 @@
 # Bug Library changelog
 
+## 0.0.5 · candidate
+
+- Require full Git commit SHAs for conflict evidence from GitHub, repository files and hosted checkouts.
+- Hold assignments when a linked PR already merged until coverage is reviewed for the current game checkout. Scope any new assignment to the remaining work.
+- Preserve Issue #75's authenticated matchmaking verification as a follow-up to PR #92.
+- Track review and validation under [Issue #65](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/65).
+
 ## 0.0.4 · in development
 
 - Started the controlled autonomous bug-management project on `bug-library-v0.0.4`.

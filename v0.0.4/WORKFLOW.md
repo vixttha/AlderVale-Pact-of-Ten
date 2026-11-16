@@ -16,6 +16,10 @@ A recorded conflict is eligible for automatic investigation and resolution prepa
 
 Do not treat "confirmed" as permission to change product requirements, widen scope, create new issues, merge, close, release, change settings, or spend money.
 
+Before dispatch, include linked closed PRs with their verified GitHub `merged` status in the queue snapshot. A linked merge requires a coordinator coverage review against the current game `main` SHA. Record the reviewed PR numbers and evidence. If work remains, provide its expected behavior, acceptance criteria, and scope limits in `mergedFixReview.remainingWork`. Provide affected paths when known so overlap checks use the follow-up scope. A completed fix waiting on issue closure stays out of the implementation queue. When `main` advances or another linked PR merges, refresh the review.
+
+For #75, PR #92 covered guest PvP and co-op and has unit evidence for the authenticated resolver. The remaining verification is authenticated matchmaking through the stored-selection path in the emulator, including ownership rejection. Keep the canonical issue open while that evidence is pending.
+
 ## 3. Claim and task packet
 
 Before edits, the coordinator checks active branches, overlapping PRs, prior worker claims, current main and handoff. It assigns one worker and records:

@@ -1,12 +1,18 @@
 # AlderVale Bug Library
 
-**Library version 0.0.4 · standalone candidate · owner acceptance pending**
+**Library version 0.0.5 · standalone candidate · owner acceptance pending**
 
 Start with [open bugs](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues?q=is%3Aissue+is%3Aopen+label%3Abug), search [all issues](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues?q=is%3Aissue) for duplicates, or browse [closed bugs](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues?q=is%3Aissue+is%3Aclosed+label%3Abug).
 
 GitHub Issues remains the canonical bug record. This version develops a controlled, agent-assisted workflow for intake, triage, investigation, exact-checkout verification, audit, and owner acceptance. It does not introduce a separate bug database or an unattended agent service.
 
-## Version 0.0.4 project
+## Version 0.0.5
+
+- Conflict assessment requires full commit SHAs for GitHub, repository files and Actions checkouts.
+- The queue holds an open issue with a linked merge until a coordinator reviews coverage against the pinned game `main`. It assigns only an explicitly scoped remainder.
+- v0.0.5 uses the existing library paths so agents can keep discovering the entry point from game `main`. [The v0.0.4 snapshot](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/1ea336d623483e1501736403d6ddc13759b8638b) preserves its exact contents.
+
+## Operating guides and acceptance history
 
 - [Project charter](v0.0.4/PROJECT.md)
 - [Architecture](v0.0.4/ARCHITECTURE.md)
@@ -46,4 +52,4 @@ Update the permanent library on `bug-library`. Use [Actions](https://github.com/
 
 ## Authority and safety
 
-The project owner controls priorities, scope, acceptance, issue closure, merge, and release. No unattended merge/closure/release, paid API, production secret, self-hosted runner, or new always-on backend is part of v0.0.4. The repository remains public; Notion remains private.
+The project owner controls priorities, scope, acceptance, issue closure, merge, and release. No unattended merge/closure/release, paid API, production secret, self-hosted runner, or new always-on backend is part of the library. The repository remains public; Notion remains private.

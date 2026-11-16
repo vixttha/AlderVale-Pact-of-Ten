@@ -1,5 +1,9 @@
 # Bug Library v0.0.4 — Conflict Management Standard
 
+## Source revisions
+
+For GitHub, repository files, and Actions receipts, record the full 40-character commit SHA. For an Actions receipt, use the tested checkout SHA and link the exact run attempt. Resolve branch names, tags, pull request refs, and abbreviated SHAs before assessment. For Notion or another provider, the coordinator must verify that the supplied revision identifies the evidence reviewed.
+
 ## Purpose
 
 Treat conflicts as first-class engineering work items. The goal is to detect incompatible project state early, establish which sources govern, and prepare a safe resolution with evidence. Conflict management must not let an LLM invent or override owner intent.

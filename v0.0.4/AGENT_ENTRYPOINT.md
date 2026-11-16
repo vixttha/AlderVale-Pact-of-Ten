@@ -1,4 +1,4 @@
-# AlderVale LLM Agent Entry Point — Bug Library v0.0.4
+# AlderVale LLM Agent Entry Point
 
 This is the provider-neutral starting point for every LLM working on AlderVale bugs or conflicts. It is a retrieval and operating contract, not a model-specific prompt and not proof that a provider is connected.
 
@@ -65,6 +65,8 @@ ChatGPT, Gemini, Claude, Grok, Cursor, Codex or another LLM may use this workflo
 ## Queue and claims
 
 Use \`queue.ts\` to evaluate the issue snapshots after evidence-based triage. A confirmed bug needs explicit expected behavior, reproduction/source evidence and acceptance criteria. A conflict needs two revision-pinned sources and a governing-authority assessment. When milestone fit is unverified, process only work explicitly scoped by the owner; otherwise leave it blocked.
+
+Check linked closed PRs and reconcile merged coverage before dispatch. Use the current library version from the branch README and the [workflow](WORKFLOW.md) for the coverage review fields. Dispatch only the remaining scoped work when a linked PR has merged.
 
 Select only the single \`next\` task packet. Before editing, create the per-issue claim ref \`bug-library-claim-issue-N\` with a claim record. Initial ref creation must be atomic. Renew/release with an expected-SHA compare-and-swap. Never force-update a claim. An expired claim is not automatically stolen: inspect the worker branch, PRs and issue activity, then record coordinator recovery. If the host cannot provide atomic claim operations, do not start a second worker.
 

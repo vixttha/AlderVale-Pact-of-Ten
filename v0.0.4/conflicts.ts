@@ -46,11 +46,26 @@ export type ConflictAssessment =
   | { status: "escalated"; reason: "OWNER_DECISION_REQUIRED" | "SECURITY_OR_PRIVACY_BOUNDARY" | "MILESTONE_AUTHORITY_UNAVAILABLE" }
   | { status: "blocked"; reason: "INSUFFICIENT_PROVENANCE" | "MISSING_RESOLUTION_EVIDENCE" | "AUTHORITY_NOT_ESTABLISHED" | "AMBIGUOUS_PRODUCT_OR_LAW_CONFLICT" };
 
+function hasPinnedRevision(source: ConflictSource): boolean {
+  switch (source.sourceType) {
+    case "github":
+    case "repository-file":
+    case "test-run":
+      return source.revision.length === 40 && /^[0-9a-f]{40}$/i.test(source.revision);
+    case "notion":
+    case "external":
+      // The coordinator verifies that the provider-specific version identifies the reviewed evidence.
+      return source.revision.trim().length > 0;
+    default:
+      return false;
+  }
+}
+
 export function assessConflict(record: ConflictRecord): ConflictAssessment {
   if (!/^AV-CONFLICT-[0-9]{3,}$/.test(record.id) ||
       !Number.isInteger(record.issueNumber) || record.issueNumber < 1 ||
       record.sources.length < 2 ||
-      record.sources.some((source) => !source.reference.trim() || !source.revision.trim() || !source.statement.trim())) {
+      record.sources.some((source) => !source.reference.trim() || !hasPinnedRevision(source) || !source.statement.trim())) {
     return { status: "blocked", reason: "INSUFFICIENT_PROVENANCE" };
   }
 
