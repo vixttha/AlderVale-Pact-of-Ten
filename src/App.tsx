@@ -40,6 +40,7 @@ import {
   loadCloudWizardsForRealm,
   loadGuestRealm,
   loadGuestSettings,
+  migrateGuestWizards,
   saveGuestSettings,
   saveCloudSettings,
   saveCloudCreatures,
@@ -248,40 +249,40 @@ export function App() {
       setWizards(guest.wizards);
       return;
     }
-    const { realm: cloudAcc, settings: cloudSettings } = await ensureCloudAccountAndRealm(user.uid, user.displayName ?? 'Wizard', user.email, realm);
-    const cloudWizards = await loadCloudWizardsForRealm(user.uid, realm);
+    const loadCloudRealm = async () => {
+      const account = await ensureCloudAccountAndRealm(user.uid, user.displayName ?? 'Wizard', user.email, realm);
+      const wizards = await loadCloudWizardsForRealm(user.uid, realm);
+      return { ...account, wizards };
+    };
+    let cloud = await loadCloudRealm();
     if (version !== realmLoad.current) return;
-    setPlayerSettings(cloudSettings);
 
-    // Guest-to-Google automatic migration if cloud realm has 0 wizards
-    const guest = loadGuestRealm(realm);
-    if (cloudWizards.length === 0 && guest.wizards.length > 0) {
-      const entries = guest.wizards.slice(0, 3).map((gw) => ({
-        wizard: { ...gw, ownerId: user.uid },
-        pets: (guest.creatures[gw.id] ?? []).map((pet) => ({ ...pet, ownerId: user.uid })),
-        sanctuary: guest.sanctuaries[gw.id] ? { ...guest.sanctuaries[gw.id], ownerId: user.uid } : null,
-        gallery: guest.gallery?.[gw.id],
-      }));
-      const migrated = entries.map(({ wizard }) => wizard);
-      const mergedAcc: RealmAccountState = {
-        ...cloudAcc, wizardIds: migrated.map((w) => w.id),
-        unlockedRaces: Array.from(new Set([...cloudAcc.unlockedRaces, ...guest.account.unlockedRaces])),
-        termXp: Math.max(cloudAcc.termXp, guest.account.termXp),
-        claimedTermTiers: [...new Set([...cloudAcc.claimedTermTiers, ...(guest.account.claimedTermTiers ?? [])])],
-        sharedVault: [...new Set([...cloudAcc.sharedVault, ...guest.account.sharedVault])],
-      };
+    const guest = readGuestProgress(realm);
+    let notice: string | undefined;
+    if (cloud.wizards.length === 0 && guest.wizards.length > 0) {
+      let migration: Awaited<ReturnType<typeof migrateGuestWizards>> | 'failed';
+      try {
+        migration = await migrateGuestWizards(cloud.realm, guest);
+      } catch {
+        migration = 'failed';
+      }
       if (version !== realmLoad.current) return;
-      await createCloudWizards(mergedAcc, entries);
+      // Another tab may have enrolled or imported while this realm was loading.
+      cloud = await loadCloudRealm();
       if (version !== realmLoad.current) return;
-      setRealmAccount(mergedAcc);
-      setWizards(migrated);
-      showToast('Guest progress migrated to your Google Cloud account!');
-      return;
+      if (migration === 'saved') notice = 'Guest progress migrated to your Google Cloud account!';
+      if (migration === 'already-linked' && !cloud.wizards.length) {
+        notice = 'This guest save is already linked. You can enroll a new wizard in this account.';
+      }
+      if (migration === 'failed' && !cloud.wizards.length) {
+        notice = 'Guest progress could not be imported. It is still on this device. You can enroll a new wizard in this account.';
+      }
     }
 
-    if (version !== realmLoad.current) return;
-    setRealmAccount(cloudAcc);
-    setWizards(cloudWizards);
+    setPlayerSettings(cloud.settings);
+    setRealmAccount(cloud.realm);
+    setWizards(cloud.wizards);
+    if (notice) showToast(notice);
   }, [readGuestProgress, setPlayerSettings, showToast]);
 
   useEffect(() => {
@@ -495,6 +496,7 @@ export function App() {
 
   const handleCreateWizard = async (wiz: WizardDocument): Promise<boolean> => {
     if (wizardCreation.current || !realmReady || wizards.length >= 3) return false;
+    const version = realmLoad.current;
     wizardCreation.current = true;
     setEnrollmentError(null);
     try {
@@ -503,6 +505,7 @@ export function App() {
         const owned = { ...wiz, ownerId: fbUser.uid };
         const prepared = wizardStarter(owned);
         await createCloudWizards(nextAcc, [{ wizard: owned, pets: [prepared.pet], sanctuary: prepared.dorm }]);
+        if (version !== realmLoad.current || auth.currentUser?.uid !== owned.ownerId) return false;
         setRealmAccount(nextAcc);
         setWizards((current) => [...current, owned]);
         await enterWorld(owned, prepared);
@@ -523,7 +526,9 @@ export function App() {
       }
       return true;
     } catch (error) {
-      setEnrollmentError(error instanceof Error ? error.message : 'Could not save the new wizard.');
+      if (version === realmLoad.current) {
+        setEnrollmentError(error instanceof Error ? error.message : 'Could not save the new wizard.');
+      }
       return false;
     } finally {
       wizardCreation.current = false;

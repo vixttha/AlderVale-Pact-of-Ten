@@ -4,6 +4,7 @@ import {
   doc,
   deleteField,
   getDoc,
+  getDocFromServer,
   getDocs,
   query,
   serverTimestamp,
@@ -281,21 +282,68 @@ function realmPayload(realmAccount: RealmAccountState) {
   };
 }
 
-export async function createCloudWizards(account: RealmAccountState, entries: {
+interface CloudWizardEntry {
   wizard: WizardDocument;
   pets: OwnedCreature[];
   sanctuary: SanctuaryState | null;
   gallery?: string[];
-}[], database = db) {
+}
+
+export async function createCloudWizards(account: RealmAccountState, entries: CloudWizardEntry[], database = db) {
+  await writeCloudWizards(account, entries, database, false);
+}
+
+export async function migrateGuestWizards(account: RealmAccountState, guest: GuestRealmBundle, database = db) {
+  const entries = guest.wizards.slice(0, 3).map((wizard) => {
+    const { id } = wizard;
+    const sanctuary = guest.sanctuaries[id];
+    return {
+      wizard: { ...wizard, ownerId: account.uid },
+      pets: (guest.creatures[id] ?? []).map((pet) => ({ ...pet, ownerId: account.uid })),
+      sanctuary: sanctuary ? { ...sanctuary, ownerId: account.uid } : null,
+      gallery: guest.gallery?.[id],
+    };
+  });
+  const mergedAccount = {
+    ...account,
+    unlockedRaces: [...new Set([...account.unlockedRaces, ...guest.account.unlockedRaces])],
+    termXp: Math.max(account.termXp, guest.account.termXp),
+    claimedTermTiers: [...new Set([...account.claimedTermTiers, ...(guest.account.claimedTermTiers ?? [])])],
+    sharedVault: [...new Set([...account.sharedVault, ...guest.account.sharedVault])],
+  };
+  try {
+    return await writeCloudWizards(mergedAccount, entries, database, true);
+  } catch (error) {
+    // A competing import can claim the IDs after our read. Firestore may reject
+    // the writes by rule before it retries the transaction.
+    if ((error as { code?: string } | null)?.code !== 'permission-denied' || !entries.length) throw error;
+    if (database === db) requireCloudOwner(account.uid);
+    const profiles = await Promise.all(entries.map(({ wizard }) =>
+      getDocFromServer(doc(database, 'publicWizards', wizard.id))));
+    if (profiles.some((profile) => profile.exists())) return 'already-linked';
+    throw error;
+  }
+}
+
+async function writeCloudWizards(account: RealmAccountState, entries: CloudWizardEntry[], database: typeof db, migrating: boolean) {
   if (database === db) requireCloudOwner(account.uid);
   const realmRef = doc(database, 'accounts', account.uid, 'realms', account.realmId);
-  await runTransaction(database, async (tx) => {
+  return runTransaction(database, async (tx) => {
     const existing = await tx.get(realmRef);
     const previousIds: string[] = existing.get('wizardIds') ?? [];
+    if (migrating) {
+      if (previousIds.length || !entries.length) return 'skipped';
+      // The signed-in client can read public profiles, including those owned by another account.
+      // Check inside the transaction so two accounts cannot import the same guest bundle at once.
+      const profiles = await Promise.all(entries.map(({ wizard }) => tx.get(doc(database, 'publicWizards', wizard.id))));
+      if (profiles.some((profile) => profile.exists())) return 'already-linked';
+    }
+    if (database === db) requireCloudOwner(account.uid);
     if (entries.some(({ wizard }) => previousIds.includes(wizard.id))) {
       throw new Error('This wizard is already saved. Reopen the realm to refresh your wizard list.');
     }
     const wizardIds = [...new Set([...previousIds, ...entries.map(({ wizard }) => wizard.id)])];
+    const existingRaces: RaceId[] = existing.get('unlockedRaces') ?? [];
     const existingVault: string[] = existing.get('sharedVault') ?? [];
     const existingClaims: number[] = existing.get('claimedTermTiers') ?? [];
     if (wizardIds.length > 3) throw new Error('All three wizard slots are in use.');
@@ -315,9 +363,11 @@ export async function createCloudWizards(account: RealmAccountState, entries: {
       ...account,
       wizardIds,
       termXp: Math.max(account.termXp, Number(existing.get('termXp') ?? 0)),
+      unlockedRaces: [...new Set([...existingRaces, ...account.unlockedRaces])],
       sharedVault: [...new Set([...existingVault, ...account.sharedVault])],
       claimedTermTiers: [...new Set([...existingClaims, ...account.claimedTermTiers])],
     }), { merge: true });
+    return 'saved';
   });
 }
 
