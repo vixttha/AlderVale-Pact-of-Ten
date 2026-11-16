@@ -26,6 +26,8 @@ import {
   isDuelComplete,
   totalAvailablePipsForSchool,
   computeWizardDerivedStats,
+  ownedCreatureToCombatSlot,
+  pickDuelCreatureRoster,
   STATUS_EFFECT_META,
   type CombatantState,
   type DuelState,
@@ -188,7 +190,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   }, [duel?.duelId, duel?.round, duel?.phase, turnDeadline]);
 
   function buildPlayerCombatant(gearlessSpire = false): CombatantState {
-    const activeTalents = creatures.find((c) => c.id === wizard.activeCreatureId)?.talents ?? [];
+    const { roster: duelRoster, activeCreatureIdx } = pickDuelCreatureRoster(creatures, wizard.activeCreatureId);
+    const activeTalents = duelRoster[activeCreatureIdx]?.talents ?? creatures[0]?.talents ?? [];
     const stats = gearlessSpire
       ? { maxHp: 460, powerPct: 5, accuracyBonus: 2, piercePct: 2, critPct: 10, blockPct: 8 }
       : computeWizardDerivedStats({
@@ -234,19 +237,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
       discard: [],
       sideboard: [...wizard.progression.sideboard],
       spellwrighting: { ...wizard.progression.spellwrighting },
-      creatures: creatures.slice(0, 3).map((pet) => ({
-        id: pet.id,
-        speciesId: pet.speciesId,
-        nickname: pet.nickname,
-        element: pet.elementId,
-        stage: pet.stage,
-        chromatic: pet.chromatic,
-        branchChoice: pet.branchChoice,
-        hp: 190 + pet.stage * 45,
-        maxHp: 190 + pet.stage * 45,
-        talents: pet.talents,
-      })),
-      activeCreatureIdx: 0,
+      creatures: duelRoster.map((pet) => ownedCreatureToCombatSlot(pet)),
+      activeCreatureIdx,
     };
     drawUpToSeven(c);
     return c;
