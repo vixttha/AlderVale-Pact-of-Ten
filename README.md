@@ -4,7 +4,7 @@ A 3D fantasy RPG set at a spellcasting academy on floating islands. Create a wiz
 
 **Status:** First playable in development. Start with the guest journey in Breeze.
 
-[Run locally](#run-locally) · [First playthrough](#first-playthrough) · [Validation](#validation) · [Report a bug](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues)
+[Run locally](#run-locally) · [First playthrough](#first-playthrough) · [Validation](#validation) · [Report a bug](#report-a-bug)
 
 ## Run locally
 
@@ -32,8 +32,8 @@ Run `bun run validate:core` for the type check, rules lint, tests, production bu
 
 | What you want to check | Where to look |
 | --- | --- |
-| Build and test commands | [Validation guide](docs/VALIDATION.md) |
-| Player journeys and regression coverage | [Test Vault](docs/test-vault/README.md) |
+| Build and test commands | [Validation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md) |
+| Player journeys and regression coverage | [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md) |
 | Results for a specific commit | [GitHub Actions](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions) |
 
 ## Report a bug
