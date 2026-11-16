@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "issueNumber": 47,
+  "claimId": "AV-CLAIM-47-20261116-01",
+  "status": "active",
+  "worker": "ChatGPT AlderVale project assistant",
+  "host": "ChatGPT",
+  "model": "unverified",
+  "sessionId": "unavailable",
+  "githubActor": "unverified",
+  "baseSha": "93abf6eb09e6ac06d44f22e0d1a23cee85fc713d",
+  "workBranch": "fix/guest-prestige-lineages",
+  "claimedAt": "2026-11-16T16:37:30.000Z",
+  "expiresAt": "2026-11-16T17:37:30.000Z",
+  "note": "Owner requested debugging and scoped fixes before the guest playthrough. Verify final-rank and owned-creature lineage eligibility on guest saves."
+}
