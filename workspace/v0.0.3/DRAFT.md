@@ -61,7 +61,7 @@ The labels describe progression tuning. Actual playtime varies.
 Run `bun run validate:core` for type checking, rules lint, tests, the production build, and HTTP and WebSocket checks. GitHub Actions also runs guest journeys in Chromium, Firefox, and WebKit and checks Firestore rules in an emulator.
 
 - [Validation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md) · [GitHub Actions](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions)
-- [First-playable test coverage and desktop checklist](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/aldervale/README.md#owner-desktop-playthrough--g36-001) · [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md)
+- [First-playable test coverage and desktop checklist](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/aldervale/README.md) · [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md)
 
 ### AI-assisted development
 
