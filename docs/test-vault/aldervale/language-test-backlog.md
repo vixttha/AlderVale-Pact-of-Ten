@@ -10,13 +10,16 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 | JavaScript with Playwright | Complete title, wizard creation, Breeze solo duel and reload in Chromium, Firefox and WebKit. Also verify offline HUD and stale-peer cleanup on reconnect, Tailor HP, fallback, and corrupt-save recovery without overwriting the other realm. | Existing and expanded in this PR |
 | Node.js JavaScript | Start built server, check health and HTML, then exchange chat with isolated realm fixtures. | Existing |
 | Python | Validate case IDs and topic coverage. Independently compare XP progression and First Spark replay with the TypeScript rules. Extend the same approach to combat rounds. | Catalog, XP, and First Spark checks run. Combat comparison is proposed. |
-| Go | Run a small health-handler fixture for the starter kit. A normal client can later verify the documented realm socket reconnect contract. | Starter fixture exists. Game client proposed. |
+| Go | Exercise real server guest reconnects, identity, roster cleanup, realm and zone scope, and zone transitions using an independent client. | Implemented in the existing Linux Core job, alongside the separate Go starter fixture |
 | Ruby | Parse the shipped quest and NPC export as UTF-8 JSON, verify required display text, and resolve each quest giver to exactly one NPC. Compare all three published payouts against fixed reward values. | Implemented in the existing public Ubuntu Vault job |
-| C# | Independently deserialize versioned synthetic saves and preserve realm, wallet, active creature, and quest flags. | Proposed |
+| C# | Read AlderVale's raw guest v1 JSON and verify realm identity, wallet and quest fields, active creature ownership, v1 optional fields and diagnostics for malformed or inconsistent saves. | Implemented in the existing Ubuntu Vault catalog job |
 | Rust | Check embedded GLB buffer and accessor ranges, skin data, and animation samples on game assets and known-bad fixtures. | Implemented in the existing Vault catalog job |
-| Haskell or F# | Model a deterministic combat round and compare damage, status expiration and draw outcomes over shared fixtures. | Proposed |
+| C++ | Verify live TypeScript combat observations and guest save v1 records against independent expectations. Includes damage, health, team order, save recovery and deterministic replay. | Implemented in the existing Ubuntu Vault catalog job |
+| F# | Compare the saga reducer and guest saves against an independent model of quest completion, interleaving, reloads and one-time payouts. | Implemented in the Ubuntu Vault catalog job |
+| Haskell | Model a deterministic combat round and compare damage, status expiration and draw outcomes over shared fixtures. | Proposed |
 | R or Julia | Analyze duel wins, round duration and balance variance against a fixed seed corpus. | Proposed |
-| Bash and PowerShell | Verify build and launcher paths with spaces and deterministic exit codes on their supported runner OS. | Proposed launcher checks |
+| Bash | Test Graphify snapshot publication against local Git remotes, including stale builds, unsupported refs, integrity failures and concurrent retries. | Implemented in the public Ubuntu Graphify job |
+| PowerShell | Windows launcher path, build identity, failure exits and saved-build recovery. | Implemented in Windows Core |
 | Firestore Rules and Java | Execute Rules checks and save transactions in the Java-backed demo emulator. | Existing |
 | HTML and CSS | Check accessible names, focus, responsive controls and 200%/400% zoom. | Narrow enrollment exists. Zoom proposed. |
 | GLSL or WGSL | Check shader compilation and fallback for the actual shipped renderer. WebGPU-specific checks depend on adopting it. | Conditional |

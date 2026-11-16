@@ -30,6 +30,10 @@ Read [PROJECT_RULES.md](PROJECT_RULES.md) before project work. These are the sol
 Apply the project workflow guidance available in the current host. See the
 [ChatGPT Project Instructions](docs/CHATGPT_PROJECT_INSTRUCTIONS.md) for setup.
 
+## Test Vault work
+
+Use `AlderVale-Test-Vault` for Vault changes and as the base of Vault pull requests. Record the game baseline when a suite exercises AlderVale source. The [Vault landing page](README.md) links both the AlderVale suites and the standalone [v0.0.2 starter](docs/test-vault/public-template/README.md). For another repository, copy only the files in `starter/` and use that project's real test entry points and runner policy.
+
 ## Bug and conflict work
 
 Resolve the separate [Bug Library branch](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/bug-library) to one full commit SHA before reading its operating guidance. Use the entry point from the version on that branch or from an exact candidate SHA the owner assigned. Resolve game `main` independently for changes to the game. GitHub Issues remains canonical; the owner retains acceptance, issue closure, merge, and release authority.

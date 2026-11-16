@@ -1,10 +1,10 @@
 # AlderVale Test Vault v0.0.2
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [38 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## What runs on AlderVale's public GitHub runners
 
-The [AlderVale validation workflow](../../../.github/workflows/validate.yml) supplies the seven existing game jobs. The [Test Vault adoption workflow](../../../.github/workflows/test-vault-template.yml) checks the project case table and the broader case catalog, runs the independent Python reference against the real TypeScript rules, and checks the shipped quest catalog export with Ruby. For a pull request, link the run and record the actual tested checkout, base, head, and attempt. Keep automated results and owner observations separate.
+The [AlderVale validation workflow](../../../.github/workflows/validate.yml) supplies the seven existing game jobs. The [Test Vault adoption workflow](../../../.github/workflows/test-vault-template.yml) checks the project and reusable catalogs, rehearses three copy-in installations, and runs the Python, Ruby, Rust, C++, C#, and F# suites. The game matrix also runs Go on Linux and PowerShell on Windows. The [Graphify workflow](../../../.github/workflows/graphify.yml) runs the Bash publisher tests against temporary Git repositories. For a pull request, link the run and record the actual tested checkout, base, head, and attempt. Keep automated results and owner observations separate.
 
 | Case ID | Issue | What it verifies | Test or checklist | CI job | Remaining gap |
 |---|---|---|---|---|---|
@@ -22,6 +22,11 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | G34-001, G34-002 | [#4][issue4] | Narrow enrollment and WebGL fallback | [Guest browser suite][guest] | Browser | HUD zoom, reduced motion, and physical-device behavior |
 | E15-001, E15-002 | | Data integrity and quest giver references | [Catalog Vitest][data], [Ruby catalog][ruby] | Core, Vault catalog | |
 | E24-001, E24-002, E34-002 | | Browser and OS compatibility plus isolated backend checks | [Game workflow][game], [Firestore checks][firestore] | Browser, Core, Firestore emulator | Live sign-in |
+| G30-004 to G30-008 | [#10][issue10] | Guest identity, disconnect cleanup, scoped rosters, and zone changes against the real server | [Go presence suite][go-presence] | Linux Core | Browser HUD, signed-in sessions, and duel recovery have separate coverage. |
+| G06-001 to G06-003, G09-002 | | Damage, combat state, team order and replay checkpoints | [C++ contracts][cpp] | Vault catalog | Browser and live duel behavior have separate coverage. |
+| G28-007 | [#13][issue13] | Guest v1 serialization, recovery, reward idempotence and realm isolation | [C++ contracts][cpp] | Vault catalog | Browser storage and signed-in saves have separate coverage. |
+| G28-008 to G28-012 | [#13][issue13] for reward fields | Guest v1 cross-runtime save checks for identity, balances, progression, creature ownership, optional fields and invalid payload diagnostics | [C# guest save suite][csharp-save] | Vault catalog | This suite checks specific guest v1 fields. Browser storage, signed-in sync and future migrations have separate evidence. |
+| G13-010 to G13-014 | [#13][issue13] | Quest completion boundaries, mixed sequences, save/reload and one-time rewards | [F# saga model][fsharp-quests] | Ubuntu Vault catalog | Event eligibility in the UI and live services have separate evidence. |
 | G36-001 | | First-playable guest loop | [Owner desktop playthrough](#owner-desktop-playthrough--g36-001) | Manual | Pending owner result |
 
 [issue4]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/4
@@ -40,6 +45,12 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [settings]: ../../../tests/vault/guestSettings.test.ts
 [data]: ../../../tests/vault/gameData.test.ts
 [game]: ../../../.github/workflows/validate.yml
+[go-presence]: ../../../tests/vault/go/guest_presence_test.go
+[cpp]: ../../../tests/vault/cpp/README.md
+[csharp-save]: ../../../tests/vault/csharp/README.md
+[windows-launcher]: ../../../tests/vault/powershell/README.md
+[bash-graphify]: ../../../tests/vault/bash/README.md
+[fsharp-quests]: ../../../tests/vault/fsharp/README.md
 [firestore]: ../../../tools/ci/firestore.check.mjs
 
 ### Test quality
@@ -63,6 +74,12 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Independent rule reference | `python3 tests/vault/first_playable_reference.py -v` with Python 3.12 and Node 24. |
 | Ruby quest catalog | `ruby tests/vault/quest_catalog.rb` with Node 24 and the Ruby bundled on the public Ubuntu runner. |
 | Rust binary asset contract | `cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml` |
+| Go realm presence | From `tests/vault/go`, run `go test -mod=readonly -count=1 -timeout=2m -v ./...` with Go 1.27.4, Node 24, and the repository’s installed dependencies. |
+| C++ gameplay contracts | Follow the [C++20, Node 24 and CTest commands][cpp]. |
+| C# guest save contracts | Follow the [pinned .NET SDK and Node commands][csharp-save]. |
+| Windows launcher contracts | Run the [PowerShell suite][windows-launcher] on public Windows Core. |
+| Graphify publisher contracts | Run the [Bash suite][bash-graphify] in the existing public Ubuntu Graphify job. |
+| F# saga sequence contracts | Run the [F# suite][fsharp-quests] in the public Ubuntu Vault catalog job. |
 | Project case table | `python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py --catalog docs/test-vault/aldervale/cases.md` |
 
 ## Evidence on verified main

@@ -20,6 +20,15 @@ python3 test-vault/validate_catalog.py
 
 The command runs with Python's standard library. It should find one starter case. To exercise the failing path locally, change its priority from `P0` to `P9`, rerun the command, then restore the valid priority. Open a pull request in a repository with Actions enabled to see the same check and the exact checkout in the job summary.
 
+## Build tests for the target project
+
+1. Read the repository's contributor instructions, existing tests and CI. Identify the entry point, supported environments and the behavior or failure you want to protect.
+2. Give the case a stable ID and record the expected result. Choose a test layer and framework that exercise the real entry point. Use fixtures for controlled state and known failure cases.
+3. Put the executable test in the target project's normal test directory and add it to that project's test command. Use separate test data and environments for tests that need a service.
+4. Run the project's test command and the Vault catalog validator in development or CI. Record the test command, target checkout, result and any coverage limits in the [case and receipt form](case-and-receipt.md).
+
+The starter checks your catalog. The target project's test commands execute its tests. Both can run with the project's existing CI.
+
 ## Add your cases
 
 Copy the five-column table in [cases.md](cases.md). Use an uppercase topic followed by a hyphen and at least three digits. Examples include `CLI-001`, `HTTP-GET-001`, and `G13-001`. IDs are unique across all case tables. Keep all five cells populated and use `P0`, `P1`, or `P2` for priority. Escape literal table pipes as `\|`. Put a Markdown divider row directly under each table header. Use fenced code blocks outside the tables for examples.

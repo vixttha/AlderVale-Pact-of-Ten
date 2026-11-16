@@ -13,4 +13,6 @@ This release candidate packages a [copy-in starter](starter/test-vault/README.md
 
 The [starter directory](starter/) contains root-relative files including a GitHub Actions workflow. Copy its contents into your target repository root and follow [the installation guide](starter/test-vault/README.md).
 
+The starter works alongside the target project's existing development and delivery workflows. Add cases and runnable tests using that project's own languages, fixtures, and runner policy. See [the starter's workflow for creating tests](starter/test-vault/README.md#build-tests-for-the-target-project).
+
 Standalone redistribution terms are pending an owner license decision. The draft remains available here for review and first-party testing.

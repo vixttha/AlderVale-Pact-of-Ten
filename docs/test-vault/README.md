@@ -103,6 +103,8 @@ The Playwright configuration starts the built application server for the test an
 
 ## Adding a Vault case
 
+Open Vault pull requests against `AlderVale-Test-Vault`. Record the source baseline for checks that exercise the game.
+
 1. Identify the player risk or invariant and give it a stable case ID, such as G13-001.
 2. Record the relevant gameplay feature, fixture, setup, action, expected result, and boundary being tested.
 3. Use the lowest layer that can prove the behavior. Add a browser, server, or emulator test only when it covers a distinct boundary.
