@@ -109,4 +109,6 @@ jobs:
           set -eo pipefail
           rustup toolchain install 1.95.0 --profile minimal
           rustc +1.95.0 --version | tee -a "$GITHUB_STEP_SUMMARY"
+          cargo +1.95.0 generate-lockfile --manifest-path tests/vault/rust/Cargo.toml
+          cat tests/vault/rust/Cargo.lock
           cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
