@@ -759,7 +759,9 @@ def run_regression_tests(root, repo, main_ref, baseline):
     def advance_hq_public_draft_pointer(fixture, version):
         workspace = fixture / "readme-hq/workspace"
         drafts = check_workspace(fixture, workspace, "README HQ")
-        require(drafts, "Regression fixture has no active README HQ draft")
+        if not drafts:
+            add_draft(workspace, include_guide=True, public_draft_version=version)
+            return
         candidate = workspace / drafts[0] / "DRAFT.md"
         content = read(candidate)
         updated = re.sub(
@@ -805,8 +807,16 @@ def run_regression_tests(root, repo, main_ref, baseline):
     def remove_guide_phrase(fixture, phrase):
         workspace = fixture / "readme-hq/workspace"
         drafts = check_workspace(fixture, workspace, "README HQ")
-        require(drafts, "Regression fixture has no active README HQ draft")
-        guide = workspace / drafts[0] / "GUIDE.md"
+        if drafts:
+            folder = workspace / drafts[0]
+        else:
+            public_drafts = check_workspace(fixture, fixture / "workspace", "public README")
+            folder = add_draft(
+                workspace,
+                include_guide=True,
+                public_draft_version=public_drafts[0] if public_drafts else None,
+            )
+        guide = folder / "GUIDE.md"
         content = read(guide)
         updated = re.sub(re.escape(phrase), "omitted", content, flags=re.IGNORECASE)
         require(updated != content, f"Regression fixture could not remove guide phrase: {phrase}")
