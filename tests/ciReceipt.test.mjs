@@ -96,6 +96,25 @@ describe("CI receipt validation", () => {
     ]);
   });
 
+  it("does not count a successful retry on the wrong or missing checkout as flaky", () => {
+    for (const [retry, code] of [
+      [result(browser, "success", head), "WRONG_CHECKOUT"],
+      [{ name: browser, outcome: "success" }, "MISSING_OR_INVALID_CHECKOUT"],
+    ]) {
+      const evidence = {
+        runId: 43913978673, latestAttempt: 2,
+        attempts: [
+          { number: 1, results: [result(primary), result(browser, "failure")] },
+          { number: 2, results: [result(primary), retry] },
+        ],
+      };
+      assert.deepEqual(validateReceipt(checkout, required, evidence).problems, [
+        { code: "FAILED", check: browser, attempt: 1 },
+        { code, check: browser, attempt: 2 },
+      ]);
+    }
+  });
+
   it("rejects missing results in an earlier attempt even when the latest attempt passed", () => {
     const successful = receipt([result(primary), result(browser)]);
     const evidence = {

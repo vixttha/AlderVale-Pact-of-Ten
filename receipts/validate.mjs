@@ -51,21 +51,22 @@ export function validateReceipt(expectedSha, requiredChecks, receipt) {
       }
       seen.add(result.name);
       const outcome = outcomes.get(result.outcome);
+      const validCheckout = isSha(result.checkoutSha);
+      const expectedCheckout = validCheckout && result.checkoutSha.toLowerCase() === expectedSha.toLowerCase();
       if (outcome === undefined) {
         problems.push({ code: "MISSING_OR_UNKNOWN_OUTCOME", ...details });
       } else if (outcome !== null) {
         problems.push({ code: outcome, ...details });
-        if (outcome === "FAILED" && isSha(result.checkoutSha) &&
-            result.checkoutSha.toLowerCase() === expectedSha.toLowerCase()) {
+        if (outcome === "FAILED" && expectedCheckout) {
           failedBefore.add(result.name);
         }
-      } else if (failedBefore.has(result.name)) {
+      } else if (expectedCheckout && failedBefore.has(result.name)) {
         problems.push({ code: "FLAKY", ...details });
       }
       if (outcome === null || result.checkoutSha !== undefined) {
-        if (!isSha(result.checkoutSha)) {
+        if (!validCheckout) {
           problems.push({ code: "MISSING_OR_INVALID_CHECKOUT", ...details });
-        } else if (result.checkoutSha.toLowerCase() !== expectedSha.toLowerCase()) {
+        } else if (!expectedCheckout) {
           problems.push({ code: "WRONG_CHECKOUT", ...details });
         }
       }
