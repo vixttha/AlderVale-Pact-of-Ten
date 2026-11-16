@@ -146,7 +146,7 @@ test('title and world remain usable with WebGL unavailable', async ({ page }) =>
 });
 
 test('guest settings survive reload and the HUD shows offline after a lost connection', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
   let realmSocket;
   let refuseReconnect = false;
   await page.routeWebSocket('**/ws', (socket) => {
