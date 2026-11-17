@@ -13,6 +13,8 @@ import type { WizardDocument } from '../../../shared/economy.ts';
 import type { OwnedCreature } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
 import { academyAudio } from '../../engine/audioSynth.ts';
+import { MagmaPactPanel } from './MagmaPactPanel.tsx';
+import type { MagmaPactAction } from './magmaPact.ts';
 
 interface CreaturesArborPanelProps {
   wizard: WizardDocument;
@@ -20,6 +22,7 @@ interface CreaturesArborPanelProps {
   onUpdateWizard: (next: WizardDocument) => void;
   onUpdateCreatures: (next: OwnedCreature[], newCreature?: OwnedCreature) => void;
   onRuneCatch: (pet: OwnedCreature) => void;
+  onMagmaPactAction?: (action: MagmaPactAction) => boolean;
   onClose: () => void;
 }
 
@@ -29,9 +32,10 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
   onUpdateWizard,
   onUpdateCreatures,
   onRuneCatch,
+  onMagmaPactAction,
   onClose,
 }) => {
-  const [tab, setTab] = useState<'kennel' | 'train' | 'adopt' | 'breed'>('kennel');
+  const [tab, setTab] = useState<'kennel' | 'train' | 'adopt' | 'breed' | 'magma-pact'>('kennel');
   const [runeCursor, setRuneCursor] = useState(10);
   const [runeDir, setRuneDir] = useState(1);
   const [runeStatus, setRuneStatus] = useState<string>('Time your catch inside the golden rune zone (40–62%)!');
@@ -177,6 +181,7 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
             { id: 'train', label: 'Rune-Catch Training', icon: Target },
             { id: 'adopt', label: 'Bonding Adoption', icon: Sparkles },
             { id: 'breed', label: `Hybrid Nest (${wizard.progression.eggs.length} Eggs)`, icon: Egg },
+            ...(onMagmaPactAction ? [{ id: 'magma-pact', label: 'Magma Pact', icon: Egg }] : []),
           ].map((t) => (
             <button
               key={t.id}
@@ -302,6 +307,10 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
               </div>
             ))}
           </div>
+        )}
+
+        {tab === 'magma-pact' && onMagmaPactAction && (
+          <MagmaPactPanel wizard={wizard} creatures={creatures} onAction={onMagmaPactAction} onAdopt={() => setTab('adopt')} />
         )}
 
         {tab === 'breed' && (

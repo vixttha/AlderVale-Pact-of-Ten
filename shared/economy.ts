@@ -66,6 +66,13 @@ export interface WizardLoadout {
   deck: string[];
 }
 
+export type MagmaPactTrail = 'tempest' | 'glacier' | 'eclipse';
+
+export type MagmaPactProgress = { fireId: string; forestId: string } & (
+  | { phase: 'vent-open' | 'egg' | 'ready' }
+  | { phase: 'hatched'; nextTrail?: MagmaPactTrail }
+);
+
 export interface WizardDocument {
   id: string;
   ownerId: string;
@@ -112,6 +119,7 @@ export interface WizardDocument {
     titleBadge: string;
     loadouts: WizardLoadout[];
     eggs: { id: string; parentA: string; parentB: string; resultSpeciesId: string; winsNeeded: number; winsDone: number }[];
+    magmaPact?: MagmaPactProgress;
   };
   activeCreatureId: string;
 }
