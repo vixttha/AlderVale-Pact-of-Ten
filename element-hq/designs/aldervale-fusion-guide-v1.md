@@ -1,12 +1,12 @@
 # AlderVale Fusion HQ
 
-**Status** · Magma is the owner-favored design lead. Tempest, Glacier, and Eclipse are existing candidates for v1. The acquisition model, encounter rules, balance, and optional fifth fusion are proposals. The [locked ten-element roster](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/84a490507db14ad3d90be5f7497f9ecf2db33fcb/element-hq/designs/aldervale-element-system-v1.md#v1-elemental-opposition-decision) governs eligible base affinities. Time and Space sit outside the elemental system.
+**Status** · The roster is under review. [Open the fusion pairing chart](aldervale-fusion-pairing-chart.md) for the current options and owner feedback. Fire + Forest → Magma below is an earlier prototype recipe the owner rejected for the design. Tempest and Glacier are being compared with alternatives. Eclipse is being considered as a phenomenon. The locked base roster is linked in the chart.
 
-## Fusion roster
+## Earlier roster proposal
 
 | Fusion affinity | Contributing affinities | Hatchling | Combat identity to develop | Design status |
 | --- | --- | --- | --- | --- |
-| **Magma** | Fire + Forest | Caldera Newt | Pressure and cover. Heat forces movement while hardened crust protects its wizard. | Owner-favored lead, prototype details proposed |
+| **Magma** | Fire + Forest | Caldera Newt | Pressure and cover. Heat forces movement while hardened crust protects its wizard. | Earlier prototype recipe rejected for the design |
 | **Tempest** | Water + Lightning | Maelstrom Eel | Mobile chain pressure. Plan where an arc jumps and trade damage for spread. | Existing recipe, candidate |
 | **Glacier** | Frost + Water | Permafrost Seal | Team protection. Catch an attack at the right moment and decide between concentrated and spread protection. | Existing recipe, candidate |
 | **Eclipse** | Dark + Light | Corona Caracal | Setup and timing. Conceal a move or expose a target for a focused strike. | Existing recipe, candidate |
