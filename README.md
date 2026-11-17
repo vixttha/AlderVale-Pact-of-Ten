@@ -6,11 +6,12 @@ Element HQ is the design reference for the mechanics and lore behind AlderValeâ€
 
 | Document | Use it for |
 | --- | --- |
-| [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the projectâ€™s populated mechanics and lore reference, with current rules and proposed decisions. |
+| [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the initial design snapshot. The [locked ten-element roster](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/84a490507db14ad3d90be5f7497f9ecf2db33fcb/element-hq/designs/aldervale-element-system-v1.md#v1-elemental-opposition-decision) records the current base elements and oppositions. |
+| [Fusion HQ](element-hq/designs/aldervale-fusion-guide-v1.md) | Review Magma, Tempest, Glacier, and Eclipse, the proposed pact encounters, and the audited conflicts. |
 | [Element design template](element-hq/templates/element-design.md) | Draft an element, fusion, or change to an existing rule. |
 | [Workspace notes](element-hq/README.md) | Read the original scope and design questions. |
-| [Element registry](element-hq/element-registry.md) | Look up the elements, matchup matrix, status effects, and spell snapshot. |
-| [Fusion System v1](element-hq/fusion-system-v1.md) | Read the proposed fusion rules, creature lineages, and open decisions. |
+| [Element registry](element-hq/element-registry.md) | Look up the historical element catalog, matchup matrix, statuses, and spell snapshot. |
+| [Historical fusion proposal](element-hq/fusion-system-v1.md) | Review the five-recipe development prototype and the earlier Hatchery rules. |
 
 ## Record a design
 
