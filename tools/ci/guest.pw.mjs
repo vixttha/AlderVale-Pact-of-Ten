@@ -103,7 +103,8 @@ for (const [branch, move, firstTrail, trailId] of [
     const vent = pact.getByRole('button', { name: 'Open the vent' });
     await expect(vent).toBeDisabled();
     await pact.getByRole('button', { name: 'Find companions in Bonding Adoption' }).click();
-    await page.getByText('Mosscap Budling', { exact: true }).locator('../..').getByRole('button', { name: 'Bond (1 Seal)' }).click();
+    await page.getByText('Mosscap Budling', { exact: true })
+      .locator('xpath=ancestor::div[button][1]').getByRole('button', { name: 'Bond (1 Seal)' }).click();
     await page.getByRole('button', { name: 'Magma Pact', exact: true }).click();
     await expect(pact.getByLabel('Forest companion')).not.toHaveValue('');
     const before = await readBreezeSave(page);
@@ -150,7 +151,13 @@ for (const [branch, move, firstTrail, trailId] of [
       expect.objectContaining({ speciesId: 'magma_salamander', elementId: 'magma', branchChoice: branch }),
     ]);
     await page.getByRole('button', { name: 'My Creatures (3)' }).click();
-    await expect(page.getByRole('button', { name: `Branch ${branch}: ${move}` })).toBeVisible();
+    const moveButton = page.getByRole('button', { name: `Branch ${branch}: ${move}` });
+    await moveButton.locator('xpath=../..').getByRole('button', { name: 'Set Lead' }).click();
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await page.getByRole('button', { name: 'Duel', exact: true }).click();
+    await page.getByRole('button', { name: 'Frost', exact: true }).click();
+    await page.getByRole('button', { name: 'Pass (+Gain Pip)', exact: true }).click();
+    await expect(page.getByText(branch === 'A' ? /Caldera Newt used Lava Surge/ : /Caldera Newt wrapped .* -45% Ward/)).toBeVisible();
   });
 }
 
