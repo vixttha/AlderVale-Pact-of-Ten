@@ -1,5 +1,7 @@
 # Fusion System v1 — design proposal
 
+> **Historical proposal.** The [current Fusion HQ](designs/aldervale-fusion-guide-v1.md) records Magma, Tempest, Glacier, and Eclipse as the four existing v1-compatible recipes. Its roster follows the locked ten base elements. The fifth recipe and rarity rules below document the earlier design.
+
 **Status:** Proposed · requires owner acceptance before gameplay implementation  
 **Source baseline:** `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd`  
 **Working branch:** `element-hq-v1`  
