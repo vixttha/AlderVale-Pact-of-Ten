@@ -24,6 +24,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | E24-001, E24-002, E34-002 | | Browser and OS compatibility plus isolated backend checks | [Game workflow][game], [Firestore checks][firestore] | Browser, Core, Firestore emulator | Live sign-in |
 | G30-004 to G30-008 | [#10][issue10] | Guest identity, disconnect cleanup, scoped rosters, and zone changes against the real server | [Go presence suite][go-presence] | Linux Core | Browser HUD, signed-in sessions, and duel recovery have separate coverage. |
 | G06-001 to G06-003, G09-002 | | Damage, combat state, team order and replay checkpoints | [C++ contracts][cpp] | Vault catalog | Browser and live duel behavior have separate coverage. |
+| G06-004 to G06-008 | | Hand refills, discards and selection, Keen Ink, sideboard, and discard recycling | [Haskell spell-card suite][haskell-cards] | Vault catalog | Resolver state. Browser card controls have separate coverage. |
 | G28-007 | [#13][issue13] | Guest v1 serialization, recovery, reward idempotence and realm isolation | [C++ contracts][cpp] | Vault catalog | Browser storage and signed-in saves have separate coverage. |
 | G28-008 to G28-012 | [#13][issue13] for reward fields | Guest v1 cross-runtime save checks for identity, balances, progression, creature ownership, optional fields and invalid payload diagnostics | [C# guest save suite][csharp-save] | Vault catalog | This suite checks specific guest v1 fields. Browser storage, signed-in sync and future migrations have separate evidence. |
 | G13-010 to G13-014 | [#13][issue13] | Quest completion boundaries, mixed sequences, save/reload and one-time rewards | [F# saga model][fsharp-quests] | Ubuntu Vault catalog | Event eligibility in the UI and live services have separate evidence. |
@@ -47,6 +48,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [game]: ../../../.github/workflows/validate.yml
 [go-presence]: ../../../tests/vault/go/guest_presence_test.go
 [cpp]: ../../../tests/vault/cpp/README.md
+[haskell-cards]: ../../../tests/vault/haskell/README.md
 [csharp-save]: ../../../tests/vault/csharp/README.md
 [windows-launcher]: ../../../tests/vault/powershell/README.md
 [bash-graphify]: ../../../tests/vault/bash/README.md
@@ -76,6 +78,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Rust binary asset contract | `cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml` |
 | Go realm presence | From `tests/vault/go`, run `go test -mod=readonly -count=1 -timeout=2m -v ./...` with Go 1.27.4, Node 24, and the repository’s installed dependencies. |
 | C++ gameplay contracts | Follow the [C++20, Node 24 and CTest commands][cpp]. |
+| Haskell spell-card contracts | Follow the [GHC and Node fixture commands][haskell-cards]. |
 | C# guest save contracts | Follow the [pinned .NET SDK and Node commands][csharp-save]. |
 | Windows launcher contracts | Run the [PowerShell suite][windows-launcher] on public Windows Core. |
 | Graphify publisher contracts | Run the [Bash suite][bash-graphify] in the existing public Ubuntu Graphify job. |
