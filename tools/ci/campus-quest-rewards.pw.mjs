@@ -5,6 +5,13 @@ const wizardName = 'Campus Quest Rowan';
 const arborId = 'q_bond_arbor';
 const trialId = 'q_rare_trial';
 
+function disableWebGl() {
+  const getContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
+    return kind.includes('webgl') ? null : getContext.call(this, kind, ...args);
+  };
+}
+
 async function readQuestProgress(page) {
   return page.evaluate(({ saveKey, wizardName }) => {
     const save = JSON.parse(localStorage.getItem(saveKey) ?? 'null');
@@ -85,6 +92,9 @@ test('Arbor and Rare Trial pay once and stay completed after guest reload (#13)'
     const url = new URL(route.request().url());
     return ['127.0.0.1', 'localhost'].includes(url.hostname) ? route.continue() : route.abort();
   });
+  // Rewards use the same campus controls in fallback mode. Keep software
+  // rendering performance out of this quest contract on hosted runners.
+  await page.addInitScript(disableWebGl);
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
 
@@ -93,6 +103,7 @@ test('Arbor and Rare Trial pay once and stay completed after guest reload (#13)'
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
   const duel = page.getByRole('button', { name: 'Duel', exact: true });
   await expect(duel).toBeVisible();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
 
   // Use a late-game guest fixture so the test exercises reward delivery
   // without first playing through academy progression and buying a deck.
