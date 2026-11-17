@@ -1,6 +1,6 @@
 # AlderVale Element Design v1 status
 
-The owner confirmed exactly ten base elements in five opposing pairs. Time and Space are outside the elemental system. Chronos and the Chronos-derived Aetheris recipe belong to the development prototype. [Rebuilt design](aldervale-element-system-v1.md).
+On November 16, 2026, the owner locked exactly ten base elements in five opposing pairs. Time and Space are outside the elemental system. Chronos and the Chronos-derived Aetheris recipe belong to the development prototype. [Rebuilt design](aldervale-element-system-v1.md).
 
 | Step | Rebuilt result |
 | --- | --- |
@@ -14,6 +14,8 @@ The owner confirmed exactly ten base elements in five opposing pairs. Time and S
 | [8. Existing game compatibility](aldervale-element-system-v1.md#8-existing-game-compatibility) | Pinned source audit, development-save fixtures, and implementation acceptance cases. There are no live player accounts to migrate. |
 
 ## Decision and evidence
+
+- [Fusion design draft](aldervale-fusion-design-v1.md) compares biological breeding, pact-created eggs, and literal creature fusion. The acquisition model and recipes await owner review.
 
 - [Development build at this clarification](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/19a9a85b039ad63e8df4d4a104ad9e98f68ae31c) has five Hatchery recipes, including the Chronos + Metal prototype. [Current resolver](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/19a9a85b039ad63e8df4d4a104ad9e98f68ae31c/shared/creatures.ts#L297).
 - [Previous draft](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/bc7a8d1ea53662f8e681675d8683679362095480/element-hq/designs/aldervale-element-system-v1.md) preserves the earlier 225-cell design proposal and Earth + Metal idea. The working matrix covers 196 cells for ten base elements and four derived fusion candidates.
