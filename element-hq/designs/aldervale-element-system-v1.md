@@ -1,6 +1,6 @@
 # AlderVale: Pact of Ten — Element Design v1
 
-**The elemental system has exactly ten base elements. Time and Space are outside the elemental system. Chronos is excluded from the v1 elemental roster and recipes.** The five reciprocal pairs are the owner's design decision. This document rebuilds the eight design steps around them. The game observations are pinned to [`658fe21de482f66754d2bc45088bcc9668668f6d`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/658fe21de482f66754d2bc45088bcc9668668f6d). The proposed tuning, fusion changes, and migration rules are ready for design review.
+**The elemental system has exactly ten base elements. Time and Space are outside the elemental system. Chronos is excluded from the v1 elemental roster and recipes.** The owner locked the ten-element roster and all five reciprocal pairs on November 16, 2026. This document rebuilds the eight design steps around them. The game observations are pinned to [`658fe21de482f66754d2bc45088bcc9668668f6d`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/658fe21de482f66754d2bc45088bcc9668668f6d). The proposed tuning, fusion changes, and migration rules are ready for design review.
 
 ## v1 elemental opposition decision
 
@@ -111,6 +111,8 @@ These are calculated targets for a future implementation. Use deterministic hits
 | Stonebeat → Wind | 125 before wards at the proposed Earth source power of 1.00. |
 
 ## 3. Fusion recipes
+
+[Current fusion design draft](aldervale-fusion-design-v1.md) compares the ways a fusion creature could enter the roster. The following recipe inventory and Hatchery mechanics describe the development build and earlier design work.
 
 ### Creatures and fusion lineage
 
