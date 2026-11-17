@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "issueNumber": 13,
+  "claimId": "AV-CLAIM-13-2026-11-17T01:24:49.421Z",
+  "status": "active",
+  "worker": "ChatGPT",
+  "host": "chatgpt.com",
+  "model": "unverified",
+  "sessionId": "unavailable",
+  "githubActor": "vixttha",
+  "baseSha": "fced4038c1dfa655c223d1bcbbdf3c18593b1e1f",
+  "workBranch": "ci/issue-13-campus-quests",
+  "claimedAt": "2026-11-17T01:24:49.421Z",
+  "expiresAt": "2026-11-17T02:24:49.421Z",
+  "note": "Verify Arbor and Rare Trial reward delivery with guest-browser regressions. Existing reward eligibility rules stay in scope as currently implemented."
+}
