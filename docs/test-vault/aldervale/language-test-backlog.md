@@ -17,6 +17,7 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 | C++ | Verify live TypeScript combat observations and guest save v1 records against independent expectations. Includes damage, health, team order, save recovery and deterministic replay. | Implemented in the existing Ubuntu Vault catalog job |
 | F# | Compare the saga reducer and guest saves against an independent model of quest completion, interleaving, reloads and one-time payouts. | Implemented in the Ubuntu Vault catalog job |
 | Haskell | Model a deterministic combat round and compare damage, status expiration and draw outcomes over shared fixtures. | Proposed |
+| Lua | Compare expected campus positions with the live collision helper across mirrored, rotated and scaled layouts. | Implemented in the public Ubuntu Vault catalog job |
 | R or Julia | Analyze duel wins, round duration and balance variance against a fixed seed corpus. | Proposed |
 | Bash | Test Graphify snapshot publication against local Git remotes, including stale builds, unsupported refs, integrity failures and concurrent retries. | Implemented in the public Ubuntu Graphify job |
 | PowerShell | Windows launcher path, build identity, failure exits and saved-build recovery. | Implemented in Windows Core |

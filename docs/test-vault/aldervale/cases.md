@@ -30,6 +30,11 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | G13-013 | Saga state at every save boundary | P0 | F# and Node.js | Reload once at each possible boundary and at all boundaries together over short event sequences. Compare state before and after each reload and preserve the other realm. |
 | G13-014 | Saga completion replay | P0 | F# and Node.js | Repeat completion routes after a reload and intervening events. Preserve payout totals and completion flags. |
 | G17-001 | Tailor persistence | P1 | Playwright | Claim the Starstitch Brim Hat from the Realm Vault, equip it at the Tailor, and confirm the +10 HP persists after reload. |
+| G20-001 | Open campus movement | P1 | Lua and Node.js | Straight, diagonal and stationary moves on open ground reach the exact geometric result. |
+| G20-002 | Island perimeter | P1 | Lua and Node.js | Accept movement inside or on the perimeter. Keep the starting position when the step ends just outside. |
+| G20-003 | Glancing obstacle collision | P1 | Lua and Node.js | Project to the circular obstacle perimeter and allow the next clear step, including with an offset obstacle. |
+| G20-004 | Exact collider center | P1 | Lua and Node.js | Keep the original finite position at an exact center hit. Project normally at a nearby nonzero offset. |
+| G20-005 | Edge obstacle correction | P1 | Lua and Node.js | Reject collision correction outside the island. Accept correction inside or on its boundary. |
 | G21-002 | Rowan fallback and retry | P1 | Vitest and Playwright | Failed Rowan model loading leaves the Classic enrollment path usable. The lifecycle suite checks that a user retry can load the model. |
 | G21-003 | Embedded binary buffer bounds | P1 | Rust / Cargo | Buffer views fit inside the declared binary payload. Invalid lengths, truncated data, and overflowing spans are rejected. |
 | G21-004 | Mesh accessor ranges | P1 | Rust / Cargo | Vertex and index accessors fit their views with the declared stride. Truncated or undersized interleaved data is rejected. |
