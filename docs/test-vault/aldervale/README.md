@@ -4,7 +4,7 @@ Use this as AlderVale's testing and acceptance record for the guest first-playab
 
 ## What runs on AlderVale's public GitHub runners
 
-The [AlderVale validation workflow](../../../.github/workflows/validate.yml) supplies the seven existing game jobs. The [Test Vault adoption workflow](../../../.github/workflows/test-vault-template.yml) checks the project and reusable catalogs, rehearses three copy-in installations, and runs the Python, Ruby, Rust, C++, C#, and F# suites. The game matrix also runs Go on Linux and PowerShell on Windows. The [Graphify workflow](../../../.github/workflows/graphify.yml) runs the Bash publisher tests against temporary Git repositories. For a pull request, link the run and record the actual tested checkout, base, head, and attempt. Keep automated results and owner observations separate.
+The [AlderVale validation workflow](../../../.github/workflows/validate.yml) supplies the seven existing game jobs. The [Test Vault adoption workflow](../../../.github/workflows/test-vault-template.yml) checks the project and reusable catalogs, rehearses three copy-in installations, and runs the Python, Ruby, Rust, C++, C#, and F# suites. The game matrix also runs Go and Java on Linux and PowerShell on Windows. The [Graphify workflow](../../../.github/workflows/graphify.yml) runs the Bash publisher tests against temporary Git repositories. For a pull request, link the run and record the actual tested checkout, base, head, and attempt. Keep automated results and owner observations separate.
 
 | Case ID | Issue | What it verifies | Test or checklist | CI job | Remaining gap |
 |---|---|---|---|---|---|
@@ -27,6 +27,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | G28-007 | [#13][issue13] | Guest v1 serialization, recovery, reward idempotence and realm isolation | [C++ contracts][cpp] | Vault catalog | Browser storage and signed-in saves have separate coverage. |
 | G28-008 to G28-012 | [#13][issue13] for reward fields | Guest v1 cross-runtime save checks for identity, balances, progression, creature ownership, optional fields and invalid payload diagnostics | [C# guest save suite][csharp-save] | Vault catalog | This suite checks specific guest v1 fields. Browser storage, signed-in sync and future migrations have separate evidence. |
 | G13-010 to G13-014 | [#13][issue13] | Quest completion boundaries, mixed sequences, save/reload and one-time rewards | [F# saga model][fsharp-quests] | Ubuntu Vault catalog | Event eligibility in the UI and live services have separate evidence. |
+| E28-001, E30-001 to E30-004 | | Built JavaScript, CSS and GLB delivery over HTTP, with byte ranges and ETag revalidation | [Java asset delivery suite][java-assets] | Linux Core | Local production server. Deployment and CDN behavior have separate coverage. |
 | G36-001 | | First-playable guest loop | [Owner desktop playthrough](#owner-desktop-playthrough--g36-001) | Manual | Pending owner result |
 
 [issue4]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/4
@@ -51,6 +52,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 [windows-launcher]: ../../../tests/vault/powershell/README.md
 [bash-graphify]: ../../../tests/vault/bash/README.md
 [fsharp-quests]: ../../../tests/vault/fsharp/README.md
+[java-assets]: ../../../tests/vault/java/README.md
 [firestore]: ../../../tools/ci/firestore.check.mjs
 
 ### Test quality
@@ -80,6 +82,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Windows launcher contracts | Run the [PowerShell suite][windows-launcher] on public Windows Core. |
 | Graphify publisher contracts | Run the [Bash suite][bash-graphify] in the existing public Ubuntu Graphify job. |
 | F# saga sequence contracts | Run the [F# suite][fsharp-quests] in the public Ubuntu Vault catalog job. |
+| Java HTTP asset contracts | Build the production client and run `node tests/vault/java/run-asset-delivery.mjs` with JDK 21 and Node 24. |
 | Project case table | `python3 docs/test-vault/public-template/starter/test-vault/validate_catalog.py --catalog docs/test-vault/aldervale/cases.md` |
 
 ## Evidence on verified main

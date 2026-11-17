@@ -20,6 +20,7 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 | R or Julia | Analyze duel wins, round duration and balance variance against a fixed seed corpus. | Proposed |
 | Bash | Test Graphify snapshot publication against local Git remotes, including stale builds, unsupported refs, integrity failures and concurrent retries. | Implemented in the public Ubuntu Graphify job |
 | PowerShell | Windows launcher path, build identity, failure exits and saved-build recovery. | Implemented in Windows Core |
+| Java | Check built module scripts, CSS, full GLBs, HTTP ranges and ETag revalidation using the JDK HTTP client. | Implemented in public Linux Core |
 | Firestore Rules and Java | Execute Rules checks and save transactions in the Java-backed demo emulator. | Existing |
 | HTML and CSS | Check accessible names, focus, responsive controls and 200%/400% zoom. | Narrow enrollment exists. Zoom proposed. |
 | GLSL or WGSL | Check shader compilation and fallback for the actual shipped renderer. WebGPU-specific checks depend on adopting it. | Conditional |

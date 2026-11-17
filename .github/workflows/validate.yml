@@ -87,6 +87,26 @@ jobs:
           "Run / attempt: $env:GITHUB_RUN_ID / $env:GITHUB_RUN_ATTEMPT" | Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
           & ./tests/vault/powershell/launcher-contracts.ps1 *>&1 |
             Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        if: runner.os == 'Linux'
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Java built asset delivery contracts
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          TESTED_SHA: ${{ steps.checkout_revision.outputs.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          {
+            printf 'Tested checkout: %s\n' "$TESTED_SHA"
+            printf 'Base: %s\nHead: %s\nRun / attempt: %s / %s\n' "${PR_BASE_SHA:-n/a}" "${PR_HEAD_SHA:-n/a}" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            java -version
+            node tests/vault/java/run-asset-delivery.mjs
+          } 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Asset sizes and GLB integrity
         if: runner.os == 'Linux'
         shell: bash
