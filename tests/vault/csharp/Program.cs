@@ -1,6 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
+if (args is ["--first-spark", var directory])
+{
+    FirstSparkSaveCheck.Run(directory);
+    return 0;
+}
+
 if (args.Length != 1)
 {
     Console.Error.WriteLine("Usage: GuestSaveContracts <directory of raw guest save fixtures>");

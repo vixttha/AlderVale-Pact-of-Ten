@@ -82,4 +82,11 @@ export function renderVerificationSummary(env) {
 
 if (process.env.GITHUB_STEP_SUMMARY) {
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, renderVerificationSummary(process.env));
+  if (process.env.FIRST_SPARK_EVIDENCE_DIR) {
+    const { runFirstSpark, firstSparkSummary } = await import('./first-spark-evidence.mjs');
+    runFirstSpark(process.env, browserEvidence(process.env.PLAYWRIGHT_EVIDENCE, process.env.BROWSER_OUTCOME));
+    const report = firstSparkSummary(process.env);
+    appendFileSync(process.env.GITHUB_STEP_SUMMARY, report.markdown);
+    if (!report.pass) process.exitCode = 1;
+  }
 }

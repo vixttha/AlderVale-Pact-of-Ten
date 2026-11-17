@@ -151,7 +151,16 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
           PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/playwright-evidence.json
+          FIRST_SPARK_EVIDENCE_DIR: ${{ matrix.browser == 'chromium' && format('{0}/first-spark-{1}-{2}', runner.temp, github.run_id, github.run_attempt) || '' }}
         run: xvfb-run --auto-servernum npm run test:browser -- --project=${{ matrix.browser }} --headed --reporter=list,html,json
+      - name: Set up .NET for the First Spark evidence check
+        if: ${{ !cancelled() && matrix.browser == 'chromium' && steps.evidence_node.outcome == 'success' }}
+        uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
+        with:
+          global-json-file: tests/vault/fsharp/global.json
+      - name: Test the First Spark evidence report
+        if: ${{ !cancelled() && matrix.browser == 'chromium' && steps.evidence_node.outcome == 'success' }}
+        run: node --test tools/ci/first-spark-evidence.test.mjs
       - name: Write verification summary
         if: ${{ always() && steps.evidence_node.outcome == 'success' }}
         env:
@@ -160,6 +169,7 @@ jobs:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           BROWSER_OUTCOME: ${{ steps.browser_test.outcome }}
           PLAYWRIGHT_EVIDENCE: ${{ runner.temp }}/playwright-evidence.json
+          FIRST_SPARK_EVIDENCE_DIR: ${{ matrix.browser == 'chromium' && format('{0}/first-spark-{1}-{2}', runner.temp, github.run_id, github.run_attempt) || '' }}
         run: node tools/ci/verification-summary.mjs
       - name: Retain failure evidence briefly
         if: failure()

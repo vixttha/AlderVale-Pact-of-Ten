@@ -2,6 +2,10 @@
 
 Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
+## First Spark cross-language evidence
+
+Public Chromium captures the guest saves from the existing First Spark journey. C# checks persistence, F# checks rewards and replay, and the run page shows one combined verdict. See the [fixture and report contract](../../../tests/vault/first-spark/README.md).
+
 ## What runs on AlderVale's public GitHub runners
 
 The [AlderVale validation workflow](../../../.github/workflows/validate.yml) supplies the seven existing game jobs. The [Test Vault adoption workflow](../../../.github/workflows/test-vault-template.yml) checks the project and reusable catalogs, rehearses three copy-in installations, and runs the Python, Ruby, Rust, C++, C#, and F# suites. The game matrix also runs Go on Linux and PowerShell on Windows. The [Graphify workflow](../../../.github/workflows/graphify.yml) runs the Bash publisher tests against temporary Git repositories. For a pull request, link the run and record the actual tested checkout, base, head, and attempt. Keep automated results and owner observations separate.
