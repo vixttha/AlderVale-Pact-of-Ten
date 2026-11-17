@@ -1,5 +1,7 @@
 # AlderVale Fusion Design v1
 
+**Fusion review update.** Use the [pairing chart](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/856c1ccc6aa72695ce599d57471c593b4068d656/element-hq/designs/aldervale-fusion-pairing-chart.md) to compare the roster candidates. This draft records earlier acquisition and encounter proposals. Fire + Forest → Magma was rejected for the design, and the gameplay prototype documents the previous implementation.
+
 The [expanded Fusion HQ](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/b0cd10ba646d11dbab83f705a1209fe2c1a54948/element-hq/designs/aldervale-fusion-guide-v1.md) records the four existing candidates, Magma's prototype, the optional fifth concept, and the source-backed conflict register. This draft preserves the original acquisition-model comparison.
 
 **Status** · Draft for owner review. The [ten base elements and their five opposition pairs](aldervale-element-system-v1.md#v1-elemental-opposition-decision) are locked. This proposal explores how fusion creatures enter the roster.

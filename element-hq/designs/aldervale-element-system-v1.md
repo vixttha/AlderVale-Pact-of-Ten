@@ -1,5 +1,7 @@
 # AlderVale: Pact of Ten — Element Design v1
 
+**Fusion review update.** The [pairing chart](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/856c1ccc6aa72695ce599d57471c593b4068d656/element-hq/designs/aldervale-fusion-pairing-chart.md) is the current decision record. The roster, recipe examples, acquisition, and balance details below describe the earlier design. Fire + Forest → Magma was rejected for this design. Tempest and Glacier have alternatives, and Eclipse is under review as a phenomenon.
+
 **The elemental system has exactly ten base elements. Time and Space are outside the elemental system. Chronos is excluded from the v1 elemental roster and recipes.** The owner locked the ten-element roster and all five reciprocal pairs on November 16, 2026. This document rebuilds the eight design steps around them. The game observations are pinned to [`658fe21de482f66754d2bc45088bcc9668668f6d`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/658fe21de482f66754d2bc45088bcc9668668f6d). The proposed tuning, fusion changes, and migration rules are ready for design review.
 
 ## v1 elemental opposition decision
