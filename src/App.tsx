@@ -61,6 +61,7 @@ import type { InteractiveHitTarget } from './engine/zoneBuilders.ts';
 import { DuelArenaModal } from './features/duel/DuelArenaModal.tsx';
 import { TailorStudioPanel } from './features/tailor/TailorStudioPanel.tsx';
 import { CreaturesArborPanel } from './features/creatures/CreaturesArborPanel.tsx';
+import { advanceMagmaPact, type MagmaPactAction } from './features/creatures/magmaPact.ts';
 import { DeckLecternPanel } from './features/deck/DeckLecternPanel.tsx';
 import { SanctuaryPanel } from './features/sanctuary/SanctuaryPanel.tsx';
 import { AcademyModalHub, type HubModalTab } from './features/shops/AcademyModalHub.tsx';
@@ -341,6 +342,26 @@ export function App() {
     },
     [fbUser, showToast, updateGuestProgress],
   );
+
+  const playMagmaPact = (action: MagmaPactAction) => {
+    if (!activeWizard || fbUser || auth.currentUser) return false;
+    const { id, realmId, ownerId } = activeWizard;
+    const bundle = readGuestProgress(realmId);
+    const wizard = bundle.wizards.find((entry) => entry.id === id && entry.ownerId === ownerId && entry.realmId === realmId);
+    if (!wizard) return false;
+    const next = advanceMagmaPact(wizard, bundle.creatures[id] ?? [], action);
+    if (!next) return false;
+
+    bundle.wizards = bundle.wizards.map((entry) => entry.id === id ? next.wizard : entry);
+    bundle.creatures[id] = next.creatures;
+    if (!commitGuestProgress(realmId, bundle)) return false;
+
+    setActiveWizard(next.wizard);
+    setWizards(bundle.wizards);
+    setCreatures(next.creatures);
+    setRealmAccount(bundle.account);
+    return true;
+  };
 
   const claimTermTier = async (tier: number) => {
     if (!activeWizard) throw new Error('Open a wizard first.');
@@ -1491,10 +1512,12 @@ export function App() {
 
       {overlay.type === 'creatures' && (
         <CreaturesArborPanel
+          key={activeWizard.id}
           wizard={activeWizard}
           creatures={creatures}
           onUpdateWizard={(w) => persistWizard(w)}
           onUpdateCreatures={(list, created) => persistCreatures(list, created)}
+          onMagmaPactAction={fbUser ? undefined : playMagmaPact}
           onRuneCatch={(pet) => {
             const updated = applySagaEvent(activeWizard, 'rune-catch');
             setCreatures((list) => list.map((entry) => entry.id === pet.id ? pet : entry));

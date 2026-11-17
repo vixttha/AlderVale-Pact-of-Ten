@@ -83,6 +83,77 @@ test('guest enrollment waits for a successful save and retries without duplicate
   await expect(page.getByText('Retry Rowan', { exact: true })).toBeVisible();
 });
 
+for (const [branch, move, firstTrail, trailId] of [
+  ['A', 'Lava Surge', 'Tempest', 'tempest'],
+  ['B', 'Stone Crust', 'Eclipse', 'eclipse'],
+]) {
+  test(`Magma Pact hatches one Newt with ${move} and remembers an optional trail`, async ({ page }) => {
+    await installGuestSaveFailure(page);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+    await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+
+    async function openPact() {
+      await page.getByRole('button', { name: 'Creatures', exact: true }).click();
+      await page.getByRole('button', { name: 'Magma Pact', exact: true }).click();
+      return page.getByRole('region', { name: 'The Caldera Pact' });
+    }
+
+    let pact = await openPact();
+    const vent = pact.getByRole('button', { name: 'Open the vent' });
+    await expect(vent).toBeDisabled();
+    await pact.getByRole('button', { name: 'Find companions in Bonding Adoption' }).click();
+    await page.getByText('Mosscap Budling', { exact: true }).locator('../..').getByRole('button', { name: 'Bond (1 Seal)' }).click();
+    await page.getByRole('button', { name: 'Magma Pact', exact: true }).click();
+    await expect(pact.getByLabel('Forest companion')).not.toHaveValue('');
+    const before = await readBreezeSave(page);
+    const wizardId = before.wizards[0].id;
+
+    await vent.click();
+    await expect(pact.getByRole('heading', { name: 'Caldera Newt Egg' })).toHaveCount(0);
+    await expect(pact.getByRole('status')).toContainText('opened the vent');
+    await pact.getByRole('button', { name: 'Anchor the path' }).click();
+    await expect(pact.getByRole('heading', { name: 'Caldera Newt Egg' })).toHaveCount(1);
+    const eggSave = await readBreezeSave(page);
+    expect(eggSave.wizards[0].progression.magmaPact).toMatchObject({ phase: 'egg' });
+    expect(eggSave.creatures[wizardId]).toEqual(before.creatures[wizardId]);
+
+    await page.reload();
+    await page.getByRole('button', { name: /Enter Aldervale/ }).click();
+    pact = await openPact();
+    await expect(pact.getByRole('heading', { name: 'Caldera Newt Egg' })).toHaveCount(1);
+    await pact.getByRole('button', { name: 'Warm the egg' }).click();
+    await expect(pact.getByRole('button', { name: 'Hatch with Lava Surge' })).toBeVisible();
+    await expect(pact.getByRole('button', { name: 'Hatch with Stone Crust' })).toBeVisible();
+    await page.evaluate(() => { window.blockGuestSave = true; });
+    await pact.getByRole('button', { name: `Hatch with ${move}` }).click();
+    await expect(pact.getByRole('alert')).toContainText('could not be saved');
+    expect((await readBreezeSave(page)).creatures[wizardId]).toEqual(before.creatures[wizardId]);
+    await page.evaluate(() => { window.blockGuestSave = false; });
+    await pact.getByRole('button', { name: `Hatch with ${move}` }).click();
+    await expect(pact.getByRole('heading', { name: 'Caldera Newt joined your roster' })).toBeVisible();
+    await expect(pact.getByRole('button', { name: /Hatch with/ })).toHaveCount(0);
+    for (const name of ['Tempest', 'Glacier', 'Eclipse']) {
+      await expect(pact.getByRole('button', { name: new RegExp(name) })).toHaveAttribute('aria-pressed', 'false');
+    }
+    await pact.getByRole('button', { name: new RegExp(firstTrail) }).click();
+
+    await page.reload();
+    await page.getByRole('button', { name: /Enter Aldervale/ }).click();
+    pact = await openPact();
+    await expect(pact.getByRole('button', { name: new RegExp(firstTrail) })).toHaveAttribute('aria-pressed', 'true');
+    const result = await readBreezeSave(page);
+    expect(result.wizards[0].progression.magmaPact).toMatchObject({ phase: 'hatched', nextTrail: trailId });
+    expect(result.wizards[0].currencies).toEqual(before.wizards[0].currencies);
+    expect(result.creatures[wizardId]).toEqual([
+      ...before.creatures[wizardId],
+      expect.objectContaining({ speciesId: 'magma_salamander', elementId: 'magma', branchChoice: branch }),
+    ]);
+    await page.getByRole('button', { name: 'My Creatures (3)' }).click();
+    await expect(page.getByRole('button', { name: `Branch ${branch}: ${move}` })).toBeVisible();
+  });
+}
+
 test('failed guest progress remains visible until retry saves both wizard and realm changes', async ({ page }) => {
   await installGuestSaveFailure(page);
   await page.goto('/');
