@@ -78,11 +78,11 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Lava | Magma | 3 / 3 / 2 / 2 | 10 | Parked |
 | Magma | Magma | 3 / 3 / 2 / 2 | 10 | Parked |
-| Obsidian | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
-| Volcanic Glass | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Obsidian | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
+| Volcanic Glass | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
 | Basalt | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
-| Pumice | Solidified magma | 3 / 3 / 1 / 2 | 9 | Exploratory |
-| Kilnstone | Fired clay | 3 / 2 / 1 / 2 | 8 | Exploratory |
+| Pumice | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
+| Kilnstone | Fired clay | 3 / 2 / 1 / 2 | 8 | Parked |
 
 ## Light
 

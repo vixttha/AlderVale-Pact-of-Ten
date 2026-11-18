@@ -25,11 +25,11 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Lava | Magma | 3 / 3 / 2 / 2 | 10 | Parked |
 | Magma | Magma | 3 / 3 / 2 / 2 | 10 | Parked |
-| Obsidian | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
-| Volcanic Glass | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Obsidian | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
+| Volcanic Glass | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
 | Basalt | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
-| Pumice | Solidified magma | 3 / 3 / 1 / 2 | 9 | Exploratory |
-| Kilnstone | Fired clay | 3 / 2 / 1 / 2 | 8 | Exploratory |
+| Pumice | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
+| Kilnstone | Fired clay | 3 / 2 / 1 / 2 | 8 | Parked |
 
 ## Water
 
@@ -51,10 +51,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Glass | Glass | 3 / 3 / 2 / 2 | 10 | Candidate |
-| Lightning Glass | Glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
-| Fulgurite | Glass | 3 / 3 / 1 / 2 | 9 | Exploratory |
-| Strike Glass | Glass | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Glass | Glass | 3 / 3 / 2 / 2 | 10 | Locked |
+| Lightning Glass | Glass | 3 / 3 / 2 / 2 | 10 | Reference |
+| Fulgurite | Glass | 3 / 3 / 1 / 2 | 9 | Reference |
+| Strike Glass | Glass | 3 / 3 / 1 / 2 | 9 | Reference |
 | Electrostatic Dust | Discharge into earth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Grounding | Discharge into earth | 3 / 1 / 2 / 1 | 7 | Reference |
 | Faultspark | Discharge into earth | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -79,8 +79,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Dust | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
-| Grit | Airborne earth | 3 / 2 / 2 / 2 | 9 | Exploratory |
-| Sand | Airborne earth | 3 / 2 / 2 / 2 | 9 | Exploratory |
+| Grit | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
+| Sand | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
 | Duststorm | Airborne earth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Erosion | Airborne earth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Sandblast | Airborne earth | 3 / 1 / 2 / 1 | 7 | Reference |
@@ -92,7 +92,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Phosphor | Light-storing solid | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Phosphor | Light-storing solid | 3 / 3 / 1 / 2 | 9 | Parked |
 | Lightwell | Radiant minerals | 3 / 1 / 2 / 2 | 8 | Reference |
 | Luminous Stone | Radiant minerals | 2 / 2 / 2 / 1 | 7 | Reference |
 | Crystalbeam | Radiant minerals | 2 / 1 / 2 / 1 | 6 | Reference |
@@ -132,7 +132,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Amber | Hardened plant resin | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Amber | Hardened plant resin | 3 / 3 / 2 / 2 | 10 | Parked |
 | Fossil Resin | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Resin Stone | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Loam | Rooted soil | 2 / 2 / 2 / 2 | 8 | Reference |

@@ -50,7 +50,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Ozone | Reactive air | 3 / 3 / 2 / 2 | 10 | Candidate |
+| Ozone | Reactive air | 3 / 3 / 2 / 2 | 10 | Parked |
 | Charged Air | Charged wind | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Ionized Air | Charged wind | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Ozone Veil | Reactive air | 3 / 1 / 2 / 2 | 8 | Reference |
@@ -80,8 +80,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Dust | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
-| Grit | Airborne earth | 3 / 2 / 2 / 2 | 9 | Exploratory |
-| Sand | Airborne earth | 3 / 2 / 2 / 2 | 9 | Exploratory |
+| Grit | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
+| Sand | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
 | Duststorm | Airborne earth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Erosion | Airborne earth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Sandblast | Airborne earth | 3 / 1 / 2 / 1 | 7 | Reference |

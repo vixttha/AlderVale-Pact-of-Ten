@@ -9,8 +9,9 @@ The chart covers all **45 unordered pairings** between different base elements. 
 | Pair or concept | Current status |
 | --- | --- |
 | Water + Metal → Rust | **Locked.** Water and Metal are reserved for Rust in this pass. |
-| Fire + Earth → Magma | **Paused by the owner.** Fire and Earth are open for exploration. |
-| Lightning + Earth → Glass | Liked candidate, reopened for review. |
+| Lightning + Earth → Glass | **Locked.** Lightning and Earth are reserved for Glass in this pass. |
+| Fire + Earth → Magma | **Paused by the owner.** Earth is now reserved for Glass. |
+| Light + Plant → Sugar | Liked proposal. Photosynthesis provides the scientific basis for the pairing. |
 | Fire + Water → Steam | Liked concept, parked while Water is reserved for Rust. |
 | Metal + Plant → Ironwood | Conditional on designing an AlderVale metal. It shares Metal with Rust. |
 

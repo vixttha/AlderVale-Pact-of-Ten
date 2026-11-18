@@ -64,7 +64,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Ozone | Reactive air | 3 / 3 / 2 / 2 | 10 | Candidate |
+| Ozone | Reactive air | 3 / 3 / 2 / 2 | 10 | Parked |
 | Charged Air | Charged wind | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Ionized Air | Charged wind | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Ozone Veil | Reactive air | 3 / 1 / 2 / 2 | 8 | Reference |
@@ -78,10 +78,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Glass | Glass | 3 / 3 / 2 / 2 | 10 | Candidate |
-| Lightning Glass | Glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
-| Fulgurite | Glass | 3 / 3 / 1 / 2 | 9 | Exploratory |
-| Strike Glass | Glass | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Glass | Glass | 3 / 3 / 2 / 2 | 10 | Locked |
+| Lightning Glass | Glass | 3 / 3 / 2 / 2 | 10 | Reference |
+| Fulgurite | Glass | 3 / 3 / 1 / 2 | 9 | Reference |
+| Strike Glass | Glass | 3 / 3 / 1 / 2 | 9 | Reference |
 | Electrostatic Dust | Discharge into earth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Grounding | Discharge into earth | 3 / 1 / 2 / 1 | 7 | Reference |
 | Faultspark | Discharge into earth | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -132,7 +132,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Rubber | Elastic plant material | 2 / 3 / 2 / 2 | 9 | Exploratory |
+| Rubber | Elastic plant material | 2 / 3 / 2 / 2 | 9 | Parked |
 | Arc Sap | Charged plant tissue | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Charwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Conductive Sap | Charged plant tissue | 3 / 2 / 1 / 2 | 8 | Exploratory |

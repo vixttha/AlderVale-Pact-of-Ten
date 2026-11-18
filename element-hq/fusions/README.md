@@ -21,10 +21,11 @@ The atlas is a living catalog of reviewable names. The expanded pass adds plausi
 | Pair | Name | Decision |
 | --- | --- | --- |
 | [Water + Metal](pairs/water-metal.md) | **Rust** | Locked. Water and Metal are reserved in this pass. |
-| [Fire + Earth](pairs/fire-earth.md) | **Magma** | Paused by the owner. Fire and Earth are open for exploration. |
-| [Lightning + Earth](pairs/lightning-earth.md) | Glass | Liked candidate, reopened for review. |
-| [Lightning + Wind](pairs/lightning-wind.md) | Ozone | Candidate. Compatible with Rust. Shares Lightning with Glass and Wind with Dry Ice. |
-| [Dark + Plant](pairs/dark-plant.md) | Ink | Exploratory. Compatible with Rust and competes with other Plant concepts. |
+| [Lightning + Earth](pairs/lightning-earth.md) | **Glass** | Locked. Lightning and Earth are reserved in this pass. |
+| [Fire + Earth](pairs/fire-earth.md) | Magma | Paused by the owner. Shares Earth with Glass. |
+| [Light + Plant](pairs/light-plant.md) | Sugar | Owner favorite. Photosynthesis supports the concept. Final selection is open. |
+| [Lightning + Wind](pairs/lightning-wind.md) | Ozone | Parked. Shares Lightning with Glass. |
+| [Dark + Plant](pairs/dark-plant.md) | Ink | Exploratory. Compatible with both locks. Shares Plant with Sugar, Ash, and Rubber. |
 | [Fire + Water](pairs/fire-water.md) | Steam | Parked. Water is reserved for Rust. |
 | [Water + Frost](pairs/water-frost.md) | Ice | Parked. Water is reserved for Rust. |
 | [Metal + Plant](pairs/metal-plant.md) | Ironwood | Parked. Depends on a setting decision about Metal and shares Metal with Rust. |
@@ -37,9 +38,9 @@ The current pass prefers one fusion per base element where possible. A score ran
 | --- | --- | --- |
 | [Fire + Plant](pairs/fire-plant.md) | Ash | Deposit a powder that can smother burning terrain, mark tracks, or feed later regrowth. |
 | [Frost + Wind](pairs/frost-wind.md) | Dry Ice | Condense a cold solid from air. Blocks shrink into gas, creating terrain with a visible expiry. |
-| [Light + Plant](pairs/light-plant.md) | Sugar | Plant stores Light as crystals that can hold an enemy in place or release energy when broken. |
-| [Lightning + Plant](pairs/lightning-plant.md) | Rubber | As a fantasy rule, Lightning cures Plant latex into a springy insulator for rebound and protection. |
-| [Earth + Light](pairs/earth-light.md) | Phosphor | Earth supplies a substance that stores Light and releases it later to reveal or mark targets. |
+| [Light + Plant](pairs/light-plant.md) | Sugar | Plants use light energy to make sugars. In the game, crystallizing them into restraints or releasing their stored energy would be magic. |
+| [Lightning + Plant](pairs/lightning-plant.md) | Rubber | As a fantasy rule, Lightning cures Plant latex into a springy insulator for rebound and protection. Parked while Glass reserves Lightning. |
+| [Earth + Light](pairs/earth-light.md) | Phosphor | Earth supplies a substance that stores Light and releases it later to reveal or mark targets. Parked while Glass reserves Earth. |
 
 ## Rating guide
 

@@ -8,9 +8,11 @@ Element HQ is the design reference for the mechanics and lore behind AlderVale�
 
 The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Wind ↔ Earth**, **Light ↔ Dark**, and **Metal ↔ Plant**.
 
-**Water + Metal → Rust** is locked for the current fusion roster. Water and Metal are reserved for Rust in this pass. Prefer one fusion per base element across the current roster where possible.
+**Water + Metal → Rust** is locked for the current fusion roster. Water and Metal are reserved for Rust in this pass.
 
-[Fire + Earth → Magma](element-hq/fusions/pairs/fire-earth.md) was previously locked and is paused by the owner. Fire and Earth are open for exploration. Glass returns to candidate review. Steam shares Water with Rust and stays parked. Ironwood shares Metal with Rust and still depends on a setting decision.
+**Lightning + Earth → Glass** is locked for the current fusion roster. Lightning and Earth are reserved for Glass in this pass. Prefer one fusion per base element across the current roster wherever possible.
+
+[Fire + Earth → Magma](element-hq/fusions/pairs/fire-earth.md) is paused by the owner. [Light + Plant → Sugar](element-hq/fusions/pairs/light-plant.md) is a liked proposal under review. Steam and Ironwood remain parked because they share a parent with Rust. Ozone overlaps Glass on Lightning.
 
 ## Start here
 

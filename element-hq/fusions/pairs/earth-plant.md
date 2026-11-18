@@ -6,7 +6,7 @@
 
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Amber | Hardened plant resin | Exploratory | 3 | 3 | 2 | 2 | 10 | Plant supplies resin and Earth magic hardens it. Preserving or trapping in a clear solid is a distinctive kit. Earth is open for exploration. Prior review. |
+| Amber | Hardened plant resin | Parked | 3 | 3 | 2 | 2 | 10 | Plant supplies resin and Earth magic hardens it. Preserving or trapping in a clear solid is a distinctive kit. Earth is reserved for Glass. Prior review. |
 | Fossil Resin | Hardened plant resin | Exploratory | 3 | 3 | 1 | 2 | 9 | An explanatory Amber alias. It reads as a material description, with a specialist name for the hardened result. New naming proposal. |
 | Resin Stone | Hardened plant resin | Exploratory | 3 | 3 | 1 | 2 | 9 | Both parent contributions are obvious, and the name could describe hardened Amber-like traps. It could read as a crafting material. Expanded naming pass. |
 | Loam | Rooted soil | Reference | 2 | 2 | 2 | 2 | 8 | Earth and organic matter make a useful growing medium. Its gameplay sits close to Plant and Earth. Earlier chart: Soil and decayed plant matter support fast growth. |
