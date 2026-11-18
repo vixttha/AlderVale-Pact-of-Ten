@@ -1,16 +1,18 @@
-# Test Vault v0.0.2
+# Test Vault v0.0.3
 
 The Test Vault tracks what a project intends to test and the evidence for cases it has run. It works alongside your project's test commands.
 
 ## Install in an existing repository
 
-From the source kit's `starter/` directory, copy both `test-vault/` and `.github/workflows/test-vault.yml` into the same paths in your target repository. Review any filename collisions before copying. This kit contains these files:
+From the source kit's `starter/` directory, copy both `test-vault/` and `.github/workflows/test-vault.yml` into the same paths in your target repository. Review any filename collisions before copying. The five base files provide catalog validation:
 
 - `test-vault/README.md`
 - `test-vault/cases.md`
 - `test-vault/validate_catalog.py`
 - `test-vault/case-and-receipt.md`
 - `.github/workflows/test-vault.yml`
+
+Optional execution evidence is documented in [Verify execution receipts](evidence.md). See the [upgrade guide](UPGRADE.md) and [changelog](CHANGELOG.md).
 
 Run this from the repository root with Python 3.12:
 
