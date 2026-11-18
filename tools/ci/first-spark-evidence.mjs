@@ -45,12 +45,12 @@ function captureObservations(directory, context) {
   return observationDigest(directory, context);
 }
 
-function verifyDotnet(id, directory) {
+function verifyDotnet(id, directory, spawn = spawnSync) {
   const cwd = fileURLToPath(new URL('../../tests/vault/' + id + '/', import.meta.url));
   const args = id === 'csharp'
     ? ['run', '--project', 'GuestSaveContracts.csproj', '--configuration', 'Release', '--', '--first-spark', directory]
     : ['fsi', '--exec', 'first-spark-check.fsx', directory];
-  const result = spawnSync('dotnet', args, { cwd, encoding: 'utf8', timeout: 60_000, killSignal: 'SIGKILL' });
+  const result = spawn('dotnet', args, { cwd, encoding: 'utf8', timeout: 60_000, killSignal: 'SIGKILL' });
   if (result.stdout) process.stdout.write(result.stdout);
   if (result.stderr) process.stderr.write(result.stderr);
   if (result.status === 0) return { status: 'pass', detail: id === 'csharp' ? 'Identity and save fields survived reload' : 'Correct payout and no second reward on reducer replay' };
@@ -58,7 +58,7 @@ function verifyDotnet(id, directory) {
   return { status: 'fail', detail: result.error?.message ?? diagnostic ?? ('dotnet exited ' + (result.signal ?? result.status)) };
 }
 
-export function runFirstSpark(env, browserOutcome) {
+export function runFirstSpark(env, browserOutcome, { spawn = spawnSync } = {}) {
   const directory = env.FIRST_SPARK_EVIDENCE_DIR;
   const context = identity(env);
   mkdirSync(directory, { recursive: true });
@@ -81,7 +81,7 @@ export function runFirstSpark(env, browserOutcome) {
     });
   }
   for (const id of ['csharp', 'fsharp']) {
-    write(id, digest ? verifyDotnet(id, directory) : { status: 'blocked', detail: problem });
+    write(id, digest ? verifyDotnet(id, directory, spawn) : { status: 'blocked', detail: problem });
   }
 }
 
