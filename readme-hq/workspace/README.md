@@ -2,6 +2,7 @@
 
 | Version | Status | Folder |
 | --- | --- | --- |
+| v0.0.6 | Draft | [Workspace record](v0.0.6/README.md) |
 | v0.0.5 | Archived (source retained) | [Workspace record](v0.0.5/README.md) |
 | v0.0.4 | Archived (source retained) | [Workspace record](v0.0.4/README.md) |
 | v0.0.3 | Archived (source retained) | [Workspace record](v0.0.3/README.md) |

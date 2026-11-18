@@ -186,6 +186,7 @@ def check_archive(root, repo, base, filenames, manifest_entries, label):
             )
 
     latest_version = max(rows, key=version_key)
+    require(rows[0] == latest_version, f"{index_label} must show the latest version first")
     return versions_dir / latest_version, latest_version
 
 
@@ -222,10 +223,26 @@ def check_workspace(root, base, label):
     return sorted(drafts, key=version_key, reverse=True)
 
 
-def heading_slugs(markdown):
+def markdown_headings(markdown):
+    """Yield ATX headings with line numbers, nesting levels, and GitHub fragments."""
     slugs = set()
-    for heading in re.findall(r"^#{1,6}\s+(.+?)\s*#*\s*$", markdown, re.MULTILINE):
-        heading = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", heading)
+    fence = None
+    for number, line in enumerate(markdown.splitlines(), 1):
+        delimiter = re.match(r"^ {0,3}(\x60{3,}|~{3,})", line)
+        if delimiter:
+            marker = delimiter[1]
+            if fence is None:
+                fence = marker
+            elif marker.startswith(fence) and not line[delimiter.end():].strip():
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        match = re.match(r"^ {0,3}(#{1,6})[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$", line)
+        if not match:
+            continue
+        hashes, title = match.groups()
+        heading = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", title)
         slug = re.sub(r"[^\w -]", "", heading.lower())
         slug = re.sub(r"\s+", "-", slug.strip())
         base_slug = slug
@@ -234,8 +251,11 @@ def heading_slugs(markdown):
             suffix += 1
             slug = f"{base_slug}-{suffix}"
         slugs.add(slug)
-    return slugs
+        yield number, len(hashes), title, slug
 
+
+def heading_slugs(markdown):
+    return {slug for _, _, _, slug in markdown_headings(markdown)}
 
 
 def markdown_links(markdown):
@@ -728,6 +748,20 @@ def validate_repo(root, repo, main_ref, baseline=None, check_external=True):
 
 
 def run_regression_tests(root, repo, main_ref, baseline):
+    source = (
+        "# Review\n"
+        "\x60\x60\x60md\n## Code-only heading\n\x60\x60\x60\n"
+        "## Review\n### 1. [Next step](../README.md)\n"
+    )
+    require(
+        list(markdown_headings(source)) == [
+            (1, 1, "Review", "review"),
+            (5, 2, "Review", "review-1"),
+            (6, 3, "1. [Next step](../README.md)", "1-next-step"),
+        ],
+        "Heading outline failed duplicate, fenced code, or inline-link regression",
+    )
+
     cases = []
 
     def add_case(name, expected_message, mutate, *, check_history=False):
@@ -827,6 +861,18 @@ def run_regression_tests(root, repo, main_ref, baseline):
     def remove_active_draft_file(fixture):
         (add_draft(fixture / "workspace") / "DRAFT.md").unlink()
 
+    def move_latest_hq_archive_to_end(fixture):
+        path = fixture / "readme-hq/versions/README.md"
+        text = read(path)
+        row = VERSION_ROW_RE.search(text)
+        end = text.index("\n", row.start())
+        last_row = list(VERSION_ROW_RE.finditer(text))[-1]
+        last_end = text.index("\n", last_row.start())
+        path.write_text(
+            text[:row.start()] + text[end + 1:last_end] + "\n" + text[row.start():end]
+            + text[last_end:], encoding="utf-8",
+        )
+
     def change_frozen_changelog(fixture):
         path = fixture / "versions/v0.0.1/CHANGELOG.md"
         path.write_text(read(path) + "\n<!-- regression mutation -->\n", encoding="utf-8")
@@ -834,6 +880,7 @@ def run_regression_tests(root, repo, main_ref, baseline):
     add_case("public frozen README drift", "snapshot checksum mismatch", change_public_snapshot)
     add_case("HQ guide and live guide drift together", "snapshot checksum mismatch", change_hq_snapshot_and_live_guide)
     add_case("HQ front page drift", "front page differs from the latest HQ snapshot", change_hq_front_page_only)
+    add_case("older HQ archive first", "must show the latest version first", move_latest_hq_archive_to_end)
     add_case(
         "public workspace index omission",
         "workspace index must list each version folder exactly once",
@@ -1224,6 +1271,7 @@ def main():
         print(f"PASS: {summary}.")
         regression_count = run_regression_tests(ROOT, ROOT, main_ref, baseline)
         print(f"PASS: {regression_count} negative fixtures rejected and 2 valid workspace transitions accepted.")
+        print("PASS: heading fragments for duplicate titles, fenced code, and inline links.")
         external_regression_count = run_external_link_regression_tests()
         print(f"PASS: {external_regression_count} external-link regression cases.")
     except (ValidationError, OSError, ValueError, KeyError, TypeError, AttributeError) as error:
