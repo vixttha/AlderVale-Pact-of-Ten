@@ -11,12 +11,13 @@ on:
       - 'tests/vault/cpp/**'
       - 'tests/vault/csharp/**'
       - 'tests/vault/fsharp/**'
+      - 'tests/vault/haskell/**'
       - 'shared/**'
       - 'src/lib/storage.ts'
       - 'src/lib/firebase.ts'
       - 'public/models/**.glb'
   push:
-    branches: [main]
+    branches: [main, AlderVale-Test-Vault]
     paths:
       - '.github/workflows/test-vault-template.yml'
       - 'docs/test-vault/**'
@@ -26,6 +27,7 @@ on:
       - 'tests/vault/cpp/**'
       - 'tests/vault/csharp/**'
       - 'tests/vault/fsharp/**'
+      - 'tests/vault/haskell/**'
       - 'shared/**'
       - 'src/lib/storage.ts'
       - 'src/lib/firebase.ts'
@@ -98,6 +100,24 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
+      - name: Compare spell-card piles with the Haskell model
+        shell: bash
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          work=$(mktemp -d "$RUNNER_TEMP/haskell-card-contracts.XXXXXX")
+          trap 'rm -rf "$work"' EXIT
+          {
+            printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)"
+            printf 'Base: %s\nHead: %s\nRun / attempt: %s / %s\n' "${BASE:-n/a}" "${HEAD:-n/a}" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            ghc --version
+            ghc -Wall -Werror -outputdir "$work" -o "$work/spell-card-contracts" tests/vault/haskell/SpellCardContracts.hs
+            "$work/spell-card-contracts" fixtures > "$work/fixtures.tsv"
+            node tests/vault/haskell/observe-cards.mjs "$work/fixtures.tsv" > "$work/observed.tsv"
+            "$work/spell-card-contracts" verify "$work/observed.tsv"
+          } 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
         with:
           global-json-file: tests/vault/csharp/global.json
