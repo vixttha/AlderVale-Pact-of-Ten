@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "product_version": "v0.0.1",
+  "status": "draft",
+  "snapshot_path": "workspace/v0.0.1",
+  "semantic_model_input_tokens": 0,
+  "semantic_model_output_tokens": 0,
+  "source_commit": "14c54e0077208f5fe52a555bc1fef7c60f4aeb17",
+  "source_path": "workspace/v0.0.1",
+  "graphify_version": "0.9.109",
+  "graph_sha256": "c9fb41ed974f16ae460d883ffd26321308f72bd44e586185954429ef09208cff",
+  "html_sha256": "488ad5c5c06905f4576662d292ab23a5d8ce9c183e3d1d4b3ce6cd1482fc1aa9",
+  "nodes": 17,
+  "edges": 19,
+  "sources": {
+    "CHANGELOG.md": {
+      "archive_path": "workspace/v0.0.1/CHANGELOG.md",
+      "blob_sha1": "7b672438088c5103304a4b2448d1880ad75a0ef6"
+    },
+    "README.md": {
+      "archive_path": "workspace/v0.0.1/README.md",
+      "blob_sha1": "4c07bd4b596e38aec451cd3f7d15596fc45e7f53"
+    },
+    "SCOPE.md": {
+      "archive_path": "workspace/v0.0.1/SCOPE.md",
+      "blob_sha1": "3607d4a9e7ac2e27fff860b672302b95ab9e7d72"
+    },
+    "evidence/README.md": {
+      "archive_path": "workspace/v0.0.1/evidence/README.md",
+      "blob_sha1": "d378bac9e2144c30715d88e935ce07b5ec5516b5"
+    }
+  }
+}

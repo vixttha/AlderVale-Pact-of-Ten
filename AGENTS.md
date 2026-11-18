@@ -37,6 +37,13 @@ synthetic tests, native installed behavior and owner acceptance.
 
 ## Housekeeping
 
+Read [the version policy](versions/README.md) before changing a workspace.
+The current working version is v0.0.1 (Draft); no archive is approved yet.
+Keep each version in its own workspace, pin source commits and regenerate its
+Graphify HQ map and receipt. Preserve approved archives and their records/maps
+byte for byte. Verify version contracts on the public hosted runner workflow.
+Development maps, source archives and public releases are different evidence.
+
 Maintain the issue index, compatibility records, sources, release receipts,
 documentation and dependency/security backlog. Reconcile stale claims.
 Suggest cleanup with exact owned paths and retention rules; never delete user

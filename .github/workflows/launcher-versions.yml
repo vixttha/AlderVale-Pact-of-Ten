@@ -1,0 +1,51 @@
+name: AlderVale Launcher version maps
+
+on:
+  push:
+    branches: [AlderVale-Launcher]
+  pull_request:
+    branches: [AlderVale-Launcher]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: launcher-versions-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  versions:
+    name: Version and Graphify contracts (${{ matrix.os }})
+    if: github.event.repository.private == false && github.event.deleted != true
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PYTHONHASHSEED: '0'
+      PYTHONUTF8: '1'
+      TRUSTED_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Install locked Graphify and MCP dependencies
+        run: >-
+          python -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
+      - name: Reject changed sources and rewritten archive history
+        run: python -m unittest discover -s tests -v
+      - name: Rebuild, query and compare every version map
+        run: |
+          set -euo pipefail
+          printf 'Launcher checkout: %s\nTrusted baseline: %s\n' "$(git rev-parse HEAD)" "$TRUSTED_BASE" >> "$GITHUB_STEP_SUMMARY"
+          python tools/graphify/version_maps.py "$RUNNER_TEMP/launcher-maps" --check --baseline "$TRUSTED_BASE" | tee -a "$GITHUB_STEP_SUMMARY"

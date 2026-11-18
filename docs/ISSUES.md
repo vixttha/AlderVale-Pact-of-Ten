@@ -27,6 +27,9 @@ workers. No estimate or delivery date is promised.
 
 ## Existing work and dependencies
 
+- [#151](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/151): launcher
+  version workspaces, archive policy and Graphify HQ setup before v0.0.1.
+
 - [PR #91](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/91): original Windows owner-play launcher, merged.
 - [PR #118](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/118): five Windows launcher contracts,
   merged into `AlderVale-Test-Vault`, not proof of adoption on game main.

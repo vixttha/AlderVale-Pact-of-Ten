@@ -10,6 +10,10 @@ platforms; native support has not yet been established.
 
 ## Start here
 
+- [v0.0.1 draft workspace](workspace/v0.0.1/README.md)
+- [Version history and lifecycle](versions/README.md)
+- [Graphify HQ — one pinned map per version](Graphify%20HQ/README.md)
+- [Version setup and runner evidence](docs/VERSION_SETUP.md)
 - [AlderGate: housekeeper and launcher creator](agents/aldergate/IDENTITY.md)
 - [Worker instructions](AGENTS.md) and [governing rules](PROJECT_RULES.md)
 - [Audit and verified sources](docs/AUDIT-2026-11-18.md)
