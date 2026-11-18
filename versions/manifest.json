@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "current_working": "v0.0.1",
+  "current_archived": null,
+  "versions": {
+    "v0.0.1": {
+      "status": "draft",
+      "source_commit": "1aea00da941d556185496326a6240c858ba6d652",
+      "source_path": "workspace/v0.0.1",
+      "snapshot_path": "workspace/v0.0.1",
+      "semantic_artifact": "tools/graphify/semantic/v0.0.1.json"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "template_version": "v0.0.1",
+  "status": "draft",
+  "snapshot_path": "workspace/v0.0.1",
+  "semantic_model_input_tokens": null,
+  "semantic_model_output_tokens": null,
+  "source_commit": "1aea00da941d556185496326a6240c858ba6d652",
+  "source_path": "workspace/v0.0.1",
+  "graphify_version": "0.9.109",
+  "graph_sha256": "25c737ecb56a0c3ce95dfd8f5556dfd67f994b99a71122d1f90ed3059fd9db0f",
+  "html_sha256": "2696281a47642c154933677c888515789563aea7d551cc76f2c69dd8717427ce",
+  "nodes": 82,
+  "edges": 91,
+  "sources": {
+    "CHANGELOG.md": {
+      "archive_path": "workspace/v0.0.1/CHANGELOG.md",
+      "blob_sha1": "58b50a97e035c7f32017c91cd8f9969f14d6f564"
+    },
+    "GUIDE.md": {
+      "archive_path": "workspace/v0.0.1/GUIDE.md",
+      "blob_sha1": "3d93e97fe1faf84680ae545fdb3cbc587fa22d29"
+    },
+    "README.md": {
+      "archive_path": "workspace/v0.0.1/README.md",
+      "blob_sha1": "efb68f01e26913103513abd2f2e4540e1b3bec7a"
+    },
+    "template/AGENTS.template.md": {
+      "archive_path": "workspace/v0.0.1/template/AGENTS.template.md",
+      "blob_sha1": "f13f0480327d5995ea44721c9bde257d43fe87a3"
+    },
+    "template/IDENTITY.template.md": {
+      "archive_path": "workspace/v0.0.1/template/IDENTITY.template.md",
+      "blob_sha1": "792ac76a5cd6ffdb507015201f62d1506dfac072"
+    },
+    "template/README.md": {
+      "archive_path": "workspace/v0.0.1/template/README.md",
+      "blob_sha1": "4dde98f22eacbb75a84fb053e416ce4d8f9b73eb"
+    },
+    "template/bindings.schema.json": {
+      "archive_path": "workspace/v0.0.1/template/bindings.schema.json",
+      "blob_sha1": "2166058f8a39b843b0d4d0a145ccc2e7b328cccb"
+    }
+  },
+  "semantic_artifact": "tools/graphify/semantic/v0.0.1.json",
+  "semantic_artifact_sha256": "80a76450a8983d3ff0191a2521a6fa2f5ae95c61f330e43ff2f2fdf385c73ded",
+  "semantic_usage_status": "host_harness_unavailable",
+  "ci_model_api_calls": 0,
+  "report_sha256": "9e247e49ec9a2da0a35d932e62fa77d6fbb83a9708c32677c865cee55e0e46d6",
+  "graph_health": {
+    "dangling_endpoint_edges": 0,
+    "missing_endpoint_edges": 0,
+    "self_loop_edges": 0,
+    "directed_same_endpoint_collapsed_edges": 0
+  }
+}
