@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "vixttha/AlderVale-Pact-of-Ten",
+  "source_ref": "refs/heads/readme-hq",
+  "source_commit": "4e7b1bcf8abdca3e9bedfd4dbaae18cfee731832",
+  "graphify_version": "0.9.109",
+  "extraction": "code-only plus tracked Markdown links and archive provenance",
+  "graph_sha256": "7becc97d069d0cd38c49171ded96ecf9be15daa57fbf57b60432bb6831433fbe",
+  "nodes": 205,
+  "edges": 608,
+  "markdown_files": 48,
+  "mcp_verified": true,
+  "mcp_source_lookup": "README.md",
+  "workflow_run": "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44238437321"
+}
