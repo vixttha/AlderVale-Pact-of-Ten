@@ -5,25 +5,62 @@
   "snapshot_path": "workspace/v0.0.1",
   "semantic_model_input_tokens": 0,
   "semantic_model_output_tokens": 0,
-  "source_commit": "14c54e0077208f5fe52a555bc1fef7c60f4aeb17",
+  "source_commit": "bc3d995a0ea26002dc40677409bfd7bb68581376",
   "source_path": "workspace/v0.0.1",
   "graphify_version": "0.9.109",
-  "graph_sha256": "c9fb41ed974f16ae460d883ffd26321308f72bd44e586185954429ef09208cff",
-  "html_sha256": "488ad5c5c06905f4576662d292ab23a5d8ce9c183e3d1d4b3ce6cd1482fc1aa9",
-  "nodes": 17,
-  "edges": 19,
+  "graph_sha256": "cd2f24698974db280b71e08ad7aec47e549a22c76cf4b4fda1d852c9cfb2bd62",
+  "html_sha256": "d79076b5903b83ea0b7586bd8ae3076576e8a4ad9adc060e460325886551d751",
+  "report_sha256": "da34963a971f5606ca5c9d66f0433011d77aeabc5f8ab43305ee6f8dd54ce061",
+  "nodes": 60,
+  "edges": 69,
   "sources": {
     "CHANGELOG.md": {
       "archive_path": "workspace/v0.0.1/CHANGELOG.md",
-      "blob_sha1": "7b672438088c5103304a4b2448d1880ad75a0ef6"
+      "blob_sha1": "26d45b8b75539188196898b5dfa9b73df506a6fb"
     },
     "README.md": {
       "archive_path": "workspace/v0.0.1/README.md",
-      "blob_sha1": "4c07bd4b596e38aec451cd3f7d15596fc45e7f53"
+      "blob_sha1": "4b8cc0622684e482414258d37c9fbbc9d1a3c3d7"
     },
     "SCOPE.md": {
       "archive_path": "workspace/v0.0.1/SCOPE.md",
       "blob_sha1": "3607d4a9e7ac2e27fff860b672302b95ab9e7d72"
+    },
+    "agent/AGENTS.md": {
+      "archive_path": "workspace/v0.0.1/agent/AGENTS.md",
+      "blob_sha1": "54b57563e0d80a2b54b133f338174c508fd86a82"
+    },
+    "agent/IDENTITY.md": {
+      "archive_path": "workspace/v0.0.1/agent/IDENTITY.md",
+      "blob_sha1": "ca638de9bd7f1f320da1da4e2944cbc2fbc4e719"
+    },
+    "agent/PROJECT_IDENTITY.md": {
+      "archive_path": "workspace/v0.0.1/agent/PROJECT_IDENTITY.md",
+      "blob_sha1": "abaaaf5c14052a0cc9bee7c4d01183973fdf93e1"
+    },
+    "agent/PROJECT_INSTRUCTIONS.md": {
+      "archive_path": "workspace/v0.0.1/agent/PROJECT_INSTRUCTIONS.md",
+      "blob_sha1": "1b073a83ac4ef6a86c52e6155d3a13dd0a1c12ff"
+    },
+    "agent/binding.json": {
+      "archive_path": "workspace/v0.0.1/agent/binding.json",
+      "blob_sha1": "6a33d50f6a422f1a3d866811f55e6860e05795d8"
+    },
+    "agent/template/AGENTS.template.md": {
+      "archive_path": "workspace/v0.0.1/agent/template/AGENTS.template.md",
+      "blob_sha1": "f13f0480327d5995ea44721c9bde257d43fe87a3"
+    },
+    "agent/template/IDENTITY.template.md": {
+      "archive_path": "workspace/v0.0.1/agent/template/IDENTITY.template.md",
+      "blob_sha1": "792ac76a5cd6ffdb507015201f62d1506dfac072"
+    },
+    "agent/template/README.md": {
+      "archive_path": "workspace/v0.0.1/agent/template/README.md",
+      "blob_sha1": "4dde98f22eacbb75a84fb053e416ce4d8f9b73eb"
+    },
+    "agent/template/bindings.schema.json": {
+      "archive_path": "workspace/v0.0.1/agent/template/bindings.schema.json",
+      "blob_sha1": "2166058f8a39b843b0d4d0a145ccc2e7b328cccb"
     },
     "evidence/README.md": {
       "archive_path": "workspace/v0.0.1/evidence/README.md",

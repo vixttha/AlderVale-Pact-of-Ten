@@ -10,6 +10,8 @@ platforms; native support has not yet been established.
 
 ## Start here
 
+- [Reusable launcher-agent template](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/Launcher-Agent-Template)
+- [AlderGate template binding](workspace/v0.0.1/agent/binding.json)
 - [v0.0.1 draft workspace](workspace/v0.0.1/README.md)
 - [Version history and lifecycle](versions/README.md)
 - [Graphify HQ — one pinned map per version](Graphify%20HQ/README.md)

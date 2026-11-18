@@ -18,6 +18,9 @@ from urllib.parse import unquote, urlsplit
 
 from graphify.build import build_from_json
 from graphify.export import to_json, to_html
+from graphify.cluster import cluster, score_all
+from graphify.analyze import god_nodes, surprising_connections, suggest_questions
+from graphify.report import generate
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
@@ -130,8 +133,21 @@ def build_map(tag, record, sources, output):
     graph.graph.update(product_version=tag, status=record["status"], scope="aldervale_launcher")
     output.mkdir(parents=True)
     graph_path = output / "graph.json"
-    to_json(graph, {0: list(graph)}, str(graph_path), built_at_commit=record["source_commit"])
-    to_html(graph, {0: list(graph)}, str(output / "graph.html"))
+    communities = cluster(graph)
+    cohesion = score_all(graph, communities)
+    labels = {cid: "AlderGate Agent Contracts" for cid in communities}
+    questions = suggest_questions(graph, communities, labels)
+    to_json(graph, communities, str(graph_path), built_at_commit=record["source_commit"],
+            community_labels=labels)
+    report = generate(graph, communities, cohesion, labels, god_nodes(graph),
+                      surprising_connections(graph, communities),
+                      {"total_files": len(sources), "total_words": sum(len(e[2].split()) for e in sources.values())},
+                      {"input": 0, "output": 0}, ".", suggested_questions=questions,
+                      built_at_commit=record["source_commit"])
+    report = re.sub(r"\A[^\n]*", f"# Graph Report - AlderVale-Launcher {tag}", report, count=1)
+    report += "\n\nThis is deterministic structural file/heading/link evidence, not a semantic or behavior audit.\n"
+    (output / "GRAPH_REPORT.md").write_text(report, encoding="utf-8", newline="\n")
+    to_html(graph, communities, str(output / "graph.html"), community_labels=labels)
     # Graphify puts the temporary output path in the title; remove that
     # nondeterministic build-location detail from the committed artifact.
     html_path = output / "graph.html"
@@ -150,6 +166,7 @@ def build_map(tag, record, sources, output):
         "graphify_version": version("graphifyy"),
         "graph_sha256": hashlib.sha256(graph_path.read_bytes()).hexdigest(),
         "html_sha256": hashlib.sha256((output / "graph.html").read_bytes()).hexdigest(),
+        "report_sha256": hashlib.sha256((output / "GRAPH_REPORT.md").read_bytes()).hexdigest(),
         "nodes": graph.number_of_nodes(),
         "edges": graph.number_of_edges(),
         "sources": {name: {"archive_path": path, "blob_sha1": blob} for name, (path, blob, _) in sources.items()},
@@ -158,7 +175,7 @@ def build_map(tag, record, sources, output):
     lines = [f"# AlderVale-Launcher {tag}", "",
              "[Graphify map](graph.json) · [Source receipt](receipt.json) · [All versions](../README.md)", "",
              f"**Status: {record['status']}. Source structure, not release acceptance.**", "",
-             "[Interactive graph](graph.html)", "", "## Indexed files", ""]
+             "[Interactive graph](graph.html) · [Graph report](GRAPH_REPORT.md)", "", "## Indexed files", ""]
     lines.extend(f"- [{name}](../../{entry['archive_path']})" for name, entry in receipt["sources"].items())
     (output / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     return receipt

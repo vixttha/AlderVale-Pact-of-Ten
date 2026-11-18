@@ -27,6 +27,8 @@ workers. No estimate or delivery date is promised.
 
 ## Existing work and dependencies
 
+- [#152](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/152): separate
+  reusable launcher-agent template and verified AlderGate adoption.
 - [#151](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/151): launcher
   version workspaces, archive policy and Graphify HQ setup before v0.0.1.
 
