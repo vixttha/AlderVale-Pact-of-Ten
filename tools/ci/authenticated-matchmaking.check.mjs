@@ -244,7 +244,7 @@ test('Bazaar escrow and sale push seller wallets only to the owning realm, witho
 
   // A later response on each socket proves no seller event was queued there.
   await Promise.all([buyerSocket, otherRealmSocket].map((socket) =>
-    exchange(socket, { type: 'move', zone: 'arbor' }, ['zone_snapshot']),
+    exchange(socket, { type: 'move', zone: 'arbor', x: 0, y: 0, z: 10, rotY: 0 }, ['zone_snapshot']),
   ));
   assert.deepEqual(unrelatedWallets, []);
 });
