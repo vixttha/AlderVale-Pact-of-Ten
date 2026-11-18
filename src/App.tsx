@@ -667,8 +667,9 @@ export function App() {
               const nextZone = data.zone as ZoneId;
               const position = location as { x: number; y: number; z: number; rotY: number };
               setZone(nextZone);
+              const confirmedSession = serverSession;
               setWorldPositionSync((previous) => ({
-                sessionId: serverSession, revision: (previous?.revision ?? 0) + 1,
+                sessionId: confirmedSession, revision: (previous?.revision ?? 0) + 1,
                 zone: nextZone, ...position,
               }));
               setPlayerMinimapPos({ x: position.x, z: position.z, rotY: position.rotY });
