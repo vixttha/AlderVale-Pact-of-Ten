@@ -7,3 +7,5 @@ The existing `validate.yml` game matrix already runs on PRs, but **not** automat
 No external model provider is called. No local/self-hosted or larger runner is required, no automatic publication, tag, merge or release is performed. Graphify is code-only, not a visual/rig validator.
 
 **Evidence states:** Proposed → Implemented → CI run started → Verified (only once observed at an exact checkout). Do not archive v0.0.1 before owner acceptance.
+
+The separate version-document Graphify stage must also pass: it checks v0.0.1 draft template/adoption headings and references through a verified MCP document readback, with per-file hashes. No `versions/v0.0.1/` archive exists until owner approval.

@@ -7,3 +7,10 @@ The dedicated `.github/workflows/formwright.yml` verifies a **code-only graph at
 Formwright template version history is kept in the [version index](../versions/README.md), the [portable template](../template/v0.0.1/README.md), and the [draft workspace](../workspace/v0.0.1/README.md). For future **accepted** versions, store a verified graph and receipt in `graphify/versions/<formwright-version>/` only through a separate authorized promotion, keyed to source SHA. Until then, refer to hosted run receipts rather than inventing a permanent snapshot.
 
 Never reuse ambiguous unprefixed global version tags for this HQ. Store no model API token or private Notion content in CI. Graph jobs must not deploy, tag, or release the game.
+
+
+## Version-specific document maps
+
+In addition to the whole-repository **code graph**, the Formwright workflow now builds a **draft v0.0.1 document graph** using `character-forge/tools/version_graph.py`. It indexes headings and internal document references from the portable template and AlderVale adoption workspace, records each document's Git blob and SHA-256, and verifies document lookup over Graphify MCP at the exact checkout SHA.
+
+Only **draft** maps exist during v0.0.1 review. Their runner receipts are review evidence, not an approved version archive. Once explicitly owner-accepted, generate the `--state archive` map against the frozen, manifest-validated version documents, store it under `graphify/versions/<formwright-version>/`, and recheck its provenance. Version-specific mapping complements the code graph; neither proves rendering, skinning, or clothing fit.

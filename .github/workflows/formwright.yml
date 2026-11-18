@@ -59,6 +59,12 @@ jobs:
       - name: Install existing locked Graphify dependencies
         run: >-
           python3 -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
+      - name: Generate draft Formwright version-document Graphify map
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 character-forge/tools/version_graph.py --version v0.0.1 --state draft --output "$RUNNER_TEMP/formwright-document-map" | tee -a "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/formwright-document-map/receipt.json" >> "$GITHUB_STEP_SUMMARY"
       - name: Extract, verify Graphify MCP and record source receipt
         shell: bash
         run: |
