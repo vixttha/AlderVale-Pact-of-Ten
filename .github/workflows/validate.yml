@@ -91,8 +91,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
-    runs-on: ubuntu-latest
+        browser: [chromium]
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -145,6 +145,135 @@ jobs:
           retention-days: 1
           if-no-files-found: ignore
 
+  browser_firefox:
+    if: github.event.repository.private == false
+    name: Guest browser (firefox)
+    runs-on: ubuntu-24.04
+    # Official Playwright image matches tools/ci/package.json (1.65.1).
+    # Browser and OS dependencies are baked in; still runs on a public GitHub-hosted runner.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      # Checkout's temporary HOME does not carry its safe.directory across container steps.
+      - name: Trust checked-out workspace in container
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Record tested checkout
+        id: checkout_revision
+        shell: bash
+        run: |
+          tested_sha=$(git rev-parse HEAD)
+          printf 'sha=%s\n' "$tested_sha" >> "$GITHUB_OUTPUT"
+      - id: evidence_node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      # Pinned Bun npm distribution avoids unzip absent from the official Playwright image.
+      - name: Install Bun 1.4.4 in Playwright container
+        run: |
+          npm install --global --no-audit --no-fund bun@1.4.4
+          test "$(bun --version)" = '1.4.4'
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Install isolated validation tools
+        run: npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
+      - name: Prepare Firefox profile home
+        run: install -d -m 700 /tmp/aldervale-firefox-home
+      - name: Test local guest flows without production Firebase
+        id: browser_test
+        working-directory: tools/ci
+        env:
+          HOME: /tmp/aldervale-firefox-home
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/playwright-evidence.json
+        run: xvfb-run --auto-servernum npm run test:browser -- --project=firefox --headed --reporter=list,html,json
+      - name: Write verification summary
+        if: ${{ always() && steps.evidence_node.outcome == 'success' }}
+        env:
+          TESTED_SHA: ${{ steps.checkout_revision.outputs.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BROWSER_OUTCOME: ${{ steps.browser_test.outcome }}
+          PLAYWRIGHT_EVIDENCE: ${{ runner.temp }}/playwright-evidence.json
+        run: node tools/ci/verification-summary.mjs
+      - name: Retain failure evidence briefly
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: guest-firefox-${{ github.run_attempt }}
+          path: |
+            tools/ci/playwright-report/
+            tools/ci/test-results/
+          retention-days: 1
+          if-no-files-found: ignore
+
+  browser_webkit:
+    if: github.event.repository.private == false
+    name: Guest browser (webkit)
+    runs-on: ubuntu-24.04
+    # Official Playwright image matches tools/ci/package.json (1.65.1).
+    # Browser and OS dependencies are baked in; still runs on a public GitHub-hosted runner.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      # Checkout's temporary HOME does not carry its safe.directory across container steps.
+      - name: Trust checked-out workspace in container
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Record tested checkout
+        id: checkout_revision
+        shell: bash
+        run: |
+          tested_sha=$(git rev-parse HEAD)
+          printf 'sha=%s\n' "$tested_sha" >> "$GITHUB_OUTPUT"
+      - id: evidence_node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      # Pinned Bun npm distribution avoids unzip absent from the official Playwright image.
+      - name: Install Bun 1.4.4 in Playwright container
+        run: |
+          npm install --global --no-audit --no-fund bun@1.4.4
+          test "$(bun --version)" = '1.4.4'
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - name: Install isolated validation tools
+        run: npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
+      - name: Test local guest flows without production Firebase
+        id: browser_test
+        working-directory: tools/ci
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/playwright-evidence.json
+        run: xvfb-run --auto-servernum npm run test:browser -- --project=webkit --headed --reporter=list,html,json
+      - name: Write verification summary
+        if: ${{ always() && steps.evidence_node.outcome == 'success' }}
+        env:
+          TESTED_SHA: ${{ steps.checkout_revision.outputs.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BROWSER_OUTCOME: ${{ steps.browser_test.outcome }}
+          PLAYWRIGHT_EVIDENCE: ${{ runner.temp }}/playwright-evidence.json
+        run: node tools/ci/verification-summary.mjs
+      - name: Retain failure evidence briefly
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: guest-webkit-${{ github.run_attempt }}
+          path: |
+            tools/ci/playwright-report/
+            tools/ci/test-results/
+          retention-days: 1
+          if-no-files-found: ignore
+
   firestore:
     if: github.event.repository.private == false
     name: Firestore emulator permissions
@@ -174,7 +303,7 @@ jobs:
       - run: npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
       - name: Install locked application dependencies
         run: npm ci --no-audit --no-fund
-      - name: Test rules, transactions, and authenticated matchmaking in a demo project
+      - name: Test rules, transactions, matchmaking, and signed-in progression in a demo project
         id: firestore_test
         env:
           GOOGLE_CLOUD_PROJECT: demo-aldervale-ci
@@ -182,7 +311,7 @@ jobs:
         run: >-
           tools/ci/node_modules/.bin/firebase emulators:exec
           --config firebase.ci.json --project demo-aldervale-ci --only auth,firestore
-          "node --test tools/ci/firestore.check.mjs && npm test -- tests/firestore.integration.test.ts && node --test tools/ci/authenticated-matchmaking.check.mjs"
+          "node --test tools/ci/firestore.check.mjs && npm test -- tests/firestore.integration.test.ts && node --test tools/ci/authenticated-matchmaking.check.mjs && node --test tools/ci/authenticated-progression.check.mjs"
       - name: Write verification summary
         if: ${{ always() && steps.evidence_node.outcome == 'success' }}
         env:
