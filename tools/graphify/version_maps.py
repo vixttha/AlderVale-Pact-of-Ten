@@ -177,8 +177,9 @@ def compare(output, export_missing):
     for label, paths in (("Unexpected", extra), ("Changed", changed), ("Missing", missing)):
         for path in paths:
             print(f"{label}: {MAPS.name}/{path}")
-    if export_missing and missing:
-        payload = json.dumps({key: expected[key].read_text(encoding="utf-8") for key in missing})
+    updates = missing + (["README.md"] if "README.md" in changed else [])
+    if export_missing and updates:
+        payload = json.dumps({key: expected[key].read_text(encoding="utf-8") for key in updates})
         encoded = base64.b64encode(payload.encode()).decode()
         if len(encoded) > 300_000:
             raise ValueError("Map export exceeded the bootstrap log budget")
@@ -191,7 +192,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--export-missing", action="store_true", help="Emit newly generated map files in CI logs")
+    parser.add_argument("--export-missing", action="store_true", help="Emit missing map files and an updated index in CI logs")
     args = parser.parse_args()
     output = args.output.resolve()
     if output == MAPS or output.is_relative_to(MAPS) or (output.exists() and (not output.is_dir() or any(output.iterdir()))):

@@ -72,3 +72,25 @@ jobs:
             printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)"
             python tools/verify_adoption.py --fixture "$FIXTURE"
           } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  receipts:
+    name: Verify execution receipts and v0.0.2 upgrade
+    if: github.event.repository.private == false && github.event.deleted != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Rehearse the upgrade and verify shared evidence
+        shell: bash
+        run: |
+          set -o pipefail
+          printf 'Template checkout: %s\n\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          python tools/verify_evidence_adoption.py
