@@ -1,4 +1,5 @@
 name: AlderVale validation
+# CI-only frozen verification ref for prebuilt WebKit; not a merge source.
 
 on:
   push:
