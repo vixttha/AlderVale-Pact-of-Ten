@@ -5,6 +5,7 @@ from pathlib import Path
 
 from verify_formwright import (
     REQUIRED, check_archives, check_markdown_links, check_required,
+    missing_archive_versions,
     is_allowed_path, portable_violations,
 )
 
@@ -30,6 +31,16 @@ class FormwrightVerifierTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertTrue(any("invalid 40-character" in m for m in check_archives(root)))
+
+    def test_rejects_deleted_approved_version(self):
+        self.assertEqual(
+            missing_archive_versions({"v0.0.1", "v0.0.2"}, {"v0.0.2"}),
+            ["v0.0.1"],
+        )
+        self.assertEqual(
+            missing_archive_versions({"v0.0.1"}, {"v0.0.1"}),
+            [],
+        )
 
     def test_rejects_out_of_scope_changes(self):
         self.assertTrue(is_allowed_path("character-forge/README.md"))

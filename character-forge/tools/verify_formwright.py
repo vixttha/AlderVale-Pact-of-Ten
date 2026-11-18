@@ -92,6 +92,27 @@ def check_scope(base: str) -> list[str]:
     return errors
 
 
+def missing_archive_versions(historical: set[str], current: set[str]) -> list[str]:
+    """Fail closed when an archived version disappears from the working tree."""
+    return sorted(historical - current)
+
+
+def check_archive_deletions(root: Path = HQ) -> list[str]:
+    historical: set[str] = set()
+    for revision in git("rev-list", "HEAD", "--", "character-forge/versions").splitlines():
+        paths = git("ls-tree", "-r", "--name-only", revision, "--",
+                    "character-forge/versions").splitlines()
+        for path in paths:
+            parts = Path(path).parts
+            if len(parts) >= 4 and VERSION.fullmatch(parts[2]):
+                historical.add(parts[2])
+    folder = root / "versions"
+    present = {path.name for path in folder.iterdir() if path.is_dir()
+               and VERSION.fullmatch(path.name)}
+    return [f"approved archive deleted from history: {name}"
+            for name in missing_archive_versions(historical, present)]
+
+
 def check_archives(root: Path = HQ) -> list[str]:
     errors: list[str] = []
     folder = root / "versions"
@@ -160,6 +181,7 @@ def validate(base: str | None = None) -> list[str]:
     for path in HQ.rglob("*.md"):
         errors.extend(check_markdown_links(path))
     errors.extend(check_archives())
+    errors.extend(check_archive_deletions())
     if base:
         errors.extend(check_scope(base))
     return errors

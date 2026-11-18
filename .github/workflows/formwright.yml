@@ -1,11 +1,9 @@
 name: Formwright v0.0.1 HQ validation and Graphify
 
 on:
+  # Always inspect branch pushes, even if someone edits only game files.
   push:
     branches: [character-forge-hq]
-    paths:
-      - 'character-forge/**'
-      - '.github/workflows/formwright.yml'
   pull_request:
     paths:
       - 'character-forge/**'
