@@ -183,10 +183,13 @@ jobs:
       - run: bun run build
       - name: Install isolated validation tools
         run: npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
+      - name: Prepare Firefox profile home
+        run: install -d -m 700 /tmp/aldervale-firefox-home
       - name: Test local guest flows without production Firebase
         id: browser_test
         working-directory: tools/ci
         env:
+          HOME: /tmp/aldervale-firefox-home
           LIBGL_ALWAYS_SOFTWARE: '1'
           PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/playwright-evidence.json
         run: xvfb-run --auto-servernum npm run test:browser -- --project=firefox --headed --reporter=list,html,json
