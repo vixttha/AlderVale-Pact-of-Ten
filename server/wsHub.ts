@@ -59,6 +59,8 @@ interface ClientConn {
   verifiedUid: string | null;
   heartbeatChallenge: string | null;
   joining: boolean;
+  movementAllowance: number;
+  lastMovementAt: number;
   duelElement: ElementId;
   duelRace: RaceId;
 }
@@ -356,7 +358,8 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     const sessionId = randomUUID();
     const conn: ClientConn = {
       ws, sessionId, presence: null, duelId: null, verifiedUid: null, heartbeatChallenge: null,
-      joining: false, duelElement: 'ember', duelRace: 'human',
+      joining: false, movementAllowance: 1.5, lastMovementAt: Date.now(),
+      duelElement: 'ember', duelRace: 'human',
     };
     clients.set(sessionId, conn);
     send(conn, { type: 'welcome', sessionId });
@@ -384,10 +387,15 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
             let activeCreatureId = typeof p.activeCreatureId === 'string' ? p.activeCreatureId : '';
             let name = p.name.trim().slice(0, 24) || 'Alder Initiate';
             const realm = p.realmId;
+            let serverWizard: Awaited<ReturnType<typeof ownedProgressionWizard>> | null = null;
+            let serverCreature: Awaited<ReturnType<typeof ownedActiveCreature>> | null = null;
             if (typeof msg.idToken === 'string') {
               const principal = await verifyFirebaseBearerToken(`Bearer ${msg.idToken}`);
               if (!principal?.emailVerified) throw new RequestError(401, 'Sign in again to connect to AlderVale.');
               const wizard = await ownedProgressionWizard(principal.uid, p.wizardId, realm);
+              serverWizard = wizard;
+              serverCreature = await ownedActiveCreature(principal.uid, wizard.id, realm);
+              if (!serverCreature) throw new RequestError(409, 'Select an enrolled creature to join.');
               activeCreatureId = wizard.activeCreatureId;
               conn.verifiedUid = principal.uid;
               identity = wizard.id;
@@ -414,7 +422,14 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
             if (reconnectKey) reconnectPositions.delete(reconnectKey);
             const restored = prior && prior.expiresAt > Date.now() && prior.zone === p.zone &&
               Math.hypot(prior.x, prior.z) <= 25 && Math.abs(prior.y) <= 10 ? prior : undefined;
-            const selectedCreature = sanitizeGuestCreatureSelection({ ...p, activeCreatureId });
+            const selectedCreature = serverCreature
+              ? sanitizeGuestCreatureSelection({
+                  activeCreatureId: serverCreature.id, activeCreatureSpeciesId: serverCreature.speciesId,
+                  activeCreatureNickname: serverCreature.nickname, activeCreatureStage: serverCreature.stage,
+                  activeCreatureChromatic: serverCreature.chromatic, activeCreatureBranchChoice: serverCreature.branchChoice,
+                  activeCreatureTalents: serverCreature.talents,
+                })
+              : sanitizeGuestCreatureSelection({ ...p, activeCreatureId });
             conn.presence = {
               ...p, ...selectedCreature, sessionId, wizardId: identity, ownerId: '', name, realmId: realm, zone: p.zone,
               raceId: p.raceId, elementId: p.elementId,
@@ -422,8 +437,17 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
               rank: Number.isFinite(p.rank) ? Math.min(20, Math.max(1, Number(p.rank))) : 1,
               titleBadge: typeof p.titleBadge === 'string' ? p.titleBadge.slice(0, 40) : '',
               x: restored?.x ?? spawn[0], y: restored?.y ?? spawn[1], z: restored?.z ?? spawn[2],
-              rotY: restored?.rotY ?? 0, mountId: null, inDuel: false,
+              rotY: restored?.rotY ?? 0,
+              mountId: serverWizard?.progression.equippedMountId ?? null,
+              ...(serverWizard ? {
+                beastClan: serverWizard.beastClan,
+                sculpt: serverWizard.sculpt, equipped: serverWizard.wardrobe.equipped,
+                stitching: serverWizard.stitching,
+              } : {}),
+              inDuel: false,
             };
+            conn.movementAllowance = 1.5;
+            conn.lastMovementAt = Date.now();
             conn.duelElement = p.elementId;
             conn.duelRace = p.raceId;
             if (conn.verifiedUid && conn.presence) setGameplayPresence(sessionId, { ...conn.presence, uid: conn.verifiedUid });
@@ -470,11 +494,40 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           const prevZone = conn.presence.zone;
           const nextZone = typeof msg.zone === 'string' && Object.hasOwn(ZONES, msg.zone) ? msg.zone as ZoneId : prevZone;
           if (![msg.x, msg.y, msg.z, msg.rotY].every((v) => v === undefined || typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= 1000)) return;
-          conn.presence.x = Number(msg.x ?? conn.presence.x);
-          conn.presence.y = Number(msg.y ?? conn.presence.y);
-          conn.presence.z = Number(msg.z ?? conn.presence.z);
-          conn.presence.rotY = Number(msg.rotY ?? conn.presence.rotY);
-          conn.presence.mountId = (msg.mountId as string | null) ?? null;
+          const x = Number(msg.x ?? conn.presence.x);
+          const y = Number(msg.y ?? conn.presence.y);
+          const z = Number(msg.z ?? conn.presence.z);
+          const rotY = Number(msg.rotY ?? conn.presence.rotY);
+          if (conn.verifiedUid) {
+            // Movement is client-rendered, but it cannot grant instant economy proximity.
+            // A small time-based travel budget permits sprint/mount and network jitter;
+            // idle time cannot bank enough distance for a teleport.
+            const now = Date.now();
+            const elapsed = Math.max(0, (now - conn.lastMovementAt) / 1000);
+            const allowance = Math.min(3, conn.movementAllowance + elapsed * 16);
+            conn.lastMovementAt = now;
+            const spawn = ZONES[nextZone].spawnPos;
+            const travel = Math.hypot(x - conn.presence.x, z - conn.presence.z);
+            const isZoneTravel = nextZone !== prevZone;
+            const allowed = Math.hypot(x, z) <= (nextZone === 'sanctuary' ? 12.5 : 22.5) &&
+              y >= 0 && y <= 4 &&
+              (isZoneTravel
+                ? Math.hypot(x - spawn[0], y - spawn[1], z - spawn[2]) < 0.2
+                : travel <= allowance + 0.01 && Math.abs(y - conn.presence.y) <= 3);
+            if (!allowed) {
+              send(conn, {
+                type: 'world_position_correction', zone: conn.presence.zone,
+                position: { x: conn.presence.x, y: conn.presence.y, z: conn.presence.z, rotY: conn.presence.rotY },
+              });
+              return;
+            }
+            conn.movementAllowance = isZoneTravel ? 1.5 : Math.max(0, allowance - travel);
+          }
+          conn.presence.x = x;
+          conn.presence.y = y;
+          conn.presence.z = z;
+          conn.presence.rotY = rotY;
+          conn.presence.mountId = conn.verifiedUid ? conn.presence.mountId : (msg.mountId as string | null) ?? null;
           conn.presence.zone = nextZone;
           if (conn.verifiedUid) setGameplayPresence(sessionId, { ...conn.presence, uid: conn.verifiedUid });
           if (prevZone !== nextZone) {
@@ -486,15 +539,44 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           }
         } else if (type === 'update_appearance' && conn.presence) {
           const patch = msg.patch as Partial<LivePlayerPresence>;
-          if (patch) {
-            if (patch.raceId && Object.hasOwn(RACES, patch.raceId)) conn.presence.raceId = patch.raceId;
-            if (patch.elementId && Object.hasOwn(ELEMENTS, patch.elementId)) conn.presence.elementId = patch.elementId;
-            Object.assign(conn.presence, sanitizeGuestCreatureSelection({ ...conn.presence, ...patch }));
-            if (typeof patch.titleBadge === 'string') conn.presence.titleBadge = patch.titleBadge.slice(0, 40);
-            if (typeof patch.level === 'number' && Number.isInteger(patch.level) && patch.level >= 1 && patch.level <= 50) conn.presence.level = patch.level;
-            if (typeof patch.rank === 'number' && Number.isInteger(patch.rank) && patch.rank >= 1 && patch.rank <= 20) conn.presence.rank = patch.rank;
-            for (const key of ['sculpt', 'equipped', 'stitching', 'mountId'] as const) {
-              if (patch[key] !== undefined) Object.assign(conn.presence, { [key]: patch[key] });
+          if (patch && typeof patch === 'object' && !Array.isArray(patch)) {
+            if (conn.verifiedUid) {
+              // Ignore *all* client-supplied progression, identity and roster display
+              // fields. Refresh the public projection from the saved enrolled wizard.
+              const uid = conn.verifiedUid;
+              const wizardId = conn.presence.wizardId;
+              const realm = conn.presence.realmId;
+              const [wizard, creature] = await Promise.all([
+                ownedProgressionWizard(uid, wizardId, realm),
+                ownedActiveCreature(uid, wizardId, realm),
+              ]);
+              if (!creature || !conn.presence || conn.verifiedUid !== uid ||
+                  conn.presence.wizardId !== wizardId || conn.presence.realmId !== realm) return;
+              Object.assign(conn.presence, {
+                raceId: wizard.raceId, elementId: wizard.elementId, level: wizard.level,
+                rank: wizard.rank, titleBadge: wizard.progression.titleBadge,
+                beastClan: wizard.beastClan, sculpt: wizard.sculpt,
+                equipped: wizard.wardrobe.equipped, stitching: wizard.stitching,
+                mountId: wizard.progression.equippedMountId ?? null,
+                ...sanitizeGuestCreatureSelection({
+                  activeCreatureId: creature.id, activeCreatureSpeciesId: creature.speciesId,
+                  activeCreatureNickname: creature.nickname, activeCreatureStage: creature.stage,
+                  activeCreatureChromatic: creature.chromatic, activeCreatureBranchChoice: creature.branchChoice,
+                  activeCreatureTalents: creature.talents,
+                }),
+              });
+              conn.duelElement = wizard.elementId;
+              conn.duelRace = wizard.raceId;
+            } else {
+              if (patch.raceId && Object.hasOwn(RACES, patch.raceId)) conn.presence.raceId = patch.raceId;
+              if (patch.elementId && Object.hasOwn(ELEMENTS, patch.elementId)) conn.presence.elementId = patch.elementId;
+              Object.assign(conn.presence, sanitizeGuestCreatureSelection({ ...conn.presence, ...patch }));
+              if (typeof patch.titleBadge === 'string') conn.presence.titleBadge = patch.titleBadge.slice(0, 40);
+              if (typeof patch.level === 'number' && Number.isInteger(patch.level) && patch.level >= 1 && patch.level <= 50) conn.presence.level = patch.level;
+              if (typeof patch.rank === 'number' && Number.isInteger(patch.rank) && patch.rank >= 1 && patch.rank <= 20) conn.presence.rank = patch.rank;
+              for (const key of ['sculpt', 'equipped', 'stitching', 'mountId'] as const) {
+                if (patch[key] !== undefined) Object.assign(conn.presence, { [key]: patch[key] });
+              }
             }
             broadcastRealmZone(conn.presence.realmId, conn.presence.zone, { type: 'player_updated', player: conn.presence }, sessionId);
           }
