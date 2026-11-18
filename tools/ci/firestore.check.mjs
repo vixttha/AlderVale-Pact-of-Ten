@@ -25,9 +25,10 @@ const wizard = (ownerId = 'alice') => ({
 const seed = async (path, value) => env.withSecurityRulesDisabled((context) => setDoc(doc(context.firestore(), path), value));
 const storedWizard = () => ({ ...wizard(), createdAt: Timestamp.fromMillis(1000), updatedAt: Timestamp.fromMillis(1000) });
 
-test('verified owner can create and read a valid wizard', async () => {
+test('verified owner can read a server wizard and enrollment uses the server route', async () => {
   const ref = doc(db('alice'), 'wizards/w_alice');
-  await assertSucceeds(setDoc(ref, wizard()));
+  await assertFails(setDoc(ref, wizard()));
+  await seed('wizards/w_alice', storedWizard());
   await assertSucceeds(getDoc(ref));
 });
 test('unauthenticated wizard creation is rejected', async () => {

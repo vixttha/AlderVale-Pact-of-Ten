@@ -55,7 +55,7 @@ const storedSelections = [
   },
 ];
 
-async function createPlayer(realmId, selection) {
+async function createPlayer(realmId, selection, enrolled = true) {
   const uid = randomUUID();
   const wizardId = 'wizard-' + uid;
   const creatureId = 'creature-' + uid;
@@ -74,12 +74,14 @@ async function createPlayer(realmId, selection) {
   const { idToken } = await response.json();
   assert.ok(idToken);
 
-  const wizard = { ownerId: uid, realmId, name: selection.nickname, raceId: 'human', elementId: 'ember', activeCreatureId: creatureId };
+  const proof = enrolled ? { serverProgressionVersion: 1 } : {};
+  const wizard = { ...proof, ownerId: uid, realmId, name: selection.nickname, raceId: 'human',
+    elementId: 'ember', activeCreatureId: creatureId, level: 1, rank: 1, progression: { titleBadge: 'Initiate' } };
   const wizardRef = cloudDb.collection('wizards').doc(wizardId);
   const creatureRef = wizardRef.collection('creatures').doc(creatureId);
   const batch = cloudDb.batch();
   batch.set(wizardRef, wizard);
-  batch.set(creatureRef, { ...selection, ownerId: uid, wizardId, realmId });
+  batch.set(creatureRef, { ...selection, ...proof, ownerId: uid, wizardId, realmId });
   await batch.commit();
   return { uid, wizardId, creatureRef, creatureId, realmId, idToken };
 }
@@ -160,6 +162,7 @@ const mismatchedOwnership = [
   ['owner', (second) => ({ ownerId: second.uid })],
   ['wizard', (second) => ({ wizardId: second.wizardId })],
   ['realm', () => ({ realmId: 'breeze' })],
+  ['server enrollment', () => ({ serverProgressionVersion: 0 })],
 ];
 
 for (const [field, mismatch] of mismatchedOwnership) {
@@ -175,6 +178,20 @@ for (const [field, mismatch] of mismatchedOwnership) {
     }
   });
 }
+
+test('an archived signed-in wizard is ineligible to join the live realm', { timeout: 45000 }, async (context) => {
+  const player = await createPlayer('breeze', storedSelections[0], false);
+  const socket = new WebSocket('ws://127.0.0.1:' + httpServer.address().port + '/ws');
+  context.after(() => socket.terminate());
+  await once(socket, 'open');
+  const result = await exchange(socket, {
+    type: 'join_world', idToken: player.idToken,
+    presence: { wizardId: player.wizardId, realmId: player.realmId, zone: 'hub',
+      name: 'Archived Wizard', raceId: 'human', elementId: 'ember' },
+  }, ['world_joined', 'world_notice']);
+  assert.equal(result.type, 'world_notice');
+  assert.match(result.text, /earlier save is preserved/);
+});
 
 async function bazaarRequest(player, path, body) {
   const response = await fetch('http://127.0.0.1:' + httpServer.address().port + '/api/bazaar/' + player.realmId + path, {
@@ -227,7 +244,7 @@ test('Bazaar escrow and sale push seller wallets only to the owning realm, witho
 
   // A later response on each socket proves no seller event was queued there.
   await Promise.all([buyerSocket, otherRealmSocket].map((socket) =>
-    exchange(socket, { type: 'move', zone: 'arbor' }, ['zone_snapshot']),
+    exchange(socket, { type: 'move', zone: 'arbor', x: 0, y: 0, z: 10, rotY: 0 }, ['zone_snapshot']),
   ));
   assert.deepEqual(unrelatedWallets, []);
 });

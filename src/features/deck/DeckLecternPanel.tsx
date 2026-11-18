@@ -1,3 +1,4 @@
+import type { RunGameplayAction } from '../../../shared/gameplayActions.ts';
 import React, { useState } from 'react';
 import { BookOpen, Sparkles, Wand2 } from 'lucide-react';
 import { SPELLS, SPELL_BY_ID, getSpellUseLockReason } from '../../../shared/spells.ts';
@@ -9,6 +10,7 @@ import { ElementCrest } from '../../lib/elementIcons.tsx';
 
 interface DeckLecternPanelProps {
   wizard: WizardDocument;
+  onCloudAction?: RunGameplayAction;
   activeCreature: OwnedCreature | null;
   onUpdateWizard: (next: WizardDocument) => void;
   onClose: () => void;
@@ -16,6 +18,7 @@ interface DeckLecternPanelProps {
 
 export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
   wizard,
+  onCloudAction,
   activeCreature,
   onUpdateWizard,
   onClose,
@@ -31,6 +34,10 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
   };
 
   const toggleDeckCard = (spellId: string, add: boolean) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'deck', id: spellId, add });
+      return;
+    }
     const spell = SPELL_BY_ID[spellId];
     if (add && (!spell || getSpellUseLockReason(spell, spellUnlockState))) return;
     const nextDeck = [...wizard.progression.deck];
@@ -46,6 +53,10 @@ export const DeckLecternPanel: React.FC<DeckLecternPanelProps> = ({
   };
 
   const applySpellwrighting = (spellId: string, branch: 'A' | 'B') => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'wright', id: spellId, branch });
+      return;
+    }
     const spell = SPELL_BY_ID[spellId];
     if (!spell || getSpellUseLockReason(spell, spellUnlockState)) return;
     if (wizard.currencies.spellShards < 2 || wizard.progression.spellwrighting[spellId] === branch) return;

@@ -91,6 +91,7 @@ export interface WizardLoadout {
 }
 
 export interface WizardDocument {
+  serverProgressionVersion?: number;
   id: string;
   ownerId: string;
   realmId: RealmId;
