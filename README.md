@@ -1,14 +1,14 @@
-# AlderVale Test Vault
+# Test Vault
 
-This is the dedicated Test Vault branch for AlderVale. Develop the test catalog, reusable template, fixtures, and automated suites here. Base new Vault pull requests on `AlderVale-Test-Vault`.
+This branch develops the reusable Test Vault template. The current archived version is **v0.0.2**, a copy-in starter for existing repositories. Adopt it using your project's own language, test commands, and acceptance criteria.
 
-| What you need | Where to start |
+| Start here | Purpose |
 |---|---|
-| Add a Test Vault to another repository | [Reusable Test Vault v0.0.2](docs/test-vault/public-template/README.md) |
-| Find what AlderVale tests and how to run it | [AlderVale test and evidence guide](docs/test-vault/aldervale/README.md) |
-| Look up a case ID, expected result, or manual check | [AlderVale case catalog](docs/test-vault/aldervale/cases.md) |
-| Read or extend executable suites | [Test Vault source](tests/vault) and [test quality rules](PROJECT_RULES.md#test-vault-reliability-and-reuse) |
+| [Install the starter](starter/test-vault/README.md) | Copy the five starter files and run the catalog check. |
+| [Template versions](versions/README.md) | Find the historical source and the exact source commit for each version. |
+| [Graphify HQ](Graphify%20HQ/README.md) | Browse a map, outline, and receipt for each archived version. |
+| [Template development](CONTRIBUTING.md) | Change the starter, validate adoption, and archive a future version. |
 
-AlderVale keeps a game source snapshot here so CI can test real game code at a known commit. GitHub Actions runs the checks on standard public GitHub-hosted runners. Browser and server checks can launch an isolated test instance. Opening or playing the game does not start these suites.
+The starter's catalog validator uses Python 3.12 and the standard library. Its optional GitHub Actions workflow checks catalog structure and coverage declarations. Your project's own test commands execute its tests. The branch CI rehearses adoption in Python CLI, Go API, and documentation-only projects.
 
-For another repository, copy only the v0.0.2 starter files. Then design tests around that repository's own code, entry points, supported environments, and risks. The starter includes a case catalog, validator, evidence form, and CI check.
+The [AlderVale game-specific Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/AlderVale-Test-Vault) holds that game's fixtures and tests. Standalone redistribution terms for the reusable starter await a license decision.
