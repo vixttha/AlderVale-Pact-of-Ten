@@ -235,9 +235,9 @@ test('archived cloud records stay outside signed-in gameplay', { timeout: 45000 
   assert.equal((await cloudDb.collection('wizards').doc('archive-' + player.uid).get()).get('level'), 10);
 });
 
-async function joinCampus(player, context, zone = 'hub') {
+async function joinCampus(player, context, zone = 'hub', socketOptions = {}) {
   const serverConnection = once(hub, 'connection', { signal: AbortSignal.timeout(10000) });
-  const socket = new WebSocket('ws://127.0.0.1:' + httpServer.address().port + '/ws', { handshakeTimeout: 10000 });
+  const socket = new WebSocket('ws://127.0.0.1:' + httpServer.address().port + '/ws', { handshakeTimeout: 10000, ...socketOptions });
   context.after(() => socket.terminate());
   const [[serverSocket]] = await Promise.all([serverConnection, once(socket, 'open')]);
   const joined = once(socket, 'message', { signal: AbortSignal.timeout(10000) });
@@ -279,6 +279,30 @@ test('signed-in campus presence survives idle, clears on disconnect, and returns
   assert.equal(reconnected.wizard.progression.mana, reconnected.wizard.progression.maxMana);
 });
 
+
+test('silent socket revokes authenticated presence after a missed heartbeat and can reconnect', { timeout: 85000 }, async (context) => {
+  const player = await createPlayer();
+  const activity = { type: 'world', id: 'fountain_main' };
+  const beforeJoin = await gameplay(player, activity, randomUUID(), 409);
+  assert.equal(beforeJoin.error, 'Move closer to that activity.');
+
+  // The ws library normally replies automatically to protocol pings. Turn that
+  // off to exercise the real missed-pong termination path, not a forced close.
+  const joined = await joinCampus(player, context, 'hub', { autoPong: false });
+  let receivedPings = 0;
+  joined.socket.on('ping', () => { receivedPings++; });
+  const started = Date.now();
+  await once(joined.serverSocket, 'close', { signal: AbortSignal.timeout(70000) });
+  assert.ok(receivedPings >= 1, 'server should challenge the idle socket');
+  assert.ok(Date.now() - started >= 10000, 'connection must survive long enough for a heartbeat');
+
+  const revoked = await gameplay(player, activity, randomUUID(), 409);
+  assert.equal(revoked.error, beforeJoin.error, 'missed pong must immediately revoke activity proximity');
+  const restored = await joinCampus(player, context);
+  assert.deepEqual(restored.acknowledgment.position, { x: 0, y: 0, z: 8, rotY: 0 });
+  const healed = await gameplay(player, activity);
+  assert.equal(healed.wizard.progression.mana, healed.wizard.progression.maxMana);
+});
 
 test('authenticated reconnect restores an off-spawn resource position without movement or stale presence', { timeout: 45000 }, async (context) => {
   const player = await createPlayer();
