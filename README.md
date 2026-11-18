@@ -7,6 +7,7 @@ This is the dedicated Test Vault branch for AlderVale. Develop the test catalog,
 | Add a Test Vault to another repository | [Reusable Test Vault v0.0.2](docs/test-vault/public-template/README.md) |
 | Find what AlderVale tests and how to run it | [AlderVale test and evidence guide](docs/test-vault/aldervale/README.md) |
 | Look up a case ID, expected result, or manual check | [AlderVale case catalog](docs/test-vault/aldervale/cases.md) |
+| Coordinate tests across languages | [Cross-language testing rules](docs/test-vault/aldervale/cross-language-rules.md) |
 | Read or extend executable suites | [Test Vault source](tests/vault) and [test quality rules](PROJECT_RULES.md#test-vault-reliability-and-reuse) |
 
 AlderVale keeps a game source snapshot here so CI can test real game code at a known commit. GitHub Actions runs the checks on standard public GitHub-hosted runners. Browser and server checks can launch an isolated test instance. Opening or playing the game does not start these suites.
