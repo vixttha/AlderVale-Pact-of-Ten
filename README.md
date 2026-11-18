@@ -20,6 +20,7 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 | --- | --- |
 | [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the initial design snapshot. The [current base roster and fusion decisions](#locked-element-and-fusion-decisions) govern active design. |
 | [Fusion chart](element-hq/fusions/fusion-chart.md) | See locked recipes, open choices, and all 45 pairings at a glance. |
+| [Fusion architecture and conflict audit](element-hq/designs/fusion-architecture-audit-2026-11-18.md) | Compare Rust, Glass, Sugar, Magnetism, the 45 pair concepts, and alternatives to adding five complete elemental schools. **Exploratory; not new owner locks.** |
 | [Fusion Name Atlas](element-hq/fusions/README.md) | Browse ten element charts and compare rated names for every pairing. |
 | [Fusion pairing chart](element-hq/designs/aldervale-fusion-pairing-chart.md) | Compare all 45 cross-element pairings and their proposed outcomes. |
 | [Fusion HQ](element-hq/designs/aldervale-fusion-guide-v1.md) | Read the earlier encounter concepts, existing recipes, and conflict audit. |
