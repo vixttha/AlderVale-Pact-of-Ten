@@ -6,7 +6,7 @@ AlderVale is a 3D browser RPG set at a spellcasting academy among floating islan
 
 **In development · Local guest play.** Start in Breeze and earn your first quest rewards in a solo duel. You can play as a guest without a Google account or API key.
 
-[Play on Windows](#play-on-windows) · [Run from source](#run-from-source) · [First playthrough](#first-playthrough) · [Report a bug](#report-a-bug)
+[Play on Windows](#play-on-windows) · [Run from source](#run-from-source) · [First playthrough](#first-playthrough) · [Bazaar](#bazaar) · [Report a bug](#report-a-bug)
 
 ## Play on Windows
 
@@ -49,6 +49,13 @@ Keep the terminal open and visit [http://localhost:3000](http://localhost:3000).
 | **Everpeak** | ~3-Hr Classic Saga |
 
 The labels describe progression tuning. Actual playtime varies.
+
+## Bazaar
+
+Sign in to buy and sell gear in your wizard’s realm. The Bazaar uses the Florins in that realm’s Bazaar wallet. Academy shops use your wizard’s Florins.
+
+- **Buy gear.** Select **Buy** on a listing you can afford. The item becomes available in **Tailor → Equip Gear**.
+- **Sell gear.** If the item is equipped, equip a different piece in the same slot in **Tailor**. In the Bazaar, select the item and choose **List for Florins**. One copy is reserved until it sells or you choose **Cancel listing**. When it sells, your Bazaar wallet updates automatically if you’re still connected in that realm.
 
 ## Troubleshooting
 
