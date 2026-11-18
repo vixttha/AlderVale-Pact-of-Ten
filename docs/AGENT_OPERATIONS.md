@@ -24,6 +24,14 @@ The Graphify workflow builds a code-only graph on public standard Ubuntu runners
 
 After the workflow reaches `main`, successful snapshots publish to the dedicated `graphify-snapshots` Git branch. `main/graph.json` and `main/receipt.json` identify the latest graph from `main`. Use a tag such as `v1.2.3` on a commit that contains this workflow and is reachable from `main` to retain `versions/v1.2.3/graph.json` and its receipt. A version snapshot stays tied to its original commit. A rerun that is neither `main` nor a version tag can store `commits/<sha>/` for the commit it indexed. That path is the graph of that commit, not a new product version. A Git tag is enough for graph generation, so a graph run does not publish a game release. The build hands off a bounded compressed payload to the later jobs through ephemeral job outputs. Git holds the retained history.
 
+## Test Vault graph
+
+The `AlderVale-Test-Vault` source branch uses the same locked Graphify workflow on the standard public Ubuntu runners. Pushes to the Vault branch rebuild its graph automatically. Graphify checks that a symbol under `tests/vault/` can be retrieved over MCP during generation and on the readback runner. A Vault pull request that changes the Graphify workflow or tools runs those checks with read-only permissions.
+
+Successful Vault branch builds publish [`test-vault/graph.json` and `test-vault/receipt.json`](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/graphify-snapshots/test-vault) to the existing `graphify-snapshots` branch. The receipt points to the exact source checkout and its workflow run. Compare its `source_commit` with the current `AlderVale-Test-Vault` head before relying on the index. The latest Vault graph starts publishing after this workflow reaches the Vault branch and a run succeeds.
+
+For Vault MCP readback, use the steps below with `AlderVale-Test-Vault` in place of `main` in the source ref and `test-vault/` as the archive path. In a GitHub-connected ChatGPT session, open the receipt and graph from the snapshot branch, find the relevant test entry point, and verify it in the pinned source file. Code-only extraction covers the symbols Graphify recognizes. Verify case coverage using the Test Vault catalog and test receipts.
+
 ## Read a runner-produced graph via MCP
 
 Install the pinned environment once with `python3.12 -m pip install -r tools/graphify/requirements.txt` in an isolated Python 3.12 environment. From the repository checkout:

@@ -78,17 +78,45 @@ seed_fixture() {
   assert_snapshot main "$fixture/original"
 }
 
-stale_main() {
+stale_latest() {
+  local ref destination advanced retained_tip
+  case "$1" in
+    main) ref=refs/heads/main; destination=main ;;
+    vault)
+      ref=refs/heads/AlderVale-Test-Vault
+      destination=test-vault
+      git -C "$source" push -q origin "HEAD:$ref"
+      publish "$ref" "$fixture/original" 0
+      assert_snapshot "$destination" "$fixture/original"
+      ;;
+  esac
+  retained_tip=$(snapshot_tip)
   git -C "$source" commit -qm advanced --allow-empty
-  git -C "$source" push -q origin HEAD:refs/heads/main
-  local advanced
+  git -C "$source" push -q origin "HEAD:$ref"
   advanced=$(git -C "$source" rev-parse HEAD)
   git -C "$source" checkout -q --detach "$source_sha"
-  assert_equal "$advanced" "$(git -C "$remote" rev-parse refs/heads/main)" 'Fixture advanced remote main'
+  assert_equal "$advanced" "$(git -C "$remote" rev-parse "$ref")" "Fixture advanced $ref"
   write_snapshot "$fixture/stale" "$source_sha" stale
-  publish refs/heads/main "$fixture/stale" 0
-  assert_message 'A newer main commit superseded this snapshot.'
-  assert_equal "$original_tip" "$(snapshot_tip)" 'Snapshot branch tip after stale publication'
+  publish "$ref" "$fixture/stale" 0
+  assert_message "A newer ${ref#refs/heads/} commit superseded this snapshot."
+  assert_equal "$retained_tip" "$(snapshot_tip)" 'Snapshot branch tip after stale publication'
+  assert_snapshot "$destination" "$fixture/original"
+  assert_snapshot main "$fixture/original"
+}
+
+stale_main() {
+  stale_latest main
+}
+
+vault_latest() {
+  stale_latest vault
+  local latest
+  latest=$(git -C "$remote" rev-parse refs/heads/AlderVale-Test-Vault)
+  git -C "$source" checkout -q --detach "$latest"
+  write_snapshot "$fixture/updated" "$latest" updated
+  publish refs/heads/AlderVale-Test-Vault "$fixture/updated" 0
+  assert_message "Published test-vault at $latest"
+  assert_snapshot test-vault "$fixture/updated"
   assert_snapshot main "$fixture/original"
 }
 
@@ -182,4 +210,5 @@ run_case E32-002 'feature ref requires explicit opt-in' unsupported_ref
 run_case E32-003 'opt-in commit snapshot preserves main' explicit_commit
 run_case E32-004 'damaged retained version is rejected' damaged_version
 run_case E32-005 'concurrent push retry preserves both snapshots' concurrent_publish
-printf 'Bash Graphify publisher contracts: 5/5 passed\n'
+run_case E32-006 'Vault latest advances independently and rejects stale builds' vault_latest
+printf 'Bash Graphify publisher contracts: 6/6 passed\n'

@@ -20,15 +20,16 @@ git init -q --bare "$workdir/remote.git"
 git -C "$workdir/remote.git" config receive.shallowUpdate true
 git clone -q --no-hardlinks "$repo" "$workdir/source"
 git -C "$workdir/source" remote set-url origin "$workdir/remote.git"
-git -C "$workdir/source" push -q origin HEAD:refs/heads/main
+git -C "$workdir/source" push -q origin HEAD:refs/heads/main HEAD:refs/heads/AlderVale-Test-Vault
 
 cd "$workdir/source"
 GITHUB_REF=refs/heads/main bash "$repo/tools/graphify/publish.sh" "$snapshot"
+GITHUB_REF=refs/heads/AlderVale-Test-Vault bash "$repo/tools/graphify/publish.sh" "$snapshot"
 GITHUB_REF=refs/tags/v0.0.0-test bash "$repo/tools/graphify/publish.sh" "$snapshot"
 GITHUB_REF=refs/tags/v0.0.0-test bash "$repo/tools/graphify/publish.sh" "$snapshot"
 
 git fetch -q origin refs/heads/graphify-snapshots
-for destination in main versions/v0.0.0-test; do
+for destination in main test-vault versions/v0.0.0-test; do
   git show "FETCH_HEAD:$destination/graph.json" > "$workdir/graph.json"
   git show "FETCH_HEAD:$destination/receipt.json" > "$workdir/receipt.json"
   cmp "$snapshot/graph.json" "$workdir/graph.json"

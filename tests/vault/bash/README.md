@@ -15,5 +15,6 @@ Each case creates a temporary source repository and bare Git remote, seeds a val
 | E32-003 | The explicit feature-ref opt-in appends `commits/<sha>` with the expected graph and receipt. The main snapshot is preserved. |
 | E32-004 | A valid tag is published, then its stored graph is deliberately changed without updating the receipt. Republishing fails the checksum and preserves the archived state for diagnosis. |
 | E32-005 | A competing publisher pushes immediately before the first outgoing push. Git rejects the stale push, and the retry preserves the competing commit and both snapshots. |
+| E32-006 | The Vault publishes and refreshes its own latest snapshot, rejects a superseded checkout, and preserves the bytes of the main snapshot. |
 
 The fixtures cover Git publication behavior. The existing Graphify job also builds a real graph and verifies MCP readback.
