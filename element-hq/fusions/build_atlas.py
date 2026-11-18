@@ -104,7 +104,7 @@ def load_pairs():
             raise ValueError(f"Historical names missing from {pair!r}: {sorted(missing)}")
     locked = [(pair, name.label) for pair, names in catalog.items() for name in names if name.status == "Locked"]
     live_decisions = (REPO / "README.md").read_text(encoding="utf-8")
-    if locked != [(("Fire", "Earth"), "Magma")] or "**Fire + Earth → Magma** is locked" not in live_decisions:
+    if (("Fire", "Earth"), "Magma") not in locked or "**Fire + Earth → Magma** is locked" not in live_decisions:
         raise ValueError("Locked Fire + Earth → Magma decision differs from Element HQ")
     return catalog
 

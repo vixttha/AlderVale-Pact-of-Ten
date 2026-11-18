@@ -51,6 +51,6 @@ Use the four scores for a total out of ten. Record one short rationale and where
 
 ## Update a pair
 
-Use [Water + Metal](pairs/water-metal.md) as the template. Edit the pair page to change the name, concept, status, scores, or rationale. Give aliases the same concept label and sort scores from highest to lowest. Record an owner decision in the rationale when it changes a favorite or lock.
+Use [Water + Metal](pairs/water-metal.md) as the template. Edit the pair page to change the name, concept, status, scores, or rationale. Give aliases the same concept label and sort scores from highest to lowest. Record an owner decision in the rationale when it changes a favorite or lock, and update the roster review above.
 
 Regenerate the element charts with `python3 element-hq/fusions/build_atlas.py`. Commit the edited pair page and the regenerated element charts together. The Element HQ GitHub Actions check verifies the roster, earlier ideas, scores, links, and generated content on a standard public Ubuntu runner.
