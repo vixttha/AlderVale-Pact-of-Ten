@@ -1,6 +1,6 @@
 # README HQ Folder Guide
 
-**Current HQ version:** `v0.0.5`
+**Current HQ version:** `v0.0.6`
 
 This guide documents the [README HQ validator](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/tools/check_readme_hq.py) and how to prepare, validate, and archive a new HQ version.
 
@@ -12,6 +12,7 @@ This guide documents the [README HQ validator](https://github.com/vixttha/AlderV
 | Review HQ workspaces | [HQ workspace index](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/workspace/README.md) |
 | Review the public game README history | [Public README version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/README.md) |
 | Draft a public game README | [Public README workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/README.md) |
+| Browse archived templates by section | [Graphify HQ](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/Graphify%20HQ/README.md) |
 | Review approved folder guide snapshots | [HQ version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/README.md) |
 | Review the validator workflow | [README HQ workflow](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/.github/workflows/readme-hq.yml) |
 | Review the frozen-source manifest | [Baseline manifest](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/tools/readme_hq_baselines.json) |
@@ -79,8 +80,9 @@ The guide-coverage guard checks the latest active HQ workspace guide while a ver
 2. Keep the workspace index row at `Draft` while the owner reviews it. Add the version to the archive index and frozen-source manifest after owner acceptance.
 3. After explicit owner acceptance, copy the approved landing page and guide byte for byte into `readme-hq/versions/<version>/`. Add the changelog, update the approved version index, update the live root README and folder guide, and add source commit/path/blob entries to the manifest in the same archive commit.
 4. Change the workspace row to an archived status, retain the source record, and preserve all earlier archives and changelogs.
-5. Run the README HQ workflow on the exact proposed archive commit. Review the checkout SHA, prior archive baseline, main SHA, test summary, and any UNVERIFIED external destinations.
-6. Keep merges, public README publication, and game releases under separate owner authorization.
+5. Follow the [Graphify map generation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/tools/graphify/README.md). Add the new version’s map, linked outline, and source receipt under `Graphify HQ/<version>/`. Regenerate the Graphify HQ index in the same archive PR.
+6. Run the README HQ and Graphify workflows on the proposed archive. Review the checkout SHA, prior archive baseline, main SHA, test summary, and any UNVERIFIED external destinations. Confirm the generated map files and index match the committed files.
+7. Keep merges, public README publication, and game releases under separate owner authorization.
 
 ## Scope boundaries
 
