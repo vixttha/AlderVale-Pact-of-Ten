@@ -394,8 +394,13 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
               if (!principal?.emailVerified) throw new RequestError(401, 'Sign in again to connect to AlderVale.');
               const wizard = await ownedProgressionWizard(principal.uid, p.wizardId, realm);
               serverWizard = wizard;
-              serverCreature = await ownedActiveCreature(principal.uid, wizard.id, realm);
-              if (!serverCreature) throw new RequestError(409, 'Select an enrolled creature to join.');
+              try {
+                serverCreature = await ownedActiveCreature(principal.uid, wizard.id, realm);
+              } catch (error) {
+                // Live realm display stays available for an invalid roster; the
+                // existing matchmaking gate still rejects the invalid selection.
+                if (!(error instanceof RequestError)) throw error;
+              }
               activeCreatureId = wizard.activeCreatureId;
               conn.verifiedUid = principal.uid;
               identity = wizard.id;
@@ -429,7 +434,9 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                   activeCreatureChromatic: serverCreature.chromatic, activeCreatureBranchChoice: serverCreature.branchChoice,
                   activeCreatureTalents: serverCreature.talents,
                 })
-              : sanitizeGuestCreatureSelection({ ...p, activeCreatureId });
+              : conn.verifiedUid
+                ? sanitizeGuestCreatureSelection({ activeCreatureId, activeCreatureSpeciesId: 'cinder_kitsune' })
+                : sanitizeGuestCreatureSelection({ ...p, activeCreatureId });
             conn.presence = {
               ...p, ...selectedCreature, sessionId, wizardId: identity, ownerId: '', name, realmId: realm, zone: p.zone,
               raceId: p.raceId, elementId: p.elementId,
