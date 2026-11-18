@@ -1,7 +1,6 @@
 """Add README HQ navigation and archive provenance to its Graphify code graph."""
 
 import asyncio
-import base64
 import hashlib
 import json
 import os
@@ -187,16 +186,6 @@ async def verify(graph_path, receipt, use_verified_reader):
     print(f"Graphify MCP verified the HQ landing page and its version-history link at {expected}")
 
 
-def export(graph_path):
-    """Return the verified first snapshot to the GitHub publisher for this draft PR."""
-    for path in (graph_path, graph_path.with_name("receipt.json")):
-        encoded = base64.b64encode(path.read_bytes()).decode("ascii")
-        blob = git("hash-object", str(path))
-        print(f"HQ_SNAPSHOT_BLOB {path.name} {blob}")
-        for index in range(0, len(encoded), 4000):
-            print(f"HQ_SNAPSHOT_DATA {path.name} {index // 4000} {encoded[index:index + 4000]}")
-
-
 if __name__ == "__main__":
     operation, filename = sys.argv[1:]
     graph_path = Path(filename).resolve(strict=True)
@@ -205,7 +194,5 @@ if __name__ == "__main__":
     elif operation == "readback":
         receipt = json.loads(graph_path.with_name("receipt.json").read_bytes())
         asyncio.run(verify(graph_path, receipt, use_verified_reader=True))
-    elif operation == "export":
-        export(graph_path)
     else:
         sys.exit(f"Unknown operation: {operation}")
