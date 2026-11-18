@@ -23,10 +23,12 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Heat Haze | Radiant fire | 3 / 1 / 2 / 2 | 8 | Reference |
 | Beaconfire | Guiding fire | 2 / 1 / 2 / 1 | 6 | Reference |
 | Flare | Flash of heat and light | 2 / 1 / 2 / 1 | 6 | Reference |
 | Incandescence | Radiant fire | 2 / 1 / 1 / 2 | 6 | Reference |
 | Solar Flame | Radiant fire | 2 / 1 / 2 / 1 | 6 | Reference |
+| White Heat | Radiant fire | 2 / 1 / 2 / 1 | 6 | Reference |
 
 ## Water
 
@@ -34,8 +36,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Water Lens | Focused light | 3 / 1 / 2 / 2 | 8 | Reference |
 | Rainbow | Refracted light | 3 / 1 / 2 / 1 | 7 | Reference |
 | Refraction | Refracted light | 3 / 1 / 1 / 2 | 7 | Reference |
+| Iridescence | Refracted light | 3 / 1 / 1 / 1 | 6 | Reference |
 | Opal | Radiant mineral | 2 / 2 / 1 / 1 | 6 | Exploratory |
 | Caustic | Focused light | 2 / 1 / 1 / 1 | 5 | Reference |
 | Mirrortide | Reflected light | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -46,7 +50,9 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Radiant Arc | Flashing discharge | 2 / 1 / 2 / 2 | 7 | Reference |
 | Arc Flash | Flashing discharge | 2 / 1 / 2 / 1 | 6 | Reference |
+| Dazzle | Flashing discharge | 2 / 1 / 2 / 1 | 6 | Reference |
 | Strobe | Flashing discharge | 2 / 1 / 2 / 1 | 6 | Reference |
 | Arcglow | Flashing discharge | 2 / 1 / 1 / 1 | 5 | Reference |
 | Lumenbolt | Flashing discharge | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -57,8 +63,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Ice Lens | Refracted light | 3 / 1 / 2 / 2 | 8 | Reference |
 | Frostglass | Refracted light | 2 / 2 / 1 / 2 | 7 | Exploratory |
 | Ice Prism | Refracted light | 3 / 1 / 2 / 1 | 7 | Rejected |
+| Glare | Reflective frost surface | 2 / 1 / 2 / 1 | 6 | Reference |
 | Halo | Refracted light | 2 / 1 / 2 / 1 | 6 | Reference |
 | Suncrust | Reflective frost surface | 2 / 1 / 1 / 1 | 5 | Reference |
 
@@ -68,6 +76,8 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Light Scatter | Scattered light | 3 / 1 / 2 / 1 | 7 | Reference |
+| Mirage | Scattered light | 2 / 2 / 1 / 2 | 7 | Exploratory |
 | Driftlight | Scattered light | 2 / 2 / 1 / 1 | 6 | Reference |
 | Sun Haze | Scattered light | 2 / 1 / 2 / 1 | 6 | Reference |
 | Sky Lantern | Wind-carried light | 2 / 1 / 2 / 0 | 5 | Reference |
@@ -79,6 +89,8 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Lightwell | Radiant minerals | 3 / 1 / 2 / 2 | 8 | Reference |
+| Luminous Stone | Radiant minerals | 2 / 2 / 2 / 1 | 7 | Reference |
 | Crystalbeam | Radiant minerals | 2 / 1 / 2 / 1 | 6 | Reference |
 | Radiant Quartz | Radiant minerals | 2 / 2 / 1 / 1 | 6 | Reference |
 | Sunstone | Radiant minerals | 2 / 2 / 1 / 1 | 6 | Rejected |
@@ -91,6 +103,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Eclipse | Light occlusion | 3 / 1 / 2 / 2 | 8 | Reference |
+| Half-Light | Light transition | 3 / 1 / 2 / 2 | 8 | Reference |
+| Silhouette | Partial shadow | 3 / 1 / 2 / 2 | 8 | Reference |
 | Penumbra | Partial shadow | 2 / 2 / 2 / 1 | 7 | Reference |
 | Twilight | Light transition | 2 / 2 / 2 / 1 | 7 | Reference |
 | Afterglow | Light transition | 2 / 1 / 2 / 1 | 6 | Reference |
@@ -103,7 +117,9 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Mirror | Reflected light | 3 / 1 / 2 / 2 | 8 | Reference |
 | Reflection | Reflected light | 3 / 1 / 2 / 2 | 8 | Reference |
+| Mirror Flash | Reflected light | 3 / 1 / 2 / 1 | 7 | Reference |
 | Mirrorsteel | Reflected light | 2 / 2 / 1 / 2 | 7 | Reference |
 | Prism Alloy | Reflected light | 2 / 2 / 1 / 2 | 7 | Reference |
 | Gleam | Reflected light | 2 / 1 / 2 / 1 | 6 | Reference |
@@ -115,7 +131,9 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Daybloom | Light-fed plant growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Nectar | Light-fed plant growth | 2 / 1 / 2 / 2 | 7 | Reference |
+| Photosynthesis | Light-fed plant growth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Sunbloom | Light-fed plant growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Canopy Rays | Light filtered by plants | 2 / 1 / 2 / 1 | 6 | Reference |
 | Glow Sap | Light-fed plant growth | 2 / 2 / 1 / 1 | 6 | Rejected |

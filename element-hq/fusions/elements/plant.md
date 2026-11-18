@@ -23,9 +23,11 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Biochar | Charred plant matter | 3 / 3 / 1 / 2 | 9 | Parked |
 | Charcoal | Charred plant matter | 3 / 3 / 2 / 1 | 9 | Parked |
 | Char | Charred plant matter | 3 / 3 / 1 / 1 | 8 | Parked |
 | Emberwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Parked |
+| Cinder Bark | Charred plant matter | 3 / 2 / 1 / 1 | 7 | Parked |
 | Wildfire | Spreading fire | 2 / 1 / 2 / 2 | 7 | Reference |
 | Ashbloom | Post-fire growth | 2 / 2 / 1 / 1 | 6 | Reference |
 
@@ -35,8 +37,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Floating Roots | Water-fed growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Peat | Waterlogged plant matter | 3 / 2 / 2 / 1 | 8 | Rejected |
 | Sap | Water-fed growth | 2 / 2 / 2 / 2 | 8 | Reference |
+| Waterlogged Wood | Water-fed growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Marsh | Water-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Kelp | Water-fed growth | 2 / 1 / 2 / 1 | 6 | Reference |
 | Mangrove | Water-fed growth | 2 / 1 / 2 / 1 | 6 | Reference |
@@ -47,8 +51,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Arc Sap | Charged plant tissue | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Charwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Conductive Sap | Charged plant tissue | 3 / 2 / 1 / 2 | 8 | Exploratory |
+| Livewire Vine | Charged plant tissue | 3 / 1 / 2 / 2 | 8 | Reference |
 | Stormwood | Charged plant tissue | 2 / 2 / 2 / 2 | 8 | Exploratory |
 | Sparkvine | Charged plant tissue | 2 / 2 / 2 / 1 | 7 | Reference |
 | Thunderroot | Charged plant tissue | 2 / 2 / 2 / 1 | 7 | Reference |
@@ -59,10 +65,12 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Frozen Sap | Frozen plant matter | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Dormancy | Frosted growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Rimewood | Frozen plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Winterwood | Frozen plant matter | 2 / 2 / 2 / 2 | 8 | Exploratory |
 | Frostbloom | Frosted growth | 2 / 2 / 2 / 1 | 7 | Reference |
+| Frostseed | Frosted growth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Rimevine | Frosted growth | 2 / 2 / 2 / 1 | 7 | Reference |
 
 ## Wind
@@ -71,7 +79,9 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Pollen Cloud | Plant dispersal | 3 / 1 / 2 / 2 | 8 | Reference |
 | Seedstorm | Plant dispersal | 3 / 1 / 2 / 2 | 8 | Reference |
+| Winged Seed | Plant dispersal | 3 / 1 / 2 / 2 | 8 | Reference |
 | Pollen | Plant dispersal | 2 / 1 / 2 / 2 | 7 | Reference |
 | Pollenwind | Plant dispersal | 3 / 1 / 2 / 1 | 7 | Reference |
 | Canopy Gale | Plant dispersal | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -84,7 +94,9 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Amber | Hardened plant resin | 3 / 3 / 2 / 2 | 10 | Parked |
 | Fossil Resin | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Parked |
+| Resin Stone | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Parked |
 | Loam | Rooted soil | 2 / 2 / 2 / 2 | 8 | Reference |
+| Rootbound Earth | Rooted soil | 3 / 1 / 2 / 2 | 8 | Reference |
 | Rootstone | Rooted stone | 2 / 2 / 2 / 2 | 8 | Exploratory |
 | Bramblebank | Rooted soil | 2 / 2 / 1 / 1 | 6 | Reference |
 
@@ -94,7 +106,9 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Daybloom | Light-fed plant growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Nectar | Light-fed plant growth | 2 / 1 / 2 / 2 | 7 | Reference |
+| Photosynthesis | Light-fed plant growth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Sunbloom | Light-fed plant growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Canopy Rays | Light filtered by plants | 2 / 1 / 2 / 1 | 6 | Reference |
 | Glow Sap | Light-fed plant growth | 2 / 2 / 1 / 1 | 6 | Rejected |
@@ -108,6 +122,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Black Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
 | Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Night Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Lightless Pigment | Light-absorbing plant pigment | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Nightbloom | Dark-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Shadevine | Dark-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Deepgrove | Dark habitat | 2 / 1 / 2 / 1 | 6 | Reference |
@@ -121,5 +137,7 @@ Breakdown order is parents, identity, name, and gameplay.
 | Ironwood | Metal-bound wood | 3 / 3 / 2 / 2 | 10 | Parked |
 | Metalwood | Metal-bound wood | 3 / 3 / 2 / 2 | 10 | Parked |
 | Ironbark | Metal-bound wood | 3 / 3 / 2 / 1 | 9 | Parked |
+| Metalgrain | Metal-bound wood | 3 / 3 / 1 / 2 | 9 | Parked |
+| Wirevine | Metal-supported growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Bramblewire | Metal-supported growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Living Trellis | Metal-supported growth | 3 / 1 / 2 / 1 | 7 | Reference |

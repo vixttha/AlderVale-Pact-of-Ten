@@ -25,6 +25,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Steam | Steam | 3 / 3 / 2 / 2 | 10 | Parked |
 | Vapor | Steam | 3 / 3 / 2 / 2 | 10 | Parked |
+| Flash Steam | Steam | 3 / 3 / 2 / 1 | 9 | Parked |
+| Superheated Steam | Steam | 3 / 3 / 1 / 2 | 9 | Parked |
 | Water Vapor | Steam | 3 / 3 / 1 / 2 | 9 | Parked |
 | Boil | Steam | 3 / 1 / 2 / 1 | 7 | Reference |
 | Scald | Steam | 3 / 1 / 2 / 1 | 7 | Reference |
@@ -36,7 +38,9 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Hydrogen | Water-splitting gas | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Electrified Water | Conducting water | 3 / 1 / 2 / 2 | 8 | Reference |
 | Tempest | Electrified weather | 2 / 2 / 2 / 2 | 8 | Reference |
+| Conductive Brine | Conducting water | 2 / 2 / 1 / 2 | 7 | Exploratory |
 | Stormwater | Conducting water | 2 / 2 / 2 / 1 | 7 | Reference |
 | Charged Tide | Conducting water | 2 / 1 / 2 / 1 | 6 | Reference |
 | Electrolysis | Water-splitting gas | 3 / 1 / 1 / 1 | 6 | Reference |
@@ -50,7 +54,9 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Ice | Ice | 3 / 3 / 2 / 2 | 10 | Candidate |
 | Glacier | Ice | 3 / 2 / 2 / 2 | 9 | Exploratory |
+| Rime | Ice | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Hail | Ice pellets | 3 / 2 / 2 / 1 | 8 | Reference |
+| Ice Sheet | Ice | 3 / 1 / 2 / 2 | 8 | Reference |
 | Pack Ice | Ice | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Rimeflow | Ice | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Slush | Ice and water mixture | 3 / 2 / 2 / 1 | 8 | Exploratory |
@@ -65,7 +71,9 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Fog | Dispersed water | 3 / 2 / 2 / 2 | 9 | Reference |
 | Mist | Dispersed water | 3 / 2 / 2 / 2 | 9 | Reference |
+| Water Vortex | Moving water | 3 / 1 / 2 / 2 | 8 | Reference |
 | Waterspout | Moving water | 3 / 1 / 2 / 2 | 8 | Reference |
+| Sea Spray | Dispersed water | 3 / 1 / 2 / 1 | 7 | Reference |
 | Spray | Dispersed water | 2 / 1 / 2 / 1 | 6 | Reference |
 | Squall | Wind and rain | 2 / 1 / 2 / 1 | 6 | Reference |
 
@@ -79,6 +87,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Silt | Wet earth | 3 / 3 / 2 / 2 | 10 | Parked |
 | Clay | Wet earth | 3 / 2 / 2 / 2 | 9 | Parked |
 | Quicksand | Saturated earth | 3 / 2 / 2 / 2 | 9 | Parked |
+| Sediment | Wet earth | 3 / 2 / 2 / 2 | 9 | Parked |
+| Wet Clay | Wet earth | 3 / 2 / 2 / 1 | 8 | Parked |
 | Slip | Wet earth | 3 / 2 / 1 / 1 | 7 | Parked |
 
 ## Light
@@ -87,8 +97,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Water Lens | Focused light | 3 / 1 / 2 / 2 | 8 | Reference |
 | Rainbow | Refracted light | 3 / 1 / 2 / 1 | 7 | Reference |
 | Refraction | Refracted light | 3 / 1 / 1 / 2 | 7 | Reference |
+| Iridescence | Refracted light | 3 / 1 / 1 / 1 | 6 | Reference |
 | Opal | Radiant mineral | 2 / 2 / 1 / 1 | 6 | Exploratory |
 | Caustic | Focused light | 2 / 1 / 1 / 1 | 5 | Reference |
 | Mirrortide | Reflected light | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -100,6 +112,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Black Ink | Light-absorbing liquid | 2 / 3 / 2 / 2 | 9 | Exploratory |
+| Lightless Pool | Dark waters | 3 / 1 / 2 / 2 | 8 | Reference |
+| Shadowwater | Light-absorbing liquid | 2 / 3 / 1 / 2 | 8 | Exploratory |
 | Blackwater | Dark waters | 2 / 2 / 2 / 1 | 7 | Exploratory |
 | Abyss | Dark waters | 2 / 1 / 1 / 1 | 5 | Reference |
 | Undertow | Concealed water current | 1 / 1 / 1 / 1 | 4 | Rejected |
@@ -112,11 +126,13 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Rust | Rust | 3 / 3 / 2 / 2 | 10 | Favorite |
 | Iron Oxide | Rust | 3 / 3 / 1 / 2 | 9 | Candidate |
+| Iron Rust | Rust | 3 / 3 / 1 / 2 | 9 | Candidate |
 | Red Rust | Rust | 3 / 3 / 2 / 1 | 9 | Candidate |
 | Corrosion | Rust | 3 / 1 / 2 / 2 | 8 | Reference |
 | Rust Scale | Rust | 2 / 3 / 1 / 2 | 8 | Exploratory |
 | Oxide | Rust | 2 / 2 / 1 / 2 | 7 | Candidate |
 | Patina | Surface coating | 2 / 2 / 2 / 1 | 7 | Exploratory |
+| Pitting | Rust | 3 / 1 / 1 / 2 | 7 | Reference |
 | Tarnish | Surface coating | 2 / 1 / 2 / 1 | 6 | Reference |
 | Turbine | Water-powered mechanism | 2 / 1 / 2 / 0 | 5 | Reference |
 | Dowsing | Water finding | 1 / 1 / 2 / 0 | 4 | Reference |
@@ -127,8 +143,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Floating Roots | Water-fed growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Peat | Waterlogged plant matter | 3 / 2 / 2 / 1 | 8 | Rejected |
 | Sap | Water-fed growth | 2 / 2 / 2 / 2 | 8 | Reference |
+| Waterlogged Wood | Water-fed growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Marsh | Water-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Kelp | Water-fed growth | 2 / 1 / 2 / 1 | 6 | Reference |
 | Mangrove | Water-fed growth | 2 / 1 / 2 / 1 | 6 | Reference |

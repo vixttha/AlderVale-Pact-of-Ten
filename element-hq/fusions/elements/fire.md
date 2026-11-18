@@ -25,6 +25,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Steam | Steam | 3 / 3 / 2 / 2 | 10 | Parked |
 | Vapor | Steam | 3 / 3 / 2 / 2 | 10 | Parked |
+| Flash Steam | Steam | 3 / 3 / 2 / 1 | 9 | Parked |
+| Superheated Steam | Steam | 3 / 3 / 1 / 2 | 9 | Parked |
 | Water Vapor | Steam | 3 / 3 / 1 / 2 | 9 | Parked |
 | Boil | Steam | 3 / 1 / 2 / 1 | 7 | Reference |
 | Scald | Steam | 3 / 1 / 2 / 1 | 7 | Reference |
@@ -36,7 +38,9 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Plasma | Plasma | 2 / 3 / 2 / 2 | 9 | Exploratory |
+| Arc Plasma | Plasma | 2 / 3 / 1 / 2 | 8 | Exploratory |
 | Ionfire | Plasma | 2 / 3 / 1 / 2 | 8 | Exploratory |
+| Electric Flame | Plasma | 2 / 2 / 2 / 1 | 7 | Reference |
 | Flashfire | Electrical ignition | 2 / 2 / 2 / 1 | 7 | Reference |
 | Firebolt | Heated discharge | 2 / 1 / 2 / 1 | 6 | Reference |
 
@@ -46,8 +50,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Quench | Rapid temperature change | 3 / 1 / 2 / 2 | 8 | Reference |
 | Thermal Shock | Rapid temperature change | 3 / 1 / 2 / 2 | 8 | Reference |
 | Frostfire | Hot and cold flame | 2 / 2 / 2 / 1 | 7 | Exploratory |
+| Thermal Fracture | Rapid temperature change | 3 / 1 / 1 / 2 | 7 | Reference |
 | Sleetglass | Rapid temperature change | 2 / 2 / 1 / 1 | 6 | Exploratory |
 | Whiteout | Obscuring frost | 2 / 1 / 1 / 1 | 5 | Reference |
 
@@ -57,10 +63,12 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Fire Whirl | Wind-driven fire | 3 / 1 / 2 / 2 | 8 | Reference |
 | Firestorm | Wind-driven fire | 2 / 2 / 2 / 2 | 8 | Reference |
 | Backdraft | Feeding a flame | 3 / 1 / 2 / 1 | 7 | Reference |
 | Bellows | Wind-driven fire | 3 / 1 / 2 / 1 | 7 | Reference |
 | Emberstorm | Wind-driven fire | 2 / 2 / 1 / 1 | 6 | Reference |
+| Flame Jet | Wind-driven fire | 2 / 1 / 2 / 1 | 6 | Reference |
 
 ## Earth
 
@@ -71,7 +79,9 @@ Breakdown order is parents, identity, name, and gameplay.
 | Lava | Magma | 3 / 3 / 2 / 2 | 10 | Parked |
 | Magma | Magma | 3 / 3 / 2 / 2 | 10 | Locked |
 | Obsidian | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
+| Volcanic Glass | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
 | Basalt | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
+| Pumice | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
 | Kilnstone | Fired clay | 3 / 2 / 1 / 2 | 8 | Parked |
 
 ## Light
@@ -80,10 +90,12 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Heat Haze | Radiant fire | 3 / 1 / 2 / 2 | 8 | Reference |
 | Beaconfire | Guiding fire | 2 / 1 / 2 / 1 | 6 | Reference |
 | Flare | Flash of heat and light | 2 / 1 / 2 / 1 | 6 | Reference |
 | Incandescence | Radiant fire | 2 / 1 / 1 / 2 | 6 | Reference |
 | Solar Flame | Radiant fire | 2 / 1 / 2 / 1 | 6 | Reference |
+| White Heat | Radiant fire | 2 / 1 / 2 / 1 | 6 | Reference |
 
 ## Dark
 
@@ -91,8 +103,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Smoke | Concealed fire | 2 / 3 / 2 / 2 | 9 | Exploratory |
 | Lampblack | Carbon residue | 2 / 3 / 1 / 1 | 7 | Exploratory |
 | Shadowflame | Concealed fire | 2 / 2 / 1 / 2 | 7 | Exploratory |
+| Smoke Veil | Concealed fire | 2 / 1 / 2 / 2 | 7 | Reference |
 | Soot | Carbon residue | 1 / 3 / 2 / 1 | 7 | Reference |
 | Carbon Black | Carbon residue | 1 / 3 / 1 / 1 | 6 | Reference |
 | Black Ember | Concealed fire | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -103,8 +117,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Molten Metal | Heated metal | 3 / 2 / 2 / 2 | 9 | Reference |
 | Slag | Smelting residue | 3 / 2 / 2 / 1 | 8 | Parked |
 | Forge | Heated metal | 3 / 1 / 2 / 1 | 7 | Reference |
+| Anneal | Heated metal | 3 / 1 / 1 / 1 | 6 | Reference |
 | Dross | Metalworking residue | 2 / 2 / 1 / 1 | 6 | Reference |
 | Hot Steel | Heated metal | 2 / 1 / 2 / 1 | 6 | Reference |
 | Scale | Metal oxide crust | 2 / 2 / 1 / 1 | 6 | Reference |
@@ -115,8 +131,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Biochar | Charred plant matter | 3 / 3 / 1 / 2 | 9 | Parked |
 | Charcoal | Charred plant matter | 3 / 3 / 2 / 1 | 9 | Parked |
 | Char | Charred plant matter | 3 / 3 / 1 / 1 | 8 | Parked |
 | Emberwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Parked |
+| Cinder Bark | Charred plant matter | 3 / 2 / 1 / 1 | 7 | Parked |
 | Wildfire | Spreading fire | 2 / 1 / 2 / 2 | 7 | Reference |
 | Ashbloom | Post-fire growth | 2 / 2 / 1 / 1 | 6 | Reference |

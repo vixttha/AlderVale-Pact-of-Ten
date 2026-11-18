@@ -23,8 +23,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Smoke | Concealed fire | 2 / 3 / 2 / 2 | 9 | Exploratory |
 | Lampblack | Carbon residue | 2 / 3 / 1 / 1 | 7 | Exploratory |
 | Shadowflame | Concealed fire | 2 / 2 / 1 / 2 | 7 | Exploratory |
+| Smoke Veil | Concealed fire | 2 / 1 / 2 / 2 | 7 | Reference |
 | Soot | Carbon residue | 1 / 3 / 2 / 1 | 7 | Reference |
 | Carbon Black | Carbon residue | 1 / 3 / 1 / 1 | 6 | Reference |
 | Black Ember | Concealed fire | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -36,6 +38,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Black Ink | Light-absorbing liquid | 2 / 3 / 2 / 2 | 9 | Exploratory |
+| Lightless Pool | Dark waters | 3 / 1 / 2 / 2 | 8 | Reference |
+| Shadowwater | Light-absorbing liquid | 2 / 3 / 1 / 2 | 8 | Exploratory |
 | Blackwater | Dark waters | 2 / 2 / 2 / 1 | 7 | Exploratory |
 | Abyss | Dark waters | 2 / 1 / 1 / 1 | 5 | Reference |
 | Undertow | Concealed water current | 1 / 1 / 1 / 1 | 4 | Rejected |
@@ -46,7 +50,9 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Hidden Charge | Concealed discharge | 3 / 1 / 2 / 2 | 8 | Reference |
 | Blackout | Concealed discharge | 2 / 1 / 2 / 2 | 7 | Reference |
+| Dark Arc | Concealed discharge | 2 / 2 / 2 / 1 | 7 | Exploratory |
 | Dark Current | Concealed discharge | 2 / 2 / 2 / 1 | 7 | Exploratory |
 | Afterimage | Concealed discharge | 2 / 1 / 2 / 1 | 6 | Reference |
 | Nightbolt | Concealed discharge | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -57,9 +63,11 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Hidden Ice | Concealed frozen surface | 3 / 1 / 2 / 2 | 8 | Reference |
 | Black Ice | Concealed frozen surface | 2 / 1 / 2 / 2 | 7 | Reference |
 | Nightfrost | Concealed frozen surface | 2 / 2 / 1 / 2 | 7 | Exploratory |
 | Cold Shadow | Concealed cold | 2 / 1 / 2 / 1 | 6 | Reference |
+| Midnight Chill | Concealed cold | 2 / 1 / 2 / 1 | 6 | Reference |
 | Winter Veil | Concealed cold | 2 / 1 / 2 / 1 | 6 | Reference |
 
 ## Wind
@@ -68,6 +76,8 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Shadow Veil | Moving concealment | 3 / 1 / 2 / 2 | 8 | Reference |
+| Lightless Gale | Moving concealment | 2 / 1 / 2 / 2 | 7 | Reference |
 | Veil | Moving concealment | 2 / 1 / 2 / 2 | 7 | Reference |
 | Nightwind | Moving concealment | 2 / 1 / 2 / 1 | 6 | Reference |
 | Shadowdraft | Moving concealment | 2 / 1 / 2 / 1 | 6 | Rejected |
@@ -79,6 +89,8 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Black Clay | Light-absorbing earth | 2 / 2 / 2 / 2 | 8 | Exploratory |
+| Shadowstone | Light-absorbing earth | 2 / 3 / 1 / 2 | 8 | Exploratory |
 | Deepstone | Light-absorbing earth | 2 / 2 / 1 / 2 | 7 | Exploratory |
 | Obscura | Light-absorbing earth | 2 / 2 / 1 / 2 | 7 | Exploratory |
 | Umbral Clay | Light-absorbing earth | 2 / 2 / 1 / 2 | 7 | Exploratory |
@@ -91,6 +103,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Eclipse | Light occlusion | 3 / 1 / 2 / 2 | 8 | Reference |
+| Half-Light | Light transition | 3 / 1 / 2 / 2 | 8 | Reference |
+| Silhouette | Partial shadow | 3 / 1 / 2 / 2 | 8 | Reference |
 | Penumbra | Partial shadow | 2 / 2 / 2 / 1 | 7 | Reference |
 | Twilight | Light transition | 2 / 2 / 2 / 1 | 7 | Reference |
 | Afterglow | Light transition | 2 / 1 / 2 / 1 | 6 | Reference |
@@ -103,6 +117,8 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Matte Shield | Light-absorbing metal | 3 / 1 / 2 / 2 | 8 | Reference |
+| Blackened Metal | Light-absorbing metal | 2 / 2 / 2 / 1 | 7 | Reference |
 | Umbral Alloy | Light-absorbing metal | 2 / 2 / 1 / 2 | 7 | Reference |
 | Blacksteel | Light-absorbing metal | 2 / 2 / 1 / 1 | 6 | Reference |
 | Shade Mirror | Concealment with metal | 2 / 2 / 1 / 1 | 6 | Reference |
@@ -117,6 +133,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Black Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
 | Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Night Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Lightless Pigment | Light-absorbing plant pigment | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Nightbloom | Dark-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Shadevine | Dark-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Deepgrove | Dark habitat | 2 / 1 / 2 / 1 | 6 | Reference |

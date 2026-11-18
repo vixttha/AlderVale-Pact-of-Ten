@@ -26,7 +26,9 @@ Breakdown order is parents, identity, name, and gameplay.
 | Lava | Magma | 3 / 3 / 2 / 2 | 10 | Parked |
 | Magma | Magma | 3 / 3 / 2 / 2 | 10 | Locked |
 | Obsidian | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
+| Volcanic Glass | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
 | Basalt | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
+| Pumice | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
 | Kilnstone | Fired clay | 3 / 2 / 1 / 2 | 8 | Parked |
 
 ## Water
@@ -39,6 +41,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Silt | Wet earth | 3 / 3 / 2 / 2 | 10 | Parked |
 | Clay | Wet earth | 3 / 2 / 2 / 2 | 9 | Parked |
 | Quicksand | Saturated earth | 3 / 2 / 2 / 2 | 9 | Parked |
+| Sediment | Wet earth | 3 / 2 / 2 / 2 | 9 | Parked |
+| Wet Clay | Wet earth | 3 / 2 / 2 / 1 | 8 | Parked |
 | Slip | Wet earth | 3 / 2 / 1 / 1 | 7 | Parked |
 
 ## Lightning
@@ -50,6 +54,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Glass | Glass | 3 / 3 / 2 / 2 | 10 | Parked |
 | Lightning Glass | Glass | 3 / 3 / 2 / 2 | 10 | Parked |
 | Fulgurite | Glass | 3 / 3 / 1 / 2 | 9 | Parked |
+| Strike Glass | Glass | 3 / 3 / 1 / 2 | 9 | Parked |
+| Electrostatic Dust | Discharge into earth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Grounding | Discharge into earth | 3 / 1 / 2 / 1 | 7 | Reference |
 | Faultspark | Discharge into earth | 2 / 1 / 1 / 1 | 5 | Reference |
 
@@ -60,7 +66,9 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Permafrost | Frozen earth | 3 / 2 / 2 / 2 | 9 | Reference |
+| Frostbound Soil | Frozen earth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Frozen Stone | Frozen earth | 2 / 2 / 2 / 2 | 8 | Reference |
+| Ground Ice | Frozen earth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Frost Heave | Frozen earth | 3 / 1 / 1 / 1 | 6 | Reference |
 | Rime Shale | Frozen earth | 2 / 2 / 1 / 1 | 6 | Exploratory |
 
@@ -71,8 +79,10 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Dust | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
+| Grit | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
 | Sand | Airborne earth | 3 / 2 / 2 / 2 | 9 | Parked |
 | Duststorm | Airborne earth | 3 / 1 / 2 / 2 | 8 | Reference |
+| Erosion | Airborne earth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Sandblast | Airborne earth | 3 / 1 / 2 / 1 | 7 | Reference |
 | Dune | Shaped sand | 2 / 1 / 2 / 1 | 6 | Reference |
 
@@ -82,6 +92,8 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Lightwell | Radiant minerals | 3 / 1 / 2 / 2 | 8 | Reference |
+| Luminous Stone | Radiant minerals | 2 / 2 / 2 / 1 | 7 | Reference |
 | Crystalbeam | Radiant minerals | 2 / 1 / 2 / 1 | 6 | Reference |
 | Radiant Quartz | Radiant minerals | 2 / 2 / 1 / 1 | 6 | Reference |
 | Sunstone | Radiant minerals | 2 / 2 / 1 / 1 | 6 | Rejected |
@@ -93,6 +105,8 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Black Clay | Light-absorbing earth | 2 / 2 / 2 / 2 | 8 | Exploratory |
+| Shadowstone | Light-absorbing earth | 2 / 3 / 1 / 2 | 8 | Exploratory |
 | Deepstone | Light-absorbing earth | 2 / 2 / 1 / 2 | 7 | Exploratory |
 | Obscura | Light-absorbing earth | 2 / 2 / 1 / 2 | 7 | Exploratory |
 | Umbral Clay | Light-absorbing earth | 2 / 2 / 1 / 2 | 7 | Exploratory |
@@ -105,6 +119,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Lodestone | Magnetic material | 2 / 2 / 2 / 2 | 8 | Reference |
+| Metal Vein | Metal-bearing rock | 3 / 1 / 2 / 2 | 8 | Reference |
+| Native Metal | Metal-bearing rock | 2 / 2 / 2 / 1 | 7 | Reference |
 | Ore | Metal-bearing rock | 2 / 2 / 2 / 1 | 7 | Reference |
 | Bedrock Alloy | Metal and rock material | 2 / 2 / 1 / 1 | 6 | Reference |
 | Mineral | Metal-bearing rock | 2 / 2 / 1 / 1 | 6 | Reference |
@@ -117,6 +133,8 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Amber | Hardened plant resin | 3 / 3 / 2 / 2 | 10 | Parked |
 | Fossil Resin | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Parked |
+| Resin Stone | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Parked |
 | Loam | Rooted soil | 2 / 2 / 2 / 2 | 8 | Reference |
+| Rootbound Earth | Rooted soil | 3 / 1 / 2 / 2 | 8 | Reference |
 | Rootstone | Rooted stone | 2 / 2 / 2 / 2 | 8 | Exploratory |
 | Bramblebank | Rooted soil | 2 / 2 / 1 / 1 | 6 | Reference |

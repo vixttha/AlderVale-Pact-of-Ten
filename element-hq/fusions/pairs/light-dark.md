@@ -7,6 +7,8 @@
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Eclipse | Light occlusion | Reference | 3 | 1 | 2 | 2 | 8 | The owner questioned it as an element. It fits an encounter or combined ability. Earlier chart: Light is briefly occluded, creating a shadow-alignment event. |
+| Half-Light | Light transition | Reference | 3 | 1 | 2 | 2 | 8 | A compact name for a transitional band where visibility rules change. It still reads as an environmental state. Expanded naming pass. |
+| Silhouette | Partial shadow | Reference | 3 | 1 | 2 | 2 | 8 | Both Light and Dark make an outline readable. The effect could reveal shapes while hiding their details. Expanded naming pass. |
 | Penumbra | Partial shadow | Reference | 2 | 2 | 2 | 1 | 7 | A meaningful edge-light mechanic that reads as a zone or condition. Earlier chart: A partial shadow creates a zone of reduced visibility. |
 | Twilight | Light transition | Reference | 2 | 2 | 2 | 1 | 7 | A distinct atmosphere or cycle rather than a sustained output. Earlier chart: Light and darkness trade control as the field dims. |
 | Afterglow | Light transition | Reference | 2 | 1 | 2 | 1 | 6 | A useful fading effect as darkness returns. Light supplies most of the result. New naming proposal. |

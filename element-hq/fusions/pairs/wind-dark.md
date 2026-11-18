@@ -6,6 +6,8 @@
 
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Shadow Veil | Moving concealment | Reference | 3 | 1 | 2 | 2 | 8 | Dark supplies concealment and Wind moves the boundary. The name fits a moving zone or defensive effect. Expanded naming pass. |
+| Lightless Gale | Moving concealment | Reference | 2 | 1 | 2 | 2 | 7 | The name cues a strong obscured Wind attack. It describes Wind moving through Darkness. Expanded naming pass. |
 | Veil | Moving concealment | Reference | 2 | 1 | 2 | 2 | 7 | A clear concealment term for a mobile area. It still needs a distinct elemental medium. New naming proposal. |
 | Nightwind | Moving concealment | Reference | 2 | 1 | 2 | 1 | 6 | An encounter or flavor name for a gust in darkness. Earlier chart: A cool air current travels under a veil of shadow. |
 | Shadowdraft | Moving concealment | Rejected | 2 | 1 | 2 | 1 | 6 | Owner set it aside. Concealing airflow describes a move. Earlier chart: A dark gust hides motion along its path. |

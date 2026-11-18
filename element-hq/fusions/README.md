@@ -4,6 +4,8 @@
 
 Open any base element to compare its nine partners. Every pair page lists candidate names, score breakdowns, rationale, and earlier ideas. Alternate names carry the same concept label when they point to the same fusion.
 
+The atlas is a living catalog of reviewable names. The expanded pass adds plausible results, aliases, and useful move or material names with explicit review statuses. More names can be added to the same pair pages as the design develops.
+
 ## Element charts
 
 | Element | Element |
