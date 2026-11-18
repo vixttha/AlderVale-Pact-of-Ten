@@ -46,6 +46,19 @@ async def verify_mcp(graph_path, commit, node, node_count, edge_count):
                     raise ValueError("MCP could not resolve the indexed source node")
 
 
+def find_source_node(nodes):
+    prefix = os.getenv("GRAPHIFY_SOURCE_PREFIX", "src/")
+    candidates = [
+        node for node in nodes
+        if node.get("source_file", "").startswith(prefix)
+        and node.get("file_type") == "code"
+        and re.fullmatch(r"L\d+(?::\d+)?(?:-L\d+(?::\d+)?)?", node.get("source_location") or "")
+    ]
+    if not candidates:
+        raise ValueError(f"No indexed code symbol under {prefix}")
+    return min(candidates, key=lambda item: item["id"])
+
+
 def main():
     graph_path = Path(sys.argv[1]).resolve(strict=True)
     data = graph_path.read_bytes()
@@ -58,15 +71,7 @@ def main():
     nodes, links = graph["nodes"], graph["links"]
     if not nodes or not links:
         raise ValueError("Graph is missing nodes or links")
-    candidates = [
-        node for node in nodes
-        if node.get("source_file", "").startswith("src/")
-        and node.get("file_type") == "code"
-        and re.fullmatch(r"L\d+(?::\d+)?(?:-L\d+(?::\d+)?)?", node.get("source_location") or "")
-    ]
-    if not candidates:
-        raise ValueError("No source symbol available for the MCP check")
-    node = min(candidates, key=lambda item: item["id"])
+    node = find_source_node(nodes)
     asyncio.run(verify_mcp(graph_path, commit, node, len(nodes), len(links)))
 
     repository = os.getenv("GITHUB_REPOSITORY")
