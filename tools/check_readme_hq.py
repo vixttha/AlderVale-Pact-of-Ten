@@ -28,6 +28,11 @@ REFERENCE_LINK_RE = re.compile(r"^\s{0,3}\[[^\]]+\]:\s*(?:<([^>]+)>|(\S+))", re.
 AUTOLINK_RE = re.compile(r"<(https?://[^>\s]+)>", re.IGNORECASE)
 HTML_URL_ATTR_RE = re.compile(r"""\b(?:href|src|poster|action)\s*=\s*(['"])(.*?)\1""", re.IGNORECASE)
 BARE_URL_RE = re.compile(r"(?i)(?<![\w\"'=])https?://[^\s<>\x60\[\]()]+")
+HEADING_UNDERSCORES_RE = re.compile(
+    r"\\_|(?<!\x60)(?P<ticks>\x60+)(?!\x60).*?(?<!\x60)(?P=ticks)(?!\x60)"
+    r"|(?<!\w)(?P<marker>_{1,3})(?![\s_])"
+    r"(?P<emphasis>.+?)(?<![\s\\_])(?P=marker)(?!\w)"
+)
 MAX_EXTERNAL_LINKS = 200
 MAX_REDIRECTS = 5
 EXTERNAL_TIMEOUT_SECONDS = 8
@@ -186,6 +191,7 @@ def check_archive(root, repo, base, filenames, manifest_entries, label):
             )
 
     latest_version = max(rows, key=version_key)
+    require(rows[0] == latest_version, f"{index_label} must show the latest version first")
     return versions_dir / latest_version, latest_version
 
 
@@ -222,10 +228,28 @@ def check_workspace(root, base, label):
     return sorted(drafts, key=version_key, reverse=True)
 
 
-def heading_slugs(markdown):
+def markdown_headings(markdown):
+    """Yield ATX headings with line numbers, nesting levels, and GitHub fragments."""
     slugs = set()
-    for heading in re.findall(r"^#{1,6}\s+(.+?)\s*#*\s*$", markdown, re.MULTILINE):
-        heading = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", heading)
+    fence = None
+    for number, line in enumerate(markdown.splitlines(), 1):
+        delimiter = re.match(r"^ {0,3}(\x60{3,}|~{3,})", line)
+        if delimiter:
+            marker = delimiter[1]
+            if fence is None:
+                fence = marker
+            elif marker.startswith(fence) and not line[delimiter.end():].strip():
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        match = re.match(r"^ {0,3}(#{1,6})[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$", line)
+        if not match:
+            continue
+        hashes, title = match.groups()
+        heading = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", title)
+        # Skip escaped underscores and code spans. Remove matched emphasis delimiters.
+        heading = HEADING_UNDERSCORES_RE.sub(lambda match: match["emphasis"] or match[0], heading)
         slug = re.sub(r"[^\w -]", "", heading.lower())
         slug = re.sub(r"\s+", "-", slug.strip())
         base_slug = slug
@@ -234,8 +258,11 @@ def heading_slugs(markdown):
             suffix += 1
             slug = f"{base_slug}-{suffix}"
         slugs.add(slug)
-    return slugs
+        yield number, len(hashes), title, slug
 
+
+def heading_slugs(markdown):
+    return {slug for _, _, _, slug in markdown_headings(markdown)}
 
 
 def markdown_links(markdown):
@@ -728,6 +755,30 @@ def validate_repo(root, repo, main_ref, baseline=None, check_external=True):
 
 
 def run_regression_tests(root, repo, main_ref, baseline):
+    source = (
+        "# Review\n"
+        "\x60\x60\x60md\n## Code-only heading\n\x60\x60\x60\n"
+        "## Review\n### 1. [Next step](../README.md)\n"
+        "## _Approval_ steps\n## Approval steps\n"
+        "## __Archive rules__\n## ___Combined emphasis___\n"
+        "## Use snake_case\n## \x60_Raw_\x60 code\n## \\_Literal_ text\n"
+    )
+    require(
+        list(markdown_headings(source)) == [
+            (1, 1, "Review", "review"),
+            (5, 2, "Review", "review-1"),
+            (6, 3, "1. [Next step](../README.md)", "1-next-step"),
+            (7, 2, "_Approval_ steps", "approval-steps"),
+            (8, 2, "Approval steps", "approval-steps-1"),
+            (9, 2, "__Archive rules__", "archive-rules"),
+            (10, 2, "___Combined emphasis___", "combined-emphasis"),
+            (11, 2, "Use snake_case", "use-snake_case"),
+            (12, 2, "\x60_Raw_\x60 code", "_raw_-code"),
+            (13, 2, "\\_Literal_ text", "_literal_-text"),
+        ],
+        "Heading outline failed Markdown fragment regression",
+    )
+
     cases = []
 
     def add_case(name, expected_message, mutate, *, check_history=False):
@@ -827,6 +878,18 @@ def run_regression_tests(root, repo, main_ref, baseline):
     def remove_active_draft_file(fixture):
         (add_draft(fixture / "workspace") / "DRAFT.md").unlink()
 
+    def move_latest_hq_archive_to_end(fixture):
+        path = fixture / "readme-hq/versions/README.md"
+        text = read(path)
+        row = VERSION_ROW_RE.search(text)
+        end = text.index("\n", row.start())
+        last_row = list(VERSION_ROW_RE.finditer(text))[-1]
+        last_end = text.index("\n", last_row.start())
+        path.write_text(
+            text[:row.start()] + text[end + 1:last_end] + "\n" + text[row.start():end]
+            + text[last_end:], encoding="utf-8",
+        )
+
     def change_frozen_changelog(fixture):
         path = fixture / "versions/v0.0.1/CHANGELOG.md"
         path.write_text(read(path) + "\n<!-- regression mutation -->\n", encoding="utf-8")
@@ -834,6 +897,7 @@ def run_regression_tests(root, repo, main_ref, baseline):
     add_case("public frozen README drift", "snapshot checksum mismatch", change_public_snapshot)
     add_case("HQ guide and live guide drift together", "snapshot checksum mismatch", change_hq_snapshot_and_live_guide)
     add_case("HQ front page drift", "front page differs from the latest HQ snapshot", change_hq_front_page_only)
+    add_case("older HQ archive first", "must show the latest version first", move_latest_hq_archive_to_end)
     add_case(
         "public workspace index omission",
         "workspace index must list each version folder exactly once",
@@ -1224,6 +1288,7 @@ def main():
         print(f"PASS: {summary}.")
         regression_count = run_regression_tests(ROOT, ROOT, main_ref, baseline)
         print(f"PASS: {regression_count} negative fixtures rejected and 2 valid workspace transitions accepted.")
+        print("PASS: heading fragments for emphasis, literal underscores, duplicates, fenced code, and inline links.")
         external_regression_count = run_external_link_regression_tests()
         print(f"PASS: {external_regression_count} external-link regression cases.")
     except (ValidationError, OSError, ValueError, KeyError, TypeError, AttributeError) as error:

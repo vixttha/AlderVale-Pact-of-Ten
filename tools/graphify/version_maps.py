@@ -12,7 +12,7 @@ import subprocess
 import sys
 from importlib.metadata import version
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 
 from graphify.build import build_from_json
 from graphify.export import to_json
@@ -24,8 +24,6 @@ ROOT = Path(__file__).resolve().parents[2]
 MAPS = ROOT / "Graphify HQ"
 ARCHIVE = Path("readme-hq/versions")
 SOURCES = {"README.md": "Landing page", "GUIDE.md": "Folder guide", "CHANGELOG.md": "Changelog"}
-HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
-FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 VERSION = re.compile(r"v\d+\.\d+\.\d+")
 
 
@@ -81,20 +79,7 @@ def map_template(tag, sources, checker, out):
         node(document, SOURCES[name], "document", path, 1)
         edge(tag, document, "contains_document", path, 1)
         stack = []
-        fence = None
-        for number, line in enumerate(markdown.splitlines(), 1):
-            delimiter = FENCE.match(line)
-            if delimiter:
-                mark = delimiter[1]
-                if not fence:
-                    fence = mark
-                elif mark[0] == fence[0] and len(mark) >= len(fence):
-                    fence = None
-                continue
-            match = HEADING.match(line) if not fence else None
-            if not match:
-                continue
-            depth, title = len(match[1]), match[2]
+        for number, depth, title, slug in checker["markdown_headings"](markdown):
             while stack and stack[-1][0] >= depth:
                 stack.pop()
             key = f"{name}:L{number}"
@@ -102,7 +87,9 @@ def map_template(tag, sources, checker, out):
             edge(stack[-1][1] if stack else document, key, "contains_section", path, number)
             stack.append((depth, key))
             if depth > 1:
-                outlines[name].append(re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", title))
+                label = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", title)
+                label = re.sub(r"([\\\[\]])", r"\\\1", label)
+                outlines[name].append((label, quote(slug, safe="-_")))
 
         for href in checker["markdown_links"](markdown):
             url = checker["parse_link_url"](href, path)
@@ -150,7 +137,7 @@ def map_template(tag, sources, checker, out):
     for name, title in SOURCES.items():
         entry = receipt["sources"][name]
         lines.extend([f"## {title}", "", f"[Archived {title.lower()}](../../{entry['archive_path']})", ""])
-        lines.extend(f"- {section}" for section in outlines[name])
+        lines.extend(f"- [{label}](../../{entry['archive_path']}#{slug})" for label, slug in outlines[name])
         if outlines[name]:
             lines.append("")
     (out / "README.md").write_text("\n".join(lines), encoding="utf-8")

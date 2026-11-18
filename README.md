@@ -2,7 +2,7 @@
 
 AlderVale’s home for the public README’s approved versions, changelogs, and drafts.
 
-**Current HQ version:** `v0.0.5`
+**Current HQ version:** `v0.0.6`
 
 | Start here | Use it for |
 | --- | --- |
@@ -10,13 +10,14 @@ AlderVale’s home for the public README’s approved versions, changelogs, and 
 | [Public README workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/workspace/README.md) | Find the folder assigned to a game README version and review its draft. |
 | [README HQ version history](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/README.md) | Compare approved README HQ landing pages, guides, and changelogs. |
 | [README HQ workspaces](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/workspace/README.md) | Find the source files and workspace record for each HQ version. |
+| [Graphify HQ](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/Graphify%20HQ/README.md) | Browse the map, source outline, and receipt for each approved HQ template version. |
 | [README HQ folder guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/README.md) | Review the updated validator documentation and its coverage guard. |
 
 **Public game README v0.0.3** · [Read on `main`](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/README.md) · [Archived README](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/v0.0.3/README.md) · [Changelog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/versions/v0.0.3/CHANGELOG.md)
 
 Publication was recorded in [PR #124](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/124).
 
-**HQ v0.0.3 archive:** [Landing page](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/v0.0.3/README.md) · [Folder guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/v0.0.3/GUIDE.md) · [Changelog](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/v0.0.3/CHANGELOG.md).
+[Latest approved HQ archive](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/readme-hq/versions/README.md#readme-hq-version-history) · Find the latest landing page, folder guide, and changelog in the first row.
 
 ## From draft to approved HQ version
 
