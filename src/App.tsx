@@ -105,7 +105,7 @@ export function App() {
   const [remotePlayers, setRemotePlayers] = useState<LivePlayerPresence[]>([]);
   const [localSessionId, setLocalSessionId] = useState<string | null>(null);
   const [worldPositionSync, setWorldPositionSync] = useState<{
-    sessionId: string; zone: ZoneId; x: number; y: number; z: number; rotY: number;
+    sessionId: string; revision: number; zone: ZoneId; x: number; y: number; z: number; rotY: number;
   } | null>(null);
   const [playerMinimapPos, setPlayerMinimapPos] = useState<{ x: number; z: number; rotY: number }>({
     x: ZONES.hub.spawnPos[0],
@@ -654,21 +654,26 @@ export function App() {
         if (stopped || socket !== ws) return;
         try {
           const data = JSON.parse(String(ev.data)) as Record<string, unknown>;
-          if (data.type === 'world_joined') {
-            delay = 500;
-            joined.current = true;
-            // A new authenticated socket may resume away from spawn. Apply the server-observed
-            // location to the still-mounted 3D scene, including when the avatar was moved offline.
+          if (data.type === 'world_joined' || data.type === 'world_position_correction') {
+            if (data.type === 'world_joined') {
+              delay = 500;
+              joined.current = true;
+            }
+            // On join and on a rejected movement, keep the live scene aligned with
+            // the server position. Each correction has a new revision on one socket.
             const location = data.position as Partial<{ x: number; y: number; z: number; rotY: number }> | undefined;
             if (fbUser && serverSession && typeof data.zone === 'string' && Object.hasOwn(ZONES, data.zone) && location &&
                 [location.x, location.y, location.z, location.rotY].every((value) => typeof value === 'number' && Number.isFinite(value))) {
               const nextZone = data.zone as ZoneId;
               const position = location as { x: number; y: number; z: number; rotY: number };
               setZone(nextZone);
-              setWorldPositionSync({ sessionId: serverSession, zone: nextZone, ...position });
+              setWorldPositionSync((previous) => ({
+                sessionId: serverSession, revision: (previous?.revision ?? 0) + 1,
+                zone: nextZone, ...position,
+              }));
               setPlayerMinimapPos({ x: position.x, z: position.z, rotY: position.rotY });
             }
-            setWorldConnected(true);
+            if (data.type === 'world_joined') setWorldConnected(true);
           } else if (data.type === 'guest_ticket' && typeof data.ticket === 'string') {
             guestTicket = data.ticket;
             try { sessionStorage.setItem(ticketKey, data.ticket); } catch { /* optional reconnect storage */ }
