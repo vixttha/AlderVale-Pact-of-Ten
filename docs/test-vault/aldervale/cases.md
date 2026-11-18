@@ -76,4 +76,5 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | E32-003 | Explicit Graphify commit snapshot | P1 | Bash and Git | Append a snapshot under the exact commit SHA and preserve the main graph and receipt. |
 | E32-004 | Damaged Graphify version snapshot | P0 | Bash and Git | Detect a retained graph checksum mismatch and abort without rewriting the archive. |
 | E32-005 | Concurrent Graphify publication | P0 | Bash and Git | Recover from a non-fast-forward push rejection and retain both publishers' snapshots. |
+| E32-006 | Test Vault Graphify publication | P0 | Bash and Git | Publish and advance the dedicated Vault snapshot, skip an older Vault checkout, and preserve the main snapshot. |
 | E34-002 | Isolated test services | P0 | GitHub Actions, browser fixtures, and Firestore emulator | Run the guest suite with external hosts blocked and Firestore checks against the `demo-aldervale-ci` emulator. |

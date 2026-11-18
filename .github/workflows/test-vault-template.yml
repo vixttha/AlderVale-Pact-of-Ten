@@ -17,7 +17,7 @@ on:
       - 'src/lib/firebase.ts'
       - 'public/models/**.glb'
   push:
-    branches: [main]
+    branches: [main, AlderVale-Test-Vault]
     paths:
       - '.github/workflows/test-vault-template.yml'
       - 'docs/test-vault/**'
