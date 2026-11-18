@@ -97,6 +97,15 @@ def load_pairs():
         pair: parse_names(ATLAS / "pairs" / f"{pair_id(*pair)}.md", pair)
         for pair in pairs
     }
+    fusion_labels = {}
+    for pair, names in catalog.items():
+        for name in names:
+            if name.role != "Fusion":
+                continue
+            duplicate = fusion_labels.setdefault(name.label.casefold(), pair)
+            if duplicate != pair:
+                raise ValueError(f"Fusion name {name.label!r} reused across {duplicate} and {pair}")
+
     chart = PAIRING_CHART.read_text(encoding="utf-8")
     axes = next(line for line in chart.splitlines() if line.startswith("| Element |"))
     if tuple(cell.strip() for cell in axes.split("|")[2:-1]) != ELEMENTS:
