@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express, { type Request, type Response, type NextFunction } from 'express';
-import { buyListing, cancelListing, changeHouseMembership, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, unpublishTour, RequestError } from './server/market.ts';
+import { buyListing, cancelListing, changeHouseMembership, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, reconcileBazaarEquipment, unpublishTour, RequestError } from './server/market.ts';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
@@ -67,6 +67,10 @@ export async function createAldervaleApp({
   app.get('/api/bazaar/:realmId', realmRoute(async (req, res, realm) => {
     const uid = req.headers.authorization ? await requireAccount(req) : undefined;
     res.json(await listBazaar(realm, uid));
+  }));
+  app.post('/api/bazaar/:realmId/reconcile-equipment', realmRoute(async (req, res, realm) => {
+    await reconcileBazaarEquipment(realm, await requireAccount(req), req.body?.wizardId);
+    res.sendStatus(204);
   }));
   app.post('/api/bazaar/:realmId/list', realmRoute(async (req, res, realm) => {
     const uid = await requireAccount(req);

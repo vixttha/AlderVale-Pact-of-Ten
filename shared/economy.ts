@@ -16,14 +16,15 @@ export function wearableEquipment(
   wardrobe: WizardDocument['wardrobe'],
   bazaarGear: Record<string, number> | undefined,
 ): EquippedGear {
+  if (bazaarGear === undefined) return wardrobe.equipped;
   const equipped = { ...wardrobe.equipped };
-  const owns = (id: string) => wardrobe.ownedGearIds.includes(id) || (bazaarGear?.[id] ?? 0) > 0;
+  const owns = (id: string) => wardrobe.ownedGearIds.includes(id) || (bazaarGear[id] ?? 0) > 0;
   let changed = false;
   for (const slot of GEAR_SLOTS) {
     const current = equipped[slot];
-    if (GEAR_BY_ID[current]?.slot === slot && owns(current)) continue;
+    if (!current || (GEAR_BY_ID[current]?.slot === slot && owns(current))) continue;
     const replacement = wardrobe.ownedGearIds.find((id) => GEAR_BY_ID[id]?.slot === slot)
-      ?? Object.keys(bazaarGear ?? {}).find((id) => GEAR_BY_ID[id]?.slot === slot && owns(id))
+      ?? Object.keys(bazaarGear).find((id) => GEAR_BY_ID[id]?.slot === slot && owns(id))
       ?? '';
     if (replacement === current) continue;
     equipped[slot] = replacement;

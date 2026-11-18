@@ -35,6 +35,24 @@ describe('Bazaar equipment and escrow (#28)', () => {
     expect(stats(reconciled)).not.toEqual(stats(equipped));
   });
 
+  it('uses the saved equipment and duel stats until the wallet loads, then removes an unowned item', async () => {
+    let finishWallet!: (gear: Record<string, number>) => void;
+    const response = new Promise<Record<string, number>>((resolve) => { finishWallet = resolve; });
+
+    const equippedAtDuelStart = wearableEquipment(wardrobe, undefined);
+    expect(equippedAtDuelStart).toBe(wardrobe.equipped);
+    expect(stats(equippedAtDuelStart)).not.toEqual(stats(wizard.wardrobe.equipped));
+
+    finishWallet({ [hat]: 1 });
+    expect(wearableEquipment(wardrobe, await response)).toBe(equippedAtDuelStart);
+    expect(wearableEquipment(wardrobe, {}).headgear).toBe('hat_academy_cap');
+  });
+
+  it('keeps an intentionally empty slot empty in a loaded wallet', () => {
+    const empty = { ...wardrobe, equipped: { ...wardrobe.equipped, headgear: '' } };
+    expect(wearableEquipment(empty, { [hat]: 1 })).toBe(empty.equipped);
+  });
+
   it('keeps an independent wardrobe copy even after the last wallet copy goes to escrow', () => {
     const owned = { ...wardrobe, ownedGearIds: [...wardrobe.ownedGearIds, hat] };
     expect(wearableEquipment(owned, { [hat]: 0 })).toBe(owned.equipped);

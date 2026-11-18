@@ -354,9 +354,33 @@ export function App() {
   );
 
   useEffect(() => {
-    if (!wallet || !activeWizard || !equippedGear || equippedGear === activeWizard.wardrobe.equipped) return;
-    persistWizard({ ...activeWizard, wardrobe: { ...activeWizard.wardrobe, equipped: equippedGear } });
-  }, [activeWizard, equippedGear, persistWizard, wallet]);
+    if (!fbUser || !wallet || !activeWizard || !equippedGear || equippedGear === activeWizard.wardrobe.equipped) return;
+    const { id, realmId, ownerId, wardrobe } = activeWizard;
+    const slots = (Object.keys(equippedGear) as (keyof typeof equippedGear)[])
+      .filter((slot) => equippedGear[slot] !== wardrobe.equipped[slot]);
+    const applyEquipment = (wizard: WizardDocument) => {
+      if (wizard.id !== id || wizard.ownerId !== ownerId || wizard.realmId !== realmId) return wizard;
+      const equipped = { ...wizard.wardrobe.equipped };
+      for (const slot of slots) {
+        if (equipped[slot] === wardrobe.equipped[slot]) equipped[slot] = equippedGear[slot];
+      }
+      return { ...wizard, wardrobe: { ...wizard.wardrobe, equipped } };
+    };
+    setActiveWizard((current) => current && applyEquipment(current));
+    setWizards((current) => current.map(applyEquipment));
+
+    void fbUser.getIdToken().then((token) => fetch(`/api/bazaar/${realmId}/reconcile-equipment`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wizardId: id }),
+    })).then((response) => {
+      if (!response.ok) throw new Error('Equipment reconciliation failed');
+    }).catch(() => {
+      if (currentPresence.current.activeWizard?.id === id && currentPresence.current.walletScope === walletScope) {
+        showToast('Your Bazaar equipment could not be saved. Reload the page to retry.');
+      }
+    });
+  }, [activeWizard, equippedGear, fbUser, showToast, wallet, walletScope]);
 
   const claimTermTier = async (tier: number) => {
     if (!activeWizard) throw new Error('Open a wizard first.');

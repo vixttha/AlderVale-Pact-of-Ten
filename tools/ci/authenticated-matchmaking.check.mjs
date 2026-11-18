@@ -184,7 +184,7 @@ async function bazaarRequest(player, path, body) {
     signal: AbortSignal.timeout(10000),
   });
   assert.ok(response.ok, 'Bazaar HTTP ' + response.status);
-  return response.json();
+  return response.status === 204 ? null : response.json();
 }
 
 test('Bazaar escrow and sale push seller wallets only to the owning realm, without a refresh (#28)', { timeout: 45000 }, async (context) => {
@@ -230,4 +230,40 @@ test('Bazaar escrow and sale push seller wallets only to the owning realm, witho
     exchange(socket, { type: 'move', zone: 'arbor' }, ['zone_snapshot']),
   ));
   assert.deepEqual(unrelatedWallets, []);
+});
+
+test('Bazaar equipment reconciliation preserves rewards and other slots saved after the seller loaded (#28)', { timeout: 45000 }, async () => {
+  const seller = await createPlayer('breeze', storedSelections[0]);
+  const wizard = cloudDb.collection('wizards').doc(seller.wizardId);
+  const wardrobe = {
+    equipped: { headgear: 'hat_pointed_brim', torso: 'torso_bomber' },
+    ownedGearIds: ['hat_academy_cap', 'torso_bomber'],
+    socketedRunestones: [],
+  };
+  await wizard.update({ wardrobe, xp: 3, currencies: { florins: 220 }, progression: { titleBadge: '' } });
+  const previous = (await wizard.get()).data();
+  await bazaarRequest(seller, '/buy/academy-hat', {});
+  await bazaarRequest(seller, '/reconcile-equipment', {});
+  assert.equal((await wizard.get()).get('wardrobe.equipped.headgear'), 'hat_pointed_brim');
+  await bazaarRequest(seller, '/list', { itemId: 'hat_pointed_brim', priceFlorins: 90 });
+
+  const latest = {
+    xp: 24,
+    currencies: { florins: 493 },
+    progression: { titleBadge: 'First Spark' },
+    'wardrobe.socketedRunestones': ['new-rune'],
+  };
+  await wizard.update(latest);
+  // The API uses the authenticated wizard and wallet. A stale wizard body cannot overwrite either.
+  await bazaarRequest(seller, '/reconcile-equipment', { wizard: previous });
+  const reconciled = (await wizard.get()).data();
+  assert.equal(reconciled.wardrobe.equipped.headgear, 'hat_academy_cap');
+  assert.equal(reconciled.wardrobe.equipped.torso, 'torso_bomber');
+  assert.deepEqual(reconciled.wardrobe.socketedRunestones, ['new-rune']);
+  assert.equal(reconciled.xp, latest.xp);
+  assert.deepEqual(reconciled.currencies, latest.currencies);
+  assert.deepEqual(reconciled.progression, latest.progression);
+
+  await bazaarRequest(seller, '/reconcile-equipment', {});
+  assert.deepEqual((await wizard.get()).data(), reconciled);
 });
