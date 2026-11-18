@@ -20,7 +20,9 @@ git init -q --bare "$workdir/remote.git"
 git -C "$workdir/remote.git" config receive.shallowUpdate true
 git clone -q --no-hardlinks "$repo" "$workdir/source"
 git -C "$workdir/source" remote set-url origin "$workdir/remote.git"
-git -C "$workdir/source" push -q origin HEAD:refs/heads/main HEAD:refs/heads/AlderVale-Test-Vault
+git -C "$workdir/source" push -q origin HEAD:refs/heads/main
+fixture_sha=$(git -C "$workdir/remote.git" rev-parse refs/heads/main)
+git -C "$workdir/remote.git" update-ref refs/heads/AlderVale-Test-Vault "$fixture_sha"
 
 cd "$workdir/source"
 GITHUB_REF=refs/heads/main bash "$repo/tools/graphify/publish.sh" "$snapshot"
