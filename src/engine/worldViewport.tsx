@@ -32,7 +32,7 @@ export interface WorldViewportProps {
   remotePlayers: LivePlayerPresence[];
   completedQuestIds?: string[];
   localSessionId?: string | null;
-  worldPositionSync?: { sessionId: string; zone: ZoneId; x: number; y: number; z: number; rotY: number } | null;
+  worldPositionSync?: { sessionId: string; revision: number; zone: ZoneId; x: number; y: number; z: number; rotY: number } | null;
   localEmote?: { emote: EmoteId; until: number } | null;
   remoteEmoteEvent?: { sessionId: string; emote: EmoteId; until: number; seq: number } | null;
   chatBubbleEvent?: { sessionId: string; senderName: string; text: string; until: number; seq: number } | null;
@@ -208,9 +208,10 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
   const creatureSlotRef = useRef<THREE.Group | null>(null);
   const playerContainerRef = useRef<THREE.Group | null>(null);
   const pendingPositionRef = useRef<NonNullable<WorldViewportProps['worldPositionSync']> | null>(null);
-  const appliedPositionSessionRef = useRef<string | null>(null);
+  const appliedPositionKeyRef = useRef<string | null>(null);
   useEffect(() => {
-    if (worldPositionSync?.zone === zone && worldPositionSync.sessionId !== appliedPositionSessionRef.current) {
+    if (worldPositionSync?.zone === zone &&
+        `${worldPositionSync.sessionId}:${worldPositionSync.revision}` !== appliedPositionKeyRef.current) {
       pendingPositionRef.current = worldPositionSync;
     }
   }, [worldPositionSync, zone]);
@@ -752,7 +753,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         propsRef.current.onPlayerMoveSample?.({
           x: reconnectPosition.x, z: reconnectPosition.z, rotY: reconnectPosition.rotY,
         });
-        appliedPositionSessionRef.current = reconnectPosition.sessionId;
+        appliedPositionKeyRef.current = `${reconnectPosition.sessionId}:${reconnectPosition.revision}`;
         pendingPositionRef.current = null;
       }
 
