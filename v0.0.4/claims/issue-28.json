@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "issueNumber": 28,
   "claimId": "AV-CLAIM-28-2026-11-18T05:41:31.000Z",
-  "status": "active",
+  "status": "released",
   "worker": "ChatGPT",
   "host": "chatgpt.com",
   "model": "unverified",
@@ -11,6 +11,6 @@
   "baseSha": "fced4038c1dfa655c223d1bcbbdf3c18593b1e1f",
   "workBranch": "cursor/issue-28-bazaar-equipped-c4b4",
   "claimedAt": "2026-11-18T05:41:31.000Z",
-  "expiresAt": "2026-11-18T06:41:31.000Z",
-  "note": "Owner directed repair and public CI for the #103 equipment save and wallet-loading regressions."
+  "expiresAt": "2026-11-18T05:59:24.000Z",
+  "note": "Both PR #103 review regressions fixed at a7090a18d14c5c3504390ba0230eaf4d79ae90aa. Seven public validation jobs, runner policy, and Semgrep passed. Evidence recorded on issue #28 and the PR is ready for owner merge decision."
 }
