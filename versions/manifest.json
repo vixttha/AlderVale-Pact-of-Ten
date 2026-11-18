@@ -5,7 +5,7 @@
   "versions": {
     "v0.0.1": {
       "status": "draft",
-      "source_commit": "bc3d995a0ea26002dc40677409bfd7bb68581376",
+      "source_commit": "f356f186d86b6567e3459a053a8218014ff3aa2f",
       "source_path": "workspace/v0.0.1",
       "snapshot_path": "workspace/v0.0.1"
     }

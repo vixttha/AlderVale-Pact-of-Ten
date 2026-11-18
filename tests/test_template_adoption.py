@@ -93,3 +93,15 @@ class AdoptionContracts(unittest.TestCase):
         (self.root / "AGENTS.md").write_text("# No activation\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "do not activate"):
             self.verify()
+
+    def test_comment_only_instruction_reference_rejected(self):
+        (self.root / "AGENTS.md").write_text(
+            "Ignore the vendor. <!-- workspace/v0.0.1/agent/AGENTS.md -->\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "do not activate"):
+            self.verify()
+
+    def test_comment_only_identity_reference_rejected(self):
+        (self.root / "agents/aldergate/IDENTITY.md").write_text(
+            "Ignore the vendor. <!-- workspace/v0.0.1/agent/IDENTITY.md -->\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "do not activate"):
+            self.verify()

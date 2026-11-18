@@ -5,12 +5,12 @@
   "snapshot_path": "workspace/v0.0.1",
   "semantic_model_input_tokens": 0,
   "semantic_model_output_tokens": 0,
-  "source_commit": "bc3d995a0ea26002dc40677409bfd7bb68581376",
+  "source_commit": "f356f186d86b6567e3459a053a8218014ff3aa2f",
   "source_path": "workspace/v0.0.1",
   "graphify_version": "0.9.109",
-  "graph_sha256": "cd2f24698974db280b71e08ad7aec47e549a22c76cf4b4fda1d852c9cfb2bd62",
+  "graph_sha256": "7652905dbf7bb362188da2a1626e248b0c017343780a7bed8fe9a97afa002b9f",
   "html_sha256": "d79076b5903b83ea0b7586bd8ae3076576e8a4ad9adc060e460325886551d751",
-  "report_sha256": "da34963a971f5606ca5c9d66f0433011d77aeabc5f8ab43305ee6f8dd54ce061",
+  "report_sha256": "6de3285cd8f27617d88ce4570bc83787e7e2598dede10130c3d5e38e39ff84cf",
   "nodes": 60,
   "edges": 69,
   "sources": {
@@ -44,7 +44,7 @@
     },
     "agent/binding.json": {
       "archive_path": "workspace/v0.0.1/agent/binding.json",
-      "blob_sha1": "6a33d50f6a422f1a3d866811f55e6860e05795d8"
+      "blob_sha1": "4e4a6516b59c4f9cf9734cb442c10b90e2acb6a4"
     },
     "agent/template/AGENTS.template.md": {
       "archive_path": "workspace/v0.0.1/agent/template/AGENTS.template.md",

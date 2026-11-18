@@ -42,6 +42,26 @@ def render(text, bindings):
     return result
 
 
+def entrypoints(relative):
+    """Controlled declarations; checking bytes does not prove host obedience."""
+    return {
+        "AGENTS.md": (
+            "# AlderVale-Launcher active worker instructions\n\n"
+            f"Read and follow [bound template instructions]({relative}/AGENTS.md),\n"
+            f"[project-specific instructions]({relative}/PROJECT_INSTRUCTIONS.md),\n"
+            f"[the binding record]({relative}/binding.json), and PROJECT_RULES.md\n"
+            "before work. The solo owner's current instructions prevail.\n"
+            "Template adoption grants no new spending, runtime, release or background authority.\n"
+        ),
+        "agents/aldergate/IDENTITY.md": (
+            "# AlderGate active identity\n\n"
+            f"Read [the bound identity](../../{relative}/IDENTITY.md) and\n"
+            f"[the retained project identity](../../{relative}/PROJECT_IDENTITY.md).\n"
+            "This is a host-executed worker role, not a deployed service or independent reviewer.\n"
+        ),
+    }
+
+
 def verify(root, binding_path, allow_fetch=True):
     root = root.resolve()
     path = (root / binding_path).resolve()
@@ -101,10 +121,10 @@ def verify(root, binding_path, allow_fetch=True):
         if output.is_symlink() or output.read_bytes() != expected:
             raise ValueError(f"Rendered instruction bytes differ: {outgoing}")
     relative = folder.relative_to(root).as_posix()
-    if relative + "/AGENTS.md" not in (root / "AGENTS.md").read_text(encoding="utf-8"):
-        raise ValueError("Root instructions do not activate bound template")
-    if relative + "/IDENTITY.md" not in (root / "agents/aldergate/IDENTITY.md").read_text(encoding="utf-8"):
-        raise ValueError("Root identity does not activate bound identity")
+    for name, expected in entrypoints(relative).items():
+        output = root / name
+        if output.is_symlink() or output.read_bytes() != expected.encode("utf-8"):
+            raise ValueError(f"Entrypoints do not activate bound instructions: {name}")
     print(f"Template {version}: source inventory, graph receipt, bindings and rendered instructions verified.")
     return data
 

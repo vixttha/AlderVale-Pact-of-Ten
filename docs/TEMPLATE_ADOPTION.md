@@ -13,6 +13,9 @@ files; prior project-specific instructions/identity were preserved beside them.
 
 CI verifies Git source, schema, bytes and activation before running adoption
 negative tests and rebuilding the product map through actual Graphify MCP.
+Activation means exact controlled root entrypoint declarations; paths hidden in
+comments or unrelated text fail. It does not prove a host follows instructions.
+Custom rules belong in the retained versioned project files, not the root stubs.
 Template commits are fetched explicitly by SHA using bounded public Git reads;
 no unrelated branch refs, credentials or model API calls are needed.
 
