@@ -2,7 +2,7 @@ name: README HQ Graphify
 
 on:
   push:
-    branches: [readme-hq, docs/readme-hq-graphify-map]
+    branches: [readme-hq]
   pull_request:
     branches: [readme-hq]
     paths:
@@ -12,6 +12,10 @@ on:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    shell: bash
 
 concurrency:
   group: readme-hq-graphify-${{ github.ref }}
@@ -38,14 +42,15 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.base.sha || (github.ref == 'refs/heads/readme-hq' && github.sha) || 'refs/heads/readme-hq' }}
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
           path: source
           persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.12'
       - name: Install locked Graphify packages
-        run: python -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
+        run: >-
+          python -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
       - name: Index the exact README HQ checkout
         working-directory: source
         run: |
@@ -66,7 +71,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.base.sha || (github.ref == 'refs/heads/readme-hq' && github.sha) || 'refs/heads/readme-hq' }}
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
           path: source
           fetch-depth: 0
           persist-credentials: false
@@ -74,7 +79,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install locked Graphify packages
-        run: python -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
+        run: >-
+          python -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
       - name: Verify provenance and query the transferred map over MCP
         working-directory: source
         env:
@@ -101,7 +107,7 @@ jobs:
           git --git-dir="$fixture/remote.git" show graphify-snapshots:readme-hq/receipt.json | cmp "$RUNNER_TEMP/snapshot/receipt.json" -
           test "$(git --git-dir="$fixture/remote.git" ls-tree --name-only graphify-snapshots)" = readme-hq
       - name: Export the verified initial snapshot
-        if: github.ref != 'refs/heads/readme-hq'
+        if: github.event_name == 'pull_request'
         run: python tools/graphify/readme_hq_map.py export "$RUNNER_TEMP/snapshot/graph.json"
 
   publish:
