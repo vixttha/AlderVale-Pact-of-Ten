@@ -6,7 +6,7 @@
     "branch": "Launcher-Agent-Template",
     "version": "v0.0.1",
     "status": "draft",
-    "home_commit": "3c6240d6f12e51647fba8c3200c96875c447b33c",
+    "home_commit": "b4c1c3e2f2a6a942cb93b7ab38aed8a8052b1a88",
     "source_commit": "1aea00da941d556185496326a6240c858ba6d652",
     "source_path": "workspace/v0.0.1/template",
     "graph_receipt_sha256": "b175b15af82e6bc7788700da3c356f6194de69c7047f629bd396e0695234605b",
