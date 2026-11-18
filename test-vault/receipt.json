@@ -2,13 +2,13 @@
   "schema_version": 1,
   "repository": "vixttha/AlderVale-Pact-of-Ten",
   "source_ref": "refs/heads/AlderVale-Test-Vault",
-  "source_commit": "60e15a16ee65cb1390997c7bb6f6db3074baef70",
+  "source_commit": "89b2796df7dc6f4429da31591b7bb401b144f2ac",
   "graphify_version": "0.9.109",
   "extraction": "code-only",
-  "graph_sha256": "9b8a2aff7a248e023fd96eb931839914cb4094bc82908fa3d1494180a2c0e948",
+  "graph_sha256": "c988f6cbf6db897a94a0c5d7d8b89229c571ac7ad161b38511be94f493d30263",
   "nodes": 1493,
   "edges": 3417,
   "mcp_verified": true,
   "mcp_source_lookup": "tests/vault/go/fixture_test.go",
-  "workflow_run": "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44249373662"
+  "workflow_run": "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44251830256"
 }
