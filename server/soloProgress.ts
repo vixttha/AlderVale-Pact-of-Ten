@@ -3,7 +3,7 @@ import { FieldValue, type DocumentData, type Transaction } from 'firebase-admin/
 import { chooseAiAction, isDuelComplete, leadCreatureQualifiedForArborWin, resolveDuelRound, type DuelState } from '../shared/combat.ts';
 import { ELEMENTS, ELEMENT_LIST, type ElementId } from '../shared/elements.ts';
 import { SPELL_BY_ID } from '../shared/spells.ts';
-import { applyTermReward, TERM_REWARD_TRACK, type WizardDocument } from '../shared/economy.ts';
+import { applyTermReward, TERM_REWARD_TRACK, wearableEquipment, type WizardDocument } from '../shared/economy.ts';
 import { applySagaEvent } from '../shared/quests.ts';
 import type { RealmId } from '../shared/realms.ts';
 import { createSoloDuel } from '../shared/soloDuel.ts';
@@ -121,9 +121,7 @@ export async function startSolo(uid: string, realm: RealmId, wizardId: unknown, 
       readProgressionCreatures(tx, wizard), tx.get(progressionRealm(realm).collection('wallets').doc(uid)),
     ]);
     if (!pets.some((pet) => pet.id === wizard.activeCreatureId)) throw new RequestError(409, 'Select an enrolled creature before dueling.');
-    const equipped = Object.fromEntries(Object.entries(wizard.wardrobe.equipped).filter(([, item]) =>
-      wizard.wardrobe.ownedGearIds.includes(item) || (wallet.get('gear')?.[item] ?? 0) > 0,
-    )) as WizardDocument['wardrobe']['equipped'];
+    const equipped = wearableEquipment(wizard.wardrobe, wallet.get('gear') ?? {});
     const duelWizard = { ...wizard, wardrobe: { ...wizard.wardrobe, equipped } };
     const room: StoredSoloDuel = {
       uid, leadId: wizard.activeCreatureId, trialElement: mode === 'trial' ? element : null,

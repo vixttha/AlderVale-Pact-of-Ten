@@ -11,6 +11,7 @@ import { RACES } from '../shared/wardrobe.ts';
 import { ZONES } from '../shared/world.ts';
 import type { Server } from 'node:http';
 import type { RealmId } from '../shared/realms.ts';
+import type { MarketAccount } from '../shared/market.ts';
 import type { ZoneId } from '../shared/world.ts';
 import type { ElementId } from '../shared/elements.ts';
 import type { BeastClanId, RaceId, WizardSculpt } from '../shared/wardrobe.ts';
@@ -850,5 +851,13 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
       clients.delete(sessionId);
     });
   });
-  return wss;
+  return Object.assign(wss, {
+    publishMarketWallet(realm: RealmId, uid: string, wallet: MarketAccount) {
+      for (const conn of clients.values()) {
+        if (conn.verifiedUid === uid && conn.presence?.realmId === realm) {
+          send(conn, { type: 'market_wallet', wallet });
+        }
+      }
+    },
+  });
 }

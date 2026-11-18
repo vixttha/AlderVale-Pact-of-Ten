@@ -1,7 +1,7 @@
 import { FieldValue, type Transaction } from 'firebase-admin/firestore';
 import { cloudDb } from './cloud.ts';
 import type { RealmId } from '../shared/realms.ts';
-import type { WizardDocument } from '../shared/economy.ts';
+import { wearableEquipment, type WizardDocument } from '../shared/economy.ts';
 import { isOwnedCreatureDocument, type StoredCreatureSelection } from './creatureSelection.ts';
 import type { AcademyHouse } from '../shared/houses.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
@@ -101,6 +101,21 @@ export async function listBazaar(realm: RealmId, uid?: string) {
   };
 }
 
+export async function reconcileBazaarEquipment(realm: RealmId, uid: string, wizardId: unknown) {
+  await cloudDb.runTransaction(async (tx) => {
+    const [wizard, wallet] = await Promise.all([ownedWizard(uid, wizardId, realm, tx), readWallet(tx, realm, uid)]);
+    const wardrobe = wizard.wardrobe;
+    if (!wardrobe?.equipped || !Array.isArray(wardrobe.ownedGearIds)) return;
+    const equipped = wearableEquipment(wardrobe, wallet.gear);
+    if (equipped === wardrobe.equipped) return;
+    const slots = Object.keys(equipped) as (keyof typeof equipped)[];
+    const changes = Object.fromEntries(slots
+      .filter((slot) => equipped[slot] !== wardrobe.equipped[slot])
+      .map((slot) => [`wardrobe.equipped.${slot}`, equipped[slot]]));
+    tx.update(cloudDb.collection('wizards').doc(wizard.id), { ...changes, updatedAt: FieldValue.serverTimestamp() });
+  });
+}
+
 export async function postListing(realm: RealmId, uid: string, body: Record<string, unknown>) {
   const { itemId, priceFlorins } = body;
   const item = typeof itemId === 'string' && Object.hasOwn(GEAR_BY_ID, itemId) ? GEAR_BY_ID[itemId] : null;
@@ -141,7 +156,7 @@ export async function buyListing(realm: RealmId, uid: string, wizardId: unknown,
     }
     if (isStarter) tx.create(ref, { purchasedAt: FieldValue.serverTimestamp() });
     else tx.update(ref, { status: 'sold', buyerUid: uid });
-    return { wallet: buyer };
+    return { wallet: buyer, sellerUpdate: seller && listing.sellerUid ? { uid: listing.sellerUid, wallet: seller } : null };
   });
 }
 

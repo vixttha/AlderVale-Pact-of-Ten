@@ -81,8 +81,8 @@ async function createPlayer() {
   return player;
 }
 
-async function call(player, path, body, status = 200) {
-  const response = await fetch('http://127.0.0.1:' + httpServer.address().port + '/api/progression/breeze/' + path, {
+async function call(player, path, body, status = 200, route = 'progression') {
+  const response = await fetch('http://127.0.0.1:' + httpServer.address().port + '/api/' + route + '/breeze/' + path, {
     headers: {
       ...(player ? { Authorization: 'Bearer ' + player.idToken } : {}),
       ...(body ? { 'Content-Type': 'application/json' } : {}),
@@ -90,7 +90,7 @@ async function call(player, path, body, status = 200) {
     ...(body ? { method: 'POST', body: JSON.stringify(body) } : {}),
     signal: AbortSignal.timeout(15000),
   });
-  const result = await response.json();
+  const result = response.status === 204 ? null : await response.json();
   assert.equal(response.status, status, path + ' ' + JSON.stringify(result));
   return result;
 }
@@ -194,6 +194,34 @@ test('signed-in gameplay commands handle shop, crafting, roster and Dorm changes
   const dorm = await gameplay(player, { type: 'dormWeather', id: 'fireflies' });
   assert.equal(dorm.sanctuary.weatherId, 'fireflies');
   assert.equal((await player.wizardRef.get()).get('activeCreatureId'), adopted.id);
+});
+
+test('Bazaar escrow uses owned fallback gear in a signed-in solo duel before reconciliation', { timeout: 55000 }, async () => {
+  const player = await createPlayer();
+  const { wizardId, wizardRef } = player;
+  const start = { wizardId, mode: 'solo', element: 'ember' };
+  const baseline = await call(player, 'solo/start', start);
+  await call(player, 'solo/finish', { wizardId, duelId: baseline.duel.duelId });
+
+  const hat = 'hat_pointed_brim';
+  const purchase = await call(player, 'buy/academy-hat', { wizardId }, 200, 'bazaar');
+  assert.equal(purchase.wallet.gear[hat], 1);
+  const equipped = await gameplay(player, { type: 'equip', id: hat });
+  assert.equal(equipped.wizard.wardrobe.equipped.headgear, hat);
+  assert.ok(!equipped.wizard.wardrobe.ownedGearIds.includes(hat));
+  const craft = await gameplay(player, { type: 'transmute' });
+  assert.equal(craft.wizard.progression.craftXp, 25);
+  const listing = await call(player, 'list', { wizardId, itemId: hat, priceFlorins: 90 }, 201, 'bazaar');
+  assert.equal(listing.wallet.gear[hat], 0);
+  assert.equal((await wizardRef.get()).get('wardrobe.equipped.headgear'), hat);
+
+  const escrowed = await call(player, 'solo/start', start);
+  assert.equal(escrowed.duel.playerTeam[0].maxHp, baseline.duel.playerTeam[0].maxHp);
+  await call(player, 'reconcile-equipment', { wizardId }, 204, 'bazaar');
+  const saved = await wizardRef.get();
+  assert.equal(saved.get('wardrobe.equipped.headgear'), 'hat_academy_cap');
+  assert.equal(saved.get('progression.craftXp'), craft.wizard.progression.craftXp);
+  assert.deepEqual(saved.get('currencies'), craft.wizard.currencies);
 });
 
 test('archived cloud records stay outside signed-in gameplay', { timeout: 45000 }, async () => {
