@@ -17,7 +17,7 @@ import {
 import { auth, db, handleFirestoreError, OperationType } from './firebase.ts';
 import type { RealmId } from '../../shared/realms.ts';
 import type { RaceId } from '../../shared/wardrobe.ts';
-import { applyTermReward, TERM_REWARD_TRACK, type WizardDocument } from '../../shared/economy.ts';
+import type { WizardDocument } from '../../shared/economy.ts';
 import type { ChromaticVariant } from '../../shared/creatures.ts';
 import type { ElementId } from '../../shared/elements.ts';
 
@@ -210,7 +210,6 @@ export async function saveCloudRealmAccount(uid: string, realmAccount: RealmAcco
         realmId: realmAccount.realmId,
         unlockedRaces: realmAccount.unlockedRaces.slice(0, 20),
         sharedVault: realmAccount.sharedVault.slice(0, 60),
-        termXp: Math.max(0, Math.floor(realmAccount.termXp)),
         updatedAt: serverTimestamp(),
       },
       { merge: true },
@@ -406,32 +405,9 @@ export async function saveCloudWizard(wizard: WizardDocument, pets: OwnedCreatur
     for (const pet of updatedPets) batch.update(doc(wizardRef, 'creatures', pet.id), creaturePayload(pet));
     if (realmAccount) {
       const accountRef = doc(db, 'accounts', realmAccount.uid, 'realms', realmAccount.realmId);
-      const { wizardIds: _ids, claimedTermTiers: _claimed, ...fields } = realmPayload(realmAccount);
+      const { wizardIds: _ids, claimedTermTiers: _claimed, termXp: _termXp, ...fields } = realmPayload(realmAccount);
       batch.update(accountRef, fields);
     }
-  });
-}
-
-export async function claimCloudTermTier(wizard: WizardDocument, tier: number, database = db) {
-  if (database === db) requireCloudOwner(wizard.ownerId);
-  const def = TERM_REWARD_TRACK.find((entry) => entry.tier === tier);
-  if (!def) throw new Error('This Term reward is unavailable.');
-  const accountRef = doc(database, 'accounts', wizard.ownerId, 'realms', wizard.realmId);
-  const wizardRef = doc(database, 'wizards', wizard.id);
-  return runTransaction(database, async (tx) => {
-    const [realm, player] = await Promise.all([tx.get(accountRef), tx.get(wizardRef)]);
-    const account = realm.data() as RealmAccountState | undefined;
-    if (!account || !player.exists() || player.get('ownerId') !== wizard.ownerId || player.get('realmId') !== wizard.realmId) {
-      throw new Error('Reopen this realm before claiming a reward.');
-    }
-    const saved = { ...player.data(), id: player.id } as WizardDocument;
-    if ((account.claimedTermTiers ?? []).includes(tier)) return { account, wizard: saved, claimed: false };
-    if (account.termXp < def.xpRequired) throw new Error('You have not earned this reward yet.');
-    const updated = applyTermReward(saved, def);
-    const claimedTermTiers = [...(account.claimedTermTiers ?? []), tier];
-    tx.update(accountRef, { claimedTermTiers, updatedAt: serverTimestamp() });
-    tx.update(wizardRef, { currencies: updated.currencies, wardrobe: updated.wardrobe, progression: updated.progression, updatedAt: serverTimestamp() });
-    return { account: { ...account, claimedTermTiers }, wizard: updated, claimed: true };
   });
 }
 

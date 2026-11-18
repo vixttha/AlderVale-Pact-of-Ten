@@ -109,30 +109,6 @@ describe.skipIf(!emulator)('Firestore audit repairs', () => {
     });
   });
 
-  it('applies a concurrent Term claim to the wizard exactly once', async () => {
-    const { createStarterWizard } = await import('../shared/economy.ts');
-    const { claimCloudTermTier } = await import('../src/lib/storage.ts');
-    const owner = player('term-owner');
-    const rowan = createStarterWizard({
-      id: 'term-rowan', ownerId: 'term-owner', realmId: 'breeze',
-      name: 'Term Rowan', raceId: 'human', elementId: 'ember',
-      sculpt: {} as Parameters<typeof createStarterWizard>[0]['sculpt'],
-    });
-    const wizardRef = doc(owner, 'wizards', rowan.id);
-    const accountRef = doc(owner, 'accounts', rowan.ownerId, 'realms', rowan.realmId);
-    const { id: _id, beastClan: _clan, ...fields } = rowan;
-    await assertSucceeds(setDoc(wizardRef, { ...fields, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
-    await assertSucceeds(setDoc(accountRef, {
-      uid: rowan.ownerId, realmId: rowan.realmId, wizardIds: [rowan.id], unlockedRaces: ['human'],
-      termXp: 60, claimedTermTiers: [], createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
-    }));
-    const results = await Promise.all([claimCloudTermTier(rowan, 1, owner), claimCloudTermTier(rowan, 1, owner)]);
-    expect(results.filter((result) => result.claimed)).toHaveLength(1);
-    await expect(claimCloudTermTier(rowan, 2, owner)).rejects.toThrow('not earned');
-    expect((await getDoc(accountRef)).get('claimedTermTiers')).toEqual([1]);
-    expect((await getDoc(wizardRef)).get('currencies.florins')).toBe(rowan.currencies.florins + 120);
-  }, 20_000);
-
   it('retains guest claims and merges vault items when migrating a wizard', async () => {
     const { migrateGuestWizards } = await import('../src/lib/storage.ts');
     const owner = player('migration-owner');

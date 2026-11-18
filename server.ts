@@ -8,6 +8,7 @@ import { verifyFirebaseBearerToken } from './server/authVerify.ts';
 import { resourceStore } from './server/authzStore.ts';
 import { generateArchivistAdvice, type StrategizeRequest } from './server/lecternAi.ts';
 import { attachAldervaleWebSocketServer } from './server/wsHub.ts';
+import { advanceSolo, claimServerTerm, finishSolo, readServerTerm, startSolo } from './server/soloProgress.ts';
 import type { RealmId } from './shared/realms.ts';
 
 
@@ -56,6 +57,21 @@ export async function createAldervaleApp({ frontend = true } = {}) {
     if (!principal?.emailVerified) throw new RequestError(401, 'Sign in with a verified Google account');
     return principal.uid;
   }
+
+  app.get('/api/progression/:realmId/term', realmRoute(async (req, res, realm) => {
+    res.json(await readServerTerm(await requireAccount(req), realm));
+  }));
+  app.post('/api/progression/:realmId/term', realmRoute(async (req, res, realm) => {
+    res.json(await claimServerTerm(await requireAccount(req), realm, req.body?.wizardId, req.body?.tier));
+  }));
+  app.post('/api/progression/:realmId/solo/:action(start|round|enchant|finish)', realmRoute(async (req, res, realm) => {
+    const uid = await requireAccount(req);
+    const body = req.body ?? {};
+    const { wizardId, duelId } = body;
+    if (req.params.action === 'start') res.json(await startSolo(uid, realm, wizardId, body));
+    else if (req.params.action === 'finish') res.json(await finishSolo(uid, realm, wizardId, duelId));
+    else res.json(await advanceSolo(uid, realm, wizardId, body, req.params.action === 'enchant'));
+  }));
 
   app.get('/api/bazaar/:realmId', realmRoute(async (req, res, realm) => {
     const uid = req.headers.authorization ? await requireAccount(req) : undefined;

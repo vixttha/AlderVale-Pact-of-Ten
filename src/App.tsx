@@ -19,7 +19,8 @@ import {
   Trophy,
   Flame,
 } from 'lucide-react';
-import { applySagaEvent, applyWizardXp } from '../shared/quests.ts';
+import { applySagaEvent } from '../shared/quests.ts';
+import { soloVictoryRewards } from '../shared/soloRewards.ts';
 import { REALMS, type RealmId } from '../shared/realms.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { CAMPUS_NPCS, CAMPUS_QUESTS, MOUNTS, ZONES, type CampusNpc, type ZoneId } from '../shared/world.ts';
@@ -35,7 +36,6 @@ import {
   loadCloudGallery,
   saveCloudPainting,
   createCloudWizards,
-  claimCloudTermTier,
   ensureCloudWizardStarter,
   loadCloudSanctuary,
   loadCloudWizardsForRealm,
@@ -54,6 +54,7 @@ import {
   type RealmAccountState,
   type SanctuaryState,
 } from './lib/storage.ts';
+import { claimCloudTerm, cloudSolo, loadServerTerm, type CloudSoloSettlement } from './lib/cloudProgression.ts';
 import { ElementCrest } from './lib/elementIcons.tsx';
 import { TitleWizardStudio } from './features/auth/TitleWizardStudio.tsx';
 import { WorldViewport } from './engine/worldViewport.tsx';
@@ -281,10 +282,13 @@ export function App() {
       }
     }
 
+    const term = await loadServerTerm(user.uid, realm).catch(() => null);
+    if (version !== realmLoad.current) return;
     setPlayerSettings(cloud.settings);
-    setRealmAccount(cloud.realm);
+    setRealmAccount({ ...cloud.realm, ...(term ?? { termXp: 0, claimedTermTiers: [] }) });
     setWizards(cloud.wizards);
-    if (notice) showToast(notice);
+    if (!term) showToast('Term progress could not be loaded. You can retry by reopening the realm.');
+    else if (notice) showToast(notice);
   }, [readGuestProgress, setPlayerSettings, showToast]);
 
   useEffect(() => {
@@ -347,7 +351,7 @@ export function App() {
     const wizard = activeWizard;
     const entry = worldEntry.current;
     if (fbUser) {
-      const pending = wizardSaves.current.then(() => claimCloudTermTier(wizard, tier));
+      const pending = wizardSaves.current.then(() => claimCloudTerm(wizard, tier));
       wizardSaves.current = pending.then(() => undefined, () => undefined);
       const result = await pending;
       if (entry === worldEntry.current) {
@@ -917,114 +921,32 @@ export function App() {
       if (res.won) showToast(fbUser ? 'Victory! Shared rewards go to your Bazaar account.' : 'Victory in guest practice!');
       return;
     }
+    if (fbUser) return;
     if (!res.won) {
       if (!res.draw && res.mode === 'trial' && res.completed) persistWizard(applySagaEvent(activeWizard, 'rare-trial-attempt'));
       showToast(res.draw ? 'The duel ended in a draw.' : res.completed ? 'Duel lost. You can try again.' : 'You left the duel.');
       return;
     }
 
-    const rCfg = REALMS[activeWizard.realmId];
-    const gainedXp = Math.round((res.mode === 'trial' ? 180 : 85) * rCfg.xpMultiplier);
-    const nextStats = applyWizardXp(activeWizard, gainedXp);
-    const lead = creatures.find((pet) => pet.id === activeWizard.activeCreatureId) ?? creatures[0];
-
-    // Charge 2-win Hybrid Eggs
-    const hatchedPets: OwnedCreature[] = [];
-    const nextEggs: typeof activeWizard.progression.eggs = [];
-    for (const egg of activeWizard.progression.eggs) {
-      const done = egg.winsDone + 1;
-      if (done >= egg.winsNeeded) {
-        const sp = SPECIES_BY_ID[egg.resultSpeciesId];
-        if (sp) {
-          hatchedPets.push({
-            id: `pet_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
-            ownerId: activeWizard.ownerId,
-            wizardId: activeWizard.id,
-            realmId: activeWizard.realmId,
-            speciesId: sp.id,
-            nickname: sp.stageNames[0],
-            elementId: sp.element,
-            stage: 1,
-            chromatic: Math.random() < 0.25 ? 'dawn' : 'none',
-            branchChoice: 'A',
-            bondXp: 25,
-            wins: 0,
-            talents: ['tal_spellproof', 'tal_may_blade'],
-          });
-        }
-      } else {
-        nextEggs.push({ ...egg, winsDone: done });
-      }
-    }
-
-    const nextUnlockedElements = [...activeWizard.progression.unlockedElements];
-    if (res.trialElement && !nextUnlockedElements.includes(res.trialElement)) {
-      nextUnlockedElements.push(res.trialElement);
-    }
-
-    const florinWin = Math.round(
-      (res.mode === 'trial' ? 140 : 65) * rCfg.dropMultiplier,
+    if (res.mode !== 'solo' && res.mode !== 'trial' && res.mode !== 'spire') return;
+    const reward = soloVictoryRewards(
+      activeWizard, creatures, realmAccount,
+      { ...res, mode: res.mode, leadCreatureWinEligible: res.leadCreatureWinEligible === true },
+      () => `pet_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
     );
-    let updatedWiz: WizardDocument = {
-      ...activeWizard,
-      ...nextStats,
-      currencies: {
-        florins: activeWizard.currencies.florins + florinWin,
-        honorMarks: activeWizard.currencies.honorMarks + 4,
-        bondingSeals: activeWizard.currencies.bondingSeals + (res.mode === 'trial' ? 1 : 0),
-        spellShards: activeWizard.currencies.spellShards + 2,
-      },
-      progression: {
-        ...activeWizard.progression,
-        unlockedElements: nextUnlockedElements,
-        spireBestFloor: res.spireFloor ? Math.max(activeWizard.progression.spireBestFloor, res.spireFloor) : activeWizard.progression.spireBestFloor,
-        eggs: nextEggs,
-        bestiarySeen: Array.from(new Set([...activeWizard.progression.bestiarySeen, ...hatchedPets.map((p) => p.speciesId)])),
-      },
-    };
+    setRealmAccount(reward.account);
+    setCreatures(reward.creatures);
+    persistWizard(reward.wizard, reward.hatchedPets, reward.account, reward.updatedLead ? [reward.updatedLead] : []);
+    showToast(reward.notice);
+  };
 
-    updatedWiz = grantFusionSpells(updatedWiz, hatchedPets);
-    if (res.mode === 'solo') updatedWiz = applySagaEvent(updatedWiz, 'solo-win');
-    if (res.mode === 'trial') updatedWiz = applySagaEvent(updatedWiz, 'rare-trial-win');
-    const leadWon = lead && res.leadCreatureWinEligible === true;
-    if (leadWon) updatedWiz = applySagaEvent(updatedWiz, 'lead-creature-win');
-    const updatedLead = leadWon ? { ...lead, wins: (lead.wins ?? 0) + 1 } : null;
-
-    const nextCreatures = [...creatures.map((pet) => pet.id === updatedLead?.id ? updatedLead : pet), ...hatchedPets];
-    const nextUnlockedRaces = new Set(realmAccount.unlockedRaces);
-    if (updatedWiz.rank >= 4 && res.mode === 'trial') {
-      nextUnlockedRaces.add('cloud_sylph');
-      nextUnlockedRaces.add('dwarf');
-      nextUnlockedRaces.add('high_elf');
-      nextUnlockedRaces.add('dark_elf');
-    }
-    if (updatedWiz.rank >= 5 && nextCreatures.some((pet) => SPECIES_BY_ID[pet.speciesId]?.isDrake && pet.stage === 3)) {
-      nextUnlockedRaces.add('draconic_kin');
-    }
-    if (updatedWiz.rank >= 7 && nextCreatures.some((pet) => SPECIES_BY_ID[pet.speciesId]?.isFusionOnly)) {
-      nextUnlockedRaces.add('astral_kin');
-    }
-    const nextAccount = {
-      ...realmAccount,
-      unlockedRaces: [...nextUnlockedRaces],
-      termXp: realmAccount.termXp + Math.round(65 * rCfg.xpMultiplier),
-    };
-    setRealmAccount(nextAccount);
-    setCreatures(nextCreatures);
-    persistWizard(updatedWiz, hatchedPets, nextAccount, updatedLead ? [updatedLead] : []);
-    const completed = CAMPUS_QUESTS.filter((quest) =>
-      !activeWizard.progression.completedQuests.includes(quest.id) && updatedWiz.progression.completedQuests.includes(quest.id),
-    );
-    const totalXp = gainedXp + completed.reduce((sum, quest) => sum + quest.rewardXp, 0);
-    const totalFlorins = updatedWiz.currencies.florins - activeWizard.currencies.florins;
-    const totalShards = updatedWiz.currencies.spellShards - activeWizard.currencies.spellShards;
-    const questNotice = completed.length ? ` Quest completed: ${completed.map((quest) => quest.title).join(', ')}.` : '';
-    const hatchNotice = hatchedPets.length ? ` Hatched ${hatchedPets.map((pet) => pet.nickname).join(', ')}!` : '';
-    const learnedFusionCard = updatedWiz.progression.ownedSpellIds.some((id) =>
-      !activeWizard.progression.ownedSpellIds.includes(id),
-    );
-    const fusionNotice = learnedFusionCard ? ' Fusion spell added to your collection. See Deck & Lectern.' : '';
-    showToast(`Victory! +${totalXp} XP, +${totalFlorins} Florins, +${totalShards} Spell Shards!${questNotice}${hatchNotice}${fusionNotice}`);
+  const applyCloudSoloSettlement = (result: CloudSoloSettlement) => {
+    if (auth.currentUser?.uid !== result.wizard.ownerId || activeWizard?.id !== result.wizard.id) return;
+    setRealmAccount(result.account);
+    setCreatures(result.creatures);
+    setWizards((list) => list.map((wizard) => wizard.id === result.wizard.id ? result.wizard : wizard));
+    setActiveWizard(result.wizard);
+    showToast(result.notice);
   };
 
   const guestSaveWarning = failedGuestRealms.length > 0 && (
@@ -1459,6 +1381,8 @@ export function App() {
           worldConnected={worldConnected}
           activeLiveDuels={activeLiveDuels}
           solo2xDefault={settings.solo2xDefault}
+          signedInSolo={fbUser ? cloudSolo(activeWizard, () => wizardSaves.current) : undefined}
+          onCloudSoloSettled={applyCloudSoloSettlement}
           onStartLocalDuel={() => {}}
           onUpdateLocalDuel={() => {}}
           onSubmitLiveAction={(action: TurnActionInput) => {
