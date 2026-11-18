@@ -92,6 +92,20 @@
         "README.md": "6992c6588d7deadaf7a5c1fec1ccfc76a32b9d0d",
         "GUIDE.md": "843b78205b000de045e95b582e9fa74add0659f0"
       }
+    },
+    "v0.0.5": {
+      "source_commits": {
+        "README.md": "5eeaaf8ca86bb6d4a24258f4cdde35ea6db2fd45",
+        "GUIDE.md": "5eeaaf8ca86bb6d4a24258f4cdde35ea6db2fd45"
+      },
+      "source_paths": {
+        "README.md": "readme-hq/workspace/v0.0.5/DRAFT.md",
+        "GUIDE.md": "readme-hq/workspace/v0.0.5/GUIDE.md"
+      },
+      "snapshots": {
+        "README.md": "0121816d4b2e1c8ce282607c14689a328e9ac0a2",
+        "GUIDE.md": "d02926f4e3334ed37cc47763cc871d607dd905da"
+      }
     }
   }
 }

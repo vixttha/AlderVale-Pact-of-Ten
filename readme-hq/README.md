@@ -1,6 +1,6 @@
 # README HQ Folder Guide
 
-**Current HQ version:** `v0.0.4`
+**Current HQ version:** `v0.0.5`
 
 This guide documents the [README HQ validator](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/readme-hq/tools/check_readme_hq.py) and how to prepare, validate, and archive a new HQ version.
 
