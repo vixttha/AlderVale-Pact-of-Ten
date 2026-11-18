@@ -1,8 +1,10 @@
 # Fusion Name Atlas
 
-[Fusion chart](fusion-chart.md) · [Role and scoring audit](SCORING_AUDIT.md) · [Element HQ](../../README.md) · [Original 45-pair chart](../designs/aldervale-fusion-pairing-chart.md)
+[Fusion Quality Law](../FUSION_QUALITY_LAW.md) · [Mechanics mind map](../designs/fusion-system-mind-map.md) · [Fusion chart](fusion-chart.md) · [Role and scoring audit](SCORING_AUDIT.md) · [Element HQ](../../README.md) · [Original 45-pair chart](../designs/aldervale-fusion-pairing-chart.md)
 
 Open any base element to compare its nine partners. Every pair page distinguishes **role** (fusion vs supporting name), **review decision**, **scores**, and **parent reuse**. All 320 preceding names are preserved, and the newly locked Magnetism proposal brings the catalog to 321 records. Only Fusion-role entries compete for the technique shortlist. Aliases use the same concept as their primary fusion, but do not inherit its Identity or Gameplay points as an independent element.
+
+**Promotion law:** ratings and names alone never authorize playability. Every proposed playable fusion must pass all four gates in [FQ-001](../FUSION_QUALITY_LAW.md): parent logic, visuals, unique gameplay and counterplay. Owner-selected recipes still need full playable-kit verification.
 
 The atlas is a living catalog of reviewable names. The expanded pass adds plausible results, aliases, and useful move or material names with explicit review statuses. More names can be added to the same pair pages as the design develops.
 

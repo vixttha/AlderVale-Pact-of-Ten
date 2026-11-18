@@ -278,7 +278,12 @@ def main():
         if overview.read_text(encoding="utf-8") != overview_content:
             raise ValueError("Fusion chart differs from the pair pages. Regenerate the charts.")
         print(f"Verified fusion chart: {len(catalog)} pair rows with links")
-        for path in [overview, ATLAS / "README.md", REPO / "README.md", PAIRING_CHART, *sorted(ATLAS.glob("*/*.md"))]:
+        for path in [overview, ATLAS / "README.md", REPO / "README.md", PAIRING_CHART,
+                     REPO / "element-hq/FUSION_QUALITY_LAW.md",
+                     REPO / "element-hq/designs/fusion-system-revamp-proposal.md",
+                     REPO / "element-hq/designs/fusion-system-mind-map.md",
+                     REPO / "element-hq/designs/fusion-roster-decisions-2026-11-18.md",
+                     *sorted(ATLAS.glob("*/*.md"))]:
             check_links(path)
     else:
         overview.write_text(overview_content, encoding="utf-8")

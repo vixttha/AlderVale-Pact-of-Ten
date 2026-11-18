@@ -6,6 +6,8 @@
 
 [Current Element HQ roster](../../README.md#locked-element-and-fusion-decisions) · [45-pair Atlas](../fusions/fusion-chart.md) · [Previous architecture audit](fusion-architecture-audit-2026-11-18.md)
 
+**New owner law:** [Fusion Quality FQ-001](../FUSION_QUALITY_LAW.md) governs promotion from an interesting recipe to playable content. **New proposal:** [Fusion Library mechanics revamp](fusion-system-revamp-proposal.md) and [mind map](fusion-system-mind-map.md) explain discovery, cards, skills, creature roles and milestone goals; these mechanics are not yet locked.
+
 ## Explicit owner decisions — November 18, 2026
 
 | Pair | Name | State | Mechanical implementation |

@@ -20,11 +20,16 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 
 ## Start here
 
+**Owner law:** [Fusion Quality Law FQ-001](element-hq/FUSION_QUALITY_LAW.md) requires strong two-parent logic, a distinct visual identity, a unique combat purpose and meaningful counterplay before any fusion becomes playable. Recipes are curated, not a fixed quota.
+
 | Document | Use it for |
 | --- | --- |
 | [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the initial design snapshot. The [current base roster and fusion decisions](#locked-element-and-fusion-decisions) govern active design. |
 | [Fusion chart](element-hq/fusions/fusion-chart.md) | See locked recipes, open choices, and all 45 pairings at a glance. |
 | [Current fusion decisions and open candidate tracks](element-hq/designs/fusion-roster-decisions-2026-11-18.md) | See the three approved fusion techniques, reopened Glass, the five remaining base elements, and four candidate tracks. |
+| [Fusion Quality Law FQ-001](element-hq/FUSION_QUALITY_LAW.md) | **Owner law:** all four quality gates must pass before playability. |
+| [Fusion system revamp](element-hq/designs/fusion-system-revamp-proposal.md) | Proposed unlock, card/skill, creature and progression mechanics; not yet accepted. |
+| [Fusion system mind map](element-hq/designs/fusion-system-mind-map.md) | See the law, selected recipes, discovery and casting options in one dependency map. |
 | [Earlier fusion architecture audit](element-hq/designs/fusion-architecture-audit-2026-11-18.md) | Historical comparison written before the latest owner decisions; consult the current decision record first. |
 | [Fusion Name Atlas](element-hq/fusions/README.md) | Browse ten element charts and compare rated names for every pairing. |
 | [Fusion pairing chart](element-hq/designs/aldervale-fusion-pairing-chart.md) | Compare all 45 cross-element pairings and their proposed outcomes. |

@@ -45,6 +45,9 @@ jobs:
               template,
               design,
               "element-hq/fusions/README.md",
+              "element-hq/FUSION_QUALITY_LAW.md",
+              "element-hq/designs/fusion-system-revamp-proposal.md",
+              "element-hq/designs/fusion-system-mind-map.md",
           }
           tracked = set(git("ls-files", "-z").rstrip("\0").split("\0"))
           missing = (documents | {"README.md", workflow, "element-hq/fusions/build_atlas.py"}) - tracked
@@ -75,6 +78,19 @@ jobs:
               if missing_sections := sections - headings:
                   raise SystemExit(f"{path} is missing sections: {sorted(missing_sections)}")
 
+          law = Path("element-hq/FUSION_QUALITY_LAW.md").read_text(encoding="utf-8")
+          required_law = (
+              "No fusion may become playable unless it has a strong explanation for both parent elements",
+              "a distinctive visual identity, a unique combat purpose, and meaningful counterplay.",
+              "Q1: Both parents make sense", "Q2: Distinct visual identity",
+              "Q3: Unique combat purpose", "Q4: Meaningful counterplay",
+              "Any FAIL or UNVERIFIED blocks promotion to playable.",
+              "Ten permanent base elemental schools",
+          )
+          for clause in required_law:
+              if clause not in law:
+                  raise SystemExit(f"FQ-001 law missing required clause: {clause}")
+          print("Verified FQ-001: all four owner-required quality gates")
           print(f"Verified Element HQ documents at {head}")
           PY
       - name: Verify Fusion Name Atlas
