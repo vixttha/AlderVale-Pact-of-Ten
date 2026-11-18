@@ -10,6 +10,7 @@ This branch develops the reusable Test Vault template. The current archived vers
 | [Template versions](versions/README.md) | Find the historical source and the exact source commit for each version. |
 | [Graphify HQ](Graphify%20HQ/README.md) | Browse a map, outline, and receipt for each archived version. |
 | [Template development](CONTRIBUTING.md) | Change the starter, validate adoption, and archive a future version. |
+| [Vaultwright agent role](AGENTS.md) | Template stewardship, audit workflow, and owner authority boundaries. |
 
 The starter's catalog validator uses Python 3.12 and the standard library. Its optional GitHub Actions workflow checks catalog structure and coverage declarations. Your project's own test commands execute its tests. The branch CI rehearses adoption in Python CLI, Go API, and documentation-only projects.
 
