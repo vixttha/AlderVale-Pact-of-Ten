@@ -1,10 +1,34 @@
-# AlderVale Test Vault v0.0.2
+# AlderVale Test Vault
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The reusable starter is maintained on [`Test-Vault`](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/Test-Vault). For v0.0.3 setup and execution receipts, use the [pinned starter guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/557f640f2c5b847733d779fb6bd320481df58d0d/starter/test-vault/README.md). The [in-branch historical starter](../public-template/README.md) supplies the existing adoption fixtures. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
-## What runs on AlderVale's public GitHub runners
+## Suite status and CI evidence
 
-The [AlderVale validation workflow](../../../.github/workflows/validate.yml) supplies the seven existing game jobs. The [Test Vault adoption workflow](../../../.github/workflows/test-vault-template.yml) checks the project and reusable catalogs, rehearses three copy-in installations, and runs the Python, Ruby, Rust, C++, C#, and F# suites. The game matrix also runs Go on Linux and PowerShell on Windows. The [Graphify workflow](../../../.github/workflows/graphify.yml) runs the Bash publisher tests against temporary Git repositories. For a pull request, link the run and record the actual tested checkout, base, head, and attempt. Keep automated results and owner observations separate.
+### In use
+
+These suites are wired into the AlderVale workflows. Each linked run establishes results for its own checkout.
+
+| Suite | Coverage | Evidence |
+|---|---|---|
+| Playwright, Vitest, Node.js, and Firestore emulator | Guest enrollment, First Spark, reload, game rules, HTTP/WebSocket behavior, and emulator access and save checks. | [Game validation on `main` at `fced403`](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43991718931) |
+| Python, Ruby, Rust, C++, C#, and F# | Reference progression, quest catalog, binary assets, combat and save contracts, and independent quest checks. | [Vault catalog and adoption at `29105a5`](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43934451596) |
+| Go and PowerShell | Guest presence on Linux and the Windows owner-play launcher. | [Vault game validation for the consolidation checkout](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43934451734) |
+| Bash and Graphify MCP | Publisher contracts, graph construction, and source readback. The branch run publishes the live game-test graph. | [Graphify branch run at `60e15a1`](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44249373662) · [Live graph and receipt](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/graphify-snapshots/test-vault) |
+
+### Draft suites
+
+These results come from review checkouts. Keep that scope when citing them.
+
+| Draft | Coverage | Evidence |
+|---|---|---|
+| [Java asset delivery #128](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/128) | Built frontend assets and full, partial, and conditional model responses. | [Linux Core job](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43992240187/job/133735492406) |
+| [Haskell spell cards #131](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/131) | Draw, discard, targeting, sideboard, and reshuffle behavior. | [Vault catalog job](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44005225831/job/133778818768) |
+| [Lua campus movement #132](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/132) | Campus movement, boundaries, and obstacle collision. | [Vault catalog job](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44013506140/job/133805823710) |
+| [First Spark shared evidence #134](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/134) | Chromium captures a guest duel and save reload. C# checks persistence and F# checks rewards and replay against that evidence. | [Chromium verdict](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44075871650/job/134013607982) |
+
+Use the [validation workflow](../../../.github/workflows/validate.yml), [Vault adoption workflow](../../../.github/workflows/test-vault-template.yml), and [Graphify workflow](../../../.github/workflows/graphify.yml) for new runs. Record the actual tested checkout, PR base and head, and run attempt. Keep automated results and [owner playthroughs](#owner-desktop-playthrough--g36-001) separate. For graph-based findings, match the graph receipt to the current branch SHA and confirm the pinned source.
+
+## Game case coverage
 
 | Case ID | Issue | What it verifies | Test or checklist | CI job | Remaining gap |
 |---|---|---|---|---|---|
@@ -84,7 +108,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 
 ## Evidence on verified main
 
-The [main push validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43860977116/attempts/1) passed all seven jobs at `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd`. The [First Spark stabilization](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/61) is included in that revision. Apply these results to that recorded build and retain a fresh receipt for subsequent changes.
+The [main push validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43991718931) passed all seven jobs at `fced4038c1dfa655c223d1bcbbdf3c18593b1e1f`. The [First Spark stabilization](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/61) is included in that revision. Apply these results to that recorded build and retain a fresh receipt for subsequent changes.
 
 ## Owner desktop playthrough — G36-001
 

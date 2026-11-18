@@ -2,6 +2,8 @@
 
 These rules apply when several test suites verify the same AlderVale behavior. A green verdict establishes that the declared checks passed for the named scenario, environments, and exact checkout. Untested inputs, environments, and player journeys remain open coverage. Keep game evidence, emulator evidence, and owner playtest evidence individually identifiable.
 
+Start with the [AlderVale suite status and CI evidence](README.md#suite-status-and-ci-evidence) for current and draft game checks. The portable receipt verifier and example live on [the reusable `Test-Vault` branch](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/Test-Vault). Follow the [v0.0.3 receipt contract](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/557f640f2c5b847733d779fb6bd320481df58d0d/starter/test-vault/evidence.md) when adopting that verifier.
+
 ## First Spark in plain language
 
 **First Spark in the Ring** is an early campus quest. Win a solo duel at the Duel Amphitheater and the quest awards a one-time bonus of **90 XP, 110 Florins, and 3 Spell Shards** in addition to the normal victory payout. [Issue #13](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13) records the original reward bug.

@@ -3,8 +3,16 @@ set -euo pipefail
 
 snapshot="$1"
 source_sha=$(git rev-parse HEAD)
+latest_ref=""
 case "$GITHUB_REF" in
-  refs/heads/main) destination=main ;;
+  refs/heads/main)
+    destination=main
+    latest_ref=$GITHUB_REF
+    ;;
+  refs/heads/AlderVale-Test-Vault)
+    destination=test-vault
+    latest_ref=$GITHUB_REF
+    ;;
   refs/tags/*)
     tag=${GITHUB_REF#refs/tags/}
     if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
@@ -43,22 +51,22 @@ git -C "$workdir" config user.email '41898282+github-actions[bot]@users.noreply.
 git -C "$workdir" remote add origin "$remote"
 
 for attempt in 1 2 3; do
-  if [[ "$destination" == main ]]; then
-    main_ref=$(git -C "$workdir" ls-remote --exit-code origin refs/heads/main)
-    if [[ ${main_ref%%$'\t'*} != "$source_sha" ]]; then
-      echo 'A newer main commit superseded this snapshot.'
-      exit 0
-    fi
-  fi
-
   remote_snapshot=$(git -C "$workdir" ls-remote origin refs/heads/graphify-snapshots)
   if [[ -n "$remote_snapshot" ]]; then
     git -C "$workdir" fetch -q --depth=1 origin refs/heads/graphify-snapshots
     git -C "$workdir" reset --hard -q FETCH_HEAD
   fi
 
+  if [[ -n "$latest_ref" ]]; then
+    current_ref=$(git -C "$workdir" ls-remote --exit-code origin "$latest_ref")
+    if [[ ${current_ref%%$'\t'*} != "$source_sha" ]]; then
+      echo "A newer ${latest_ref#refs/heads/} commit superseded this snapshot."
+      exit 0
+    fi
+  fi
+
   target="$workdir/$destination"
-  if [[ "$destination" != main && "$destination" != commits/* && -f "$target/receipt.json" ]]; then
+  if [[ "$destination" == versions/* && -f "$target/receipt.json" ]]; then
     python - "$target/receipt.json" "$source_sha" "$target/graph.json" <<'PY'
 import hashlib
 import json
