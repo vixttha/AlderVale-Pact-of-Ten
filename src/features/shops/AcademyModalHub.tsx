@@ -196,6 +196,10 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   const postBazaarListing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (marketBusy) return;
+    if (Object.values(wizard.wardrobe.equipped).includes(listItemId)) {
+      setNotice('Unequip that gear before listing it.');
+      return;
+    }
     if (!isBazaarPrice(listPrice)) {
       setNotice('Enter a whole-number price between 1 and 1,000,000 Florins.');
       return;
@@ -396,7 +400,7 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
               <span className="font-bold">Post Listing ({wizard.realmId.toUpperCase()} Realm):</span>
               <select aria-label="Bazaar gear to list" value={listItemId} onChange={(e) => setListItemId(e.target.value)} className="rounded-lg border px-2.5 py-1">
                 <option value="">Select Bazaar gear</option>
-                {MODULAR_GEAR.filter((gear) => (wallet?.gear[gear.id] ?? 0) > 0).map((gear) => (
+                {MODULAR_GEAR.filter((gear) => (wallet?.gear[gear.id] ?? 0) > 0 && wizard.wardrobe.equipped[gear.slot] !== gear.id).map((gear) => (
                   <option key={gear.id} value={gear.id}>{gear.name}</option>
                 ))}
               </select>
