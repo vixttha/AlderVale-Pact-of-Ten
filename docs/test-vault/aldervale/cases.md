@@ -13,6 +13,11 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | G06-001 | Spell damage contract | P0 | C++ / CTest | Check neutral, mirror and opposing damage, modifier consumption, critical and block thresholds, rounding and the damage floor against the live rules. |
 | G06-002 | Health and stat invariants | P0 | C++ / CTest | Check derived wizard stats, regen caps, knockout, stun and status refresh, and the round pip limit. |
 | G06-003 | Turn coin and action order | P0 | C++ / CTest | Resolve the coin winner first, retain same-team order, and skip casts with an invalid selection, inadequate pips or a stunned actor. |
+| G06-004 | Spell draw and refill | P0 | Haskell and Node.js | Fill to seven in deck order, stop when the deck runs out, and leave a full hand alone. |
+| G06-005 | Discard and selected card identity | P0 | Haskell and Node.js | Preserve original selection across discards, including duplicates. Discarding the selected card leaves the action uncast. |
+| G06-006 | Keen Ink target identity | P1 | Haskell and Node.js | Consume Ink once, upgrade only the eligible target copy, and preserve both cards on an ineligible attempt. |
+| G06-007 | Sideboard cast and fizzle | P1 | Haskell and Node.js | A landed sideboard cast consumes only that sideboard card. A fizzle retains it and preserves the hand selection. |
+| G06-008 | Reshuffle card conservation | P1 | Haskell and Node.js | Recycle discards after the existing deck in order. Preserve every copy across the reshuffle and following round. |
 | G09-001 | Solo duel | P0 | Playwright | As Rowan in Breeze, start the First Spark solo duel, win it, claim victory, and return to the campus. |
 | G09-002 | Deterministic duel replay | P0 | C++ / CTest | Replay three rounds from explicit random inputs and compare checkpoints, terminal victory and simultaneous knockout draw. |
 | G13-001 | First Spark rewards | P0 | Vitest and Playwright | The controlled Breeze duel reports +388 XP, +273 Florins, and +5 Spell Shards in total. The quest completion and saved rewards survive reload. The Vitest storage regression checks that replay cannot pay the quest a second time. |
@@ -76,4 +81,5 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | E32-003 | Explicit Graphify commit snapshot | P1 | Bash and Git | Append a snapshot under the exact commit SHA and preserve the main graph and receipt. |
 | E32-004 | Damaged Graphify version snapshot | P0 | Bash and Git | Detect a retained graph checksum mismatch and abort without rewriting the archive. |
 | E32-005 | Concurrent Graphify publication | P0 | Bash and Git | Recover from a non-fast-forward push rejection and retain both publishers' snapshots. |
+| E32-006 | Test Vault Graphify publication | P0 | Bash and Git | Publish and advance the dedicated Vault snapshot, skip an older Vault checkout, and preserve the main snapshot. |
 | E34-002 | Isolated test services | P0 | GitHub Actions, browser fixtures, and Firestore emulator | Run the guest suite with external hosts blocked and Firestore checks against the `demo-aldervale-ci` emulator. |
