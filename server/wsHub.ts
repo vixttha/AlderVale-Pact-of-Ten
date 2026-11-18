@@ -441,7 +441,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
               mountId: serverWizard?.progression.equippedMountId ?? null,
               ...(serverWizard ? {
                 beastClan: serverWizard.beastClan,
-                sculpt: serverWizard.sculpt, equipped: serverWizard.wardrobe.equipped,
+                sculpt: serverWizard.sculpt, equipped: serverWizard.wardrobe?.equipped,
                 stitching: serverWizard.stitching,
               } : {}),
               inDuel: false,
@@ -556,7 +556,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                 raceId: wizard.raceId, elementId: wizard.elementId, level: wizard.level,
                 rank: wizard.rank, titleBadge: wizard.progression.titleBadge,
                 beastClan: wizard.beastClan, sculpt: wizard.sculpt,
-                equipped: wizard.wardrobe.equipped, stitching: wizard.stitching,
+                equipped: wizard.wardrobe?.equipped, stitching: wizard.stitching,
                 mountId: wizard.progression.equippedMountId ?? null,
                 ...sanitizeGuestCreatureSelection({
                   activeCreatureId: creature.id, activeCreatureSpeciesId: creature.speciesId,
