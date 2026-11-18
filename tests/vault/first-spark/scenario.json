@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "scenarioId": "first-spark-guest-v1",
+  "realm": "breeze",
+  "wizardName": "Rowan Duelist",
+  "actions": [
+    "create-guest",
+    "enter-campus",
+    "win-first-spark",
+    "reload",
+    "replay-solo-win-event"
+  ],
+  "checkpoints": [
+    "before-duel",
+    "after-victory",
+    "after-reload",
+    "after-replay"
+  ],
+  "checks": [
+    {
+      "id": "playwright",
+      "label": "Playwright · Guest duel and reload"
+    },
+    {
+      "id": "csharp",
+      "label": "C# · Guest save persistence"
+    },
+    {
+      "id": "fsharp",
+      "label": "F# · Reward and replay"
+    }
+  ]
+}

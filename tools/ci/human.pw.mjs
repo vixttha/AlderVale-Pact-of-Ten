@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/*', (route) => {
@@ -156,22 +158,37 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
   // retain the usual timeout so an absent control still fails promptly.
   test.setTimeout(180_000);
   const errors = [];
-  const wizardName = 'Rowan Duelist';
+  const scenario = JSON.parse(readFileSync(new URL('../../tests/vault/first-spark/scenario.json', import.meta.url), 'utf8'));
+  const { wizardName, realm } = scenario;
+  const evidenceDir = process.env.FIRST_SPARK_EVIDENCE_DIR;
+  const checkReward = evidenceDir ? expect.configure({ soft: true }) : expect;
   const questName = 'First Spark in the Ring';
-  const readWizard = () => page.evaluate((name) => {
-    const save = JSON.parse(localStorage.getItem('aldervale_guest_breeze_v1') ?? 'null');
-    const wizard = save?.wizards.find((entry) => entry.name === name);
+  const readSave = () => page.evaluate(({ name, key }) => {
+    const raw = localStorage.getItem(key);
+    const wizard = JSON.parse(raw ?? 'null')?.wizards.find((entry) => entry.name === name);
     if (!wizard) return null;
     return {
-      id: wizard.id,
-      realmId: wizard.realmId,
-      completedQuests: wizard.progression.completedQuests,
-      level: wizard.level,
-      xp: wizard.xp,
-      florins: wizard.currencies.florins,
-      shards: wizard.currencies.spellShards,
+      raw,
+      wizard: {
+        id: wizard.id,
+        realmId: wizard.realmId,
+        completedQuests: wizard.progression.completedQuests,
+        level: wizard.level,
+        xp: wizard.xp,
+        florins: wizard.currencies.florins,
+        shards: wizard.currencies.spellShards,
+      },
     };
-  }, wizardName);
+  }, { name: wizardName, key: 'aldervale_guest_' + realm + '_v1' });
+  const readWizard = async () => (await readSave())?.wizard ?? null;
+  const capture = async (checkpoint) => {
+    const saved = await readSave();
+    if (evidenceDir && saved) {
+      mkdirSync(evidenceDir, { recursive: true });
+      writeFileSync(join(evidenceDir, checkpoint + '.json'), saved.raw);
+    }
+    return saved?.wizard ?? null;
+  };
   const expectFirstSparkCompleted = async () => {
     await page.getByRole('button', { name: /Active Saga Quest/ }).click({ timeout: 15_000 });
     const cardHeader = page.getByText(questName, { exact: true }).locator('..');
@@ -183,12 +200,12 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
   const world = page.locator('[data-world-avatar-model]');
   await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
-  const starter = await readWizard();
-  expect(starter).toMatchObject({ realmId: 'breeze', completedQuests: [], level: 1, xp: 0 });
+  const starter = await capture('before-duel');
+  expect(starter).toMatchObject({ realmId: realm, completedQuests: [], level: 1, xp: 0 });
 
   await winBreezeSoloDuel(page);
   // Breeze solo payout (298 XP, 163F, 2 shards) plus First Spark (90 XP, 110F, 3 shards).
-  await expect(page.getByText(`Victory! +388 XP, +273 Florins, +5 Spell Shards! Quest completed: ${questName}.`, {
+  await checkReward(page.getByText(`Victory! +388 XP, +273 Florins, +5 Spell Shards! Quest completed: ${questName}.`, {
     exact: true,
   })).toBeVisible();
   await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
@@ -201,17 +218,18 @@ test('a guest wins as Rowan and keeps First Spark and its rewards after reload',
     florins: starter.florins + 273,
     shards: starter.shards + 5,
   };
-  await expect.poll(readWizard).toEqual(rewarded);
+  await checkReward.poll(readWizard).toEqual(rewarded);
+  await capture('after-victory');
   await expectFirstSparkCompleted();
 
   await page.reload();
   await expect(page.getByText(wizardName, { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Enter Aldervale', exact: true }).click();
   await expect(world).toHaveAttribute('data-world-avatar-model', 'rowan');
-  await expect(page.getByText(`${rewarded.florins}F`, { exact: true })).toBeVisible();
-  await expect(page.getByText(`${rewarded.shards} Shards`, { exact: true })).toBeVisible();
+  await checkReward(page.getByText(`${rewarded.florins}F`, { exact: true })).toBeVisible();
+  await checkReward(page.getByText(`${rewarded.shards} Shards`, { exact: true })).toBeVisible();
   await expectFirstSparkCompleted();
-  expect(await readWizard()).toEqual(rewarded);
+  checkReward(await capture('after-reload')).toEqual(rewarded);
   expect(errors).toEqual([]);
 });
 

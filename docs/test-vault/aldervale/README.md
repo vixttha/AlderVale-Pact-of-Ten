@@ -28,6 +28,12 @@ These results come from review checkouts. Keep that scope when citing them.
 
 Use the [validation workflow](../../../.github/workflows/validate.yml), [Vault adoption workflow](../../../.github/workflows/test-vault-template.yml), and [Graphify workflow](../../../.github/workflows/graphify.yml) for new runs. Record the actual tested checkout, PR base and head, and run attempt. Keep automated results and [owner playthroughs](#owner-desktop-playthrough--g36-001) separate. For graph-based findings, match the graph receipt to the current branch SHA and confirm the pinned source.
 
+## First Spark cross-language evidence (draft #134)
+
+[Draft PR #134](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/134) connects the existing Chromium First Spark guest journey to a shared, versioned evidence record. Playwright captures the guest saves before the duel, after victory and after reload; C# checks guest identity and persistence; F# checks the expected reward and replays the quest reducer to confirm one-time payout. The run summary requires all three checks to agree on the tested checkout, run/attempt and checkpoint hashes.
+
+See the [scenario fixture and report contract](../../../tests/vault/first-spark/README.md). This is a synthetic guest test; it is not owner playthrough, live sign-in or production cloud-save acceptance. Until #134 is integrated and current-head CI passes, its earlier passing receipts remain **draft-candidate evidence** only.
+
 ## Game case coverage
 
 | Case ID | Issue | What it verifies | Test or checklist | CI job | Remaining gap |
