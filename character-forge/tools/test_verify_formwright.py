@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from verify_formwright import (
-    REQUIRED, check_markdown_links, check_required,
+    REQUIRED, check_archives, check_markdown_links, check_required,
     is_allowed_path, portable_violations,
 )
 
@@ -16,6 +16,20 @@ class FormwrightVerifierTests(unittest.TestCase):
     def test_portable_rejects_project_specific_content(self):
         self.assertIn("aldervale", portable_violations("AlderVale race spec"))
         self.assertIn("notion.com", portable_violations("https://notion.com/private"))
+
+    def test_invalid_archive_manifest_is_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            version = root / "versions" / "v0.0.1"
+            version.mkdir(parents=True)
+            (version / "README.md").write_text("frozen", encoding="utf-8")
+            (version / "CHANGELOG.md").write_text("frozen", encoding="utf-8")
+            (version / "MANIFEST.json").write_text(
+                '{"version":"v0.0.1","files":[{"source_commit":"bad","source_blob_sha":"bad",'
+                '"source_path":"safe.md","archived_path":"character-forge/versions/v0.0.1/README.md"}]}',
+                encoding="utf-8",
+            )
+            self.assertTrue(any("invalid 40-character" in m for m in check_archives(root)))
 
     def test_rejects_out_of_scope_changes(self):
         self.assertTrue(is_allowed_path("character-forge/README.md"))

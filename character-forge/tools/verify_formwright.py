@@ -101,6 +101,14 @@ def check_archives(root: Path = HQ) -> list[str]:
         if not VERSION.fullmatch(version_dir.name):
             errors.append(f"unexpected archive directory: {version_dir.name}")
             continue
+        # Detect an archive rewrite even when it exists only on this HQ branch.
+        archive_path = f"character-forge/versions/{version_dir.name}"
+        history = git("rev-list", "--reverse", "HEAD", "--", archive_path).splitlines()
+        if history:
+            first_tree = git("rev-parse", f"{history[0]}:{archive_path}")
+            current_tree = git("rev-parse", f"HEAD:{archive_path}")
+            if first_tree != current_tree:
+                errors.append(f"{version_dir.name}: frozen archive differs from its first committed snapshot")
         required = ("README.md", "CHANGELOG.md", "MANIFEST.json")
         for name in required:
             if not (version_dir / name).is_file():
@@ -135,7 +143,7 @@ def check_archives(root: Path = HQ) -> list[str]:
                                       cwd=ROOT, capture_output=True, check=True).stdout
                 if data != dest.read_bytes():
                     raise ValidationError("archive bytes differ from pinned source")
-            expect = {str(p.relative_to(root.parent)) for p in version_dir.iterdir() if p.is_file() and p.name != "MANIFEST.json"}
+            expect = {str(p.relative_to(root.parent)) for p in version_dir.rglob("*") if p.is_file() and p.name != "MANIFEST.json"}
             if expect != seen:
                 raise ValidationError("manifest does not cover every archived file")
         except (ValidationError, ValueError, TypeError, KeyError, subprocess.CalledProcessError) as exc:
