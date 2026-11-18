@@ -6,7 +6,7 @@
 
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Ice | Ice | Candidate | 3 | 3 | 2 | 2 | 10 | Simple and clear if Frost chills and Ice builds solid cover and platforms. The distinction needs gameplay testing. Prior review. |
+| Ice | Ice | Parked | 3 | 3 | 2 | 2 | 10 | Simple and clear if Frost chills and Ice builds solid cover and platforms. The distinction needs gameplay testing. Rust reserves Water in this pass. Prior review. |
 | Glacier | Ice | Exploratory | 3 | 2 | 2 | 2 | 9 | A recognizable ice mass with scale and momentum. Compare it with Ice and avoid duplicating Frost. Earlier chart: Packed ice becomes a slow-moving wall or shield. |
 | Rime | Ice | Exploratory | 3 | 2 | 2 | 2 | 9 | A short Ice-family name for a rough frozen coating. It supports grip, brittle layering, and shatter effects if those differ from Frost. Expanded naming pass. |
 | Hail | Ice pellets | Reference | 3 | 2 | 2 | 1 | 8 | Freezing water produces recognizable pellets. Their repeated impacts fit an attack family. Earlier chart: Frost freezes droplets into falling ice pellets. |

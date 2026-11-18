@@ -36,7 +36,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Hydrogen | Water-splitting gas | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Hydrogen | Water-splitting gas | 3 / 3 / 2 / 2 | 10 | Parked |
 | Electrified Water | Conducting water | 3 / 1 / 2 / 2 | 8 | Reference |
 | Tempest | Electrified weather | 2 / 2 / 2 / 2 | 8 | Reference |
 | Conductive Brine | Conducting water | 2 / 2 / 1 / 2 | 7 | Exploratory |
@@ -78,10 +78,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Glass | Glass | 3 / 3 / 2 / 2 | 10 | Parked |
-| Lightning Glass | Glass | 3 / 3 / 2 / 2 | 10 | Parked |
-| Fulgurite | Glass | 3 / 3 / 1 / 2 | 9 | Parked |
-| Strike Glass | Glass | 3 / 3 / 1 / 2 | 9 | Parked |
+| Glass | Glass | 3 / 3 / 2 / 2 | 10 | Candidate |
+| Lightning Glass | Glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Fulgurite | Glass | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Strike Glass | Glass | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Electrostatic Dust | Discharge into earth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Grounding | Discharge into earth | 3 / 1 / 2 / 1 | 7 | Reference |
 | Faultspark | Discharge into earth | 2 / 1 / 1 / 1 | 5 | Reference |
@@ -132,6 +132,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Rubber | Elastic plant material | 2 / 3 / 2 / 2 | 9 | Exploratory |
 | Arc Sap | Charged plant tissue | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Charwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Conductive Sap | Charged plant tissue | 3 / 2 / 1 / 2 | 8 | Exploratory |

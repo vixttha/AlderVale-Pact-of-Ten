@@ -8,10 +8,10 @@ The chart covers all **45 unordered pairings** between different base elements. 
 
 | Pair or concept | Current status |
 | --- | --- |
-| Fire + Earth → Magma | **Locked.** Fire and Earth are reserved for Magma in the current roster. |
-| Water + Metal → Rust | Favored candidate. It can join Magma without repeating a parent. |
-| Fire + Water → Steam | Liked concept, on hold while Fire is reserved for Magma. |
-| Lightning + Earth → Glass | Liked concept, on hold while Earth is reserved for Magma. |
+| Water + Metal → Rust | **Locked.** Water and Metal are reserved for Rust in this pass. |
+| Fire + Earth → Magma | **Paused by the owner.** Fire and Earth are open for exploration. |
+| Lightning + Earth → Glass | Liked candidate, reopened for review. |
+| Fire + Water → Steam | Liked concept, parked while Water is reserved for Rust. |
 | Metal + Plant → Ironwood | Conditional on designing an AlderVale metal. It shares Metal with Rust. |
 
 Prefer one fusion per base element in the current roster where possible. The matrix and options preserve all 45 pairs for exploration. Acquisition and combat details are open design work. [Locked base roster and scope](../../README.md#locked-element-and-fusion-decisions).

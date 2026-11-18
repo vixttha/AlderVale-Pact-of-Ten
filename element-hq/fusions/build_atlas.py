@@ -104,8 +104,15 @@ def load_pairs():
             raise ValueError(f"Historical names missing from {pair!r}: {sorted(missing)}")
     locked = [(pair, name.label) for pair, names in catalog.items() for name in names if name.status == "Locked"]
     live_decisions = (REPO / "README.md").read_text(encoding="utf-8")
-    if (("Fire", "Earth"), "Magma") not in locked or "**Fire + Earth → Magma** is locked" not in live_decisions:
-        raise ValueError("Locked Fire + Earth → Magma decision differs from Element HQ")
+    lock_section = live_decisions.split("## Locked element and fusion decisions", 1)[1].split("\n## ", 1)[0]
+    records = re.findall(
+        r"^\*\*([A-Z][a-z]+) \+ ([A-Z][a-z]+) → ([^*\n]+)\*\* is locked for the current fusion roster\.",
+        lock_section,
+        re.MULTILINE,
+    )
+    declared = [((first, second), label) for first, second, label in records]
+    if sorted(locked) != sorted(declared):
+        raise ValueError(f"Locked fusion records differ: Element HQ {declared!r}, pair pages {locked!r}")
     return catalog
 
 

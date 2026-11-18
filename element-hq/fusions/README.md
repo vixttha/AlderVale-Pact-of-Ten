@@ -20,15 +20,26 @@ The atlas is a living catalog of reviewable names. The expanded pass adds plausi
 
 | Pair | Name | Decision |
 | --- | --- | --- |
-| [Fire + Earth](pairs/fire-earth.md) | **Magma** | Locked. Fire and Earth are reserved in this pass. |
-| [Water + Metal](pairs/water-metal.md) | **Rust** | Owner favorite. Compatible with Magma. |
-| [Lightning + Wind](pairs/lightning-wind.md) | Ozone | Candidate. Compatible with Magma and Rust. |
-| [Dark + Plant](pairs/dark-plant.md) | Ink | Exploratory. Compatible with Magma, Rust, and Ozone if selected. |
-| [Fire + Water](pairs/fire-water.md) | Steam | Parked. Shares Fire with Magma. |
-| [Lightning + Earth](pairs/lightning-earth.md) | Glass | Parked. Shares Earth with Magma. |
-| [Metal + Plant](pairs/metal-plant.md) | Ironwood | Parked. Depends on a setting decision about metal and overlaps Rust. |
+| [Water + Metal](pairs/water-metal.md) | **Rust** | Locked. Water and Metal are reserved in this pass. |
+| [Fire + Earth](pairs/fire-earth.md) | **Magma** | Paused by the owner. Fire and Earth are open for exploration. |
+| [Lightning + Earth](pairs/lightning-earth.md) | Glass | Liked candidate, reopened for review. |
+| [Lightning + Wind](pairs/lightning-wind.md) | Ozone | Candidate. Compatible with Rust. Shares Lightning with Glass and Wind with Dry Ice. |
+| [Dark + Plant](pairs/dark-plant.md) | Ink | Exploratory. Compatible with Rust and competes with other Plant concepts. |
+| [Fire + Water](pairs/fire-water.md) | Steam | Parked. Water is reserved for Rust. |
+| [Water + Frost](pairs/water-frost.md) | Ice | Parked. Water is reserved for Rust. |
+| [Metal + Plant](pairs/metal-plant.md) | Ironwood | Parked. Depends on a setting decision about Metal and shares Metal with Rust. |
 
 The current pass prefers one fusion per base element where possible. A score ranks a design for review. The owner decides the roster and its locks.
+
+## New fusion concepts
+
+| Pair | Proposed fusion | Gameplay direction |
+| --- | --- | --- |
+| [Fire + Plant](pairs/fire-plant.md) | Ash | Deposit a powder that can smother burning terrain, mark tracks, or feed later regrowth. |
+| [Frost + Wind](pairs/frost-wind.md) | Dry Ice | Condense a cold solid from air. Blocks shrink into gas, creating terrain with a visible expiry. |
+| [Light + Plant](pairs/light-plant.md) | Sugar | Plant stores Light as crystals that can hold an enemy in place or release energy when broken. |
+| [Lightning + Plant](pairs/lightning-plant.md) | Rubber | As a fantasy rule, Lightning cures Plant latex into a springy insulator for rebound and protection. |
+| [Earth + Light](pairs/earth-light.md) | Phosphor | Earth supplies a substance that stores Light and releases it later to reveal or mark targets. |
 
 ## Rating guide
 
@@ -47,12 +58,12 @@ Use the four scores for a total out of ten. Record one short rationale and where
 | Favorite | Owner likes the idea and its final selection remains open. |
 | Candidate | Strong design proposal or alternate name under review. |
 | Exploratory | Idea needs a stronger result, fantasy rule, name, or gameplay stance. |
-| Parked | Idea has a roster conflict or an unmet design dependency. |
+| Parked | Idea is paused by the owner, has a roster conflict, or depends on a separate design decision. |
 | Reference | Retained as a move, effect, material, encounter, or earlier concept. |
 | Rejected | Owner explicitly set this name aside for fusions. |
 
 ## Update a pair
 
-Use [Water + Metal](pairs/water-metal.md) as the template. Edit the pair page to change the name, concept, status, scores, or rationale. Give aliases the same concept label and sort scores from highest to lowest. Record an owner decision in the rationale when it changes a favorite or lock, and update the roster review above.
+Use [Water + Metal](pairs/water-metal.md) as the template. Edit the pair page to change the name, concept, status, scores, or rationale. Give aliases the same concept label and sort scores from highest to lowest. Record an owner decision in the rationale when it changes a favorite or lock, and update the roster review above. For a locked recipe, also record a paragraph in Element HQ in the form `**First + Second → Name** is locked for the current fusion roster.` so the atlas check can compare the two records.
 
 Regenerate the element charts with `python3 element-hq/fusions/build_atlas.py`. Commit the edited pair page and the regenerated element charts together. The Element HQ GitHub Actions check verifies the roster, earlier ideas, scores, links, and generated content on a standard public Ubuntu runner.

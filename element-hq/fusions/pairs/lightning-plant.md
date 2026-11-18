@@ -6,6 +6,7 @@
 
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Rubber | Elastic plant material | Exploratory | 2 | 3 | 2 | 2 | 9 | Plant supplies latex. In this fantasy recipe Lightning cures it into an elastic insulator for rebound, impact absorption, and protection from shock. New concept proposal. |
 | Arc Sap | Charged plant tissue | Exploratory | 3 | 2 | 1 | 2 | 8 | Plant supplies a fluid and Lightning gives it a brief conducting role. It could link placed growth if the fictional rule is clear. Expanded naming pass. |
 | Charwood | Charred plant matter | Exploratory | 3 | 2 | 1 | 2 | 8 | The strike visibly transforms Plant matter. It overlaps the Fire and Plant Charcoal concept. Prior review. |
 | Conductive Sap | Charged plant tissue | Exploratory | 3 | 2 | 1 | 2 | 8 | A living fluid could route bursts through placed growth. The long technical label is harder to remember. New naming proposal. |

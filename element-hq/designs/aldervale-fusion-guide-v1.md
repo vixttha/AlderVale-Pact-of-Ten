@@ -1,6 +1,6 @@
 # AlderVale Fusion HQ
 
-**Current decision** · [Element HQ locks Plant and Fire + Earth → Magma](../../README.md#locked-element-and-fusion-decisions). Fire and Earth are reserved for Magma in the current roster. The recipe, encounter, and conflict notes below record earlier work, including the rejected Fire + Forest prototype. Use the [pairing chart](aldervale-fusion-pairing-chart.md) for current candidate status.
+**Current decision** · [Element HQ locks Plant and Water + Metal → Rust](../../README.md#locked-element-and-fusion-decisions). Fire + Earth → Magma is paused. The recipe, encounter, and conflict notes below record earlier work, including the rejected Fire + Forest prototype. Use the [Fusion Name Atlas](../fusions/README.md#roster-review) for current candidate status.
 
 ## Earlier roster proposal
 

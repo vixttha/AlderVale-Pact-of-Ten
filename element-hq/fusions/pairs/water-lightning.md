@@ -6,7 +6,7 @@
 
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Hydrogen | Water-splitting gas | Exploratory | 3 | 3 | 2 | 2 | 10 | A genuinely different substance in a controlled magic concept inspired by electrolysis. It competes with Rust and Ozone for parents. Prior review. |
+| Hydrogen | Water-splitting gas | Parked | 3 | 3 | 2 | 2 | 10 | A genuinely different substance in a controlled magic concept inspired by electrolysis. Rust reserves Water in this pass; Lightning also overlaps Ozone. Prior review. |
 | Electrified Water | Conducting water | Reference | 3 | 1 | 2 | 2 | 8 | The exact interaction is easy to read. It suits a temporary field that powers puddles or connected surfaces. Expanded naming pass. |
 | Tempest | Electrified weather | Reference | 2 | 2 | 2 | 2 | 8 | A strong storm identity for an encounter or attack family. The result is weather. Earlier chart: Lightning lashes a surge of rain and water. |
 | Conductive Brine | Conducting water | Exploratory | 2 | 2 | 1 | 2 | 7 | A mineral-rich Water variant could hold a useful persistent charge in-game. The mineral assumption and overlap with ordinary Water need review. Expanded naming pass. |

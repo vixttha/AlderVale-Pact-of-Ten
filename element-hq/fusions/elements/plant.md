@@ -23,11 +23,12 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Biochar | Charred plant matter | 3 / 3 / 1 / 2 | 9 | Parked |
-| Charcoal | Charred plant matter | 3 / 3 / 2 / 1 | 9 | Parked |
-| Char | Charred plant matter | 3 / 3 / 1 / 1 | 8 | Parked |
-| Emberwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Parked |
-| Cinder Bark | Charred plant matter | 3 / 2 / 1 / 1 | 7 | Parked |
+| Ash | Plant ash | 3 / 3 / 2 / 2 | 10 | Candidate |
+| Biochar | Charred plant matter | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Charcoal | Charred plant matter | 3 / 3 / 2 / 1 | 9 | Exploratory |
+| Char | Charred plant matter | 3 / 3 / 1 / 1 | 8 | Exploratory |
+| Emberwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
+| Cinder Bark | Charred plant matter | 3 / 2 / 1 / 1 | 7 | Exploratory |
 | Wildfire | Spreading fire | 2 / 1 / 2 / 2 | 7 | Reference |
 | Ashbloom | Post-fire growth | 2 / 2 / 1 / 1 | 6 | Reference |
 
@@ -51,6 +52,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Rubber | Elastic plant material | 2 / 3 / 2 / 2 | 9 | Exploratory |
 | Arc Sap | Charged plant tissue | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Charwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Conductive Sap | Charged plant tissue | 3 / 2 / 1 / 2 | 8 | Exploratory |
@@ -92,9 +94,9 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Amber | Hardened plant resin | 3 / 3 / 2 / 2 | 10 | Parked |
-| Fossil Resin | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Parked |
-| Resin Stone | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Parked |
+| Amber | Hardened plant resin | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Fossil Resin | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Resin Stone | Hardened plant resin | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Loam | Rooted soil | 2 / 2 / 2 / 2 | 8 | Reference |
 | Rootbound Earth | Rooted soil | 3 / 1 / 2 / 2 | 8 | Reference |
 | Rootstone | Rooted stone | 2 / 2 / 2 / 2 | 8 | Exploratory |
@@ -106,6 +108,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Sugar | Stored plant energy | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Daybloom | Light-fed plant growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Nectar | Light-fed plant growth | 2 / 1 / 2 / 2 | 7 | Reference |
 | Photosynthesis | Light-fed plant growth | 3 / 1 / 1 / 2 | 7 | Reference |

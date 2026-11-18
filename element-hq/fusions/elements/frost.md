@@ -36,7 +36,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Ice | Ice | 3 / 3 / 2 / 2 | 10 | Candidate |
+| Ice | Ice | 3 / 3 / 2 / 2 | 10 | Parked |
 | Glacier | Ice | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Rime | Ice | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Hail | Ice pellets | 3 / 2 / 2 / 1 | 8 | Reference |
@@ -66,6 +66,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Dry Ice | Frozen air component | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Blizzard | Wind-driven frost | 3 / 1 / 2 / 2 | 8 | Reference |
 | Ice Dust | Wind-driven frost | 3 / 1 / 2 / 2 | 8 | Reference |
 | Snowpack | Wind-driven frost | 3 / 2 / 2 / 1 | 8 | Rejected |

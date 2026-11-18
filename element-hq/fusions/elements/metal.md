@@ -37,14 +37,14 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Rust | Rust | 3 / 3 / 2 / 2 | 10 | Favorite |
-| Iron Oxide | Rust | 3 / 3 / 1 / 2 | 9 | Candidate |
-| Iron Rust | Rust | 3 / 3 / 1 / 2 | 9 | Candidate |
-| Red Rust | Rust | 3 / 3 / 2 / 1 | 9 | Candidate |
+| Rust | Rust | 3 / 3 / 2 / 2 | 10 | Locked |
+| Iron Oxide | Rust | 3 / 3 / 1 / 2 | 9 | Reference |
+| Iron Rust | Rust | 3 / 3 / 1 / 2 | 9 | Reference |
+| Red Rust | Rust | 3 / 3 / 2 / 1 | 9 | Reference |
 | Corrosion | Rust | 3 / 1 / 2 / 2 | 8 | Reference |
 | Rust Scale | Rust | 2 / 3 / 1 / 2 | 8 | Exploratory |
-| Oxide | Rust | 2 / 2 / 1 / 2 | 7 | Candidate |
-| Patina | Surface coating | 2 / 2 / 2 / 1 | 7 | Exploratory |
+| Oxide | Rust | 2 / 2 / 1 / 2 | 7 | Reference |
+| Patina | Surface coating | 2 / 2 / 2 / 1 | 7 | Parked |
 | Pitting | Rust | 3 / 1 / 1 / 2 | 7 | Reference |
 | Tarnish | Surface coating | 2 / 1 / 2 / 1 | 6 | Reference |
 | Turbine | Water-powered mechanism | 2 / 1 / 2 / 0 | 5 | Reference |

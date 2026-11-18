@@ -77,12 +77,12 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Lava | Magma | 3 / 3 / 2 / 2 | 10 | Parked |
-| Magma | Magma | 3 / 3 / 2 / 2 | 10 | Locked |
-| Obsidian | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
-| Volcanic Glass | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Parked |
+| Magma | Magma | 3 / 3 / 2 / 2 | 10 | Parked |
+| Obsidian | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Volcanic Glass | Volcanic glass | 3 / 3 / 2 / 2 | 10 | Exploratory |
 | Basalt | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
-| Pumice | Solidified magma | 3 / 3 / 1 / 2 | 9 | Parked |
-| Kilnstone | Fired clay | 3 / 2 / 1 / 2 | 8 | Parked |
+| Pumice | Solidified magma | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Kilnstone | Fired clay | 3 / 2 / 1 / 2 | 8 | Exploratory |
 
 ## Light
 
@@ -131,10 +131,11 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
-| Biochar | Charred plant matter | 3 / 3 / 1 / 2 | 9 | Parked |
-| Charcoal | Charred plant matter | 3 / 3 / 2 / 1 | 9 | Parked |
-| Char | Charred plant matter | 3 / 3 / 1 / 1 | 8 | Parked |
-| Emberwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Parked |
-| Cinder Bark | Charred plant matter | 3 / 2 / 1 / 1 | 7 | Parked |
+| Ash | Plant ash | 3 / 3 / 2 / 2 | 10 | Candidate |
+| Biochar | Charred plant matter | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Charcoal | Charred plant matter | 3 / 3 / 2 / 1 | 9 | Exploratory |
+| Char | Charred plant matter | 3 / 3 / 1 / 1 | 8 | Exploratory |
+| Emberwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
+| Cinder Bark | Charred plant matter | 3 / 2 / 1 / 1 | 7 | Exploratory |
 | Wildfire | Spreading fire | 2 / 1 / 2 / 2 | 7 | Reference |
 | Ashbloom | Post-fire growth | 2 / 2 / 1 / 1 | 6 | Reference |

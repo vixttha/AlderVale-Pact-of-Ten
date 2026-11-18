@@ -11,4 +11,4 @@
 | Native Metal | Metal-bearing rock | Reference | 2 | 2 | 2 | 1 | 7 | Names metal found in Earth in a straightforward way. It gives gathering a label without inventing another material. Expanded naming pass. |
 | Ore | Metal-bearing rock | Reference | 2 | 2 | 2 | 1 | 7 | Both parents describe a common raw material. Fits gathering well. Earlier chart: Earth carries metal in mineral veins. |
 | Bedrock Alloy | Metal and rock material | Reference | 2 | 2 | 1 | 1 | 6 | A worked material description with the invented-metal concern. Earlier chart: Metal is worked around a strong core of stone. |
-| Mineral | Metal-bearing rock | Reference | 2 | 2 | 1 | 1 | 6 | A broad resource label with little standalone magic identity. Earth is reserved. New naming proposal. |
+| Mineral | Metal-bearing rock | Reference | 2 | 2 | 1 | 1 | 6 | A broad resource label with little standalone magic identity. Metal is reserved for Rust. New naming proposal. |

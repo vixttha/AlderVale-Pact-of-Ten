@@ -6,6 +6,7 @@
 
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Sugar | Stored plant energy | Exploratory | 3 | 2 | 2 | 2 | 9 | Light lets Plant make sugars. AlderVale could crystallize them into sticky traps that store energy and release it when broken. New concept proposal. |
 | Daybloom | Light-fed plant growth | Reference | 3 | 1 | 2 | 2 | 8 | Light triggers a Plant bloom. It is clear as a growth state or creature ability. Expanded naming pass. |
 | Nectar | Light-fed plant growth | Reference | 2 | 1 | 2 | 2 | 7 | A clear liquid for restorative Plant moves. Light supports production and doesn't define a separate outcome. New naming proposal. |
 | Photosynthesis | Light-fed plant growth | Reference | 3 | 1 | 1 | 2 | 7 | Both parents explain accumulating energy through growth. The technical word fits a process or passive mechanic. Expanded naming pass. |

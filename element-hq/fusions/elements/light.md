@@ -89,6 +89,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Phosphor | Light-storing solid | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Lightwell | Radiant minerals | 3 / 1 / 2 / 2 | 8 | Reference |
 | Luminous Stone | Radiant minerals | 2 / 2 / 2 / 1 | 7 | Reference |
 | Crystalbeam | Radiant minerals | 2 / 1 / 2 / 1 | 6 | Reference |
@@ -131,6 +132,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Sugar | Stored plant energy | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Daybloom | Light-fed plant growth | 3 / 1 / 2 / 2 | 8 | Reference |
 | Nectar | Light-fed plant growth | 2 / 1 / 2 / 2 | 7 | Reference |
 | Photosynthesis | Light-fed plant growth | 3 / 1 / 1 / 2 | 7 | Reference |

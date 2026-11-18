@@ -6,6 +6,7 @@
 
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Dry Ice | Frozen air component | Exploratory | 3 | 3 | 1 | 2 | 9 | As a game rule, Frost freezes carbon dioxide drawn from moving air. Blocks can shrink into gas, creating temporary terrain with a visible expiry. New concept proposal. |
 | Blizzard | Wind-driven frost | Reference | 3 | 1 | 2 | 2 | 8 | Classic weather with a clear slow and visibility kit. The result describes a storm. Earlier chart: Wind drives snow across the field and obscures sight. |
 | Ice Dust | Wind-driven frost | Reference | 3 | 1 | 2 | 2 | 8 | Wind suspends tiny Frost fragments. It can reduce visibility or abrade a surface as a terrain effect. Expanded naming pass. |
 | Snowpack | Wind-driven frost | Rejected | 3 | 2 | 2 | 1 | 8 | Owner set it aside. Wind piles ice crystals into a drift, a terrain identity. Prior review. |
