@@ -32,6 +32,7 @@ export interface WorldViewportProps {
   remotePlayers: LivePlayerPresence[];
   completedQuestIds?: string[];
   localSessionId?: string | null;
+  worldPositionSync?: { sessionId: string; zone: ZoneId; x: number; y: number; z: number; rotY: number } | null;
   localEmote?: { emote: EmoteId; until: number } | null;
   remoteEmoteEvent?: { sessionId: string; emote: EmoteId; until: number; seq: number } | null;
   chatBubbleEvent?: { sessionId: string; senderName: string; text: string; until: number; seq: number } | null;
@@ -122,6 +123,7 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
   remotePlayers,
   completedQuestIds = [],
   localSessionId = null,
+  worldPositionSync = null,
   localEmote = null,
   remoteEmoteEvent = null,
   chatBubbleEvent = null,
@@ -205,6 +207,13 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
   const mountSlotRef = useRef<THREE.Group | null>(null);
   const creatureSlotRef = useRef<THREE.Group | null>(null);
   const playerContainerRef = useRef<THREE.Group | null>(null);
+  const pendingPositionRef = useRef<NonNullable<WorldViewportProps['worldPositionSync']> | null>(null);
+  const appliedPositionSessionRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (worldPositionSync?.zone === zone && worldPositionSync.sessionId !== appliedPositionSessionRef.current) {
+      pendingPositionRef.current = worldPositionSync;
+    }
+  }, [worldPositionSync, zone]);
   const dormSlotRef = useRef<THREE.Group | null>(null);
   const dormInteractablesRef = useRef<{ object: THREE.Object3D; hit: InteractiveHitTarget }[]>([]);
   const maxAnisoRef = useRef<number>(4);
@@ -730,6 +739,21 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
         if (entry.creatureSlot.children[0]) {
           animateCreatureRig(entry.creatureSlot.children[0], t, dt);
         }
+      }
+
+      // Restore the server's current authenticated location without rebuilding WebGL.
+      const reconnectPosition = pendingPositionRef.current;
+      if (reconnectPosition && reconnectPosition.zone === zone) {
+        playerContainer.position.set(reconnectPosition.x, reconnectPosition.y, reconnectPosition.z);
+        playerContainer.rotation.y = reconnectPosition.rotY;
+        desiredFacing = reconnectPosition.rotY;
+        playerY = reconnectPosition.y;
+        jumpVelY = 0;
+        propsRef.current.onPlayerMoveSample?.({
+          x: reconnectPosition.x, z: reconnectPosition.z, rotY: reconnectPosition.rotY,
+        });
+        appliedPositionSessionRef.current = reconnectPosition.sessionId;
+        pendingPositionRef.current = null;
       }
 
       // Local WASD + Arrow Movement + Shift Sprint + Space Jump
