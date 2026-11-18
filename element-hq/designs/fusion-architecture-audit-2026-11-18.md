@@ -178,6 +178,8 @@ The historical prototype uses Hatchery egg progression. A later field-pact draft
 | FA-10 | Legacy `resolveFusionSpecies` may return null/fallback for new pairs | No phantom offspring, stable species ID, idempotent claim and recoverable egg |
 | FA-11 | Fusion states could create new damage, status, shield, and multiplayer discrepancies | One bounded mechanic prototype; deterministic same action client/server, public runner tests |
 | FA-12 | Science is inspiration, not sufficient lore: a natural mineral or chemical product doesn't automatically make a compelling school | Require independent mechanics and distinguish where fantasy begins |
+| FA-13 | [Draft PR #130](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/130) currently prototypes a Magma pact even though Magma is paused in the owner-directed design | Keep draft/implementation evidence separate; do not merge, promote, or infer a new Magma acceptance from an in-flight prototype |
+| FA-14 | [Draft PR #120](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/120) captures a legacy combat baseline, not the new ten-element design | Treat its tests as old-behavior evidence only; do not make them acceptance for a 15-school redesign |
 
 The previous HQ conflict register F-01–F-29 remains intact; these FA- items are a **supplement**, not an assertion that the older issues were fixed or closed.
 
