@@ -9,6 +9,8 @@ import { GEAR_BY_ID } from '../shared/wardrobe.ts';
 import { isBazaarPrice, STARTING_MARKET_FLORINS, type BazaarListing, type MarketAccount } from '../shared/market.ts';
 import { dormTourRatingFromTotals } from '../shared/dormTours.ts';
 
+import { PROGRESSION_VERSION } from '../shared/gameplayActions.ts';
+
 export class RequestError extends Error {
   readonly status: number;
 
@@ -50,12 +52,14 @@ export async function ownedWizard(uid: string, wizardId: unknown, realm: RealmId
 
 export async function ownedActiveCreature(uid: string, wizardId: unknown, realm: RealmId): Promise<StoredCreatureSelection | null> {
   const wizard = await ownedWizard(uid, wizardId, realm);
-  if (!isDocumentId(wizard.activeCreatureId)) return null;
+  if (wizard.serverProgressionVersion !== PROGRESSION_VERSION || !isDocumentId(wizard.activeCreatureId)) {
+    throw new RequestError(409, 'Select a server-enrolled creature before matchmaking.');
+  }
   const ref = cloudDb.collection('wizards').doc(wizard.id).collection('creatures').doc(wizard.activeCreatureId);
   const snapshot = await ref.get();
-  if (!snapshot.exists) return null;
+  if (!snapshot.exists) throw new RequestError(404, 'Selected creature unavailable');
   const data = snapshot.data() as Record<string, unknown>;
-  if (!isOwnedCreatureDocument(data, uid, wizard.id, realm)) {
+  if (data.serverProgressionVersion !== PROGRESSION_VERSION || !isOwnedCreatureDocument(data, uid, wizard.id, realm)) {
     throw new RequestError(404, 'Selected creature unavailable');
   }
   return {
@@ -297,6 +301,7 @@ export async function publishTour(realm: RealmId, uid: string, wizardId: unknown
   const listing = realmRef(realm).collection('dormTours').doc(wizardId);
   return cloudDb.runTransaction(async (tx) => {
     const [wizard, snapshot, old] = await Promise.all([ownedWizard(uid, wizardId, realm, tx), tx.get(layout), tx.get(listing)]);
+    if (wizard.serverProgressionVersion !== PROGRESSION_VERSION) throw new RequestError(409, 'Enroll an online wizard to publish a Dorm.');
     const dorm = snapshot.data();
     if (!dorm || dorm.ownerId !== uid || dorm.realmId !== realm) throw new RequestError(404, 'Dorm layout unavailable');
     tx.update(layout, { isPublic: true, updatedAt: FieldValue.serverTimestamp() });

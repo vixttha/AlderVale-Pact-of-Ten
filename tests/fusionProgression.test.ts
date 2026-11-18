@@ -97,7 +97,7 @@ describe('Fusion hatch and signature spell progression (#105)', () => {
 
     const forge = loadCallback('../src/features/creatures/CreaturesArborPanel.tsx', 'forgeHybridEgg', {
       wizard, creatures: parents, parentAId: parents[1].id, parentBId: parents[0].id,
-      resolveFusionSpecies, onUpdateWizard: persist, academyAudio: { playChime: () => {} },
+      resolveFusionSpecies, onCloudAction: undefined, onUpdateWizard: persist, academyAudio: { playChime: () => {} },
     });
     forge();
     const forged = loadGuestRealm(wizard.realmId).wizards[0];

@@ -1,8 +1,10 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { randomUUID } from 'node:crypto';
 import { verifyFirebaseBearerToken } from './authVerify.ts';
-import { ownedWizard, ownedActiveCreature, settleTrade, awardLiveVictory, RequestError } from './market.ts';
+import { ownedActiveCreature, settleTrade, awardLiveVictory, RequestError } from './market.ts';
 import { resolveLiveCombatCreature, sanitizeGuestCreatureSelection } from './creatureSelection.ts';
+import { ownedProgressionWizard } from './progressionState.ts';
+import { setGameplayPresence, clearGameplayPresence } from './gameplayPresence.ts';
 import { duelView, readDuelAction } from './duelView.ts';
 import { ELEMENTS } from '../shared/elements.ts';
 import { RACES } from '../shared/wardrobe.ts';
@@ -355,11 +357,14 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
             if (typeof msg.idToken === 'string') {
               const principal = await verifyFirebaseBearerToken(`Bearer ${msg.idToken}`);
               if (!principal?.emailVerified) throw new RequestError(401, 'Sign in again to connect to AlderVale.');
-              const wizard = await ownedWizard(principal.uid, p.wizardId, realm);
+              const wizard = await ownedProgressionWizard(principal.uid, p.wizardId, realm);
               activeCreatureId = wizard.activeCreatureId;
               conn.verifiedUid = principal.uid;
               identity = wizard.id;
               name = wizard.name;
+              p.level = wizard.level;
+              p.rank = wizard.rank;
+              p.titleBadge = wizard.progression.titleBadge;
               p.raceId = Object.hasOwn(RACES, wizard.raceId) ? wizard.raceId : 'human';
               p.elementId = Object.hasOwn(ELEMENTS, wizard.elementId) ? wizard.elementId : 'ember';
             } else {
@@ -385,6 +390,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
             };
             conn.duelElement = p.elementId;
             conn.duelRace = p.raceId;
+            if (conn.verifiedUid && conn.presence) setGameplayPresence(sessionId, { ...conn.presence, uid: conn.verifiedUid });
             send(conn, { type: 'world_joined' });
           } catch (error) {
             send(conn, { type: 'world_notice', text: error instanceof RequestError ? error.message : 'Multiplayer is temporarily unavailable.' });
@@ -428,6 +434,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           conn.presence.rotY = Number(msg.rotY ?? conn.presence.rotY);
           conn.presence.mountId = (msg.mountId as string | null) ?? null;
           conn.presence.zone = nextZone;
+          if (conn.verifiedUid) setGameplayPresence(sessionId, { ...conn.presence, uid: conn.verifiedUid });
           if (prevZone !== nextZone) {
             broadcastRealmZone(conn.presence.realmId, prevZone, { type: 'player_left', sessionId });
             send(conn, { type: 'zone_snapshot', players: getZoneSnapshot(conn.presence.realmId, nextZone, conn), activeDuels: spectateDuelsForRealm(conn.presence.realmId) });
@@ -785,6 +792,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     });
 
     ws.on('close', () => {
+      clearGameplayPresence(sessionId);
       cancelInvitesForSession(sessionId, 'Trade invitation ended because a player disconnected.');
       for (const trade of trades.values()) if (trade.aSession === sessionId || trade.bSession === sessionId) cancelTrade(trade, 'A trader disconnected.');
       for (const room of duels.values()) room.spectators.delete(sessionId);

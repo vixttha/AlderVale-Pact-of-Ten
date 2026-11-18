@@ -1,3 +1,4 @@
+import type { RunGameplayAction } from '../../../shared/gameplayActions.ts';
 import type { PlayerSettings } from '../../../shared/settings.ts';
 import React, { useEffect, useState } from 'react';
 import { ShoppingBag, ScrollText, Shield, Sliders, Map, Store, Sparkles } from 'lucide-react';
@@ -17,6 +18,7 @@ export type HubModalTab = 'shops' | 'bazaar' | 'quests' | 'social' | 'map' | 'se
 interface AcademyModalHubProps {
   initialTab: HubModalTab;
   wizard: WizardDocument;
+  onCloudAction?: RunGameplayAction;
   realmAccount: RealmAccountState;
   isSignedIn: boolean;
   wallet: MarketAccount | null;
@@ -34,6 +36,7 @@ interface AcademyModalHubProps {
 export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   initialTab,
   wizard,
+  onCloudAction,
   realmAccount,
   isSignedIn,
   wallet,
@@ -92,6 +95,10 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   }, [tab, wizard.realmId, isSignedIn, onWallet]);
 
   const buyGear = (gearId: string, price: number) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'buyGear', id: gearId });
+      return;
+    }
     const finalPrice = Math.round(price * dwarfDiscount);
     if (wizard.currencies.florins < finalPrice || wizard.wardrobe.ownedGearIds.includes(gearId)) return;
     onUpdateWizard({
@@ -103,6 +110,10 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   };
 
   const buySpell = (spellId: string, price: number) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'buySpell', id: spellId });
+      return;
+    }
     const spell = SPELLS.find((entry) => entry.id === spellId);
     if (!spell || getSpellShopLockReason(spell, spellUnlockState)) return;
     if (wizard.currencies.florins < price || wizard.progression.ownedSpellIds.includes(spellId)) return;
@@ -115,6 +126,10 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   };
 
   const buyMount = (mountId: string, price: number) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'buyMount', id: mountId });
+      return;
+    }
     if (wizard.currencies.florins < price || wizard.progression.ownedMounts.includes(mountId)) return;
     onUpdateWizard({
       ...wizard,
@@ -129,6 +144,10 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   };
 
   const transmuteStarstone = () => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'transmute' });
+      return;
+    }
     if (wizard.resources.sunleaf < 2 || wizard.resources.ember_ash < 2) return;
     onUpdateWizard({
       ...wizard,
@@ -147,6 +166,10 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   };
 
   const claimAlmanac = () => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'almanac' });
+      return;
+    }
     const today = new Date().toISOString().slice(0, 10);
     if (wizard.progression.lastAlmanacClaim === today) return;
     const nextDay = (wizard.progression.almanacDay % 7) + 1;

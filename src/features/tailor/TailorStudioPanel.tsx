@@ -1,3 +1,4 @@
+import type { RunGameplayAction } from '../../../shared/gameplayActions.ts';
 import React, { useState } from 'react';
 import { Scissors, Gem, RefreshCcw, Archive } from 'lucide-react';
 import { MODULAR_GEAR, GEAR_BY_ID, RUNESTONES, RACES, type RaceId } from '../../../shared/wardrobe.ts';
@@ -8,6 +9,7 @@ import { HumanAppearanceChoice } from '../auth/HumanAppearanceChoice.tsx';
 
 interface TailorStudioPanelProps {
   wizard: WizardDocument;
+  onCloudAction?: RunGameplayAction;
   bazaarGear?: Record<string, number>;
   realmAccount: RealmAccountState;
   onUpdateWizard: (next: WizardDocument) => void;
@@ -17,6 +19,7 @@ interface TailorStudioPanelProps {
 
 export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   wizard,
+  onCloudAction,
   bazaarGear,
   realmAccount,
   onUpdateWizard,
@@ -31,6 +34,10 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   const slotOwned = ownedGear.filter((g) => g.slot === slotFilter);
 
   const equipGear = (itemId: string) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'equip', id: itemId });
+      return;
+    }
     const item = GEAR_BY_ID[itemId];
     if (!item || !ownedGear.some((gear) => gear.id === itemId)) return;
     onUpdateWizard({
@@ -43,6 +50,10 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   };
 
   const applyStitch = (slot: typeof slotFilter, visualGearId: string | null) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'stitch', slot, item: visualGearId });
+      return;
+    }
     onUpdateWizard({
       ...wizard,
       stitching: { ...wizard.stitching, [slot]: visualGearId },
@@ -50,6 +61,10 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   };
 
   const socketRunestone = (runeId: string) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'socket', id: runeId });
+      return;
+    }
     const rune = RUNESTONES.find((r) => r.id === runeId);
     if (!rune || wizard.currencies.florins < rune.priceFlorins) return;
     if (wizard.wardrobe.socketedRunestones.length >= 6) return;
@@ -64,6 +79,10 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   };
 
   const applyRebirthSeal = (newRaceId: RaceId) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'rebirth', race: newRaceId });
+      return;
+    }
     if (wizard.progression.rebirthSeals < 1) return;
     const r = RACES[newRaceId];
     onUpdateWizard({
@@ -75,6 +94,10 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   };
 
   const depositToVault = (gearId: string) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'vaultDeposit', id: gearId });
+      return;
+    }
     if (wizard.wardrobe.ownedGearIds.length <= 5 || !wizard.wardrobe.ownedGearIds.includes(gearId)) return;
     onUpdateRealmAccount({ ...realmAccount, sharedVault: [...realmAccount.sharedVault, gearId] });
   };
@@ -82,6 +105,10 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
   const withdrawFromVault = (idx: number) => {
     const itemId = realmAccount.sharedVault[idx];
     if (!itemId) return;
+    if (onCloudAction) {
+      void onCloudAction({ type: 'vaultWithdraw', index: idx, id: itemId });
+      return;
+    }
     const nextVault = [...realmAccount.sharedVault];
     nextVault.splice(idx, 1);
     onUpdateRealmAccount({ ...realmAccount, sharedVault: nextVault });
@@ -91,6 +118,11 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
         wardrobe: { ...wizard.wardrobe, ownedGearIds: [...wizard.wardrobe.ownedGearIds, itemId] },
       });
     }
+  };
+
+  const editAppearance = (patch: Partial<WizardDocument['sculpt']>) => {
+    if (onCloudAction) void onCloudAction({ type: 'appearance', patch });
+    else onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, ...patch } });
   };
 
   return (
@@ -103,7 +135,7 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
               <div className="mb-3">
                 <HumanAppearanceChoice
                   value={wizard.sculpt.humanModel}
-                  onChange={(humanModel) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, humanModel } })}
+                  onChange={(humanModel) => editAppearance({ humanModel })}
                 />
               </div>
             )}
@@ -128,15 +160,15 @@ export const TailorStudioPanel: React.FC<TailorStudioPanelProps> = ({
           <div className="mt-3 flex flex-wrap gap-3 text-xs">
             <label className="flex items-center gap-1.5">
               <span>Primary</span>
-              <input disabled={rowanHuman} type="color" value={wizard.sculpt.primaryDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, primaryDye: e.target.value } })} />
+              <input disabled={rowanHuman} type="color" value={wizard.sculpt.primaryDye} onChange={(e) => editAppearance({ primaryDye: e.target.value })} />
             </label>
             <label className="flex items-center gap-1.5">
               <span>Trim</span>
-              <input disabled={rowanHuman} type="color" value={wizard.sculpt.trimDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, trimDye: e.target.value } })} />
+              <input disabled={rowanHuman} type="color" value={wizard.sculpt.trimDye} onChange={(e) => editAppearance({ trimDye: e.target.value })} />
             </label>
             <label className="flex items-center gap-1.5">
               <span>Accent</span>
-              <input disabled={rowanHuman} type="color" value={wizard.sculpt.accentDye} onChange={(e) => onUpdateWizard({ ...wizard, sculpt: { ...wizard.sculpt, accentDye: e.target.value } })} />
+              <input disabled={rowanHuman} type="color" value={wizard.sculpt.accentDye} onChange={(e) => editAppearance({ accentDye: e.target.value })} />
             </label>
           </div>
         </div>

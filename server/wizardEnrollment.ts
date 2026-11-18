@@ -7,9 +7,10 @@ import { wizardStarter } from '../shared/wizardStarter.ts';
 import type { RealmAccountState } from '../src/lib/storage.ts';
 import { cloudDb } from './cloud.ts';
 import { isDocumentId, RequestError } from './market.ts';
+import { legacyRealmRef, newProgressionAccount, PROGRESSION_VERSION, trustedRealmRef } from './progressionState.ts';
 import { readTermView } from './soloProgress.ts';
 
-function readSculpt(value: unknown): WizardSculpt {
+export function readSculpt(value: unknown): WizardSculpt {
   if (!value || typeof value !== 'object') throw new RequestError(400, 'Invalid wizard appearance');
   const {
     humanModel, height, build, skinHex, hairStyle, hairHex, hairTipHex,
@@ -51,21 +52,18 @@ export async function enrollWizard(uid: string, realm: RealmId, body: Record<str
   }
   const sculpt = readSculpt(body.sculpt);
   const wizardRef = cloudDb.collection('wizards').doc(id);
-  const accountRef = cloudDb.collection('accounts').doc(uid).collection('realms').doc(realm);
+  const accountRef = trustedRealmRef(uid, realm);
   const publicRef = cloudDb.collection('publicWizards').doc(id);
   const termRef = cloudDb.collection('worldRealms').doc(realm).collection('termProgress').doc(uid);
   return cloudDb.runTransaction(async (tx) => {
-    const [account, existing, profile, term] = await Promise.all([
-      tx.get(accountRef), tx.get(wizardRef), tx.get(publicRef), tx.get(termRef),
+    const [account, existing, profile, term, legacy] = await Promise.all([
+      tx.get(accountRef), tx.get(wizardRef), tx.get(publicRef), tx.get(termRef), tx.get(legacyRealmRef(uid, realm)),
     ]);
-    const data = account.data();
-    if (!data || data.uid !== uid || data.realmId !== realm) throw new RequestError(409, 'Reopen this realm before enrolling.');
-    const wizardIds = data.wizardIds as string[];
-    const realmAccount: RealmAccountState = {
-      uid, realmId: realm, wizardIds, unlockedRaces: data.unlockedRaces, sharedVault: data.sharedVault ?? [],
-      ...readTermView(term.data(), data.claimedTermTiers),
-    };
-    if (existing.exists && existing.get('ownerId') === uid && existing.get('realmId') === realm && wizardIds.includes(id)) {
+    const data = (account.data() as RealmAccountState | undefined) ?? newProgressionAccount(uid, realm);
+    const wizardIds = data.wizardIds;
+    const realmAccount = { ...data, ...readTermView(term.data(), legacy.get('claimedTermTiers')) };
+    if (existing.get('serverProgressionVersion') === PROGRESSION_VERSION &&
+        existing.get('ownerId') === uid && existing.get('realmId') === realm && wizardIds.includes(id)) {
       return { account: realmAccount, wizard: { ...existing.data(), id } as WizardDocument };
     }
     if (existing.exists || profile.exists || wizardIds.includes(id)) {
@@ -78,19 +76,20 @@ export async function enrollWizard(uid: string, realm: RealmId, body: Record<str
       id, ownerId: uid, realmId: realm, name, raceId: race.id, elementId: element.id, sculpt,
       ...(raceId === 'beastfolk' ? { beastClan: beastClan as BeastClanId } : {}),
     });
+    wizard.serverProgressionVersion = PROGRESSION_VERSION;
     const { pet, dorm } = wizardStarter(wizard);
     const { id: _wizardId, beastClan: clan, ...saved } = wizard;
     const { id: petId, ...savedPet } = pet;
     const timestamps = { createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp() };
     tx.create(wizardRef, { ...saved, ...(clan ? { beastClan: clan } : {}), ...timestamps });
-    tx.create(wizardRef.collection('creatures').doc(petId), { ...savedPet, ...timestamps });
+    tx.create(wizardRef.collection('creatures').doc(petId), { ...savedPet, serverProgressionVersion: PROGRESSION_VERSION, ...timestamps });
     tx.create(wizardRef.collection('sanctuary').doc('layout'), { ...dorm, ...timestamps });
     tx.create(publicRef, {
       ownerId: uid, realmId: realm, name, raceId: race.id, elementId: element.id,
       level: wizard.level, rank: wizard.rank, titleBadge: wizard.progression.titleBadge, ...timestamps,
     });
     const enrolled = [...wizardIds, id];
-    tx.update(accountRef, { wizardIds: enrolled, updatedAt: FieldValue.serverTimestamp() });
+    tx.set(accountRef, { ...data, wizardIds: enrolled });
     return { wizard, account: { ...realmAccount, wizardIds: enrolled } };
   });
 }

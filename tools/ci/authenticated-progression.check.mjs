@@ -65,6 +65,7 @@ async function createPlayer() {
   for (const { account, wizard } of enrollments) {
     assert.deepEqual(account.wizardIds, [wizardId]);
     assert.equal(wizard.level, 1);
+    assert.equal(wizard.serverProgressionVersion, 1);
     assert.equal(wizard.currencies.florins, 220);
     assert.equal(wizard.activeCreatureId, wizardId + '_starter_pet');
   }
@@ -141,4 +142,50 @@ test('leaving an unfinished signed-in duel creates no earned rewards', { timeout
   assert.equal(finish.notice, 'You left the duel.');
   assert.equal(finish.wizard.currencies.florins, 220);
   assert.deepEqual(await call(player, 'term'), { termXp: 0, claimedTermTiers: [2] });
+});
+
+function gameplay(player, action, actionId = randomUUID(), status = 200) {
+  return call(player, 'action', { wizardId: player.wizardId, actionId, action }, status);
+}
+
+test('signed-in gameplay commands handle shop, crafting, roster and Dorm changes', { timeout: 55000 }, async () => {
+  const player = await createPlayer();
+  const sameReceipt = randomUUID();
+  const purchases = await Promise.all([
+    gameplay(player, { type: 'buyGear', id: 'hat_pointed_brim' }, sameReceipt),
+    gameplay(player, { type: 'buyGear', id: 'hat_pointed_brim' }, sameReceipt),
+  ]);
+  for (const purchase of purchases) {
+    assert.equal(purchase.wizard.currencies.florins, 130);
+    assert.equal(purchase.wizard.wardrobe.ownedGearIds.filter((id) => id === 'hat_pointed_brim').length, 1);
+  }
+  const equipped = await gameplay(player, { type: 'equip', id: 'hat_pointed_brim' });
+  assert.equal(equipped.wizard.wardrobe.equipped.headgear, 'hat_pointed_brim');
+  const craft = await gameplay(player, { type: 'transmute' });
+  assert.equal(craft.wizard.progression.craftXp, 25);
+  assert.equal(craft.wizard.resources.starstone, 2);
+  const adoption = await gameplay(player, { type: 'adopt', id: 'bramble_sprig' });
+  const adopted = adoption.creatures.find((pet) => pet.speciesId === 'bramble_sprig');
+  assert.ok(adopted);
+  assert.equal(adopted.serverProgressionVersion, 1);
+  const lead = await gameplay(player, { type: 'lead', id: adopted.id });
+  assert.equal(lead.wizard.activeCreatureId, adopted.id);
+  await gameplay(player, { type: 'gardenHarvest', index: 0 }, randomUUID(), 409);
+  const plant = await gameplay(player, { type: 'gardenPlant', index: 0, element: 'ember' });
+  assert.equal(plant.sanctuary.gardens[0].seedElement, 'ember');
+  await gameplay(player, { type: 'gardenHarvest', index: 0 }, randomUUID(), 409);
+  const dorm = await gameplay(player, { type: 'dormWeather', id: 'fireflies' });
+  assert.equal(dorm.sanctuary.weatherId, 'fireflies');
+  assert.equal((await player.wizardRef.get()).get('activeCreatureId'), adopted.id);
+});
+
+test('archived cloud records stay outside signed-in gameplay', { timeout: 45000 }, async () => {
+  const player = await createPlayer();
+  await cloudDb.collection('wizards').doc('archive-' + player.uid).set({
+    ownerId: player.uid, realmId: 'breeze', name: 'Earlier Save', level: 10,
+  });
+  const realm = await call(player, 'realm');
+  assert.deepEqual(realm.wizardIds, [player.wizardId]);
+  await call(player, 'solo/start', { wizardId: 'archive-' + player.uid, mode: 'solo', element: 'ember' }, 409);
+  assert.equal((await cloudDb.collection('wizards').doc('archive-' + player.uid).get()).get('level'), 10);
 });

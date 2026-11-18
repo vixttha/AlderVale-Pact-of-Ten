@@ -24,6 +24,8 @@ interface TitleWizardStudioProps {
   selectedRealm: RealmId;
   realmAccount: RealmAccountState;
   wizards: WizardDocument[];
+  legacyWizards: WizardDocument[];
+  onCopyLegacy: (wizard: WizardDocument) => void;
   onSignInGoogle: () => void;
   onSelectRealm: (realmId: RealmId) => void;
   onEnterWorld: (wizard: WizardDocument) => void;
@@ -47,6 +49,8 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   selectedRealm,
   realmAccount,
   wizards,
+  legacyWizards,
+  onCopyLegacy,
   onSignInGoogle,
   onSelectRealm,
   onEnterWorld,
@@ -146,6 +150,18 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
       <div className="mx-auto max-w-6xl space-y-5">
         {notice && <p role="status" className="rounded-xl bg-[#202942] p-3">{notice}</p>}
         {isSignedIn && <button onClick={onSignOut} className="text-sm underline">Sign out</button>}
+        {isSignedIn && legacyWizards.length > 0 && (
+          <section className="space-y-2 rounded-xl border border-[#d7c7a9]/25 bg-[#202942] p-4">
+            <h2 className="font-display text-lg">Earlier cloud saves</h2>
+            <p className="text-sm">Copy an earlier wizard to this device, then sign out to play it as a guest.</p>
+            {legacyWizards.map((wizard) => (
+              <button key={wizard.id} onClick={() => onCopyLegacy(wizard)}
+                className="mr-3 rounded-lg border border-[#d7c7a9]/25 px-3 py-1.5 text-sm">
+                Copy {wizard.name} to guest saves
+              </button>
+            ))}
+          </section>
+        )}
         {/* Header Bar */}
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#d7c7a9]/25 bg-[#202942]/95 px-6 py-4 shadow-xl">
           <div>

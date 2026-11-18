@@ -8,7 +8,8 @@ import { verifyFirebaseBearerToken } from './server/authVerify.ts';
 import { resourceStore } from './server/authzStore.ts';
 import { generateArchivistAdvice, type StrategizeRequest } from './server/lecternAi.ts';
 import { attachAldervaleWebSocketServer } from './server/wsHub.ts';
-import { advanceSolo, claimServerTerm, finishSolo, readServerTerm, startSolo } from './server/soloProgress.ts';
+import { advanceSolo, claimServerTerm, finishSolo, readProgressionRealm, readServerTerm, startSolo } from './server/soloProgress.ts';
+import { applyGameplayAction } from './server/gameplayActions.ts';
 import { enrollWizard } from './server/wizardEnrollment.ts';
 import type { RealmId } from './shared/realms.ts';
 
@@ -59,6 +60,12 @@ export async function createAldervaleApp({ frontend = true } = {}) {
     return principal.uid;
   }
 
+  app.get('/api/progression/:realmId/realm', realmRoute(async (req, res, realm) => {
+    res.json(await readProgressionRealm(await requireAccount(req), realm));
+  }));
+  app.post('/api/progression/:realmId/action', realmRoute(async (req, res, realm) => {
+    res.json(await applyGameplayAction(await requireAccount(req), realm, req.body ?? {}));
+  }));
   app.post('/api/progression/:realmId/enroll', realmRoute(async (req, res, realm) => {
     res.json(await enrollWizard(await requireAccount(req), realm, req.body ?? {}));
   }));

@@ -1,10 +1,11 @@
 import type { DuelState, TurnActionInput } from '../../shared/combat.ts';
 import type { WizardDocument } from '../../shared/economy.ts';
 import type { ElementId } from '../../shared/elements.ts';
+import type { GameplayAction, GameplayFeedback } from '../../shared/gameplayActions.ts';
 import type { RealmId } from '../../shared/realms.ts';
 import type { SoloDuelMode } from '../../shared/soloDuel.ts';
 import { auth } from './firebase.ts';
-import type { OwnedCreature, RealmAccountState } from './storage.ts';
+import type { OwnedCreature, RealmAccountState, SanctuaryState } from './storage.ts';
 
 export interface CloudSoloState {
   duel: DuelState;
@@ -33,8 +34,19 @@ async function request<T>(uid: string, realm: RealmId, path: string, body?: Reco
   return result as T;
 }
 
-export function loadServerTerm(uid: string, realm: RealmId) {
-  return request<Pick<RealmAccountState, 'termXp' | 'claimedTermTiers'>>(uid, realm, 'term');
+export function loadProgressionRealm(uid: string, realm: RealmId) {
+  return request<RealmAccountState>(uid, realm, 'realm');
+}
+
+export function submitGameplayAction(wizard: WizardDocument, action: GameplayAction) {
+  const body = { wizardId: wizard.id, actionId: crypto.randomUUID(), action };
+  type Result = { wizard: WizardDocument; account: RealmAccountState; creatures: OwnedCreature[];
+    sanctuary: SanctuaryState; feedback: GameplayFeedback };
+  const send = () => request<Result>(wizard.ownerId, wizard.realmId, 'action', body);
+  return send().catch((error: unknown) => {
+    if (error instanceof TypeError) return send();
+    throw error;
+  });
 }
 
 export function claimCloudTerm(wizard: WizardDocument, tier: number) {

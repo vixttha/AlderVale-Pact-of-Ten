@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { applySagaEvent } from '../shared/quests.ts';
 import { soloVictoryRewards } from '../shared/soloRewards.ts';
+import { PROGRESSION_VERSION, type RunGameplayAction } from '../shared/gameplayActions.ts';
 import { REALMS, type RealmId } from '../shared/realms.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { CAMPUS_NPCS, CAMPUS_QUESTS, MOUNTS, ZONES, type CampusNpc, type ZoneId } from '../shared/world.ts';
@@ -31,29 +32,23 @@ import { isWizardMuted } from '../shared/playerSocial.ts';
 import { RACES } from '../shared/wardrobe.ts';
 import { auth, signInWithGooglePopup, signOutFirebase } from './lib/firebase.ts';
 import {
-  ensureCloudAccountAndRealm,
+  ensureCloudAccount,
   loadCloudCreatures,
   loadCloudGallery,
   saveCloudPainting,
-  ensureCloudWizardStarter,
   loadCloudSanctuary,
   loadCloudWizardsForRealm,
   loadGuestRealm,
   loadGuestSettings,
-  migrateGuestWizards,
   saveGuestSettings,
   saveCloudSettings,
-  saveCloudCreatures,
-  saveCloudRealmAccount,
-  saveCloudSanctuary,
-  saveCloudWizard,
   saveGuestRealm,
   type GuestRealmBundle,
   type OwnedCreature,
   type RealmAccountState,
   type SanctuaryState,
 } from './lib/storage.ts';
-import { claimCloudTerm, cloudSolo, enrollCloudWizard, loadServerTerm, type CloudSoloSettlement } from './lib/cloudProgression.ts';
+import { claimCloudTerm, cloudSolo, enrollCloudWizard, loadProgressionRealm, submitGameplayAction, type CloudSoloSettlement } from './lib/cloudProgression.ts';
 import { ElementCrest } from './lib/elementIcons.tsx';
 import { TitleWizardStudio } from './features/auth/TitleWizardStudio.tsx';
 import { WorldViewport } from './engine/worldViewport.tsx';
@@ -85,6 +80,7 @@ export function App() {
   const [fbUser, setFbUser] = useState<User | null>(null);
   const [selectedRealm, setSelectedRealm] = useState<RealmId>('breeze');
   const [realmAccount, setRealmAccount] = useState<RealmAccountState>(() => loadGuestRealm('breeze').account);
+  const [legacyWizards, setLegacyWizards] = useState<WizardDocument[]>([]);
   const [wizards, setWizards] = useState<WizardDocument[]>(() => loadGuestRealm('breeze').wizards);
   const [activeWizard, setActiveWizard] = useState<WizardDocument | null>(null);
   const [creatures, setCreatures] = useState<OwnedCreature[]>([]);
@@ -232,45 +228,24 @@ export function App() {
       setPlayerSettings(loadGuestSettings());
       setRealmAccount(guest.account);
       setWizards(guest.wizards);
+      setLegacyWizards([]);
       return;
     }
-    const loadCloudRealm = async () => {
-      const account = await ensureCloudAccountAndRealm(user.uid, user.displayName ?? 'Wizard', user.email, realm);
-      const wizards = await loadCloudWizardsForRealm(user.uid, realm);
-      return { ...account, wizards };
-    };
-    let cloud = await loadCloudRealm();
+    const [settings, account, allWizards] = await Promise.all([
+      ensureCloudAccount(user.uid, user.displayName ?? 'Wizard', user.email),
+      loadProgressionRealm(user.uid, realm),
+      loadCloudWizardsForRealm(user.uid, realm),
+    ]);
     if (version !== realmLoad.current) return;
-
-    const guest = readGuestProgress(realm);
-    let notice: string | undefined;
-    if (cloud.wizards.length === 0 && guest.wizards.length > 0) {
-      let migration: Awaited<ReturnType<typeof migrateGuestWizards>> | 'failed';
-      try {
-        migration = await migrateGuestWizards(cloud.realm, guest);
-      } catch {
-        migration = 'failed';
-      }
-      if (version !== realmLoad.current) return;
-      // Another tab may have enrolled or imported while this realm was loading.
-      cloud = await loadCloudRealm();
-      if (version !== realmLoad.current) return;
-      if (migration === 'saved') notice = 'Guest progress migrated to your Google Cloud account!';
-      if (migration === 'already-linked' && !cloud.wizards.length) {
-        notice = 'This guest save is already linked. You can enroll a new wizard in this account.';
-      }
-      if (migration === 'failed' && !cloud.wizards.length) {
-        notice = 'Guest progress could not be imported. It is still on this device. You can enroll a new wizard in this account.';
-      }
+    const online = allWizards.filter((wizard) =>
+      wizard.serverProgressionVersion === PROGRESSION_VERSION && account.wizardIds.includes(wizard.id));
+    setPlayerSettings(settings);
+    setRealmAccount(account);
+    setWizards(online);
+    setLegacyWizards(allWizards.filter((wizard) => !online.includes(wizard)));
+    if (allWizards.length > online.length || readGuestProgress(realm).wizards.length > 0) {
+      showToast('Earlier saves are preserved. Enroll an online wizard for verified progression. Sign out to play your local guest saves.');
     }
-
-    const term = await loadServerTerm(user.uid, realm).catch(() => null);
-    if (version !== realmLoad.current) return;
-    setPlayerSettings(cloud.settings);
-    setRealmAccount({ ...cloud.realm, ...(term ?? { termXp: 0, claimedTermTiers: [] }) });
-    setWizards(cloud.wizards);
-    if (!term) showToast('Term progress could not be loaded. You can retry by reopening the realm.');
-    else if (notice) showToast(notice);
   }, [readGuestProgress, setPlayerSettings, showToast]);
 
   useEffect(() => {
@@ -288,6 +263,7 @@ export function App() {
       setRealmReady(!user);
       if (user) {
         setWizards([]);
+        setLegacyWizards([]);
         setRealmAccount({ ...loadGuestRealm(selectedRealm).account, uid: user.uid, wizardIds: [] });
       }
       void loadRealmData(user, selectedRealm, version).then(() => {
@@ -304,29 +280,59 @@ export function App() {
 
   const persistWizard = useCallback(
     (next: WizardDocument, pets: OwnedCreature[] = [], account?: RealmAccountState, updatedPets: OwnedCreature[] = []) => {
+      if (fbUser) return;
       const updateWizardList = (list: WizardDocument[]) => list.some((w) => w.id === next.id)
         ? list.map((w) => w.id === next.id ? next : w)
         : [...list, next];
       setActiveWizard(next);
       setWizards(updateWizardList);
-      if (!fbUser) {
-        updateGuestProgress(next.realmId, (guest) => {
-          guest.wizards = updateWizardList(guest.wizards);
-          if (account) guest.account = account;
-          if (pets.length || updatedPets.length) {
-            const byId = new Map((guest.creatures[next.id] ?? []).map((pet) => [pet.id, pet]));
-            for (const pet of [...pets, ...updatedPets]) byId.set(pet.id, pet);
-            guest.creatures[next.id] = [...byId.values()];
-          }
-        });
-      } else {
-        wizardSaves.current = wizardSaves.current.then(
-          () => saveCloudWizard(next, pets, account, updatedPets),
-        ).catch(() => showToast('Cloud save failed. Your latest changes may need to be retried.'));
-      }
+      updateGuestProgress(next.realmId, (guest) => {
+        guest.wizards = updateWizardList(guest.wizards);
+        if (account) guest.account = account;
+        if (pets.length || updatedPets.length) {
+          const byId = new Map((guest.creatures[next.id] ?? []).map((pet) => [pet.id, pet]));
+          for (const pet of [...pets, ...updatedPets]) byId.set(pet.id, pet);
+          guest.creatures[next.id] = [...byId.values()];
+        }
+      });
     },
-    [fbUser, showToast, updateGuestProgress],
+    [fbUser, updateGuestProgress],
   );
+
+  const copyLegacyToGuest = async (wizard: WizardDocument) => {
+    if (!fbUser || auth.currentUser?.uid !== wizard.ownerId) return;
+    const version = realmLoad.current;
+    try {
+      const [pets, dorm, images] = await Promise.all([
+        loadCloudCreatures(wizard.id, true), loadCloudSanctuary(wizard.id, wizard.realmId), loadCloudGallery(wizard),
+      ]);
+      if (version !== realmLoad.current || auth.currentUser?.uid !== wizard.ownerId) return;
+      const guest = readGuestProgress(wizard.realmId);
+      const id = `legacy_${wizard.id}`;
+      if (guest.wizards.some((saved) => saved.id === id)) {
+        showToast('This archive already has a local copy.');
+        return;
+      }
+      if (guest.wizards.length >= 3) {
+        showToast('There are no free guest slots. The original archive is still available.');
+        return;
+      }
+      const { serverProgressionVersion: _version, ...saved } = wizard;
+      const ownerId = 'guest_local';
+      const wizards = [...guest.wizards, { ...saved, id, ownerId }];
+      const creatures = { ...guest.creatures, [id]: pets.map(({ serverProgressionVersion: _petVersion, ...pet }) =>
+        ({ ...pet, wizardId: id, ownerId })) };
+      const sanctuaries = { ...guest.sanctuaries, ...(dorm ? { [id]: { ...dorm, wizardId: id, ownerId, isPublic: false } } : {}) };
+      const gallery = { ...guest.gallery, [id]: images };
+      if (!commitGuestProgress(wizard.realmId, {
+        ...guest, wizards, creatures, sanctuaries, gallery,
+        account: { ...guest.account, wizardIds: wizards.map((entry) => entry.id) },
+      })) throw new Error('Your device could not save the archive.');
+      showToast('Copied to this device. Sign out to play your guest copy.');
+    } catch (error) {
+      if (version === realmLoad.current) showToast(error instanceof Error ? error.message : 'Could not copy that archive.');
+    }
+  };
 
   const claimTermTier = async (tier: number) => {
     if (!activeWizard) throw new Error('Open a wizard first.');
@@ -358,48 +364,50 @@ export function App() {
     return true;
   };
 
-  const persistRealmAccount = useCallback(
-    (next: RealmAccountState) => {
-      setRealmAccount(next);
-      if (fbUser) {
-        wizardSaves.current = wizardSaves.current.then(() => saveCloudRealmAccount(fbUser.uid, next))
-          .catch(() => showToast('Realm progress could not be saved.'));
-      } else {
-        updateGuestProgress(next.realmId, (guest) => { guest.account = next; });
-      }
-    },
-    [fbUser, showToast, updateGuestProgress],
-  );
+  const persistRealmAccount = useCallback((next: RealmAccountState) => {
+    if (fbUser) return;
+    setRealmAccount(next);
+    updateGuestProgress(next.realmId, (guest) => { guest.account = next; });
+  }, [fbUser, updateGuestProgress]);
 
-  const persistCreatures = useCallback(
-    (nextList: OwnedCreature[], newCreature?: OwnedCreature) => {
-      setCreatures(nextList);
-      if (!activeWizard) return;
-      if (fbUser) {
-        const pending = newCreature ? saveCloudCreatures([newCreature], new Set([newCreature.id])) : saveCloudCreatures(nextList);
-        void pending.catch(() => showToast('Creature progress could not be saved.'));
-      } else {
-        updateGuestProgress(activeWizard.realmId, (guest) => {
-          guest.creatures[activeWizard.id] = nextList;
-        });
-      }
-    },
-    [fbUser, activeWizard, showToast, updateGuestProgress],
-  );
+  const persistCreatures = useCallback((nextList: OwnedCreature[]) => {
+    if (fbUser || !activeWizard) return;
+    setCreatures(nextList);
+    updateGuestProgress(activeWizard.realmId, (guest) => {
+      guest.creatures[activeWizard.id] = nextList;
+    });
+  }, [fbUser, activeWizard, updateGuestProgress]);
 
-  const persistSanctuary = useCallback(
-    (nextSanc: SanctuaryState, isNew = false) => {
-      setSanctuary(nextSanc);
-      if (fbUser) {
-        void saveCloudSanctuary(nextSanc, isNew).catch(() => showToast('Your Dorm changes could not be saved.'));
-      } else {
-        updateGuestProgress(nextSanc.realmId, (guest) => {
-          guest.sanctuaries[nextSanc.wizardId] = nextSanc;
-        });
-      }
-    },
-    [fbUser, showToast, updateGuestProgress],
-  );
+  const persistSanctuary = useCallback((next: SanctuaryState) => {
+    setSanctuary(next);
+    if (!fbUser) updateGuestProgress(next.realmId, (guest) => {
+      guest.sanctuaries[next.wizardId] = next;
+    });
+  }, [fbUser, updateGuestProgress]);
+
+  const runGameplayAction: RunGameplayAction = async (action) => {
+    if (!fbUser || !activeWizard) return;
+    const wizard = activeWizard;
+    const entry = worldEntry.current;
+    const pending = wizardSaves.current.then(() => {
+      if (entry !== worldEntry.current) throw new Error('Reopen this activity and try again.');
+      return submitGameplayAction(wizard, action);
+    });
+    wizardSaves.current = pending.then(() => undefined, () => undefined);
+    try {
+      const result = await pending;
+      if (entry !== worldEntry.current || auth.currentUser?.uid !== result.wizard.ownerId) return;
+      setActiveWizard(result.wizard);
+      setWizards((list) => list.map((saved) => saved.id === wizard.id ? result.wizard : saved));
+      setCreatures(result.creatures);
+      setRealmAccount(result.account);
+      setSanctuary(result.sanctuary);
+      if (result.feedback.notice) showToast(result.feedback.notice);
+      return result.feedback;
+    } catch (error) {
+      if (entry === worldEntry.current) showToast(error instanceof Error ? error.message : 'Could not save this activity.');
+    }
+  };
 
   const enterWorld = async (wiz: WizardDocument, prepared?: { pet: OwnedCreature; dorm: SanctuaryState }) => {
     const entry = ++worldEntry.current;
@@ -416,9 +424,9 @@ export function App() {
           const [pets, dorm] = await Promise.all([
             loadCloudCreatures(wiz.id), loadCloudSanctuary(wiz.id, wiz.realmId),
           ]);
-          await ensureCloudWizardStarter(wiz, pets.length ? null : defaults.pet, dorm ? null : defaults.dorm);
-          loadedPets = pets.length ? pets : await loadCloudCreatures(wiz.id);
-          loadedSanc = dorm ?? await loadCloudSanctuary(wiz.id, wiz.realmId) ?? defaults.dorm;
+          if (!dorm || !pets.some((pet) => pet.id === wiz.activeCreatureId)) throw new Error('Your online save is incomplete.');
+          loadedPets = pets;
+          loadedSanc = dorm;
         } else {
           const guest = readGuestProgress(wiz.realmId);
           const savedPets = guest.creatures[wiz.id];
@@ -446,7 +454,7 @@ export function App() {
       }
       setZone('hub');
       setOverlay({ type: 'none' });
-      const recoveredWizard = grantFusionSpells(wiz, loadedPets);
+      const recoveredWizard = fbUser ? wiz : grantFusionSpells(wiz, loadedPets);
       if (recoveredWizard !== wiz) persistWizard(recoveredWizard);
       else setActiveWizard(wiz);
     } catch {
@@ -842,6 +850,10 @@ export function App() {
   const handleInteractHit = (hit: InteractiveHitTarget) => {
     if (!activeWizard) return;
     academyAudio.playChime('ui');
+    if (fbUser && (hit.kind === 'fountain' || hit.kind === 'wisp' || hit.kind === 'resource' || hit.kind === 'fishing')) {
+      void runGameplayAction({ type: 'world', id: hit.id });
+      return;
+    }
 
     if (hit.kind === 'npc') {
       const npc = CAMPUS_NPCS.find((n) => n.id === hit.id);
@@ -962,6 +974,8 @@ export function App() {
             setSelectedRealm(realm);
           }}
           onEnterWorld={(w) => void enterWorld(w)}
+          legacyWizards={legacyWizards}
+          onCopyLegacy={(w) => void copyLegacyToGuest(w)}
           onCreateWizard={handleCreateWizard}
           notice={toast}
           enrollmentError={enrollmentError}
@@ -1007,6 +1021,10 @@ export function App() {
         }}
         onPlayerMoveSample={setPlayerMinimapPos}
         onToggleMount={() => {
+          if (fbUser) {
+            void runGameplayAction({ type: 'mountToggle' });
+            return;
+          }
           const owned = activeWizard.progression.ownedMounts;
           const nextMount = activeWizard.progression.equippedMountId ? null : (owned[0] ?? 'mount_cloud_broom');
           persistWizard({
@@ -1385,6 +1403,7 @@ export function App() {
 
       {overlay.type === 'tailor' && (
         <TailorStudioPanel
+          onCloudAction={fbUser ? runGameplayAction : undefined}
           wizard={activeWizard}
           bazaarGear={wallet?.gear}
           realmAccount={realmAccount}
@@ -1396,11 +1415,13 @@ export function App() {
 
       {overlay.type === 'creatures' && (
         <CreaturesArborPanel
+          onCloudAction={fbUser ? runGameplayAction : undefined}
           wizard={activeWizard}
           creatures={creatures}
           onUpdateWizard={(w) => persistWizard(w)}
           onUpdateCreatures={(list, created) => persistCreatures(list, created)}
           onRuneCatch={(pet) => {
+            if (fbUser) return;
             const updated = applySagaEvent(activeWizard, 'rune-catch');
             setCreatures((list) => list.map((entry) => entry.id === pet.id ? pet : entry));
             persistWizard(updated, [], undefined, [pet]);
@@ -1411,6 +1432,7 @@ export function App() {
 
       {overlay.type === 'deck' && (
         <DeckLecternPanel
+          onCloudAction={fbUser ? runGameplayAction : undefined}
           wizard={activeWizard}
           activeCreature={activePet}
           onUpdateWizard={(w) => persistWizard(w)}
@@ -1420,6 +1442,7 @@ export function App() {
 
       {overlay.type === 'sanctuary' && sanctuary && (
         <SanctuaryPanel
+          onCloudAction={fbUser ? runGameplayAction : undefined}
           wizard={activeWizard}
           sanctuary={sanctuary}
           galleryImages={galleryImages}
@@ -1433,6 +1456,7 @@ export function App() {
 
       {overlay.type === 'hub' && (
         <AcademyModalHub
+          onCloudAction={fbUser ? runGameplayAction : undefined}
           initialTab={overlay.tab}
           wizard={activeWizard}
           realmAccount={realmAccount}
