@@ -21,7 +21,7 @@
 2. **File a candidate:** record recipe, primary fusion name, category (technique/material/ability), each parent's causal role, visual identity and overlap assessment, unique tactical verb, primary cost, counterplay and intended progression purpose. Reuse [the Atlas](fusions/README.md) and its scoring guide.
 3. **Gate independently:** mark Q1–Q4 **PASS**, **FAIL**, or **UNVERIFIED**, with design evidence and a specific comparison against currently selected techniques. **Any FAIL or UNVERIFIED blocks promotion to playable.** Ratings and popularity alone are not evidence.
 4. **Owner selection:** only an explicit owner decision can lock a recipe, approve its kit, authorize a gameplay implementation or authorize a merge/release. A locked **name/recipe** is not automatic evidence that its move, art or counterplay passes the four gameplay gates.
-5. **Engineering acceptance:** after separately authorized implementation, validate the proposed rules, gameplay, persistence and multiplayer behavior on the actual checkout using **standard GitHub-hosted public runners** under [the public runner policy](../docs/PUBLIC_RUNNER_POLICY.md). Keep private planning in Notion.
+5. **Engineering acceptance:** after separately authorized implementation, validate the proposed rules, gameplay, persistence and multiplayer behavior on the actual checkout using **standard GitHub-hosted public runners** under [the public runner policy](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/5a7d0438e46582e625fc101efb6aa0f9e637c55e/docs/PUBLIC_RUNNER_POLICY.md). Keep private planning in Notion.
 
 ## Roster and complexity rules
 
