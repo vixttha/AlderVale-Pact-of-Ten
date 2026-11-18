@@ -52,3 +52,12 @@ actions, exact dependencies, read-only token permissions, finite timeout and
 superseded-run cancellation. It records checkout and baseline SHAs, executes
 negative regressions, rebuilds maps and verifies them through Graphify MCP.
 No self-hosted runner, paid model, schedule, signing key or game release is used.
+
+## Future toolchain upgrades
+
+Archived maps are immutable and currently rebuild with the one locked toolchain.
+Changing Graphify or extraction behavior can change older output and correctly
+fail both the rebuild and frozen-history gates. Before making such an upgrade,
+retain a historical-compatible generator/environment or introduce a reviewed
+version-specific verifier. Do not silently rebaseline approved maps. This is a
+known future upgrade constraint; no approved launcher archive exists yet.

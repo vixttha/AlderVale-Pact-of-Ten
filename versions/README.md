@@ -28,13 +28,21 @@ implicitly part of the mapped product corpus.
    acceptance for the source snapshot. A setup request is not release acceptance.
 2. Copy the complete approved workspace bytes to `versions/vX.Y.Z/`.
 3. Keep its original source commit/path. Change status to `archived` and
-   snapshot_path to the archive; update current_archived. Retain the workspace.
+   snapshot_path to the archive; update current_archived. Clear current_working
+   to null if there is no successor draft, or point it to a new draft entry.
+   Retain the archived version's workspace.
 4. Regenerate the version map against those archived bytes and update the
    indexes. Review and verify the normal branch change on public runners.
 5. Preserve that archive, record and map byte for byte thereafter. CI compares
    archived entries and files against the trusted prior push/PR-base commit.
 6. For the next version add a new workspace, manifest entry and map. Keep all
    previous archives. Only one active draft is allowed.
+
+The Graphify toolchain is locked. Before upgrading its package or generator,
+provide a compatible historical rebuild/verifier for existing frozen maps;
+do not rewrite old maps simply to make an upgrade pass. Until then, such an
+upgrade must fail closed. Rehearse archive-plus-successor-draft transitions and
+toolchain changes in fixtures when adding historical toolchain support.
 
 Archiving is a source-history operation. A launcher download, public release,
 main-game merge or channel promotion requires separate owner authorization.
