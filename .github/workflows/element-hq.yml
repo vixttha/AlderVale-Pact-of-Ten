@@ -44,12 +44,13 @@ jobs:
               "element-hq/fusion-system-v1.md",
               template,
               design,
+              "element-hq/fusions/README.md",
           }
           tracked = set(git("ls-files", "-z").rstrip("\0").split("\0"))
-          missing = (documents | {"README.md", workflow}) - tracked
+          missing = (documents | {"README.md", workflow, "element-hq/fusions/build_atlas.py"}) - tracked
           unexpected = {
               path for path in tracked
-              if path not in {"README.md", workflow}
+              if path not in {"README.md", workflow, "element-hq/fusions/build_atlas.py"}
               and (not path.startswith("element-hq/") or not path.endswith(".md")
                    or not Path(path).is_file() or Path(path).is_symlink())
           }
@@ -76,3 +77,5 @@ jobs:
 
           print(f"Verified Element HQ documents at {head}")
           PY
+      - name: Verify Fusion Name Atlas
+        run: python3 element-hq/fusions/build_atlas.py --check
