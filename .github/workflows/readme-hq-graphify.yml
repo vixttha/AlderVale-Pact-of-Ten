@@ -2,7 +2,7 @@ name: README HQ Graphify
 
 on:
   push:
-    branches: [readme-hq]
+    branches: [readme-hq, docs/readme-hq-graphify-map]
   pull_request:
     branches: [readme-hq]
     paths:
@@ -38,7 +38,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          ref: ${{ github.event.pull_request.base.sha || (github.ref == 'refs/heads/readme-hq' && github.sha) || 'refs/heads/readme-hq' }}
           path: source
           persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -66,7 +66,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          ref: ${{ github.event.pull_request.base.sha || (github.ref == 'refs/heads/readme-hq' && github.sha) || 'refs/heads/readme-hq' }}
           path: source
           fetch-depth: 0
           persist-credentials: false
@@ -101,7 +101,7 @@ jobs:
           git --git-dir="$fixture/remote.git" show graphify-snapshots:readme-hq/receipt.json | cmp "$RUNNER_TEMP/snapshot/receipt.json" -
           test "$(git --git-dir="$fixture/remote.git" ls-tree --name-only graphify-snapshots)" = readme-hq
       - name: Export the verified initial snapshot
-        if: github.event_name == 'pull_request'
+        if: github.ref != 'refs/heads/readme-hq'
         run: python tools/graphify/readme_hq_map.py export "$RUNNER_TEMP/snapshot/graph.json"
 
   publish:
