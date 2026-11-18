@@ -44,6 +44,12 @@ CI must independently run regressions and rebuild/query/compare committed maps
 on both standard public Ubuntu and Windows runners. The result SHA and run URL
 belong in issue #151 and the private Notion handoff, not an invented receipt.
 
+The first hosted Ubuntu job passed. Windows exposed a repository-wide Git ref
+case collision during full-history checkout, before any tests ran. The workflow
+now checks out one commit and explicitly fetches only its ancestry, retaining
+source/baseline verification without fetching unrelated branch refs. The failed
+run remains evidence; no conflicting branch was renamed or deleted.
+
 v0.0.1 is Draft. Source archive approval, public release acceptance, main-game
 integration and signing/billing remain separate owner decisions. No installer
 or executable launcher is supplied by this version infrastructure change.
