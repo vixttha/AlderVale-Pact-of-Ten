@@ -21,132 +21,132 @@ Breakdown order is parents, identity, name, and gameplay.
 
 [Fire + Water pair page](../pairs/fire-water.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Steam | Steam | 3 / 3 / 2 / 2 | 10 | Parked |
-| Vapor | Steam | 3 / 3 / 2 / 2 | 10 | Parked |
-| Flash Steam | Steam | 3 / 3 / 2 / 1 | 9 | Parked |
-| Superheated Steam | Steam | 3 / 3 / 1 / 2 | 9 | Parked |
-| Water Vapor | Steam | 3 / 3 / 1 / 2 | 9 | Parked |
-| Boil | Steam | 3 / 1 / 2 / 1 | 7 | Reference |
-| Scald | Steam | 3 / 1 / 2 / 1 | 7 | Reference |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Steam | Steam | Fusion | 3 / 3 / 2 / 2 | 10 | Parked |
+| Boil | Steam | Process | 3 / 1 / 2 / 1 | 7 | Reference |
+| Flash Steam | Steam | Ability | 3 / 1 / 2 / 1 | 7 | Parked |
+| Scald | Steam | Process | 3 / 1 / 2 / 1 | 7 | Reference |
+| Superheated Steam | Steam | Material | 3 / 1 / 1 / 1 | 6 | Parked |
+| Vapor | Steam | Alias | 3 / 0 / 2 / 0 | 5 | Parked |
+| Water Vapor | Steam | Alias | 3 / 0 / 1 / 0 | 4 | Parked |
 
 ## Lightning
 
 [Water + Lightning pair page](../pairs/water-lightning.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Hydrogen | Water-splitting gas | 3 / 3 / 2 / 2 | 10 | Parked |
-| Electrified Water | Conducting water | 3 / 1 / 2 / 2 | 8 | Reference |
-| Tempest | Electrified weather | 2 / 2 / 2 / 2 | 8 | Reference |
-| Conductive Brine | Conducting water | 2 / 2 / 1 / 2 | 7 | Exploratory |
-| Stormwater | Conducting water | 2 / 2 / 2 / 1 | 7 | Reference |
-| Charged Tide | Conducting water | 2 / 1 / 2 / 1 | 6 | Reference |
-| Electrolysis | Water-splitting gas | 3 / 1 / 1 / 1 | 6 | Reference |
-| Thunderwake | Conducting water | 2 / 1 / 1 / 1 | 5 | Reference |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Hydrogen | Water-splitting gas | Fusion | 3 / 2 / 2 / 2 | 9 | Parked |
+| Electrified Water | Conducting water | Material | 3 / 1 / 2 / 1 | 7 | Reference |
+| Charged Tide | Conducting water | Ability | 2 / 1 / 2 / 1 | 6 | Reference |
+| Electrolysis | Water-splitting gas | Process | 3 / 1 / 1 / 1 | 6 | Reference |
+| Stormwater | Conducting water | Material | 2 / 1 / 2 / 1 | 6 | Reference |
+| Tempest | Electrified weather | Material | 2 / 1 / 2 / 1 | 6 | Reference |
+| Conductive Brine | Conducting water | Material | 2 / 1 / 1 / 1 | 5 | Reference |
+| Thunderwake | Conducting water | Material | 2 / 1 / 1 / 1 | 5 | Reference |
 
 ## Frost
 
 [Water + Frost pair page](../pairs/water-frost.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Ice | Ice | 3 / 3 / 2 / 2 | 10 | Parked |
-| Glacier | Ice | 3 / 2 / 2 / 2 | 9 | Exploratory |
-| Rime | Ice | 3 / 2 / 2 / 2 | 9 | Exploratory |
-| Hail | Ice pellets | 3 / 2 / 2 / 1 | 8 | Reference |
-| Ice Sheet | Ice | 3 / 1 / 2 / 2 | 8 | Reference |
-| Pack Ice | Ice | 3 / 2 / 1 / 2 | 8 | Exploratory |
-| Rimeflow | Ice | 3 / 2 / 1 / 2 | 8 | Exploratory |
-| Slush | Ice and water mixture | 3 / 2 / 2 / 1 | 8 | Exploratory |
-| Icefall | Ice | 2 / 2 / 2 / 1 | 7 | Reference |
-| Sleet | Ice and water mixture | 3 / 1 / 2 / 1 | 7 | Reference |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Glacier | Ice | Variant | 3 / 1 / 2 / 1 | 7 | Reference |
+| Hail | Ice pellets | Phenomenon | 3 / 1 / 2 / 1 | 7 | Reference |
+| Ice | Ice | Fusion | 3 / 1 / 2 / 1 | 7 | Parked |
+| Ice Sheet | Ice | Material | 3 / 1 / 2 / 1 | 7 | Reference |
+| Rime | Ice | Variant | 3 / 1 / 2 / 1 | 7 | Reference |
+| Sleet | Ice and water mixture | Material | 3 / 1 / 2 / 1 | 7 | Reference |
+| Slush | Ice and water mixture | Variant | 3 / 1 / 2 / 1 | 7 | Reference |
+| Icefall | Ice | Material | 2 / 1 / 2 / 1 | 6 | Reference |
+| Pack Ice | Ice | Variant | 3 / 1 / 1 / 1 | 6 | Reference |
+| Rimeflow | Ice | Material | 3 / 1 / 1 / 1 | 6 | Reference |
 
 ## Wind
 
 [Water + Wind pair page](../pairs/water-wind.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Fog | Dispersed water | 3 / 2 / 2 / 2 | 9 | Reference |
-| Mist | Dispersed water | 3 / 2 / 2 / 2 | 9 | Reference |
-| Water Vortex | Moving water | 3 / 1 / 2 / 2 | 8 | Reference |
-| Waterspout | Moving water | 3 / 1 / 2 / 2 | 8 | Reference |
-| Sea Spray | Dispersed water | 3 / 1 / 2 / 1 | 7 | Reference |
-| Spray | Dispersed water | 2 / 1 / 2 / 1 | 6 | Reference |
-| Squall | Wind and rain | 2 / 1 / 2 / 1 | 6 | Reference |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Fog | Dispersed water | Phenomenon | 3 / 1 / 2 / 1 | 7 | Reference |
+| Mist | Dispersed water | Phenomenon | 3 / 1 / 2 / 1 | 7 | Reference |
+| Sea Spray | Dispersed water | Material | 3 / 1 / 2 / 1 | 7 | Reference |
+| Water Vortex | Moving water | Ability | 3 / 1 / 2 / 1 | 7 | Reference |
+| Waterspout | Moving water | Phenomenon | 3 / 1 / 2 / 1 | 7 | Reference |
+| Spray | Dispersed water | Material | 2 / 1 / 2 / 1 | 6 | Reference |
+| Squall | Wind and rain | Phenomenon | 2 / 1 / 2 / 1 | 6 | Reference |
 
 ## Earth
 
 [Water + Earth pair page](../pairs/water-earth.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Mud | Wet earth | 3 / 3 / 2 / 2 | 10 | Parked |
-| Silt | Wet earth | 3 / 3 / 2 / 2 | 10 | Parked |
-| Clay | Wet earth | 3 / 2 / 2 / 2 | 9 | Parked |
-| Quicksand | Saturated earth | 3 / 2 / 2 / 2 | 9 | Parked |
-| Sediment | Wet earth | 3 / 2 / 2 / 2 | 9 | Parked |
-| Wet Clay | Wet earth | 3 / 2 / 2 / 1 | 8 | Parked |
-| Slip | Wet earth | 3 / 2 / 1 / 1 | 7 | Parked |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Mud | Wet earth | Fusion | 3 / 2 / 2 / 1 | 8 | Parked |
+| Clay | Wet earth | Variant | 3 / 1 / 2 / 1 | 7 | Parked |
+| Quicksand | Saturated earth | Variant | 3 / 1 / 2 / 1 | 7 | Parked |
+| Sediment | Wet earth | Variant | 3 / 1 / 2 / 1 | 7 | Parked |
+| Silt | Wet earth | Variant | 3 / 1 / 2 / 1 | 7 | Parked |
+| Wet Clay | Wet earth | Variant | 3 / 1 / 2 / 1 | 7 | Parked |
+| Slip | Wet earth | Variant | 3 / 1 / 1 / 1 | 6 | Parked |
 
 ## Light
 
 [Water + Light pair page](../pairs/water-light.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Water Lens | Focused light | 3 / 1 / 2 / 2 | 8 | Reference |
-| Rainbow | Refracted light | 3 / 1 / 2 / 1 | 7 | Reference |
-| Refraction | Refracted light | 3 / 1 / 1 / 2 | 7 | Reference |
-| Iridescence | Refracted light | 3 / 1 / 1 / 1 | 6 | Reference |
-| Opal | Radiant mineral | 2 / 2 / 1 / 1 | 6 | Exploratory |
-| Caustic | Focused light | 2 / 1 / 1 / 1 | 5 | Reference |
-| Mirrortide | Reflected light | 2 / 1 / 1 / 1 | 5 | Reference |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Rainbow | Refracted light | Phenomenon | 3 / 1 / 2 / 1 | 7 | Reference |
+| Water Lens | Focused light | Material | 3 / 1 / 2 / 1 | 7 | Reference |
+| Iridescence | Refracted light | Phenomenon | 3 / 1 / 1 / 1 | 6 | Reference |
+| Refraction | Refracted light | Process | 3 / 1 / 1 / 1 | 6 | Reference |
+| Caustic | Focused light | Material | 2 / 1 / 1 / 1 | 5 | Reference |
+| Mirrortide | Reflected light | Material | 2 / 1 / 1 / 1 | 5 | Reference |
+| Opal | Radiant mineral | Material | 2 / 1 / 1 / 1 | 5 | Reference |
 
 ## Dark
 
 [Water + Dark pair page](../pairs/water-dark.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Black Ink | Light-absorbing liquid | 2 / 3 / 2 / 2 | 9 | Exploratory |
-| Lightless Pool | Dark waters | 3 / 1 / 2 / 2 | 8 | Reference |
-| Shadowwater | Light-absorbing liquid | 2 / 3 / 1 / 2 | 8 | Exploratory |
-| Blackwater | Dark waters | 2 / 2 / 2 / 1 | 7 | Exploratory |
-| Abyss | Dark waters | 2 / 1 / 1 / 1 | 5 | Reference |
-| Undertow | Concealed water current | 1 / 1 / 1 / 1 | 4 | Rejected |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Lightless Pool | Dark waters | Material | 3 / 1 / 2 / 1 | 7 | Reference |
+| Black Ink | Light-absorbing liquid | Material | 2 / 1 / 2 / 1 | 6 | Reference |
+| Blackwater | Dark waters | Material | 2 / 1 / 2 / 1 | 6 | Reference |
+| Abyss | Dark waters | Habitat | 2 / 1 / 1 / 1 | 5 | Reference |
+| Shadowwater | Light-absorbing liquid | Material | 2 / 1 / 1 / 1 | 5 | Reference |
+| Undertow | Concealed water current | Material | 1 / 1 / 1 / 1 | 4 | Rejected |
 
 ## Metal
 
 [Water + Metal pair page](../pairs/water-metal.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Rust | Rust | 3 / 3 / 2 / 2 | 10 | Locked |
-| Iron Oxide | Rust | 3 / 3 / 1 / 2 | 9 | Reference |
-| Iron Rust | Rust | 3 / 3 / 1 / 2 | 9 | Reference |
-| Red Rust | Rust | 3 / 3 / 2 / 1 | 9 | Reference |
-| Corrosion | Rust | 3 / 1 / 2 / 2 | 8 | Reference |
-| Rust Scale | Rust | 2 / 3 / 1 / 2 | 8 | Exploratory |
-| Oxide | Rust | 2 / 2 / 1 / 2 | 7 | Reference |
-| Patina | Surface coating | 2 / 2 / 2 / 1 | 7 | Parked |
-| Pitting | Rust | 3 / 1 / 1 / 2 | 7 | Reference |
-| Tarnish | Surface coating | 2 / 1 / 2 / 1 | 6 | Reference |
-| Turbine | Water-powered mechanism | 2 / 1 / 2 / 0 | 5 | Reference |
-| Dowsing | Water finding | 1 / 1 / 2 / 0 | 4 | Reference |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Rust | Rust | Fusion | 3 / 3 / 2 / 2 | 10 | Locked |
+| Corrosion | Rust | Process | 3 / 1 / 2 / 1 | 7 | Reference |
+| Red Rust | Rust | Variant | 3 / 1 / 2 / 1 | 7 | Reference |
+| Iron Oxide | Rust | Variant | 3 / 1 / 1 / 1 | 6 | Reference |
+| Patina | Surface coating | Variant | 2 / 1 / 2 / 1 | 6 | Parked |
+| Pitting | Rust | Process | 3 / 1 / 1 / 1 | 6 | Reference |
+| Tarnish | Surface coating | Process | 2 / 1 / 2 / 1 | 6 | Reference |
+| Oxide | Rust | Variant | 2 / 1 / 1 / 1 | 5 | Reference |
+| Rust Scale | Rust | Ability | 2 / 1 / 1 / 1 | 5 | Reference |
+| Turbine | Water-powered mechanism | Material | 2 / 1 / 2 / 0 | 5 | Reference |
+| Dowsing | Water finding | Material | 1 / 1 / 2 / 0 | 4 | Reference |
+| Iron Rust | Rust | Alias | 3 / 0 / 1 / 0 | 4 | Reference |
 
 ## Plant
 
 [Water + Plant pair page](../pairs/water-plant.md)
 
-| Name | Concept | Breakdown | Total /10 | Status |
-| --- | --- | ---: | ---: | --- |
-| Floating Roots | Water-fed growth | 3 / 1 / 2 / 2 | 8 | Reference |
-| Peat | Waterlogged plant matter | 3 / 2 / 2 / 1 | 8 | Rejected |
-| Sap | Water-fed growth | 2 / 2 / 2 / 2 | 8 | Reference |
-| Waterlogged Wood | Water-fed growth | 3 / 1 / 2 / 2 | 8 | Reference |
-| Marsh | Water-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
-| Kelp | Water-fed growth | 2 / 1 / 2 / 1 | 6 | Reference |
-| Mangrove | Water-fed growth | 2 / 1 / 2 / 1 | 6 | Reference |
+| Name | Concept | Role | Breakdown | Total /10 | Status |
+| --- | --- | --- | ---: | ---: | --- |
+| Floating Roots | Water-fed growth | Material | 3 / 1 / 2 / 1 | 7 | Reference |
+| Peat | Waterlogged plant matter | Material | 3 / 1 / 2 / 1 | 7 | Rejected |
+| Waterlogged Wood | Water-fed growth | Material | 3 / 1 / 2 / 1 | 7 | Reference |
+| Kelp | Water-fed growth | Habitat | 2 / 1 / 2 / 1 | 6 | Reference |
+| Mangrove | Water-fed growth | Habitat | 2 / 1 / 2 / 1 | 6 | Reference |
+| Marsh | Water-fed growth | Habitat | 2 / 1 / 2 / 1 | 6 | Reference |
+| Sap | Water-fed growth | Material | 2 / 1 / 2 / 1 | 6 | Reference |

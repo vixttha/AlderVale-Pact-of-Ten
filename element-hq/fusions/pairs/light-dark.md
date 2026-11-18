@@ -4,13 +4,13 @@
 
 ## Rated names
 
-| Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Eclipse | Light occlusion | Reference | 3 | 1 | 2 | 2 | 8 | The owner questioned it as an element. It fits an encounter or combined ability. Earlier chart: Light is briefly occluded, creating a shadow-alignment event. |
-| Half-Light | Light transition | Reference | 3 | 1 | 2 | 2 | 8 | A compact name for a transitional band where visibility rules change. It still reads as an environmental state. Expanded naming pass. |
-| Silhouette | Partial shadow | Reference | 3 | 1 | 2 | 2 | 8 | Both Light and Dark make an outline readable. The effect could reveal shapes while hiding their details. Expanded naming pass. |
-| Penumbra | Partial shadow | Reference | 2 | 2 | 2 | 1 | 7 | A meaningful edge-light mechanic that reads as a zone or condition. Earlier chart: A partial shadow creates a zone of reduced visibility. |
-| Twilight | Light transition | Reference | 2 | 2 | 2 | 1 | 7 | A distinct atmosphere or cycle rather than a sustained output. Earlier chart: Light and darkness trade control as the field dims. |
-| Afterglow | Light transition | Reference | 2 | 1 | 2 | 1 | 6 | A useful fading effect as darkness returns. Light supplies most of the result. New naming proposal. |
-| Chiaroscuro | Light transition | Reference | 3 | 1 | 1 | 1 | 6 | Names the interplay of light and dark well, with a specialist art term. Its strongest use is presentation or a dual spell. New naming proposal. |
-| Corona | Light occlusion | Reference | 2 | 1 | 1 | 1 | 5 | Works as a visible ring or creature motif. The name has several unrelated meanings. Earlier chart: An illuminated rim surrounds a dark center for a creature motif. |
+| Name | Concept | Role | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Eclipse | Light occlusion | Phenomenon | Reference | 3 | 1 | 2 | 1 | 7 | The owner questioned it as an element. It fits an encounter or combined ability. Earlier chart: Light is briefly occluded, creating a shadow-alignment event. Atlas audit: phenomenon reference, not a separately scored fusion affinity. |
+| Half-Light | Light transition | Phenomenon | Reference | 3 | 1 | 2 | 1 | 7 | A compact name for a transitional band where visibility rules change. It still reads as an environmental state. Expanded naming pass. Atlas audit: phenomenon reference, not a separately scored fusion affinity. |
+| Silhouette | Partial shadow | Phenomenon | Reference | 3 | 1 | 2 | 1 | 7 | Both Light and Dark make an outline readable. The effect could reveal shapes while hiding their details. Expanded naming pass. Atlas audit: phenomenon reference, not a separately scored fusion affinity. |
+| Afterglow | Light transition | Phenomenon | Reference | 2 | 1 | 2 | 1 | 6 | A useful fading effect as darkness returns. Light supplies most of the result. New naming proposal. |
+| Chiaroscuro | Light transition | Phenomenon | Reference | 3 | 1 | 1 | 1 | 6 | Names the interplay of light and dark well, with a specialist art term. Its strongest use is presentation or a dual spell. New naming proposal. |
+| Penumbra | Partial shadow | Phenomenon | Reference | 2 | 1 | 2 | 1 | 6 | A meaningful edge-light mechanic that reads as a zone or condition. Earlier chart: A partial shadow creates a zone of reduced visibility. Atlas audit: phenomenon reference, not a separately scored fusion affinity. |
+| Twilight | Light transition | Phenomenon | Reference | 2 | 1 | 2 | 1 | 6 | A distinct atmosphere or cycle rather than a sustained output. Earlier chart: Light and darkness trade control as the field dims. Atlas audit: phenomenon reference, not a separately scored fusion affinity. |
+| Corona | Light occlusion | Phenomenon | Reference | 2 | 1 | 1 | 1 | 5 | Works as a visible ring or creature motif. The name has several unrelated meanings. Earlier chart: An illuminated rim surrounds a dark center for a creature motif. |

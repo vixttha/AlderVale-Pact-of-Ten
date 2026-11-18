@@ -1,8 +1,8 @@
 # Fusion Name Atlas
 
-[Fusion chart](fusion-chart.md) · [Element HQ](../../README.md) · [Original 45-pair chart](../designs/aldervale-fusion-pairing-chart.md)
+[Fusion chart](fusion-chart.md) · [Role and scoring audit](SCORING_AUDIT.md) · [Element HQ](../../README.md) · [Original 45-pair chart](../designs/aldervale-fusion-pairing-chart.md)
 
-Open any base element to compare its nine partners. Every pair page lists candidate names, score breakdowns, rationale, and earlier ideas. Alternate names carry the same concept label when they point to the same fusion.
+Open any base element to compare its nine partners. Every pair page distinguishes **role** (fusion vs supporting name), **review decision**, **scores**, and **parent reuse**. The 320 names are retained for history; only Fusion-role entries compete for a roster slot. Aliases use the same concept as their primary fusion, but do not inherit its Identity or Gameplay points as an independent element.
 
 The atlas is a living catalog of reviewable names. The expanded pass adds plausible results, aliases, and useful move or material names with explicit review statuses. More names can be added to the same pair pages as the design develops.
 
@@ -20,8 +20,8 @@ The atlas is a living catalog of reviewable names. The expanded pass adds plausi
 
 | Pair | Name | Decision |
 | --- | --- | --- |
-| [Water + Metal](pairs/water-metal.md) | **Rust** | Locked. Water and Metal are reserved in this pass. |
-| [Lightning + Earth](pairs/lightning-earth.md) | **Glass** | Locked. Lightning and Earth are reserved in this pass. |
+| [Water + Metal](pairs/water-metal.md) | **Rust** | Locked. Water and Metal are counted as used in the preferred no-repeat view; other pairings remain reviewable. |
+| [Lightning + Earth](pairs/lightning-earth.md) | **Glass** | Locked. Lightning and Earth are counted as used in the preferred no-repeat view; other pairings remain reviewable. |
 | [Fire + Earth](pairs/fire-earth.md) | Magma | Paused by the owner. Shares Earth with Glass. |
 | [Light + Plant](pairs/light-plant.md) | Sugar | Owner favorite. Photosynthesis supports the concept. Final selection is open. |
 | [Lightning + Wind](pairs/lightning-wind.md) | Ozone | Parked. Shares Lightning with Glass. |
@@ -30,33 +30,51 @@ The atlas is a living catalog of reviewable names. The expanded pass adds plausi
 | [Water + Frost](pairs/water-frost.md) | Ice | Parked. Water is reserved for Rust. |
 | [Metal + Plant](pairs/metal-plant.md) | Ironwood | Parked. Depends on a setting decision about Metal and shares Metal with Rust. |
 
-The current pass prefers one fusion per base element where possible. A score ranks a design for review. The owner decides the roster and its locks.
+**Parent reuse is an advisory filter, not a prohibition.** Compare a no-repeat lineup first, but keep any of the 45 pairings eligible for future proposals, variants, or a roster that intentionally reuses a parent. Two competing fusions can be explored without being selected simultaneously. The owner alone sets locks, changes acceptance, or expands the roster.
 
 ## New fusion concepts
 
 | Pair | Proposed fusion | Gameplay direction |
 | --- | --- | --- |
 | [Fire + Plant](pairs/fire-plant.md) | Ash | Deposit a powder that can smother burning terrain, mark tracks, or feed later regrowth. |
-| [Frost + Wind](pairs/frost-wind.md) | Dry Ice | Condense a cold solid from air. Blocks shrink into gas, creating terrain with a visible expiry. |
+| [Frost + Wind](pairs/frost-wind.md) | Dry Ice (material reference) | Condense carbon dioxide from air only under an explicit concentration and Frost-magic rule; not a separate affinity. |
 | [Light + Plant](pairs/light-plant.md) | Sugar | Plants use light energy to make sugars. In the game, crystallizing them into restraints or releasing their stored energy would be magic. |
-| [Lightning + Plant](pairs/lightning-plant.md) | Rubber | As a fantasy rule, Lightning cures Plant latex into a springy insulator for rebound and protection. Parked while Glass reserves Lightning. |
+| [Lightning + Plant](pairs/lightning-plant.md) | Rubber (material reference) | Plant latex can become rubber, but the Lightning contribution needs a credible rule. Does not count as a separate fusion. |
 | [Earth + Light](pairs/earth-light.md) | Phosphor | Earth supplies a substance that stores Light and releases it later to reveal or mark targets. Parked while Glass reserves Earth. |
 
-## Latest rated names
+## Recent names after the rating audit
 
-These pairs use parents that are free under the Rust and Glass locks. Ideas on the same pair or sharing a parent compete for that slot.
+Older ratings were often too generous to materials and alternate labels. This summary distinguishes genuine fusion contenders from useful supporting ideas.
 
-| Pair | Name | Score /10 | Status | Direction |
+| Pair | Name | Reviewed /10 | Role | Decision |
 | --- | --- | ---: | --- | --- |
-| [Fire + Plant](pairs/fire-plant.md) | Tar | 10 | Candidate | Sticky terrain and seals. |
-| [Wind + Plant](pairs/wind-plant.md) | Thread | 9 | Candidate | Tethers, pulls, and woven cover. |
-| [Dark + Plant](pairs/dark-plant.md) | Lacquer | 9 | Exploratory | Layered, opaque armor. |
-| [Light + Plant](pairs/light-plant.md) | Starch | 9 | Exploratory | Stored energy and impact-absorbing paste. |
-| [Frost + Wind](pairs/frost-wind.md) | Liquid Air | 9 | Exploratory | A liquid deposit that releases a gust as it warms. |
-| [Frost + Plant](pairs/frost-plant.md) | Pulp | 8 | Exploratory | Soft terrain that muffles movement and absorbs impact. |
-| [Fire + Plant](pairs/fire-plant.md) | Pitch | 9 | Reference | A thicker material in the Tar family. |
-| [Light + Plant](pairs/light-plant.md) | Syrup | 8 | Reference | A liquid form of Sugar for slowing effects. |
+| [Fire + Plant](pairs/fire-plant.md) | Tar | 9 | Fusion | Candidate |
+| [Fire + Plant](pairs/fire-plant.md) | Ash | 9 | Fusion | Candidate |
+| [Wind + Plant](pairs/wind-plant.md) | Thread | 6 | Material | Reference |
+| [Dark + Plant](pairs/dark-plant.md) | Lacquer | 6 | Variant | Reference |
+| [Light + Plant](pairs/light-plant.md) | Starch | 7 | Variant | Reference |
+| [Frost + Wind](pairs/frost-wind.md) | Liquid Air | 7 | Fusion | Exploratory |
+| [Frost + Wind](pairs/frost-wind.md) | Dry Ice | 6 | Variant | Reference |
+| [Frost + Plant](pairs/frost-plant.md) | Pulp | 6 | Material | Reference |
+| [Fire + Plant](pairs/fire-plant.md) | Pitch | 6 | Variant | Reference |
+| [Light + Plant](pairs/light-plant.md) | Syrup | 7 | Variant | Reference |
 
+## Role guide
+
+**Role says what the name actually represents; status says what the owner has decided.** These must never be combined. A material can inspire an excellent ability, but it is not automatically a new element.
+
+| Role | Meaning | Can lead a fusion shortlist? |
+| --- | --- | --- |
+| Fusion | Independent elemental affinity concept with its own mechanics | Yes, subject to owner decision |
+| Alias | Alternate label for a primary fusion; inherits its concept | No |
+| Variant | A form, subtype, or derivative of the concept | No |
+| Material | Tangible substance/item not yet justified as an independent affinity | No |
+| Ability | Spell, attack, or localized effect | No |
+| Process | Reaction or transformation (e.g. corrosion) | No |
+| Phenomenon | Weather, optical event, or temporary condition | No |
+| Habitat | Place or ecosystem rather than a substance or affinity | No |
+
+A locked recipe stays locked even when its science or gameplay needs future work. Reclassification never silently changes owner decisions. A rejected label remains rejected and a parked choice stays parked until the owner changes it.
 
 ## Rating guide
 
@@ -67,7 +85,7 @@ These pairs use parents that are free under the Rust and Glass locks. Ideas on t
 | Name | 0–2 | 0 for misleading, 1 for ambiguous or niche, 2 for clear and memorable. |
 | Gameplay | 0–2 | 0 for no clear use, 1 for one credible mechanic, 2 for several related abilities or interactions. |
 
-Use the four scores for a total out of ten. Record one short rationale and where the idea came from. Scores are provisional design judgments. Use the status column to record review decisions.
+Use the four scores for a total out of ten. **10/10 is exceptional and belongs only to a standalone Fusion proposal with essential parents, an identifiable result, an excellent name, and multiple coherent mechanics.** Aliases receive Identity = 0 and Gameplay = 0 because they inherit the underlying fusion's design; they cannot tie the primary score. Materials, variants, abilities, processes, phenomena, and habitats receive at most Identity = 1 and Gameplay = 1 and cannot exceed 7/10. Keep the source rationale and flag invented magic separately from demonstrated real-world processes. These are provisional *design* ratings, not scientific certainty. Status carries owner decisions, separate from score and role.
 
 | Status | Meaning |
 | --- | --- |
@@ -81,6 +99,6 @@ Use the four scores for a total out of ten. Record one short rationale and where
 
 ## Update a pair
 
-Use [Water + Metal](pairs/water-metal.md) as the template. Edit the pair page to change the name, concept, status, scores, or rationale. Give aliases the same concept label and sort scores from highest to lowest. Record an owner decision in the rationale when it changes a favorite or lock, and update the roster review above. For a locked recipe, also record a paragraph in Element HQ in the form `**First + Second → Name** is locked for the current fusion roster.` so the atlas check can compare the two records.
+Use [Water + Metal](pairs/water-metal.md) as the template. Edit the pair page to change the name, concept, **role**, status, scores, or rationale. Only assign Fusion when the pair has a distinct elemental identity; use Alias for alternate names and supporting roles for materials and moves. Give aliases the same concept label and sort scores from highest to lowest. Record an owner decision in the rationale when it changes a favorite or lock, and update the roster review above. For a locked recipe, also record a paragraph in Element HQ in the form `**First + Second → Name** is locked for the current fusion roster.` so the atlas check can compare the two records.
 
 Regenerate the element charts with `python3 element-hq/fusions/build_atlas.py`. Commit the edited pair page and the regenerated element charts together. The Element HQ GitHub Actions check verifies the roster, earlier ideas, scores, links, and generated content on a standard public Ubuntu runner.

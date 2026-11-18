@@ -13,7 +13,8 @@ REPO = ATLAS.parents[1]
 PAIRING_CHART = ATLAS.parent / "designs/aldervale-fusion-pairing-chart.md"
 ELEMENTS = ("Fire", "Water", "Lightning", "Frost", "Wind", "Earth", "Light", "Dark", "Metal", "Plant")
 STATUSES = {"Locked", "Favorite", "Candidate", "Exploratory", "Parked", "Reference", "Rejected"}
-HEADER = "| Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |"
+ROLES = {"Fusion", "Alias", "Variant", "Material", "Ability", "Phenomenon", "Habitat", "Process"}
+HEADER = "| Name | Concept | Role | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |"
 LIMITS = (3, 3, 2, 2)
 
 
@@ -21,6 +22,7 @@ LIMITS = (3, 3, 2, 2)
 class Name:
     label: str
     concept: str
+    role: str
     status: str
     scores: tuple[int, int, int, int]
     total: int
@@ -39,7 +41,7 @@ def parse_names(path, pair):
     if not separator or HEADER in table or "## Rated names" not in before:
         raise ValueError(f"{path}: expected one rated names table")
     lines = table.split("\n")
-    if not re.fullmatch(r"\|(?: --- \|){9}", lines[0]):
+    if not re.fullmatch(r"\|(?: --- \|){10}", lines[0]):
         raise ValueError(f"{path}: invalid table separator")
 
     names = []
@@ -48,11 +50,11 @@ def parse_names(path, pair):
         if not line.strip():
             break
         cells = [cell.strip() for cell in line.strip("|").split("|")]
-        if not line.startswith("| ") or not line.endswith(" |") or len(cells) != 9:
+        if not line.startswith("| ") or not line.endswith(" |") or len(cells) != 10:
             raise ValueError(f"{path}: malformed name row {line!r}")
-        label, concept, status, *columns = cells
+        label, concept, role, status, *columns = cells
         score_cells = columns[:5]
-        if not label or not concept or status not in STATUSES or not columns[-1]:
+        if not label or not concept or role not in ROLES or status not in STATUSES or not columns[-1]:
             raise ValueError(f"{path}: missing name, concept, status, or rationale for {label!r}")
         if not all(cell.isascii() and cell.isdecimal() for cell in score_cells):
             raise ValueError(f"{path}: expected whole-number scores for {label!r}")
@@ -60,13 +62,27 @@ def parse_names(path, pair):
         total = int(score_cells[4])
         if any(score > limit for score, limit in zip(scores, LIMITS, strict=True)) or sum(scores) != total:
             raise ValueError(f"{path}: invalid scores for {label!r}")
+        if role == "Alias" and (scores[1] != 0 or scores[3] != 0):
+            raise ValueError(f"{path}: aliases inherit identity/gameplay, cannot score independently: {label!r}")
+        if role != "Fusion":
+            if scores[1] > 1 or scores[3] > 1 or total > 7:
+                raise ValueError(f"{path}: reference role has inflated scores: {label!r}")
+            if status in {"Locked", "Favorite", "Candidate", "Exploratory"}:
+                raise ValueError(f"{path}: non-fusion role is competing for the roster: {label!r}")
+        elif status in {"Reference", "Rejected"}:
+            raise ValueError(f"{path}: Fusion role cannot be a mere reference or rejected label: {label!r}")
+        if total == 10 and role != "Fusion":
+            raise ValueError(f"{path}: 10/10 reserved for exceptional independent Fusion proposals")
         if label.casefold() in seen:
             raise ValueError(f"{path}: duplicate name {label!r}")
         seen.add(label.casefold())
-        names.append(Name(label, concept, status, scores, total))
+        names.append(Name(label, concept, role, status, scores, total))
 
     if not names:
         raise ValueError(f"{path}: every pair needs reviewed names")
+    concepts = [name.concept.casefold() for name in names if name.role == "Fusion"]
+    if len(concepts) != len(set(concepts)):
+        raise ValueError(f"{path}: duplicate Fusion concepts: aliases must not become separate fusions")
     return sorted(names, key=lambda name: (-name.total, name.label.casefold()))
 
 
@@ -138,9 +154,9 @@ def render_element(element, catalog):
             "",
             f"[{pair[0]} + {pair[1]} pair page](../pairs/{pair_id(*pair)}.md)",
             "",
-            "| Name | Concept | Breakdown | Total /10 | Status |",
-            "| --- | --- | ---: | ---: | --- |",
-            *[f"| {name.label} | {name.concept} | {' / '.join(map(str, name.scores))} | "
+            "| Name | Concept | Role | Breakdown | Total /10 | Status |",
+            "| --- | --- | --- | ---: | ---: | --- |",
+            *[f"| {name.label} | {name.concept} | {name.role} | {' / '.join(map(str, name.scores))} | "
               f"{name.total} | {name.status} |" for name in catalog[pair]],
         ])
     return "\n".join(lines) + "\n"
@@ -157,21 +173,26 @@ def locked_parents(catalog):
 
 
 def pair_summary(pair, names, held):
-    overlaps = any(parent in held for parent in pair)
-    undecided = ("Parked", "Candidate", "Exploratory") if overlaps else ("Candidate", "Exploratory", "Parked")
-    for status in ("Locked", "Favorite", *undecided):
-        choices = [name for name in names if name.status == status]
+    """Keep role, owner decision, and parent reuse as separate review dimensions."""
+    candidates = [name for name in names if name.role == "Fusion"]
+    for status in ("Locked", "Favorite", "Candidate", "Exploratory", "Parked"):
+        choices = [name for name in candidates if name.status == status]
         if not choices:
             continue
-        best = min(choices, key=lambda name: (-name.total, name.label.casefold() != name.concept.casefold(), name.label.casefold()))
-        if status == "Locked":
-            return best.label, "Locked"
-        if overlaps:
-            return best.label, "Shares a locked parent"
-        return best.label, "Open" if status in {"Candidate", "Exploratory"} else status
-    if overlaps:
-        return "Reference only", "Shares a locked parent"
-    return "Reference only", "Reference"
+        best = min(choices, key=lambda name: (-name.total, name.label.casefold()))
+        decision = {"Locked": "Locked", "Favorite": "Favorite", "Parked": "Paused / parked"}.get(status, "Open for review")
+        break
+    else:
+        best, decision = None, "No distinct fusion candidate"
+
+    collisions = sorted(parent for parent in pair if parent in held and not (best and best.status == "Locked"))
+    if best and best.status == "Locked":
+        fit = "Selected"
+    elif collisions:
+        fit = "Overlap: " + ", ".join(collisions) + " (reviewable)"
+    else:
+        fit = "No locked-parent overlap"
+    return best.label if best else "—", decision, fit
 
 
 def render_fusion_chart(catalog):
@@ -188,20 +209,21 @@ def render_fusion_chart(catalog):
     ]
     for (first, second), names in catalog.items():
         for name in names:
-            if name.status in {"Locked", "Favorite"}:
+            if name.role == "Fusion" and name.status in {"Locked", "Favorite"}:
                 lines.append(f"| [{first} + {second}](pairs/{pair_id(first, second)}.md) | **{name.label}** | {name.status} |")
     lines.extend([
         "",
         "## All 45 pairs",
         "",
-        "Each pair links to its rated names. Parent overlap refers to the current preference of one fusion per base element where possible.",
+        "Only Fusion-role names can appear as roster leads. Other materials, aliases, abilities, and phenomena remain on each pair page.",
+        "Using each base element once is a *preferred lineup view*, not a rule that bans any pairing or future expansion. Overlapping recipes remain reviewable; only the owner may change locks.",
         "",
-        "| Pair | Review name | Roster status | Rated names |",
-        "| --- | --- | --- | ---: |",
+        "| Pair | Fusion contender | Review status | Parent-use note | Rated entries |",
+        "| --- | --- | --- | --- | ---: |",
     ])
     for pair, names in catalog.items():
-        label, status = pair_summary(pair, names, held)
-        lines.append(f"| [{pair[0]} + {pair[1]}](pairs/{pair_id(*pair)}.md) | {label} | {status} | {len(names)} |")
+        label, status, fit = pair_summary(pair, names, held)
+        lines.append(f"| [{pair[0]} + {pair[1]}](pairs/{pair_id(*pair)}.md) | {label} | {status} | {fit} | {len(names)} |")
     return "\n".join(lines) + "\n"
 
 
@@ -251,8 +273,10 @@ def main():
     else:
         overview.write_text(overview_content, encoding="utf-8")
     names = sum(map(len, catalog.values()))
+    fusions = sum(name.role == "Fusion" for group in catalog.values() for name in group)
+    assert len(catalog) == 45 and names >= 320, "An original atlas entry was lost"
     print(f"{'Verified' if args.check else 'Generated'}: {len(catalog)} unique pairs, {names} rated names, "
-          f"{len(ELEMENTS)} element charts, {len(catalog) * 2} pair views")
+          f"{len(ELEMENTS)} element charts, {len(catalog) * 2} pair views, {fusions} fusion-role entries")
 
 
 if __name__ == "__main__":
