@@ -235,7 +235,7 @@ test('archived cloud records stay outside signed-in gameplay', { timeout: 45000 
   assert.equal((await cloudDb.collection('wizards').doc('archive-' + player.uid).get()).get('level'), 10);
 });
 
-async function joinCampus(player, context) {
+async function joinCampus(player, context, zone = 'hub') {
   const serverConnection = once(hub, 'connection', { signal: AbortSignal.timeout(10000) });
   const socket = new WebSocket('ws://127.0.0.1:' + httpServer.address().port + '/ws', { handshakeTimeout: 10000 });
   context.after(() => socket.terminate());
@@ -244,12 +244,13 @@ async function joinCampus(player, context) {
   socket.send(JSON.stringify({
     type: 'join_world',
     idToken: player.idToken,
-    presence: { wizardId: player.wizardId, realmId: 'breeze', zone: 'hub',
+    presence: { wizardId: player.wizardId, realmId: 'breeze', zone,
       name: 'Progress Rowan', raceId: 'human', elementId: 'ember' },
   }));
   const [message] = await joined;
-  assert.equal(JSON.parse(message).type, 'world_joined');
-  return { socket, serverSocket };
+  const acknowledgment = JSON.parse(message);
+  assert.equal(acknowledgment.type, 'world_joined');
+  return { socket, serverSocket, acknowledgment };
 }
 
 test('signed-in campus presence survives idle, clears on disconnect, and returns on reconnect', { timeout: 150000 }, async (context) => {
@@ -276,4 +277,37 @@ test('signed-in campus presence survives idle, clears on disconnect, and returns
   await joinCampus(player, context);
   const reconnected = await gameplay(player, activity);
   assert.equal(reconnected.wizard.progression.mana, reconnected.wizard.progression.maxMana);
+});
+
+
+test('authenticated reconnect restores an off-spawn resource position without movement or stale presence', { timeout: 45000 }, async (context) => {
+  const player = await createPlayer();
+  const resource = { type: 'world', id: 'res_starstone_2' };
+  // The hub spawn (0,8) is more than 12 units from this resource near (-14.8,0.6).
+  const missing = await gameplay(player, resource, randomUUID(), 409);
+  assert.equal(missing.error, 'Move closer to that activity.');
+  const first = await joinCampus(player, context);
+  assert.deepEqual(first.acknowledgment.position, { x: 0, y: 0, z: 8, rotY: 0 });
+
+  const moveProcessed = once(first.serverSocket, 'message', { signal: AbortSignal.timeout(10000) });
+  first.socket.send(JSON.stringify({ type: 'move', zone: 'hub', x: -14, y: 0, z: 1, rotY: 0.75 }));
+  await moveProcessed;
+  const closed = once(first.serverSocket, 'close', { signal: AbortSignal.timeout(10000) });
+  first.socket.close();
+  await closed;
+
+  const offline = await gameplay(player, resource, randomUUID(), 409);
+  assert.equal(offline.error, missing.error, 'disconnect must immediately revoke campus access');
+
+  const restored = await joinCampus(player, context);
+  assert.deepEqual(restored.acknowledgment.position, { x: -14, y: 0, z: 1, rotY: 0.75 });
+  assert.equal(restored.acknowledgment.zone, 'hub');
+  const collected = await gameplay(player, resource);
+  assert.match(collected.notice, /Harvested/);
+  assert.ok(collected.wizard.resources.starstone > 0);
+
+  const closedAgain = once(restored.serverSocket, 'close', { signal: AbortSignal.timeout(10000) });
+  restored.socket.close();
+  await closedAgain;
+  assert.equal((await gameplay(player, resource, randomUUID(), 409)).error, missing.error);
 });
