@@ -104,6 +104,8 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
   const tradeInvites = new Map<string, TradeInvite>();
   const guestTickets = new Map<string, { wizardId: string; realm: RealmId; expiresAt: number }>();
   const reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  // Short-lived last server-observed location; never preserves gameplay presence after a disconnect.
+  const reconnectPositions = new Map<string, { zone: ZoneId; x: number; y: number; z: number; rotY: number; expiresAt: number }>();
 
   function send(conn: ClientConn, payload: unknown) {
     if (conn.ws.readyState === WebSocket.OPEN) {
@@ -309,6 +311,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
   const sweep = setInterval(() => {
     const now = Date.now();
     for (const [ticket, guest] of guestTickets) if (guest.expiresAt <= now) guestTickets.delete(ticket);
+    for (const [key, pos] of reconnectPositions) if (pos.expiresAt <= now) reconnectPositions.delete(key);
     for (const room of duels.values()) {
       if (room.finishedAt && now - room.finishedAt > 60_000) duels.delete(room.duelId);
       if (room.state.phase === 'planning' && room.turnDeadline && now >= room.turnDeadline) {
@@ -406,6 +409,11 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
               throw new RequestError(409, 'This wizard already has a live session.');
             }
             const spawn = ZONES[p.zone].spawnPos;
+            const reconnectKey = conn.verifiedUid ? `${conn.verifiedUid}:${realm}:${identity}` : null;
+            const prior = reconnectKey ? reconnectPositions.get(reconnectKey) : undefined;
+            if (reconnectKey) reconnectPositions.delete(reconnectKey);
+            const restored = prior && prior.expiresAt > Date.now() && prior.zone === p.zone &&
+              Math.hypot(prior.x, prior.z) <= 25 && Math.abs(prior.y) <= 10 ? prior : undefined;
             const selectedCreature = sanitizeGuestCreatureSelection({ ...p, activeCreatureId });
             conn.presence = {
               ...p, ...selectedCreature, sessionId, wizardId: identity, ownerId: '', name, realmId: realm, zone: p.zone,
@@ -413,12 +421,19 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
               level: Number.isFinite(p.level) ? Math.min(50, Math.max(1, Number(p.level))) : 1,
               rank: Number.isFinite(p.rank) ? Math.min(20, Math.max(1, Number(p.rank))) : 1,
               titleBadge: typeof p.titleBadge === 'string' ? p.titleBadge.slice(0, 40) : '',
-              x: spawn[0], y: spawn[1], z: spawn[2], rotY: 0, mountId: null, inDuel: false,
+              x: restored?.x ?? spawn[0], y: restored?.y ?? spawn[1], z: restored?.z ?? spawn[2],
+              rotY: restored?.rotY ?? 0, mountId: null, inDuel: false,
             };
             conn.duelElement = p.elementId;
             conn.duelRace = p.raceId;
             if (conn.verifiedUid && conn.presence) setGameplayPresence(sessionId, { ...conn.presence, uid: conn.verifiedUid });
-            send(conn, { type: 'world_joined' });
+            send(conn, {
+              type: 'world_joined',
+              ...(conn.verifiedUid ? {
+                zone: conn.presence.zone,
+                position: { x: conn.presence.x, y: conn.presence.y, z: conn.presence.z, rotY: conn.presence.rotY },
+              } : {}),
+            });
           } catch (error) {
             send(conn, { type: 'world_notice', text: error instanceof RequestError ? error.message : 'Multiplayer is temporarily unavailable.' });
             ws.close(1013, 'Unable to join');
@@ -832,7 +847,12 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
         if (idx >= 0) q.splice(idx, 1);
       }
       if (conn.presence) {
-        const { realmId, zone, wizardId } = conn.presence;
+        const { realmId, zone, wizardId, x, y, z, rotY } = conn.presence;
+        if (conn.verifiedUid && Math.hypot(x, z) <= 25 && Math.abs(y) <= 10 && Number.isFinite(rotY)) {
+          reconnectPositions.set(`${conn.verifiedUid}:${realmId}:${wizardId}`, {
+            zone, x, y, z, rotY, expiresAt: Date.now() + 60_000,
+          });
+        }
         broadcastRealmZone(realmId, zone, { type: 'player_left', sessionId });
         if (conn.duelId) {
           const room = duels.get(conn.duelId);
