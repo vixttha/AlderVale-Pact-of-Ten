@@ -9,3 +9,5 @@
 | v0.0.1 | 2026-11-15 | First HQ landing page and folder guide. | [Landing page](v0.0.1/README.md) · [Folder guide](v0.0.1/GUIDE.md) · [Changelog](v0.0.1/CHANGELOG.md) |
 
 Add one row per owner-approved HQ version archived on this branch, newest first. Keep the landing-page and folder-guide snapshots byte for byte. Each changelog records changes since the previous approved HQ version. A branch archive does not itself merge into `main` or declare a game release.
+
+[Graphify HQ](../../Graphify%20HQ/README.md) has a map for each approved README HQ template version. Include its map folder and update the Graphify HQ index in the archive PR.

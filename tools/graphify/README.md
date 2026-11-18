@@ -1,19 +1,7 @@
-# README HQ Graphify map
+# README HQ template maps
 
-The map covers the README HQ landing page, public and HQ workspaces, approved archives, archived image links, publication PR links, and the validator. Graphify extracts code symbols. The map also reads tracked Markdown links and the archive provenance manifest without calling a model.
+[Graphify HQ](../../Graphify%20HQ/README.md) has one folder for each approved README HQ template in the `readme_hq` section of the baseline manifest. The three archived HQ documents are the map inputs. The generator checks the original landing page and guide against their recorded commits and records all three archive blobs in `receipt.json`. Frozen map bytes are independent of the PR merge commit. The Actions run records its exact checkout.
 
-## Read the map
+When archiving an approved HQ version, generate its map with the locked Graphify packages using `python tools/graphify/version_maps.py /path/to/new-output`. Add the new folder and the regenerated Graphify HQ index to the archive PR. Open the graph with `python -m graphify.serve 'Graphify HQ/<version>/graph.json'`.
 
-Open the [README HQ snapshot folder](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/graphify-snapshots/readme-hq). Read `receipt.json` for the source commit, SHA-256, Graphify version, and runner evidence. Compare its source commit with the head of `readme-hq` before using the map as current evidence.
-
-With the branch's pinned Graphify packages installed, start its MCP reader with the downloaded graph and receipt in the same directory:
-
-```bash
-python tools/graphify/read_snapshot.py /path/to/graph.json EXPECTED_README_HQ_COMMIT
-```
-
-Use `graph_stats` to confirm the source revision. Use `get_node` or `get_neighbors` with `hq:file:README.md` to start from the landing page.
-
-## Refresh
-
-Public GitHub-hosted Ubuntu builds and queries the map, then a second runner verifies the transferred copy. A push to `readme-hq` publishes the verified snapshot after both jobs pass. Pull requests map the candidate checkout and verify publication against a disposable Git remote. A stale run exits before updating the snapshot.
+The read-only workflow on the public Ubuntu runner rebuilds every approved version, queries the three source nodes over Graphify MCP, and checks the files byte for byte. If a new version is missing its map, the job log provides the new files and updated index in the `GRAPHIFY_MAPS_EXPORT` lines. The chunks in log order form a base64-encoded gzip JSON object that maps output paths to UTF-8 file contents. Review and commit those files on the archive PR, then verify the rerun.
