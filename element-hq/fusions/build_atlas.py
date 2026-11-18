@@ -278,6 +278,28 @@ def main():
         if overview.read_text(encoding="utf-8") != overview_content:
             raise ValueError("Fusion chart differs from the pair pages. Regenerate the charts.")
         print(f"Verified fusion chart: {len(catalog)} pair rows with links")
+        # Experimental skill-tree charts: exactly ten pages, nine distinct partner links each.
+        # This checks documentation integrity only; it does not approve skill mechanics.
+        skill_trees = REPO / "element-hq/designs/skill-trees"
+        skill_pages = {skill_trees / f"{element.lower()}.md" for element in ELEMENTS}
+        if set(skill_trees.glob("*.md")) != skill_pages:
+            raise ValueError("Skill-tree design must have exactly ten elemental chart pages")
+        for element in ELEMENTS:
+            text = (skill_trees / f"{element.lower()}.md").read_text(encoding="utf-8")
+            for partner in ELEMENTS:
+                if partner == element:
+                    continue
+                first, second = sorted((element, partner), key=ELEMENTS.index)
+                slug = pair_id(first, second)
+                target = f"../../fusions/pairs/{slug}.md"
+                if text.count(f"]({target})") != 1:
+                    raise ValueError(f"{element}: expected exactly one canonical gateway {target}")
+                partner_text = (skill_trees / f"{partner.lower()}.md").read_text(encoding="utf-8")
+                if partner_text.count(f"]({target})") != 1:
+                    raise ValueError(f"{element}+{partner}: missing symmetric gateway in partner tree")
+            check_links(skill_trees / f"{element.lower()}.md")
+        check_links(REPO / "element-hq/designs/skill-tree-feasibility-2026-11-18.md")
+        print("Verified ten exploratory skill-tree charts, 45 pair gateways and 90 mirrored links")
         for path in [overview, ATLAS / "README.md", REPO / "README.md", PAIRING_CHART,
                      REPO / "element-hq/FUSION_QUALITY_LAW.md",
                      REPO / "element-hq/designs/fusion-system-revamp-proposal.md",

@@ -30,6 +30,7 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 | [Fusion Quality Law FQ-001](element-hq/FUSION_QUALITY_LAW.md) | **Owner law:** all four quality gates must pass before playability. |
 | [Fusion system revamp](element-hq/designs/fusion-system-revamp-proposal.md) | Proposed unlock, card/skill, creature and progression mechanics; not yet accepted. |
 | [Fusion system mind map](element-hq/designs/fusion-system-mind-map.md) | See the law, selected recipes, discovery and casting options in one dependency map. |
+| [Ten elemental skill-tree feasibility charts](element-hq/designs/skill-tree-feasibility-2026-11-18.md) | Exploratory study of ten charts, 45 shared gateways, points, levels, racial perks and development costs. |
 | [Earlier fusion architecture audit](element-hq/designs/fusion-architecture-audit-2026-11-18.md) | Historical comparison written before the latest owner decisions; consult the current decision record first. |
 | [Fusion Name Atlas](element-hq/fusions/README.md) | Browse ten element charts and compare rated names for every pairing. |
 | [Fusion pairing chart](element-hq/designs/aldervale-fusion-pairing-chart.md) | Compare all 45 cross-element pairings and their proposed outcomes. |
