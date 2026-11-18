@@ -43,6 +43,13 @@ export function claimCloudTerm(wizard: WizardDocument, tier: number) {
   );
 }
 
+export function enrollCloudWizard(uid: string, wizard: WizardDocument) {
+  const { id, name, raceId, beastClan, elementId, sculpt } = wizard;
+  return request<{ account: RealmAccountState; wizard: WizardDocument }>(
+    uid, wizard.realmId, 'enroll', { id, name, raceId, beastClan, elementId, sculpt },
+  );
+}
+
 export function cloudSolo(wizard: WizardDocument, awaitSaves: () => Promise<unknown>) {
   const send = async <T>(action: string, body: Record<string, unknown>) => {
     await awaitSaves();

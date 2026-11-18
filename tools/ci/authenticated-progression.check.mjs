@@ -3,7 +3,6 @@ import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { after, before, test } from 'node:test';
-import { createStarterWizard } from '../../shared/economy.ts';
 
 const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
 const localEmulator = /^127\.0\.0\.1:\d+$/;
@@ -44,26 +43,32 @@ async function createPlayer() {
   assert.equal(signIn.status, 200);
   const { idToken } = await signIn.json();
 
-  const { id, beastClan, ...wizard } = createStarterWizard({
-    id: wizardId, ownerId: uid, realmId: 'breeze', name: 'Progress Rowan',
-    raceId: 'human', elementId: 'ember', sculpt: {},
-  });
   const wizardRef = cloudDb.collection('wizards').doc(wizardId);
   const realmRef = cloudDb.collection('accounts').doc(uid).collection('realms').doc('breeze');
-  const batch = cloudDb.batch();
-  batch.set(wizardRef, wizard);
-  batch.set(wizardRef.collection('creatures').doc(wizard.activeCreatureId), {
-    ownerId: uid, wizardId, realmId: 'breeze', speciesId: 'cinder_kitsune', elementId: 'ember',
-    nickname: 'Spark-Kit', stage: 1, chromatic: 'none', branchChoice: 'A',
-    bondXp: 0, wins: 0, talents: ['tal_sturdy'],
-  });
-  // Simulates a pre-existing save with Term history. Only the new ledger qualifies for claims.
-  batch.set(realmRef, {
-    uid, realmId: 'breeze', wizardIds: [wizardId], unlockedRaces: ['human'],
+  // Simulates a pre-existing realm with Term history. The claim path reads its
+  // own server ledger, and enrollment creates the new wizard from profile choices.
+  await realmRef.set({
+    uid, realmId: 'breeze', wizardIds: [], unlockedRaces: ['human'],
     sharedVault: [], termXp: 480, claimedTermTiers: [1, 2],
   });
-  await batch.commit();
-  return { uid, wizardId, wizardRef, realmRef, idToken };
+  const player = { uid, wizardId, wizardRef, realmRef, idToken };
+  const appearance = {
+    height: 1, build: 'balanced', skinHex: '#b58368', hairStyle: 'Windblown Shag',
+    hairHex: '#453128', hairTipHex: '#453128', eyeShape: 'bright', eyeLeftHex: '#5b4d33',
+    eyeRightHex: '#5b4d33', browStyle: 'soft', marking: 'none', primaryDye: '#534679',
+    trimDye: '#ffffff', accentDye: '#b58e4b', castPose: 'scholar',
+  };
+  const choices = {
+    id: wizardId, name: 'Progress Rowan', raceId: 'human', elementId: 'ember', sculpt: appearance,
+  };
+  const enrollments = await Promise.all([call(player, 'enroll', choices), call(player, 'enroll', choices)]);
+  for (const { account, wizard } of enrollments) {
+    assert.deepEqual(account.wizardIds, [wizardId]);
+    assert.equal(wizard.level, 1);
+    assert.equal(wizard.currencies.florins, 220);
+    assert.equal(wizard.activeCreatureId, wizardId + '_starter_pet');
+  }
+  return player;
 }
 
 async function call(player, path, body, status = 200) {

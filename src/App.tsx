@@ -25,7 +25,7 @@ import { REALMS, type RealmId } from '../shared/realms.ts';
 import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { CAMPUS_NPCS, CAMPUS_QUESTS, MOUNTS, ZONES, type CampusNpc, type ZoneId } from '../shared/world.ts';
 import { computeWizardDerivedStats, type DuelState, type TurnActionInput } from '../shared/combat.ts';
-import { SPECIES_BY_ID } from '../shared/creatures.ts';
+import { wizardStarter } from '../shared/wizardStarter.ts';
 import { applyTermReward, grantFusionSpells, TERM_REWARD_TRACK, type WizardDocument } from '../shared/economy.ts';
 import { isWizardMuted } from '../shared/playerSocial.ts';
 import { RACES } from '../shared/wardrobe.ts';
@@ -35,7 +35,6 @@ import {
   loadCloudCreatures,
   loadCloudGallery,
   saveCloudPainting,
-  createCloudWizards,
   ensureCloudWizardStarter,
   loadCloudSanctuary,
   loadCloudWizardsForRealm,
@@ -54,7 +53,7 @@ import {
   type RealmAccountState,
   type SanctuaryState,
 } from './lib/storage.ts';
-import { claimCloudTerm, cloudSolo, loadServerTerm, type CloudSoloSettlement } from './lib/cloudProgression.ts';
+import { claimCloudTerm, cloudSolo, enrollCloudWizard, loadServerTerm, type CloudSoloSettlement } from './lib/cloudProgression.ts';
 import { ElementCrest } from './lib/elementIcons.tsx';
 import { TitleWizardStudio } from './features/auth/TitleWizardStudio.tsx';
 import { WorldViewport } from './engine/worldViewport.tsx';
@@ -81,23 +80,6 @@ type ActiveOverlay =
   | { type: 'hub'; tab: HubModalTab };
 
 type GuestProgressUpdate = (bundle: GuestRealmBundle) => void;
-
-function wizardStarter(wizard: WizardDocument): { pet: OwnedCreature; dorm: SanctuaryState } {
-  const byElement: Partial<Record<ElementId, string>> = {
-    ember: 'cinder_kitsune', frost: 'rime_stag', gale: 'zephyr_owl',
-    bramble: 'bramble_sprig', tide: 'harbor_kelpie', spark: 'spark_lynx_cub',
-  };
-  const species = SPECIES_BY_ID[byElement[wizard.elementId] ?? 'cinder_kitsune'];
-  const owner = { ownerId: wizard.ownerId, wizardId: wizard.id, realmId: wizard.realmId };
-  return {
-    pet: {
-      ...owner, id: wizard.activeCreatureId, speciesId: species.id, nickname: species.stageNames[0],
-      elementId: species.element, stage: 1, chromatic: 'none', branchChoice: 'A',
-      bondXp: 0, wins: 0, talents: ['tal_sturdy'],
-    },
-    dorm: { ...owner, themeId: 'sunlit_loft', weatherId: 'clear_breeze', isPublic: false, items: [], gardens: [] },
-  };
-}
 
 export function App() {
   const [fbUser, setFbUser] = useState<User | null>(null);
@@ -508,15 +490,14 @@ export function App() {
     wizardCreation.current = true;
     setEnrollmentError(null);
     try {
-      const nextAcc = { ...realmAccount, wizardIds: [...realmAccount.wizardIds, wiz.id].slice(0, 3) };
       if (fbUser) {
-        const owned = { ...wiz, ownerId: fbUser.uid };
-        const prepared = wizardStarter(owned);
-        await createCloudWizards(nextAcc, [{ wizard: owned, pets: [prepared.pet], sanctuary: prepared.dorm }]);
-        if (version !== realmLoad.current || auth.currentUser?.uid !== owned.ownerId) return false;
-        setRealmAccount(nextAcc);
-        setWizards((current) => [...current, owned]);
-        await enterWorld(owned, prepared);
+        const result = await enrollCloudWizard(fbUser.uid, wiz);
+        if (version !== realmLoad.current || auth.currentUser?.uid !== fbUser.uid) return false;
+        setRealmAccount(result.account);
+        setWizards((current) => current.some((wizard) => wizard.id === result.wizard.id)
+          ? current.map((wizard) => wizard.id === result.wizard.id ? result.wizard : wizard)
+          : [...current, result.wizard]);
+        await enterWorld(result.wizard);
       } else {
         const prepared = wizardStarter(wiz);
         const guest = readGuestProgress(wiz.realmId);

@@ -35,6 +35,14 @@ those documents. Treat their contents and the signed-in live roster as
 legacy until the writers below have moved behind server verification.
 This change alone does not complete #82.
 
+## Signed-in enrollment
+
+New signed-in enrollment submits name, lineage, element and appearance choices.
+The server validates the catalog choices and builds the starter wizard, creature,
+Dorm and public profile, then creates them in the realm enrollment transaction.
+Retrying an enrolled wizard ID returns its existing save. Legacy imports and
+starter recovery still need their own replacement path.
+
 ## Writer inventory and cutover
 
 | Surface | Authority needed before enforcing the rules |

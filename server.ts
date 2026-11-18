@@ -9,6 +9,7 @@ import { resourceStore } from './server/authzStore.ts';
 import { generateArchivistAdvice, type StrategizeRequest } from './server/lecternAi.ts';
 import { attachAldervaleWebSocketServer } from './server/wsHub.ts';
 import { advanceSolo, claimServerTerm, finishSolo, readServerTerm, startSolo } from './server/soloProgress.ts';
+import { enrollWizard } from './server/wizardEnrollment.ts';
 import type { RealmId } from './shared/realms.ts';
 
 
@@ -58,6 +59,9 @@ export async function createAldervaleApp({ frontend = true } = {}) {
     return principal.uid;
   }
 
+  app.post('/api/progression/:realmId/enroll', realmRoute(async (req, res, realm) => {
+    res.json(await enrollWizard(await requireAccount(req), realm, req.body ?? {}));
+  }));
   app.get('/api/progression/:realmId/term', realmRoute(async (req, res, realm) => {
     res.json(await readServerTerm(await requireAccount(req), realm));
   }));

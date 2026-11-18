@@ -3,10 +3,10 @@ import ts from 'typescript';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolveFusionSpecies, SPECIES_BY_ID } from '../shared/creatures.ts';
 import { createStarterWizard, grantFusionSpells, type WizardDocument } from '../shared/economy.ts';
-import { applySagaEvent, applyWizardXp } from '../shared/quests.ts';
-import { REALMS, rankFromLevel } from '../shared/realms.ts';
+import { soloVictoryRewards } from '../shared/soloRewards.ts';
+import { applySagaEvent } from '../shared/quests.ts';
+import { rankFromLevel } from '../shared/realms.ts';
 import { getSpellShopLockReason, getSpellUseLockReason, SPELL_BY_ID } from '../shared/spells.ts';
-import { CAMPUS_QUESTS } from '../shared/world.ts';
 import { loadGuestRealm, saveGuestRealm, type OwnedCreature, type GuestRealmBundle } from '../src/lib/storage.ts';
 
 vi.mock('../src/lib/firebase.ts', () => ({}));
@@ -110,9 +110,9 @@ describe('Fusion hatch and signature spell progression (#105)', () => {
       const saved = loadGuestRealm(wizard.realmId);
       const finish = loadCallback('../src/App.tsx', 'handleDuelFinished', {
         activeWizard: saved.wizards[0], creatures: saved.creatures[wizard.id], realmAccount: saved.account,
-        fbUser: null, spectating: false, REALMS, SPECIES_BY_ID, applySagaEvent, applyWizardXp, CAMPUS_QUESTS,
+        fbUser: null, spectating: false, applySagaEvent, soloVictoryRewards,
         setLiveDuelState: () => {}, showToast: () => {}, setRealmAccount: () => {}, setCreatures: () => {},
-        persistWizard: persist, grantFusionSpells,
+        persistWizard: persist,
       });
       finish({ won, mode, completed: true });
       return loadGuestRealm(wizard.realmId);
