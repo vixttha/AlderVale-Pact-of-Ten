@@ -289,9 +289,8 @@ test('authenticated reconnect restores an off-spawn resource position without mo
   const first = await joinCampus(player, context);
   assert.deepEqual(first.acknowledgment.position, { x: 0, y: 0, z: 8, rotY: 0 });
 
-  const moveProcessed = once(first.serverSocket, 'message', { signal: AbortSignal.timeout(10000) });
-  first.socket.send(JSON.stringify({ type: 'move', zone: 'hub', x: -14, y: 0, z: 1, rotY: 0.75 }));
-  await moveProcessed;
+  // Legitimate movement must advance within the server's per-session travel budget.
+  await walkCampus(first, { x: -14, z: 1, rotY: 0.75 });
   const closed = once(first.serverSocket, 'close', { signal: AbortSignal.timeout(10000) });
   first.socket.close();
   await closed;
@@ -310,4 +309,113 @@ test('authenticated reconnect restores an off-spawn resource position without mo
   restored.socket.close();
   await closedAgain;
   assert.equal((await gameplay(player, resource, randomUUID(), 409)).error, missing.error);
+});
+
+async function socketMessageOfType(socket, type, emit) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => finish(new Error('Timed out waiting for ' + type)), 10000);
+    function onMessage(raw) {
+      const message = JSON.parse(raw.toString());
+      if (message.type === type) finish(null, message);
+    }
+    function onClose() { finish(new Error('Connection closed before ' + type)); }
+    function finish(error, message) {
+      clearTimeout(timer);
+      socket.off('message', onMessage);
+      socket.off('close', onClose);
+      if (error) reject(error);
+      else resolve(message);
+    }
+    socket.on('message', onMessage);
+    socket.once('close', onClose);
+    emit();
+  });
+}
+
+async function walkCampus({ socket, serverSocket }, destination) {
+  const steps = 12;
+  for (let step = 1; step <= steps; step++) {
+    await delay(130);
+    const processed = once(serverSocket, 'message', { signal: AbortSignal.timeout(10000) });
+    socket.send(JSON.stringify({
+      type: 'move', zone: 'hub',
+      x: 0 + (destination.x * step / steps), y: 0,
+      z: 8 + ((destination.z - 8) * step / steps),
+      rotY: destination.rotY ?? 0,
+    }));
+    await processed;
+  }
+}
+
+test('signed-in appearance updates ignore forged identity, progression, roster and cosmetic fields', { timeout: 45000 }, async (context) => {
+  const [viewer, actor] = await Promise.all([createPlayer(), createPlayer()]);
+  const observer = await joinCampus(viewer, context);
+  const target = await joinCampus(actor, context);
+  const actual = (await actor.wizardRef.get()).data();
+  const message = await socketMessageOfType(observer.socket, 'player_updated', () => {
+    target.socket.send(JSON.stringify({
+      type: 'update_appearance',
+      patch: {
+        level: 50, rank: 20, titleBadge: 'Forged Archmaster', raceId: 'dark_elf',
+        elementId: 'umbra', activeCreatureId: 'fake-creature',
+        activeCreatureSpeciesId: 'zephyr_owl', activeCreatureStage: 3,
+        sculpt: { height: 999 }, equipped: { headgear: 'admin-only' },
+      },
+    }));
+  });
+  assert.equal(message.player.wizardId, actor.wizardId);
+  assert.equal(message.player.level, actual.level);
+  assert.equal(message.player.rank, actual.rank);
+  assert.equal(message.player.titleBadge, actual.progression.titleBadge);
+  assert.equal(message.player.raceId, actual.raceId);
+  assert.equal(message.player.elementId, actual.elementId);
+  assert.equal(message.player.activeCreatureId, actual.activeCreatureId);
+  assert.equal(message.player.activeCreatureStage, 1);
+  assert.deepEqual(message.player.sculpt, actual.sculpt);
+  assert.deepEqual(message.player.equipped, actual.wardrobe.equipped);
+
+  // The projection still refreshes after a legitimate *server* progression change.
+  await actor.wizardRef.update({ level: 4, rank: 2, 'progression.titleBadge': 'Warden' });
+  const refreshed = await socketMessageOfType(observer.socket, 'player_updated', () => {
+    target.socket.send(JSON.stringify({ type: 'update_appearance', patch: { rank: 99 } }));
+  });
+  assert.equal(refreshed.player.level, 4);
+  assert.equal(refreshed.player.rank, 2);
+  assert.equal(refreshed.player.titleBadge, 'Warden');
+});
+
+test('signed-in movement rejects instant resource teleport and cross-zone reward jumps', { timeout: 45000 }, async (context) => {
+  const player = await createPlayer();
+  const joined = await joinCampus(player, context);
+  const spawn = { x: 0, y: 0, z: 8, rotY: 0 };
+  const resource = { type: 'world', id: 'res_starstone_2' };
+  const fishing = { type: 'world', id: 'cloud_pier' };
+
+  const instant = await socketMessageOfType(joined.socket, 'world_position_correction', () => {
+    joined.socket.send(JSON.stringify({
+      type: 'move', zone: 'hub', x: -14, y: 0, z: 1, rotY: 0,
+    }));
+  });
+  assert.deepEqual(instant.position, spawn);
+  assert.equal((await gameplay(player, resource, randomUUID(), 409)).error, 'Move closer to that activity.');
+
+  const crossZone = await socketMessageOfType(joined.socket, 'world_position_correction', () => {
+    joined.socket.send(JSON.stringify({
+      type: 'move', zone: 'arbor', x: 11, y: 0, z: 10.6, rotY: 0,
+    }));
+  });
+  assert.equal(crossZone.zone, 'hub');
+  assert.deepEqual(crossZone.position, spawn);
+  assert.equal((await gameplay(player, fishing, randomUUID(), 409)).error, 'Move closer to that activity.');
+
+  // A real zone transition is an intentional fast travel to that zone's spawn,
+  // never straight onto a remote resource node.
+  const arrived = socketMessageOfType(joined.socket, 'zone_snapshot', () => {
+    joined.socket.send(JSON.stringify({
+      type: 'move', zone: 'arbor', x: 0, y: 0, z: 10, rotY: 0,
+    }));
+  });
+  await arrived;
+  const afterTravel = await gameplay(player, resource, randomUUID(), 409);
+  assert.equal(afterTravel.error, 'Move closer to that activity.');
 });
