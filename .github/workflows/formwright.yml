@@ -59,7 +59,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install existing locked Graphify dependencies
-        run: python3 -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
+        run: >-
+          python3 -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
       - name: Extract, verify Graphify MCP and record source receipt
         shell: bash
         run: |
