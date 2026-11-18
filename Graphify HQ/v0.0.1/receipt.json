@@ -46,7 +46,7 @@
   "semantic_artifact_sha256": "80a76450a8983d3ff0191a2521a6fa2f5ae95c61f330e43ff2f2fdf385c73ded",
   "semantic_usage_status": "host_harness_unavailable",
   "ci_model_api_calls": 0,
-  "report_sha256": "9e247e49ec9a2da0a35d932e62fa77d6fbb83a9708c32677c865cee55e0e46d6",
+  "report_sha256": "449c86a39cd22b211e30f41994a91350addf4fcab26c194201d17a84189d850a",
   "graph_health": {
     "dangling_endpoint_edges": 0,
     "missing_endpoint_edges": 0,

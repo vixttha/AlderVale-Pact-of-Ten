@@ -1,4 +1,4 @@
-# Graph Report - launcher-agent-template-9632d8c295d7499182b131326e0a57fc  (2026-11-18)
+# Graph Report - Launcher-Agent-Template v0.0.1
 
 ## Corpus Check
 - 7 files · ~1,037 words

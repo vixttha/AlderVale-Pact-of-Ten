@@ -105,6 +105,9 @@ def render(root, tag, record, sources, nodes, edges, output):
                           for entry in sources.values())},
                       {"input": 0, "output": 0}, ".", suggested_questions=questions,
                       built_at_commit=record["source_commit"])
+    # Default report titles contain today's date and the checkout directory.
+    # A versioned source report instead has a stable product/version identity.
+    report = re.sub(r"\A[^\n]*", f"# Graph Report - Launcher-Agent-Template {tag}", report, count=1)
     report += ("\n\n## Extraction usage and integrity\n\n"
                "Token cost above is CI replay only: no model API calls. Initial host semantic\n"
                "extraction input/output token usage is unavailable from this harness; it is not zero.\n\n"
