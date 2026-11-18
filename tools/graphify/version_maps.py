@@ -37,6 +37,10 @@ def archive_blob(data):
     return hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest()
 
 
+def document_id(name):
+    return f"hq:document:{name}"
+
+
 def read_sources(tag, record):
     sources = {}
     for name in SOURCES:
@@ -73,8 +77,9 @@ def map_template(tag, sources, checker, out):
     node(tag, f"README HQ template {tag}", "concept")
     for name, (entry, markdown) in sources.items():
         path = entry["archive_path"]
-        node(name, SOURCES[name], "document", path, 1)
-        edge(tag, name, "contains_document", path, 1)
+        document = document_id(name)
+        node(document, SOURCES[name], "document", path, 1)
+        edge(tag, document, "contains_document", path, 1)
         stack = []
         fence = None
         for number, line in enumerate(markdown.splitlines(), 1):
@@ -94,7 +99,7 @@ def map_template(tag, sources, checker, out):
                 stack.pop()
             key = f"{name}:L{number}"
             node(key, title, "concept", path, number)
-            edge(stack[-1][1] if stack else name, key, "contains_section", path, number)
+            edge(stack[-1][1] if stack else document, key, "contains_section", path, number)
             stack.append((depth, key))
             if depth > 1:
                 outlines[name].append(re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", title))
@@ -117,11 +122,11 @@ def map_template(tag, sources, checker, out):
                 continue
             archived = Path(reference)
             if archived.parent == ARCHIVE / tag and archived.name in sources:
-                destination = archived.name
+                destination = document_id(archived.name)
             else:
                 destination = f"reference:{reference}"
                 node(destination, reference, "concept")
-            edge(name, destination, "links_to", path)
+            edge(document, destination, "links_to", path)
 
     graph = build_from_json({"nodes": list(nodes.values()), "edges": list(edges.values())},
                             directed=True, dedup=False)
@@ -163,10 +168,11 @@ async def verify(out, receipt):
             if result.is_error or not {f"Nodes: {receipt['nodes']}", f"Edges: {receipt['edges']}"} <= set(stats.splitlines()):
                 raise ValueError(f"{out.name}: Graphify MCP statistics differ from the export")
             for name, entry in receipt["sources"].items():
-                result = await session.call_tool("get_node", {"node_id": name})
+                result = await session.call_tool("get_node", {"node_id": document_id(name)})
                 source = f"Source: {entry['archive_path']} L1"
-                if result.is_error or not any(source in item.text for item in result.content if item.type == "text"):
-                    raise ValueError(f"{out.name}: Graphify MCP could not locate {name}")
+                reply = "\n".join(item.text for item in result.content if item.type == "text")
+                if result.is_error or source not in reply:
+                    raise ValueError(f"{out.name}: Graphify MCP could not locate {name}: {reply[:600]}")
 
 
 def compare(output):
