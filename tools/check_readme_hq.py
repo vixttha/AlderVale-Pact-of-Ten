@@ -28,6 +28,11 @@ REFERENCE_LINK_RE = re.compile(r"^\s{0,3}\[[^\]]+\]:\s*(?:<([^>]+)>|(\S+))", re.
 AUTOLINK_RE = re.compile(r"<(https?://[^>\s]+)>", re.IGNORECASE)
 HTML_URL_ATTR_RE = re.compile(r"""\b(?:href|src|poster|action)\s*=\s*(['"])(.*?)\1""", re.IGNORECASE)
 BARE_URL_RE = re.compile(r"(?i)(?<![\w\"'=])https?://[^\s<>\x60\[\]()]+")
+HEADING_UNDERSCORES_RE = re.compile(
+    r"\\_|(?<!\x60)(?P<ticks>\x60+)(?!\x60).*?(?<!\x60)(?P=ticks)(?!\x60)"
+    r"|(?<!\w)(?P<marker>_{1,3})(?![\s_])"
+    r"(?P<emphasis>.+?)(?<![\s\\_])(?P=marker)(?!\w)"
+)
 MAX_EXTERNAL_LINKS = 200
 MAX_REDIRECTS = 5
 EXTERNAL_TIMEOUT_SECONDS = 8
@@ -243,6 +248,8 @@ def markdown_headings(markdown):
             continue
         hashes, title = match.groups()
         heading = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", title)
+        # Skip escaped underscores and code spans. Remove matched emphasis delimiters.
+        heading = HEADING_UNDERSCORES_RE.sub(lambda match: match["emphasis"] or match[0], heading)
         slug = re.sub(r"[^\w -]", "", heading.lower())
         slug = re.sub(r"\s+", "-", slug.strip())
         base_slug = slug
@@ -752,14 +759,24 @@ def run_regression_tests(root, repo, main_ref, baseline):
         "# Review\n"
         "\x60\x60\x60md\n## Code-only heading\n\x60\x60\x60\n"
         "## Review\n### 1. [Next step](../README.md)\n"
+        "## _Approval_ steps\n## Approval steps\n"
+        "## __Archive rules__\n## ___Combined emphasis___\n"
+        "## Use snake_case\n## \x60_Raw_\x60 code\n## \\_Literal_ text\n"
     )
     require(
         list(markdown_headings(source)) == [
             (1, 1, "Review", "review"),
             (5, 2, "Review", "review-1"),
             (6, 3, "1. [Next step](../README.md)", "1-next-step"),
+            (7, 2, "_Approval_ steps", "approval-steps"),
+            (8, 2, "Approval steps", "approval-steps-1"),
+            (9, 2, "__Archive rules__", "archive-rules"),
+            (10, 2, "___Combined emphasis___", "combined-emphasis"),
+            (11, 2, "Use snake_case", "use-snake_case"),
+            (12, 2, "\x60_Raw_\x60 code", "_raw_-code"),
+            (13, 2, "\\_Literal_ text", "_literal_-text"),
         ],
-        "Heading outline failed duplicate, fenced code, or inline-link regression",
+        "Heading outline failed Markdown fragment regression",
     )
 
     cases = []
@@ -1271,7 +1288,7 @@ def main():
         print(f"PASS: {summary}.")
         regression_count = run_regression_tests(ROOT, ROOT, main_ref, baseline)
         print(f"PASS: {regression_count} negative fixtures rejected and 2 valid workspace transitions accepted.")
-        print("PASS: heading fragments for duplicate titles, fenced code, and inline links.")
+        print("PASS: heading fragments for emphasis, literal underscores, duplicates, fenced code, and inline links.")
         external_regression_count = run_external_link_regression_tests()
         print(f"PASS: {external_regression_count} external-link regression cases.")
     except (ValidationError, OSError, ValueError, KeyError, TypeError, AttributeError) as error:
