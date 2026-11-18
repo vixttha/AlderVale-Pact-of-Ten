@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "issueNumber": 28,
-  "claimId": "AV-CLAIM-28-2026-11-18T05:00:03.694Z",
-  "status": "released",
+  "claimId": "AV-CLAIM-28-2026-11-18T05:41:31.000Z",
+  "status": "active",
   "worker": "ChatGPT",
   "host": "chatgpt.com",
   "model": "unverified",
@@ -10,7 +10,7 @@
   "githubActor": "vixttha",
   "baseSha": "fced4038c1dfa655c223d1bcbbdf3c18593b1e1f",
   "workBranch": "cursor/issue-28-bazaar-equipped-c4b4",
-  "claimedAt": "2026-11-18T05:00:03.694Z",
-  "expiresAt": "2026-11-18T05:18:53.000Z",
-  "note": "PR #103 head eb4952993d446e32741c2360bf6419c45cdd63b1 passed all 7 first-attempt public validation jobs. Conflict resolution and Bazaar seller equipment evidence recorded on issue #28. Delivered for owner merge review."
+  "claimedAt": "2026-11-18T05:41:31.000Z",
+  "expiresAt": "2026-11-18T06:41:31.000Z",
+  "note": "Owner directed repair and public CI for the #103 equipment save and wallet-loading regressions."
 }
