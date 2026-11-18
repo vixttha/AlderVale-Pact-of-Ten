@@ -64,7 +64,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Role | Breakdown | Total /10 | Status |
 | --- | --- | --- | ---: | ---: | --- |
-| Ozone | Reactive air | Fusion | 3 / 2 / 2 / 2 | 9 | Parked |
+| Ozone | Reactive air | Fusion | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Charged Air | Charged wind | Variant | 3 / 1 / 2 / 1 | 7 | Reference |
 | Ozone Veil | Reactive air | Ability | 3 / 1 / 2 / 1 | 7 | Reference |
 | Ionized Air | Charged wind | Variant | 3 / 1 / 1 / 1 | 6 | Reference |
@@ -78,7 +78,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Role | Breakdown | Total /10 | Status |
 | --- | --- | --- | ---: | ---: | --- |
-| Glass | Glass | Fusion | 3 / 3 / 2 / 2 | 10 | Locked |
+| Glass | Glass | Fusion | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Grounding | Discharge into earth | Process | 3 / 1 / 2 / 1 | 7 | Reference |
 | Electrostatic Dust | Discharge into earth | Material | 3 / 1 / 1 / 1 | 6 | Reference |
 | Fulgurite | Glass | Material | 3 / 1 / 1 / 1 | 6 | Reference |

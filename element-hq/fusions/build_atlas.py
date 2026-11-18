@@ -172,8 +172,9 @@ def render_element(element, catalog):
 
 
 def locked_parents(catalog):
+    # Multiple locked recipes may intentionally share a parent, e.g. Rust and Magnetism use Metal.
     return {
-        parent: name.label
+        parent
         for pair, names in catalog.items()
         for name in names
         if name.status == "Locked"
@@ -225,7 +226,7 @@ def render_fusion_chart(catalog):
         "## All 45 pairs",
         "",
         "Only Fusion-role names can appear as roster leads. Other materials, aliases, abilities, and phenomena remain on each pair page.",
-        "Using each base element once is a *preferred lineup view*, not a rule that bans any pairing or future expansion. Overlapping recipes remain reviewable; only the owner may change locks.",
+        "Parent reuse is explicitly allowed: Rust and Magnetism share Metal. Overlap notes are advisory, never disqualifying; only the owner may change locks.",
         "",
         "| Pair | Fusion contender | Review status | Parent-use note | Rated entries |",
         "| --- | --- | --- | --- | ---: |",

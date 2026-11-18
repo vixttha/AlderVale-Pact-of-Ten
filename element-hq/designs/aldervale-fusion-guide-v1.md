@@ -1,6 +1,6 @@
 # AlderVale Fusion HQ
 
-**Current decision** · [Element HQ locks Rust and Glass](../../README.md#locked-element-and-fusion-decisions). Magma is paused and Sugar is under review. The recipe, encounter, and conflict notes below record earlier work, including the rejected Fire + Forest prototype. Use the [Fusion Name Atlas](../fusions/README.md#roster-review) for current candidate status.
+**Current decision** · [Element HQ locks Rust, Sugar and Magnetism](../../README.md#locked-element-and-fusion-decisions). Glass is unlocked for exploration; Magma remains paused. Earlier suggestions below are preserved as historical review. The recipe, encounter, and conflict notes below record earlier work, including the rejected Fire + Forest prototype. Use the [Fusion Name Atlas](../fusions/README.md#roster-review) for current candidate status.
 
 ## Earlier roster proposal
 

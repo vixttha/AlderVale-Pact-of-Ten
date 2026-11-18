@@ -1,5 +1,7 @@
 # Fusion Name Atlas — Role and Rating Audit
 
+> **Historical scoring checkpoint:** Rust and Glass were locked when this scoring audit was made. A newer owner decision now locks Rust, Sugar, and Magnetism and reopens Glass. See [current roster](README.md#roster-review) and [decision record](../designs/fusion-roster-decisions-2026-11-18.md). This note does not overwrite the earlier validation findings.
+
 [Atlas overview](README.md) · [All 45 pairs](fusion-chart.md) · [Water + Metal worked example](pairs/water-metal.md)
 
 ## Scope and authority

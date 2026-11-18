@@ -2,7 +2,7 @@
 
 [Fusion chart](fusion-chart.md) · [Role and scoring audit](SCORING_AUDIT.md) · [Element HQ](../../README.md) · [Original 45-pair chart](../designs/aldervale-fusion-pairing-chart.md)
 
-Open any base element to compare its nine partners. Every pair page distinguishes **role** (fusion vs supporting name), **review decision**, **scores**, and **parent reuse**. The 320 names are retained for history; only Fusion-role entries compete for a roster slot. Aliases use the same concept as their primary fusion, but do not inherit its Identity or Gameplay points as an independent element.
+Open any base element to compare its nine partners. Every pair page distinguishes **role** (fusion vs supporting name), **review decision**, **scores**, and **parent reuse**. All 320 preceding names are preserved, and the newly locked Magnetism proposal brings the catalog to 321 records. Only Fusion-role entries compete for the technique shortlist. Aliases use the same concept as their primary fusion, but do not inherit its Identity or Gameplay points as an independent element.
 
 The atlas is a living catalog of reviewable names. The expanded pass adds plausible results, aliases, and useful move or material names with explicit review statuses. More names can be added to the same pair pages as the design develops.
 
@@ -20,17 +20,19 @@ The atlas is a living catalog of reviewable names. The expanded pass adds plausi
 
 | Pair | Name | Decision |
 | --- | --- | --- |
-| [Water + Metal](pairs/water-metal.md) | **Rust** | Locked. Water and Metal are counted as used in the preferred no-repeat view; other pairings remain reviewable. |
-| [Lightning + Earth](pairs/lightning-earth.md) | **Glass** | Locked. Lightning and Earth are counted as used in the preferred no-repeat view; other pairings remain reviewable. |
-| [Fire + Earth](pairs/fire-earth.md) | Magma | Paused by the owner. Shares Earth with Glass. |
-| [Light + Plant](pairs/light-plant.md) | Sugar | Owner favorite. Photosynthesis supports the concept. Final selection is open. |
-| [Lightning + Wind](pairs/lightning-wind.md) | Ozone | Parked. Shares Lightning with Glass. |
-| [Dark + Plant](pairs/dark-plant.md) | Ink | Exploratory. Compatible with both locks. Shares Plant with Sugar, Ash, and Rubber. |
-| [Fire + Water](pairs/fire-water.md) | Steam | Parked. Water is reserved for Rust. |
-| [Water + Frost](pairs/water-frost.md) | Ice | Parked. Water is reserved for Rust. |
-| [Metal + Plant](pairs/metal-plant.md) | Ironwood | Parked. Depends on a setting decision about Metal and shares Metal with Rust. |
+| [Water + Metal](pairs/water-metal.md) | **Rust** | **Locked** as a named fusion technique. Metal may be reused in other recipes. |
+| [Light + Plant](pairs/light-plant.md) | **Sugar** | **Locked** as a named fusion technique; sticky syrup, energy banking and crystalline shards remain an open gameplay/art specification. |
+| [Earth + Metal](pairs/earth-metal.md) | **Magnetism** | **Locked** as a named fusion technique. Shares Metal with Rust by explicit owner choice. |
+| [Lightning + Earth](pairs/lightning-earth.md) | Glass | **Unlocked / exploratory**; owner prefers Sugar to own the crystalline-shard visual direction. Historical recipe retained for research. |
+| [Fire + Earth](pairs/fire-earth.md) | Magma | Paused by the owner, not revived. |
+| [Lightning + Wind](pairs/lightning-wind.md) | Ozone | Reopened for exploration after Glass was unlocked. |
+| [Fire + Dark](pairs/fire-dark.md) | Smoke | Exploratory; needs a unique concealment interaction beyond ordinary Fire. |
+| [Frost + Wind](pairs/frost-wind.md) | Liquid Air / Blizzard | Exploratory; a material and a weather technique, not automatic extra schools. |
+| [Fire + Frost](pairs/fire-frost.md) | Thermal Shock | Process / candidate fusion technique for abrupt heating and cooling, not a separate school. |
 
-**Parent reuse is an advisory filter, not a prohibition.** Compare a no-repeat lineup first, but keep any of the 45 pairings eligible for future proposals, variants, or a roster that intentionally reuses a parent. Two competing fusions can be explored without being selected simultaneously. The owner alone sets locks, changes acceptance, or expands the roster.
+**Selected architecture:** keep the ten original elemental schools; fusion recipes unlock named **techniques/resonances** rather than additional attack/resistance schools. Unique collectible fusion creatures are a possible later decision, not already approved. **Parent reuse is explicitly permitted:** Rust and Magnetism both use Metal. Review all 45 pairs without imposing a one-parent-per-technique restriction. The count of remaining distinct unused base elements is five: Fire, Lightning, Frost, Wind, and Dark. This does not imply five mandatory recipes.
+
+[Current owner decisions and four open exploration tracks](../designs/fusion-roster-decisions-2026-11-18.md)
 
 ## New fusion concepts
 
@@ -40,7 +42,7 @@ The atlas is a living catalog of reviewable names. The expanded pass adds plausi
 | [Frost + Wind](pairs/frost-wind.md) | Dry Ice (material reference) | Condense carbon dioxide from air only under an explicit concentration and Frost-magic rule; not a separate affinity. |
 | [Light + Plant](pairs/light-plant.md) | Sugar | Plants use light energy to make sugars. In the game, crystallizing them into restraints or releasing their stored energy would be magic. |
 | [Lightning + Plant](pairs/lightning-plant.md) | Rubber (material reference) | Plant latex can become rubber, but the Lightning contribution needs a credible rule. Does not count as a separate fusion. |
-| [Earth + Light](pairs/earth-light.md) | Phosphor | Earth supplies a substance that stores Light and releases it later to reveal or mark targets. Parked while Glass reserves Earth. |
+| [Earth + Light](pairs/earth-light.md) | Phosphor | Earth supplies a substance that stores Light and releases it later to reveal or mark targets. Retained for comparison; Earth is not exclusively reserved. |
 
 ## Recent names after the rating audit
 
@@ -65,7 +67,7 @@ Older ratings were often too generous to materials and alternate labels. This su
 
 | Role | Meaning | Can lead a fusion shortlist? |
 | --- | --- | --- |
-| Fusion | Independent elemental affinity concept with its own mechanics | Yes, subject to owner decision |
+| Fusion | Named resonance or technique concept with a distinct mechanical identity; it is **not automatically a new elemental school** | Yes, subject to owner decision |
 | Alias | Alternate label for a primary fusion; inherits its concept | No |
 | Variant | A form, subtype, or derivative of the concept | No |
 | Material | Tangible substance/item not yet justified as an independent affinity | No |
@@ -85,7 +87,7 @@ A locked recipe stays locked even when its science or gameplay needs future work
 | Name | 0–2 | 0 for misleading, 1 for ambiguous or niche, 2 for clear and memorable. |
 | Gameplay | 0–2 | 0 for no clear use, 1 for one credible mechanic, 2 for several related abilities or interactions. |
 
-Use the four scores for a total out of ten. **10/10 is exceptional and belongs only to a standalone Fusion proposal with essential parents, an identifiable result, an excellent name, and multiple coherent mechanics.** Aliases receive Identity = 0 and Gameplay = 0 because they inherit the underlying fusion's design; they cannot tie the primary score. Materials, variants, abilities, processes, phenomena, and habitats receive at most Identity = 1 and Gameplay = 1 and cannot exceed 7/10. Keep the source rationale and flag invented magic separately from demonstrated real-world processes. These are provisional *design* ratings, not scientific certainty. Status carries owner decisions, separate from score and role.
+Use the four scores for a total out of ten. **10/10 is exceptional and belongs only to a distinct Fusion technique proposal with essential parents, an identifiable result, an excellent name, and multiple coherent mechanics.** Aliases receive Identity = 0 and Gameplay = 0 because they inherit the underlying fusion's design; they cannot tie the primary score. Materials, variants, abilities, processes, phenomena, and habitats receive at most Identity = 1 and Gameplay = 1 and cannot exceed 7/10. Keep the source rationale and flag invented magic separately from demonstrated real-world processes. These are provisional *design* ratings, not scientific certainty. Status carries owner decisions, separate from score and role.
 
 | Status | Meaning |
 | --- | --- |

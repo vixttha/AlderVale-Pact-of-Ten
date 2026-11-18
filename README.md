@@ -8,11 +8,15 @@ Element HQ is the design reference for the mechanics and lore behind AlderVale�
 
 The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Wind ↔ Earth**, **Light ↔ Dark**, and **Metal ↔ Plant**.
 
-**Water + Metal → Rust** is locked for the current fusion roster. Water and Metal are reserved for Rust in this pass.
+**Water + Metal → Rust** is locked for the current fusion roster. Rust is the selected corrosion technique; Metal may also participate in another locked recipe.
 
-**Lightning + Earth → Glass** is locked for the current fusion roster. Lightning and Earth are reserved for Glass in this pass. Prefer one fusion per base element across the current roster wherever possible.
+**Light + Plant → Sugar** is locked for the current fusion roster. Sugar may use syrup, energy storage and crystalline shards in its design; its exact gameplay kit is not locked.
 
-[Fire + Earth → Magma](element-hq/fusions/pairs/fire-earth.md) is paused by the owner. [Light + Plant → Sugar](element-hq/fusions/pairs/light-plant.md) is a liked proposal under review. Steam and Ironwood remain parked because they share a parent with Rust. Ozone overlaps Glass on Lightning.
+**Earth + Metal → Magnetism** is locked for the current fusion roster. The recipe intentionally shares Metal with Rust; Earth supplies the lodestone/mineral identity while Metal supports magnetic interaction.
+
+[Lightning + Earth → Glass](element-hq/fusions/pairs/lightning-earth.md) was previously locked but is now **unlocked and exploratory** by the owner because its crystal visuals overlap Sugar. [Fire + Earth → Magma](element-hq/fusions/pairs/fire-earth.md) remains paused. No parent is exclusively reserved, and a recipe can share parents with another recipe.
+
+**Fusion architecture decision:** retain exactly ten elemental schools. Fusion results are **named resonance techniques, not additional elemental damage/resistance schools**. Collectible fusion creatures are a possible later feature; no new creature pipeline, combat behavior or implementation is approved by these recipe locks.
 
 ## Start here
 
@@ -20,7 +24,8 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 | --- | --- |
 | [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the initial design snapshot. The [current base roster and fusion decisions](#locked-element-and-fusion-decisions) govern active design. |
 | [Fusion chart](element-hq/fusions/fusion-chart.md) | See locked recipes, open choices, and all 45 pairings at a glance. |
-| [Fusion architecture and conflict audit](element-hq/designs/fusion-architecture-audit-2026-11-18.md) | Compare Rust, Glass, Sugar, Magnetism, the 45 pair concepts, and alternatives to adding five complete elemental schools. **Exploratory; not new owner locks.** |
+| [Current fusion decisions and open candidate tracks](element-hq/designs/fusion-roster-decisions-2026-11-18.md) | See the three approved fusion techniques, reopened Glass, the five remaining base elements, and four candidate tracks. |
+| [Earlier fusion architecture audit](element-hq/designs/fusion-architecture-audit-2026-11-18.md) | Historical comparison written before the latest owner decisions; consult the current decision record first. |
 | [Fusion Name Atlas](element-hq/fusions/README.md) | Browse ten element charts and compare rated names for every pairing. |
 | [Fusion pairing chart](element-hq/designs/aldervale-fusion-pairing-chart.md) | Compare all 45 cross-element pairings and their proposed outcomes. |
 | [Fusion HQ](element-hq/designs/aldervale-fusion-guide-v1.md) | Read the earlier encounter concepts, existing recipes, and conflict audit. |

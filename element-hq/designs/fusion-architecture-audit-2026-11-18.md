@@ -1,5 +1,7 @@
 # Fusion architecture and concept conflict audit — design options
 
+> **Historical audit / superseded decisions:** The owner subsequently locked Rust, Sugar and Earth + Metal → Magnetism, unlocked Glass, and selected ten base schools with fusion techniques rather than new schools. See [current owner decisions](fusion-roster-decisions-2026-11-18.md). This document remains a record of earlier alternatives, not the live lock roster.
+
 **Status: Exploration only — no new gameplay approval, elemental lock, merge, or release.**  
 **Verified game source:** `main` at `5a7d0438e46582e625fc101efb6aa0f9e637c55e`.  
 **Starting Element HQ ref:** `element-hq-v1` at `abf423bba86d3bf12f14a60259f4d8c272e7ad3b`.  
