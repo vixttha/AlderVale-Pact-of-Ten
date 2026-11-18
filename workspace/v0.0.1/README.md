@@ -8,6 +8,9 @@ number is independent of the game, Test Vault, README HQ and their own versions.
 
 ## Work on this version
 
+- [Bound agent instructions](agent/AGENTS.md)
+- [Bound identity](agent/IDENTITY.md) and [retained project identity](agent/PROJECT_IDENTITY.md)
+- [Pinned template adoption record](agent/binding.json)
 - [Scope and acceptance](SCOPE.md)
 - [Draft changelog](CHANGELOG.md)
 - [Evidence register](evidence/README.md)

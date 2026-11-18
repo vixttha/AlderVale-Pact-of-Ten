@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "adoption_status": "development",
+  "template": {
+    "repository": "vixttha/AlderVale-Pact-of-Ten",
+    "branch": "Launcher-Agent-Template",
+    "version": "v0.0.1",
+    "status": "draft",
+    "home_commit": "b096cab0bf5e80ba7dd1d9e8451be71fc290abda",
+    "source_commit": "1aea00da941d556185496326a6240c858ba6d652",
+    "source_path": "workspace/v0.0.1/template",
+    "graph_receipt_sha256": "5dffb8011344d8edd3f101295956718c821f4739ccb7fb1d4e11ac726010b40f",
+    "files": {
+      "AGENTS.template.md": "531f0e9e960775a72e12614d9a0c94bc91786374f9bd7cbb475067589dbaf740",
+      "bindings.schema.json": "9b8f7d85533014f4120ce584609305de9b421f743c96a86c202785a65edd24fa",
+      "IDENTITY.template.md": "ea388e7bec16a8d8d5801f8b379e2e4d02c6a791378b7735c06ff65b4f9cf5cc",
+      "README.md": "e5a18a066610657556572eb35b9bed58b511ce3ce94d97be83d5416679ea52f6"
+    }
+  },
+  "bindings": {
+    "AGENT_ID": "aldergate",
+    "AGENT_NAME": "AlderGate",
+    "PRODUCT_NAME": "AlderVale-Launcher",
+    "HOME_BRANCH": "AlderVale-Launcher",
+    "REPOSITORY": "vixttha/AlderVale-Pact-of-Ten",
+    "ISSUE_TRACKER": "https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/143"
+  }
+}
