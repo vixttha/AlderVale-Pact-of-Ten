@@ -208,7 +208,6 @@ export async function saveCloudRealmAccount(uid: string, realmAccount: RealmAcco
       {
         uid,
         realmId: realmAccount.realmId,
-        unlockedRaces: realmAccount.unlockedRaces.slice(0, 20),
         sharedVault: realmAccount.sharedVault.slice(0, 60),
         updatedAt: serverTimestamp(),
       },
@@ -405,7 +404,7 @@ export async function saveCloudWizard(wizard: WizardDocument, pets: OwnedCreatur
     for (const pet of updatedPets) batch.update(doc(wizardRef, 'creatures', pet.id), creaturePayload(pet));
     if (realmAccount) {
       const accountRef = doc(db, 'accounts', realmAccount.uid, 'realms', realmAccount.realmId);
-      const { wizardIds: _ids, claimedTermTiers: _claimed, termXp: _termXp, ...fields } = realmPayload(realmAccount);
+      const { wizardIds: _ids, claimedTermTiers: _claimed, termXp: _termXp, unlockedRaces: _races, ...fields } = realmPayload(realmAccount);
       batch.update(accountRef, fields);
     }
   });

@@ -7,6 +7,7 @@ import { wizardStarter } from '../shared/wizardStarter.ts';
 import type { RealmAccountState } from '../src/lib/storage.ts';
 import { cloudDb } from './cloud.ts';
 import { isDocumentId, RequestError } from './market.ts';
+import { readTermView } from './soloProgress.ts';
 
 function readSculpt(value: unknown): WizardSculpt {
   if (!value || typeof value !== 'object') throw new RequestError(400, 'Invalid wizard appearance');
@@ -62,7 +63,7 @@ export async function enrollWizard(uid: string, realm: RealmId, body: Record<str
     const wizardIds = data.wizardIds as string[];
     const realmAccount: RealmAccountState = {
       uid, realmId: realm, wizardIds, unlockedRaces: data.unlockedRaces, sharedVault: data.sharedVault ?? [],
-      termXp: term.get('termXp') ?? 0, claimedTermTiers: term.get('claimedTermTiers') ?? [],
+      ...readTermView(term.data(), data.claimedTermTiers),
     };
     if (existing.exists && existing.get('ownerId') === uid && existing.get('realmId') === realm && wizardIds.includes(id)) {
       return { account: realmAccount, wizard: { ...existing.data(), id } as WizardDocument };

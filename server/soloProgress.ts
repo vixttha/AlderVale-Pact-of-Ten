@@ -15,6 +15,9 @@ import { duelView, readDuelAction } from './duelView.ts';
 import { isDocumentId, ownedWizard, RequestError } from './market.ts';
 
 type TermProgress = Pick<RealmAccountState, 'termXp' | 'claimedTermTiers'>;
+interface StoredTermProgress extends TermProgress {
+  legacyCompletedTiers: number[];
+}
 interface StoredSoloDuel {
   uid: string;
   state: DuelState;
@@ -42,8 +45,25 @@ function accountRef(uid: string, realm: RealmId) {
   return cloudDb.collection('accounts').doc(uid).collection('realms').doc(realm);
 }
 
-function termProgress(value: DocumentData | undefined): TermProgress {
-  return { termXp: value?.termXp ?? 0, claimedTermTiers: value?.claimedTermTiers ?? [] };
+function termProgress(value: DocumentData | undefined, legacyClaims: unknown): StoredTermProgress {
+  const prior = Array.isArray(legacyClaims) ? legacyClaims : [];
+  return {
+    termXp: value?.termXp ?? 0,
+    claimedTermTiers: value?.claimedTermTiers ?? [],
+    legacyCompletedTiers: value?.legacyCompletedTiers ??
+      TERM_REWARD_TRACK.filter(({ tier }) => prior.includes(tier)).map(({ tier }) => tier),
+  };
+}
+
+function termView(progress: StoredTermProgress): TermProgress {
+  return {
+    termXp: progress.termXp,
+    claimedTermTiers: [...new Set([...progress.claimedTermTiers, ...progress.legacyCompletedTiers])].sort((a, b) => a - b),
+  };
+}
+
+export function readTermView(value: DocumentData | undefined, legacyClaims: unknown): TermProgress {
+  return termView(termProgress(value, legacyClaims));
 }
 
 function view(room: StoredSoloDuel) {
@@ -89,7 +109,8 @@ function writeWizardReward(tx: Transaction, wizard: WizardDocument, hasProjectio
 }
 
 export async function readServerTerm(uid: string, realm: RealmId) {
-  return termProgress((await serverTermRef(uid, realm).get()).data());
+  const [ledger, account] = await Promise.all([serverTermRef(uid, realm).get(), accountRef(uid, realm).get()]);
+  return readTermView(ledger.data(), account.get('claimedTermTiers'));
 }
 
 export async function startSolo(uid: string, realm: RealmId, wizardId: unknown, body: Record<string, unknown>) {
@@ -106,6 +127,9 @@ export async function startSolo(uid: string, realm: RealmId, wizardId: unknown, 
     const supplied = body.element;
     if (typeof supplied !== 'string' || !Object.hasOwn(ELEMENTS, supplied)) throw new RequestError(400, 'Invalid element');
     const element = floor === undefined ? supplied as ElementId : ELEMENT_LIST[floor % 6].id;
+    if (mode === 'solo' && ELEMENTS[element].tier !== 'starter') {
+      throw new RequestError(400, 'This skirmish is unavailable.');
+    }
     if (mode === 'trial' && (wizard.rank < 4 || !trialElements.has(element))) {
       throw new RequestError(409, 'This Rare Trial is unavailable.');
     }
@@ -166,7 +190,8 @@ export async function finishSolo(uid: string, realm: RealmId, wizardId: unknown,
       tx.get(cloudDb.collection('publicWizards').doc(wizardId)),
     ]);
     if (!account.exists) throw new RequestError(409, 'Reopen this realm before claiming rewards.');
-    const accountState = { ...account.data(), ...termProgress(ledger.data()) } as RealmAccountState;
+    const progress = termProgress(ledger.data(), account.get('claimedTermTiers'));
+    const accountState = { ...account.data(), ...termView(progress) } as RealmAccountState;
     const pets = await readPets(tx, wizard);
     if (previous.exists) {
       return { wizard, account: accountState, creatures: pets, notice: previous.get('notice') as string };
@@ -190,7 +215,7 @@ export async function finishSolo(uid: string, realm: RealmId, wizardId: unknown,
         tx.update(petsRef.doc(reward.updatedLead.id), { wins: reward.updatedLead.wins, updatedAt: FieldValue.serverTimestamp() });
       }
       tx.update(accountRef(uid, realm), { unlockedRaces: reward.account.unlockedRaces, updatedAt: FieldValue.serverTimestamp() });
-      tx.set(serverTermRef(uid, realm), { termXp: reward.account.termXp, claimedTermTiers: reward.account.claimedTermTiers });
+      tx.set(serverTermRef(uid, realm), { ...progress, termXp: reward.account.termXp });
       result = reward;
     } else if (state.phase === 'defeat' && state.mode === 'trial') {
       result.wizard = applySagaEvent(wizard, 'rare-trial-attempt');
@@ -217,14 +242,15 @@ export async function claimServerTerm(uid: string, realm: RealmId, wizardId: unk
       tx.get(cloudDb.collection('publicWizards').doc(wizardId)),
     ]);
     if (!account.exists) throw new RequestError(409, 'Reopen this realm before claiming a reward.');
-    const progress = termProgress(term.data());
-    const realmState = { ...account.data(), ...progress } as RealmAccountState;
-    if (progress.claimedTermTiers.includes(tier.tier)) return { account: realmState, wizard, claimed: false };
+    const progress = termProgress(term.data(), account.get('claimedTermTiers'));
+    const realmState = { ...account.data(), ...termView(progress) } as RealmAccountState;
+    if (realmState.claimedTermTiers.includes(tier.tier)) return { account: realmState, wizard, claimed: false };
     if (progress.termXp < tier.xpRequired) throw new RequestError(409, 'You have not earned this reward yet.');
     const updated = applyTermReward(wizard, tier);
     const claimedTermTiers = [...progress.claimedTermTiers, tier.tier];
     writeWizardReward(tx, updated, projection.exists);
-    tx.set(ref, { termXp: progress.termXp, claimedTermTiers });
-    return { account: { ...realmState, claimedTermTiers }, wizard: updated, claimed: true };
+    const nextProgress = { ...progress, claimedTermTiers };
+    tx.set(ref, nextProgress);
+    return { account: { ...realmState, ...termView(nextProgress) }, wizard: updated, claimed: true };
   });
 }

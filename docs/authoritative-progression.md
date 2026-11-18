@@ -72,12 +72,13 @@ progression from server-generated defaults unless there is independent
 server-owned evidence for the value. Give users an explicit choice before
 creating a fresh online progression profile from an existing save.
 
-The initial Term ledger begins at zero and does not seed XP or claim
-eligibility from guest or legacy realm data. Earlier records and paid items
-remain intact. Before rollout, handle any legacy tier reward already paid
-when reconciling the trusted economy so there is a single trusted reward per
-account, realm and tier. Do not convert historical balances or claims into
-trusted entitlements by copying them through an Admin SDK.
+The initial Term ledger starts at zero XP. It does not promote historical
+XP into an earned balance. Historical claims count only as already
+completed for display and to suppress duplicate payouts. At the first
+server-earned reward, the server records those exclusions in its private
+ledger. Earlier records and paid items remain intact. Before final rollout,
+reconcile historical payouts against independent receipts where available.
+Do not convert historical balances or claims into trusted entitlements.
 
 ## Verification
 

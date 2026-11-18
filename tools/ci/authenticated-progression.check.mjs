@@ -49,7 +49,7 @@ async function createPlayer() {
   // own server ledger, and enrollment creates the new wizard from profile choices.
   await realmRef.set({
     uid, realmId: 'breeze', wizardIds: [], unlockedRaces: ['human'],
-    sharedVault: [], termXp: 480, claimedTermTiers: [1, 2],
+    sharedVault: [], termXp: 480, claimedTermTiers: [2],
   });
   const player = { uid, wizardId, wizardRef, realmRef, idToken };
   const appearance = {
@@ -89,7 +89,7 @@ test('a signed-in solo win settles once and earns one Term claim', { timeout: 55
   const player = await createPlayer();
   const { wizardId } = player;
   await call(null, 'term', undefined, 401);
-  assert.deepEqual(await call(player, 'term'), { termXp: 0, claimedTermTiers: [] });
+  assert.deepEqual(await call(player, 'term'), { termXp: 0, claimedTermTiers: [2] });
   await call(player, 'term', { wizardId, tier: 1 }, 409);
 
   const start = await call(player, 'solo/start', { wizardId, mode: 'solo', element: 'ember' });
@@ -119,14 +119,18 @@ test('a signed-in solo win settles once and earns one Term claim', { timeout: 55
   }
   const claims = await Promise.all(Array.from({ length: 2 }, () => call(player, 'term', { wizardId, tier: 1 })));
   assert.equal(claims.filter((result) => result.claimed).length, 1);
-  assert.deepEqual(await call(player, 'term'), { termXp: 228, claimedTermTiers: [1] });
+  assert.equal((await call(player, 'term', { wizardId, tier: 2 })).claimed, false);
+  await player.realmRef.update({ claimedTermTiers: [] });
+  assert.equal((await call(player, 'term', { wizardId, tier: 2 })).claimed, false);
+  await player.realmRef.update({ claimedTermTiers: [2] });
+  assert.deepEqual(await call(player, 'term'), { termXp: 228, claimedTermTiers: [1, 2] });
   assert.equal((await player.wizardRef.get()).get('currencies.florins'), 613);
   const profile = await cloudDb.collection('publicWizards').doc(wizardId).get();
   assert.equal(profile.get('ownerId'), player.uid);
   assert.equal(profile.get('rank'), (await player.wizardRef.get()).get('rank'));
   const preserved = await player.realmRef.get();
   assert.equal(preserved.get('termXp'), 480);
-  assert.deepEqual(preserved.get('claimedTermTiers'), [1, 2]);
+  assert.deepEqual(preserved.get('claimedTermTiers'), [2]);
 });
 
 test('leaving an unfinished signed-in duel creates no earned rewards', { timeout: 45000 }, async () => {
@@ -136,5 +140,5 @@ test('leaving an unfinished signed-in duel creates no earned rewards', { timeout
   const finish = await call(player, 'solo/finish', { wizardId, duelId });
   assert.equal(finish.notice, 'You left the duel.');
   assert.equal(finish.wizard.currencies.florins, 220);
-  assert.deepEqual(await call(player, 'term'), { termXp: 0, claimedTermTiers: [] });
+  assert.deepEqual(await call(player, 'term'), { termXp: 0, claimedTermTiers: [2] });
 });

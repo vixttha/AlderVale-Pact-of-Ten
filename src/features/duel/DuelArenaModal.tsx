@@ -373,7 +373,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                   <button
                     key={el}
                     disabled={cloudBusy}
-                  onClick={() => launchSolo('solo', el)}
+                    onClick={() => launchSolo('solo', el)}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-[#d7c7a9] bg-[#fbf6ec] px-3 py-1.5 text-xs font-bold hover:border-[#241b16]"
                   >
                     <ElementCrest elementId={el} size={15} showLabel />
@@ -426,7 +426,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
               <p className="text-xs text-[#615346]">Equalized 10-floor solo puzzle-duel climb where pure deck skill rules.</p>
               <button
                 disabled={cloudBusy}
-                  onClick={() => launchSolo('spire', ELEMENT_LIST[nextSpire % 6].id, nextSpire)}
+                onClick={() => launchSolo('spire', ELEMENT_LIST[nextSpire % 6].id, nextSpire)}
                 className="w-full rounded-xl bg-[#2f8a73] py-2 text-xs font-bold text-white hover:bg-[#389e85]"
               >
                 Enter Spire Floor {nextSpire}
@@ -643,7 +643,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
               </div>
               <button
                 disabled={cloudBusy}
-                  onClick={() => handleClaimExit(duel.phase === 'victory')}
+                onClick={() => handleClaimExit(duel.phase === 'victory')}
                 className="mt-2 rounded-xl bg-[#f4c98b] px-5 py-2 text-xs font-bold text-[#241b16]"
               >
                 {duel.phase === 'victory' && !liveDuelState ? 'Claim Rewards & Return' : 'Return to Campus'}
