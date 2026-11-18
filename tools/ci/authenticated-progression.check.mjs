@@ -3,10 +3,12 @@ import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { after, before, test } from 'node:test';
+import WebSocket from 'ws';
 
 const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
 const localEmulator = /^127\.0\.0\.1:\d+$/;
 let httpServer;
+let hub;
 let cloudAuth;
 let cloudDb;
 
@@ -19,11 +21,17 @@ before(async () => {
   ({ cloudAuth, cloudDb } = await import('../../server/cloud.ts'));
   const { createAldervaleApp } = await import('../../server.ts');
   httpServer = createServer(await createAldervaleApp({ frontend: false }));
+  const { attachAldervaleWebSocketServer } = await import('../../server/wsHub.ts');
+  hub = attachAldervaleWebSocketServer(httpServer);
   httpServer.listen(0, '127.0.0.1');
   await once(httpServer, 'listening');
 });
 
 after(async () => {
+  if (hub) {
+    for (const socket of hub.clients) socket.terminate();
+    await new Promise((resolve) => hub.close(resolve));
+  }
   if (httpServer?.listening) await new Promise((resolve) => httpServer.close(resolve));
   await cloudDb?.terminate();
 });
@@ -174,6 +182,14 @@ test('signed-in gameplay commands handle shop, crafting, roster and Dorm changes
   const plant = await gameplay(player, { type: 'gardenPlant', index: 0, element: 'ember' });
   assert.equal(plant.sanctuary.gardens[0].seedElement, 'ember');
   await gameplay(player, { type: 'gardenHarvest', index: 0 }, randomUUID(), 409);
+  const gardenRef = player.wizardRef.collection('sanctuary').doc('layout');
+  // Advance the trusted fixture's crop clock so the test needs no real wait.
+  await gardenRef.update({ gardens: [{ ...plant.sanctuary.gardens[0], readyAt: Date.now() - 1000 }] });
+  const harvest = await gameplay(player, { type: 'gardenHarvest', index: 0 });
+  assert.equal(harvest.wizard.resources.sunleaf, 3);
+  assert.equal(harvest.wizard.currencies.florins, 175);
+  assert.equal(harvest.sanctuary.gardens[0].seedElement, null);
+  await gameplay(player, { type: 'gardenHarvest', index: 0 }, randomUUID(), 409);
   const dorm = await gameplay(player, { type: 'dormWeather', id: 'fireflies' });
   assert.equal(dorm.sanctuary.weatherId, 'fireflies');
   assert.equal((await player.wizardRef.get()).get('activeCreatureId'), adopted.id);
@@ -188,4 +204,25 @@ test('archived cloud records stay outside signed-in gameplay', { timeout: 45000 
   assert.deepEqual(realm.wizardIds, [player.wizardId]);
   await call(player, 'solo/start', { wizardId: 'archive-' + player.uid, mode: 'solo', element: 'ember' }, 409);
   assert.equal((await cloudDb.collection('wizards').doc('archive-' + player.uid).get()).get('level'), 10);
+});
+
+test('campus activity uses the authenticated realm presence and server node definitions', { timeout: 45000 }, async (context) => {
+  const player = await createPlayer();
+  const activity = { type: 'world', id: 'fountain_main' };
+  await gameplay(player, activity, randomUUID(), 409);
+  const socket = new WebSocket('ws://127.0.0.1:' + httpServer.address().port + '/ws', { handshakeTimeout: 10000 });
+  context.after(() => socket.terminate());
+  await once(socket, 'open');
+  const joined = once(socket, 'message', { signal: AbortSignal.timeout(10000) });
+  socket.send(JSON.stringify({
+    type: 'join_world',
+    idToken: player.idToken,
+    presence: { wizardId: player.wizardId, realmId: 'breeze', zone: 'hub',
+      name: 'Progress Rowan', raceId: 'human', elementId: 'ember' },
+  }));
+  const [message] = await joined;
+  assert.equal(JSON.parse(message).type, 'world_joined');
+  const result = await gameplay(player, activity);
+  assert.equal(result.wizard.progression.mana, result.wizard.progression.maxMana);
+  assert.equal(result.wizard.progression.flasks, result.wizard.progression.maxFlasks);
 });

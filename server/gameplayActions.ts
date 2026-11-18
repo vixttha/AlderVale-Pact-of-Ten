@@ -207,7 +207,7 @@ function applyAction(state: ActionState, input: Payload, now: number): GameplayF
     }
     case 'adopt': {
       const species = byId(SPECIES_BY_ID, id);
-      requireChoice(species && !species.isFusionOnly && creatures.length < 100, 'That species cannot be adopted.');
+      requireChoice(species && !species.isFusionOnly && creatures.length + progress.eggs.length < 100, 'That species cannot be adopted.');
       spend('bondingSeals', species.bondSealCost);
       const roll = Math.random();
       const chromatic = roll < 0.1 ? 'dawn' : roll < 0.2 ? 'dusk' : 'none';

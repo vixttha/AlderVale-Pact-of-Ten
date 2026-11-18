@@ -1419,7 +1419,7 @@ export function App() {
           wizard={activeWizard}
           creatures={creatures}
           onUpdateWizard={(w) => persistWizard(w)}
-          onUpdateCreatures={(list, created) => persistCreatures(list, created)}
+          onUpdateCreatures={persistCreatures}
           onRuneCatch={(pet) => {
             if (fbUser) return;
             const updated = applySagaEvent(activeWizard, 'rune-catch');

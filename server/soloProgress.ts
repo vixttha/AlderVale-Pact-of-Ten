@@ -14,7 +14,7 @@ import { duelView, readDuelAction } from './duelView.ts';
 import { isDocumentId, RequestError } from './market.ts';
 
 import {
-  legacyRealmRef, newProgressionAccount, ownedProgressionWizard, PROGRESSION_VERSION,
+  legacyRealmRef, newProgressionAccount, ownedProgressionWizard, PROGRESSION_VERSION, progressionRealm,
   readProgressionCreatures, trustedRealmRef, writeProgressionWizard,
 } from './progressionState.ts';
 

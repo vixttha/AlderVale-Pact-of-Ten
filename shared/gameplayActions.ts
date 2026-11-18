@@ -41,7 +41,7 @@ export interface ProgressionNode {
 }
 
 export function gatherNode(id: string, zone: string, resources: readonly ResourceId[]): ProgressionNode | undefined {
-  if (id === 'fountain_main' && zone === 'hub') return { id, kind: 'fountain', x: 0, z: 0 };
+  if (id === 'fountain_main' && zone === 'hub') return { id, kind: 'fountain', x: 0, z: 1 };
   if (id === 'cloud_pier' && zone === 'arbor') return { id, kind: 'fishing', x: 11, z: 10.6 };
   if (zone !== 'hub' && zone !== 'arbor') return;
   if (id === 'wisp_0') return { id, kind: 'wisp', x: -6, z: 9 };
