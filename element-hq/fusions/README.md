@@ -1,6 +1,6 @@
 # Fusion Name Atlas
 
-[Element HQ](../../README.md) · [Original 45-pair chart](../designs/aldervale-fusion-pairing-chart.md)
+[Fusion chart](fusion-chart.md) · [Element HQ](../../README.md) · [Original 45-pair chart](../designs/aldervale-fusion-pairing-chart.md)
 
 Open any base element to compare its nine partners. Every pair page lists candidate names, score breakdowns, rationale, and earlier ideas. Alternate names carry the same concept label when they point to the same fusion.
 

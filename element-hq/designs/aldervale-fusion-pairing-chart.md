@@ -1,6 +1,6 @@
 # AlderVale Fusion Pairing Chart
 
-[Open the Fusion Name Atlas](../fusions/README.md) for rated names, rationale, and a chart for each element.
+[Open the current fusion chart](../fusions/fusion-chart.md) to see locks and parent overlap. [Open the Fusion Name Atlas](../fusions/README.md) for rated names, rationale, and a chart for each element.
 
 The chart covers all **45 unordered pairings** between different base elements. Each pair appears once because input order is interchangeable. The diagonal identifies the ten same-element matches for reference. The overview shows one example per pair. The options table gives three to five candidate outcomes per pair, with 139 ideas in total.
 

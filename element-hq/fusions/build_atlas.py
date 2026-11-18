@@ -1,4 +1,4 @@
-"""Generate and verify the ten Markdown views of the fusion naming records."""
+"""Generate and verify the Markdown charts of the fusion naming records."""
 
 import argparse
 from dataclasses import dataclass
@@ -146,6 +146,65 @@ def render_element(element, catalog):
     return "\n".join(lines) + "\n"
 
 
+def locked_parents(catalog):
+    return {
+        parent: name.label
+        for pair, names in catalog.items()
+        for name in names
+        if name.status == "Locked"
+        for parent in pair
+    }
+
+
+def pair_summary(pair, names, held):
+    overlaps = any(parent in held for parent in pair)
+    undecided = ("Parked", "Candidate", "Exploratory") if overlaps else ("Candidate", "Exploratory", "Parked")
+    for status in ("Locked", "Favorite", *undecided):
+        choices = [name for name in names if name.status == status]
+        if not choices:
+            continue
+        best = min(choices, key=lambda name: (-name.total, name.label.casefold() != name.concept.casefold(), name.label.casefold()))
+        if status == "Locked":
+            return best.label, "Locked"
+        if overlaps:
+            return best.label, "Shares a locked parent"
+        return best.label, "Open" if status in {"Candidate", "Exploratory"} else status
+    if overlaps:
+        return "Reference only", "Shares a locked parent"
+    return "Reference only", "Reference"
+
+
+def render_fusion_chart(catalog):
+    held = locked_parents(catalog)
+    lines = [
+        "# Element Fusion Chart",
+        "",
+        "[Element HQ](../../README.md) · [Fusion Name Atlas](README.md)",
+        "",
+        "## Roster decisions",
+        "",
+        "| Pair | Fusion | Status |",
+        "| --- | --- | --- |",
+    ]
+    for (first, second), names in catalog.items():
+        for name in names:
+            if name.status in {"Locked", "Favorite"}:
+                lines.append(f"| [{first} + {second}](pairs/{pair_id(first, second)}.md) | **{name.label}** | {name.status} |")
+    lines.extend([
+        "",
+        "## All 45 pairs",
+        "",
+        "Each pair links to its rated names. Parent overlap refers to the current preference of one fusion per base element where possible.",
+        "",
+        "| Pair | Review name | Roster status | Rated names |",
+        "| --- | --- | --- | ---: |",
+    ])
+    for pair, names in catalog.items():
+        label, status = pair_summary(pair, names, held)
+        lines.append(f"| [{pair[0]} + {pair[1]}](pairs/{pair_id(*pair)}.md) | {label} | {status} | {len(names)} |")
+    return "\n".join(lines) + "\n"
+
+
 def check_links(path):
     for destination in re.findall(r"\]\(([^)]+)\)", path.read_text(encoding="utf-8")):
         link = urlsplit(destination)
@@ -181,9 +240,16 @@ def main():
         else:
             path.write_text(content, encoding="utf-8")
 
+    overview = ATLAS / "fusion-chart.md"
+    overview_content = render_fusion_chart(catalog)
     if args.check:
-        for path in [ATLAS / "README.md", REPO / "README.md", PAIRING_CHART, *sorted(ATLAS.glob("*/*.md"))]:
+        if overview.read_text(encoding="utf-8") != overview_content:
+            raise ValueError("Fusion chart differs from the pair pages. Regenerate the charts.")
+        print(f"Verified fusion chart: {len(catalog)} pair rows with links")
+        for path in [overview, ATLAS / "README.md", REPO / "README.md", PAIRING_CHART, *sorted(ATLAS.glob("*/*.md"))]:
             check_links(path)
+    else:
+        overview.write_text(overview_content, encoding="utf-8")
     names = sum(map(len, catalog.values()))
     print(f"{'Verified' if args.check else 'Generated'}: {len(catalog)} unique pairs, {names} rated names, "
           f"{len(ELEMENTS)} element charts, {len(catalog) * 2} pair views")
