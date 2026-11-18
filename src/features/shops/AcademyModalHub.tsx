@@ -196,6 +196,10 @@ export const AcademyModalHub: React.FC<AcademyModalHubProps> = ({
   const postBazaarListing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (marketBusy) return;
+    if (Object.values(wizard.wardrobe.equipped).includes(listItemId)) {
+      setNotice('Unequip that gear before listing it.');
+      return;
+    }
     if (!isBazaarPrice(listPrice)) {
       setNotice('Enter a whole-number price between 1 and 1,000,000 Florins.');
       return;

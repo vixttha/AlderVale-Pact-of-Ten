@@ -137,7 +137,7 @@ export async function buyListing(realm: RealmId, uid: string, wizardId: unknown,
     }
     if (isStarter) tx.create(ref, { purchasedAt: FieldValue.serverTimestamp() });
     else tx.update(ref, { status: 'sold', buyerUid: uid });
-    return { wallet: buyer };
+    return { wallet: buyer, sellerUpdate: seller && listing.sellerUid ? { uid: listing.sellerUid, wallet: seller } : null };
   });
 }
 

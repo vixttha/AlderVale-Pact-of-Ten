@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import {
   Compass,
@@ -25,7 +25,7 @@ import { ELEMENTS, type ElementId } from '../shared/elements.ts';
 import { CAMPUS_NPCS, CAMPUS_QUESTS, MOUNTS, ZONES, type CampusNpc, type ZoneId } from '../shared/world.ts';
 import { computeWizardDerivedStats, type DuelState, type TurnActionInput } from '../shared/combat.ts';
 import { SPECIES_BY_ID } from '../shared/creatures.ts';
-import { applyTermReward, pruneEquippedWardrobe, TERM_REWARD_TRACK, visibleEquippedGearIds, type WizardDocument } from '../shared/economy.ts';
+import { applyTermReward, grantFusionSpells, TERM_REWARD_TRACK, wearableEquipment, type WizardDocument } from '../shared/economy.ts';
 import { isWizardMuted } from '../shared/playerSocial.ts';
 import { RACES } from '../shared/wardrobe.ts';
 import { auth, signInWithGooglePopup, signOutFirebase } from './lib/firebase.ts';
@@ -150,10 +150,23 @@ export function App() {
   const [spectating, setSpectating] = useState(false);
   const [turnDeadline, setTurnDeadline] = useState<number | null>(null);
   const [worldConnected, setWorldConnected] = useState(false);
-  const [wallet, setWallet] = useState<MarketAccount | null>(null);
-  const persistWizardRef = useRef<(next: WizardDocument, pets?: OwnedCreature[], account?: RealmAccountState, updatedPets?: OwnedCreature[]) => void>(() => {});
-  const currentPresence = useRef({ activeWizard, creatures, zone });
-  currentPresence.current = { activeWizard, creatures, zone };
+  const [walletState, setWalletState] = useState<{ scope: string; wallet: MarketAccount } | null>(null);
+  const walletScope = fbUser && activeWizard?.ownerId === fbUser.uid ? `${fbUser.uid}:${activeWizard.realmId}` : null;
+  const wallet = walletState && walletState.scope === walletScope ? walletState.wallet : null;
+  const wardrobe = activeWizard?.wardrobe;
+  const bazaarGear = wallet?.gear;
+  const equippedGear = useMemo(() => wardrobe && (walletScope
+    ? wearableEquipment(wardrobe, bazaarGear)
+    : wardrobe.equipped), [wardrobe, walletScope, bazaarGear]);
+  const currentPresence = useRef({ activeWizard, creatures, zone, equippedGear, walletScope });
+  currentPresence.current = { activeWizard, creatures, zone, equippedGear, walletScope };
+  const updateWallet = useCallback((next: MarketAccount) => {
+    if (!walletScope || currentPresence.current.walletScope !== walletScope) return;
+    setWalletState((current) => {
+      if (current?.scope === walletScope && (next.revision ?? 0) < (current.wallet.revision ?? 0)) return current;
+      return { scope: walletScope, wallet: next };
+    });
+  }, [walletScope]);
   const realmLoad = useRef(0);
   const [realmReady, setRealmReady] = useState(true);
   const wizardSaves = useRef(Promise.resolve());
@@ -339,19 +352,11 @@ export function App() {
     },
     [fbUser, showToast, updateGuestProgress],
   );
-  persistWizardRef.current = persistWizard;
 
-  const updateWallet = useCallback((next: MarketAccount) => {
-    setWallet((current) => {
-      const accepted = !current || (next.revision ?? 0) >= (current.revision ?? 0) ? next : current;
-      const wizard = currentPresence.current.activeWizard;
-      if (wizard) {
-        const pruned = pruneEquippedWardrobe(wizard, accepted.gear);
-        if (pruned) persistWizardRef.current(pruned);
-      }
-      return accepted;
-    });
-  }, []);
+  useEffect(() => {
+    if (!wallet || !activeWizard || !equippedGear || equippedGear === activeWizard.wardrobe.equipped) return;
+    persistWizard({ ...activeWizard, wardrobe: { ...activeWizard.wardrobe, equipped: equippedGear } });
+  }, [activeWizard, equippedGear, persistWizard, wallet]);
 
   const claimTermTier = async (tier: number) => {
     if (!activeWizard) throw new Error('Open a wizard first.');
@@ -471,7 +476,9 @@ export function App() {
       }
       setZone('hub');
       setOverlay({ type: 'none' });
-      setActiveWizard(wiz);
+      const recoveredWizard = grantFusionSpells(wiz, loadedPets);
+      if (recoveredWizard !== wiz) persistWizard(recoveredWizard);
+      else setActiveWizard(wiz);
     } catch {
       showToast('Could not load this wizard’s save. Please try again.');
     }
@@ -610,7 +617,7 @@ export function App() {
               activeCreatureSpeciesId: pet?.speciesId, activeCreatureNickname: pet?.nickname,
               activeCreatureStage: pet?.stage, activeCreatureChromatic: pet?.chromatic,
               activeCreatureBranchChoice: pet?.branchChoice, activeCreatureTalents: pet?.talents ?? [],
-              sculpt: wizard.sculpt, equipped: wizard.wardrobe.equipped, stitching: wizard.stitching,
+              sculpt: wizard.sculpt, equipped: current.equippedGear ?? wizard.wardrobe.equipped, stitching: wizard.stitching,
             },
           }));
         } catch {
@@ -755,9 +762,9 @@ export function App() {
       socket?.close();
       wsRef.current = null;
       clearPresence();
-      setWallet(null);
+      setWalletState(null);
     };
-  }, [activeWizard?.id, activeWizard?.realmId, fbUser?.uid, clearPresence]);
+  }, [activeWizard?.id, activeWizard?.realmId, fbUser?.uid, clearPresence, updateWallet]);
 
   useEffect(() => {
     if (!activeWizard || !fbUser || !worldConnected || activeWizard.ownerId !== fbUser.uid) return;
@@ -771,7 +778,7 @@ export function App() {
       }
     }).catch(() => {});
     return () => { cancelled = true; };
-  }, [activeWizard?.id, fbUser?.uid, worldConnected]);
+  }, [activeWizard?.id, fbUser?.uid, worldConnected, updateWallet]);
 
   // Broadcast live appearance, mount, race, or companion updates to zone peers
   const activePetForSync = activeWizard
@@ -798,7 +805,7 @@ export function App() {
           activeCreatureBranchChoice: activePetForSync?.branchChoice ?? 'A',
           activeCreatureTalents: activePetForSync?.talents ?? [],
           sculpt: activeWizard.sculpt,
-          equipped: activeWizard.wardrobe.equipped,
+          equipped: equippedGear ?? activeWizard.wardrobe.equipped,
           stitching: activeWizard.stitching,
         },
       }),
@@ -812,7 +819,7 @@ export function App() {
     activeWizard?.progression.titleBadge,
     activeWizard?.progression.equippedMountId,
     activeWizard?.sculpt,
-    activeWizard?.wardrobe.equipped,
+    equippedGear,
     activeWizard?.stitching,
     activePetForSync?.id,
     activePetForSync?.speciesId,
@@ -935,7 +942,6 @@ export function App() {
     const rCfg = REALMS[activeWizard.realmId];
     const gainedXp = Math.round((res.mode === 'trial' ? 180 : 85) * rCfg.xpMultiplier);
     const nextStats = applyWizardXp(activeWizard, gainedXp);
-    const nextRank = nextStats.rank;
     const lead = creatures.find((pet) => pet.id === activeWizard.activeCreatureId) ?? creatures[0];
 
     // Charge 2-win Hybrid Eggs
@@ -972,23 +978,6 @@ export function App() {
       nextUnlockedElements.push(res.trialElement);
     }
 
-    // Unlock Prestige Races on Account at Rank 4 / 5 / 7
-    const nextUnlockedRaces = new Set(realmAccount.unlockedRaces);
-    if (nextRank >= 4 && res.mode === 'trial') {
-      nextUnlockedRaces.add('cloud_sylph');
-      nextUnlockedRaces.add('dwarf');
-      nextUnlockedRaces.add('high_elf');
-      nextUnlockedRaces.add('dark_elf');
-    }
-    if (nextRank >= 5 && creatures.some((c) => SPECIES_BY_ID[c.speciesId]?.isDrake && c.stage === 3)) {
-      nextUnlockedRaces.add('draconic_kin');
-    }
-    if (nextRank >= 7 && hatchedPets.some((p) => SPECIES_BY_ID[p.speciesId]?.isFusionOnly)) {
-      nextUnlockedRaces.add('astral_kin');
-    }
-
-    const nextAccount = { ...realmAccount, unlockedRaces: Array.from(nextUnlockedRaces), termXp: realmAccount.termXp + Math.round(65 * rCfg.xpMultiplier) };
-
     const florinWin = Math.round(
       (res.mode === 'trial' ? 140 : 65) * rCfg.dropMultiplier,
     );
@@ -1010,13 +999,34 @@ export function App() {
       },
     };
 
+    updatedWiz = grantFusionSpells(updatedWiz, hatchedPets);
     if (res.mode === 'solo') updatedWiz = applySagaEvent(updatedWiz, 'solo-win');
     if (res.mode === 'trial') updatedWiz = applySagaEvent(updatedWiz, 'rare-trial-win');
     const leadWon = lead && res.leadCreatureWinEligible === true;
     if (leadWon) updatedWiz = applySagaEvent(updatedWiz, 'lead-creature-win');
     const updatedLead = leadWon ? { ...lead, wins: (lead.wins ?? 0) + 1 } : null;
+
+    const nextCreatures = [...creatures.map((pet) => pet.id === updatedLead?.id ? updatedLead : pet), ...hatchedPets];
+    const nextUnlockedRaces = new Set(realmAccount.unlockedRaces);
+    if (updatedWiz.rank >= 4 && res.mode === 'trial') {
+      nextUnlockedRaces.add('cloud_sylph');
+      nextUnlockedRaces.add('dwarf');
+      nextUnlockedRaces.add('high_elf');
+      nextUnlockedRaces.add('dark_elf');
+    }
+    if (updatedWiz.rank >= 5 && nextCreatures.some((pet) => SPECIES_BY_ID[pet.speciesId]?.isDrake && pet.stage === 3)) {
+      nextUnlockedRaces.add('draconic_kin');
+    }
+    if (updatedWiz.rank >= 7 && nextCreatures.some((pet) => SPECIES_BY_ID[pet.speciesId]?.isFusionOnly)) {
+      nextUnlockedRaces.add('astral_kin');
+    }
+    const nextAccount = {
+      ...realmAccount,
+      unlockedRaces: [...nextUnlockedRaces],
+      termXp: realmAccount.termXp + Math.round(65 * rCfg.xpMultiplier),
+    };
     setRealmAccount(nextAccount);
-    setCreatures([...creatures.map((pet) => pet.id === updatedLead?.id ? updatedLead : pet), ...hatchedPets]);
+    setCreatures(nextCreatures);
     persistWizard(updatedWiz, hatchedPets, nextAccount, updatedLead ? [updatedLead] : []);
     const completed = CAMPUS_QUESTS.filter((quest) =>
       !activeWizard.progression.completedQuests.includes(quest.id) && updatedWiz.progression.completedQuests.includes(quest.id),
@@ -1026,7 +1036,11 @@ export function App() {
     const totalShards = updatedWiz.currencies.spellShards - activeWizard.currencies.spellShards;
     const questNotice = completed.length ? ` Quest completed: ${completed.map((quest) => quest.title).join(', ')}.` : '';
     const hatchNotice = hatchedPets.length ? ` Hatched ${hatchedPets.map((pet) => pet.nickname).join(', ')}!` : '';
-    showToast(`Victory! +${totalXp} XP, +${totalFlorins} Florins, +${totalShards} Spell Shards!${questNotice}${hatchNotice}`);
+    const learnedFusionCard = updatedWiz.progression.ownedSpellIds.some((id) =>
+      !activeWizard.progression.ownedSpellIds.includes(id),
+    );
+    const fusionNotice = learnedFusionCard ? ' Fusion spell added to your collection. See Deck & Lectern.' : '';
+    showToast(`Victory! +${totalXp} XP, +${totalFlorins} Florins, +${totalShards} Spell Shards!${questNotice}${hatchNotice}${fusionNotice}`);
   };
 
   const guestSaveWarning = failedGuestRealms.length > 0 && (
@@ -1071,11 +1085,14 @@ export function App() {
   }
 
   const activePet = creatures.find((c) => c.id === activeWizard.activeCreatureId) ?? creatures[0] ?? null;
+  const equippedWizard = equippedGear && equippedGear !== activeWizard.wardrobe.equipped
+    ? { ...activeWizard, wardrobe: { ...activeWizard.wardrobe, equipped: equippedGear } }
+    : activeWizard;
   const stats = computeWizardDerivedStats({
     level: activeWizard.level,
     raceId: activeWizard.raceId,
     element: activeWizard.elementId,
-    equippedGearIds: visibleEquippedGearIds(activeWizard, wallet?.gear),
+    equippedGearIds: Object.values(equippedWizard.wardrobe.equipped),
     socketedRunestoneIds: activeWizard.wardrobe.socketedRunestones,
     creatureTalents: activePet?.talents ?? [],
   });
@@ -1085,7 +1102,7 @@ export function App() {
       {guestSaveWarning}
       {/* Full-Viewport 3D Sky-Island World (>=85% unobstructed) */}
       <WorldViewport
-        wizard={activeWizard}
+        wizard={equippedWizard}
         activeCreature={activePet}
         zone={zone}
         dormThemeId={sanctuary?.themeId ?? 'sunlit_loft'}
@@ -1453,7 +1470,7 @@ export function App() {
       {/* Feature Overlays */}
       {overlay.type === 'duel' && (
         <DuelArenaModal
-          wizard={activeWizard}
+          wizard={equippedWizard}
           creatures={creatures}
           liveDuelState={liveDuelState}
           spectating={spectating}
@@ -1461,7 +1478,6 @@ export function App() {
           worldConnected={worldConnected}
           activeLiveDuels={activeLiveDuels}
           solo2xDefault={settings.solo2xDefault}
-          bazaarGear={wallet?.gear}
           onStartLocalDuel={() => {}}
           onUpdateLocalDuel={() => {}}
           onSubmitLiveAction={(action: TurnActionInput) => {
@@ -1483,7 +1499,7 @@ export function App() {
 
       {overlay.type === 'tailor' && (
         <TailorStudioPanel
-          wizard={activeWizard}
+          wizard={equippedWizard}
           bazaarGear={wallet?.gear}
           realmAccount={realmAccount}
           onUpdateWizard={(w) => persistWizard(w)}

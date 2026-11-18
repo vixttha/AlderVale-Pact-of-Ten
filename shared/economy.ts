@@ -1,7 +1,7 @@
 import type { ElementId } from './elements.ts';
 import type { RealmId } from './realms.ts';
-import type { BeastClanId, RaceId, WizardSculpt } from './wardrobe.ts';
-import { GEAR_BY_ID } from './wardrobe.ts';
+import { GEAR_BY_ID, type BeastClanId, type RaceId, type WizardSculpt } from './wardrobe.ts';
+import { SPECIES_BY_ID } from './creatures.ts';
 import { getStarterDeckForElement } from './spells.ts';
 
 export type ResourceId = 'sunleaf' | 'dewglass' | 'starstone' | 'copper_wire' | 'ember_ash';
@@ -9,57 +9,27 @@ export type ResourceId = 'sunleaf' | 'dewglass' | 'starstone' | 'copper_wire' | 
 export const CRAFT_XP_PER_RANK = 100;
 export const CRAFT_XP_PER_TRANSMUTE = 25;
 
-export type GearEquipSlot = keyof WizardDocument['wardrobe']['equipped'];
-const GEAR_SLOTS: GearEquipSlot[] = ['headgear', 'torso', 'back', 'footwear', 'staff'];
+type EquippedGear = WizardDocument['wardrobe']['equipped'];
+const GEAR_SLOTS: (keyof EquippedGear)[] = ['headgear', 'torso', 'back', 'footwear', 'staff'];
 
-export function canWearGear(
-  wizard: Pick<WizardDocument, 'wardrobe'>,
-  bazaarGear: Record<string, number> | null | undefined,
-  gearId: string,
-): boolean {
-  if (!gearId || !GEAR_BY_ID[gearId]) return false;
-  return wizard.wardrobe.ownedGearIds.includes(gearId) || (bazaarGear?.[gearId] ?? 0) > 0;
-}
-
-export function visibleEquippedGearIds(
-  wizard: Pick<WizardDocument, 'wardrobe'>,
-  bazaarGear: Record<string, number> | null | undefined,
-): string[] {
-  return GEAR_SLOTS.map((slot) => wizard.wardrobe.equipped[slot]).filter((gearId) => canWearGear(wizard, bazaarGear, gearId));
-}
-
-function fallbackGearForSlot(
-  wizard: Pick<WizardDocument, 'wardrobe'>,
-  bazaarGear: Record<string, number> | null | undefined,
-  slot: GearEquipSlot,
-): string {
-  for (const gearId of wizard.wardrobe.ownedGearIds) {
-    if (GEAR_BY_ID[gearId]?.slot === slot && canWearGear(wizard, bazaarGear, gearId)) return gearId;
-  }
-  for (const [gearId, count] of Object.entries(bazaarGear ?? {})) {
-    if (count > 0 && GEAR_BY_ID[gearId]?.slot === slot) return gearId;
-  }
-  return wizard.wardrobe.equipped[slot];
-}
-
-/** Returns an updated wizard when escrow removes wearable Bazaar gear from a slot; otherwise null. */
-export function pruneEquippedWardrobe(
-  wizard: WizardDocument,
-  bazaarGear: Record<string, number> | null | undefined,
-): WizardDocument | null {
-  const equipped = { ...wizard.wardrobe.equipped };
+export function wearableEquipment(
+  wardrobe: WizardDocument['wardrobe'],
+  bazaarGear: Record<string, number> | undefined,
+): EquippedGear {
+  const equipped = { ...wardrobe.equipped };
+  const owns = (id: string) => wardrobe.ownedGearIds.includes(id) || (bazaarGear?.[id] ?? 0) > 0;
   let changed = false;
   for (const slot of GEAR_SLOTS) {
     const current = equipped[slot];
-    if (canWearGear(wizard, bazaarGear, current)) continue;
-    const next = fallbackGearForSlot(wizard, bazaarGear, slot);
-    if (next !== current) {
-      equipped[slot] = next;
-      changed = true;
-    }
+    if (GEAR_BY_ID[current]?.slot === slot && owns(current)) continue;
+    const replacement = wardrobe.ownedGearIds.find((id) => GEAR_BY_ID[id]?.slot === slot)
+      ?? Object.keys(bazaarGear ?? {}).find((id) => GEAR_BY_ID[id]?.slot === slot && owns(id))
+      ?? '';
+    if (replacement === current) continue;
+    equipped[slot] = replacement;
+    changed = true;
   }
-  if (!changed) return null;
-  return { ...wizard, wardrobe: { ...wizard.wardrobe, equipped } };
+  return changed ? equipped : wardrobe.equipped;
 }
 
 export function craftProgressionAfterGain(craftXp: number, gained: number) {
@@ -183,6 +153,47 @@ export function applyTermReward(wizard: WizardDocument, tier: TermTierReward): W
       ? { ...wizard.wardrobe, ownedGearIds: [...wizard.wardrobe.ownedGearIds, reward.cosmeticId] }
       : wizard.wardrobe,
     progression: tier.tier === 8 ? { ...wizard.progression, rebirthSeals: wizard.progression.rebirthSeals + 1 } : wizard.progression,
+  };
+}
+
+export function grantFusionSpells(
+  wizard: WizardDocument,
+  creatures: readonly {
+    speciesId: string;
+    ownerId: string;
+    wizardId: string;
+    realmId: RealmId;
+  }[],
+): WizardDocument {
+  const currentFusions = wizard.progression.unlockedFusions ?? [];
+  const currentSpells = wizard.progression.ownedSpellIds;
+  const unlockedFusions = new Set(currentFusions);
+  const ownedSpellIds = new Set(currentSpells);
+  let changed = false;
+
+  for (const creature of creatures) {
+    if (creature.ownerId !== wizard.ownerId || creature.wizardId !== wizard.id || creature.realmId !== wizard.realmId) continue;
+    const species = SPECIES_BY_ID[creature.speciesId];
+    if (!species?.isFusionOnly) continue;
+
+    if (!unlockedFusions.has(species.element)) {
+      unlockedFusions.add(species.element);
+      changed = true;
+    }
+    if (!ownedSpellIds.has(species.innatePactCardId)) {
+      ownedSpellIds.add(species.innatePactCardId);
+      changed = true;
+    }
+  }
+
+  if (!changed) return wizard;
+  return {
+    ...wizard,
+    progression: {
+      ...wizard.progression,
+      unlockedFusions: [...unlockedFusions],
+      ownedSpellIds: [...ownedSpellIds],
+    },
   };
 }
 

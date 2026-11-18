@@ -174,15 +174,15 @@ jobs:
       - run: npm ci --prefix tools/ci --ignore-scripts --no-audit --no-fund
       - name: Install locked application dependencies
         run: npm ci --no-audit --no-fund
-      - name: Test actual rules and transaction behavior in a demo project
+      - name: Test rules, transactions, and authenticated matchmaking in a demo project
         id: firestore_test
         env:
           GOOGLE_CLOUD_PROJECT: demo-aldervale-ci
           FIRESTORE_DATABASE_ID: '(default)'
         run: >-
           tools/ci/node_modules/.bin/firebase emulators:exec
-          --config firebase.ci.json --project demo-aldervale-ci --only firestore
-          "node --test tools/ci/firestore.check.mjs && npm test -- tests/firestore.integration.test.ts"
+          --config firebase.ci.json --project demo-aldervale-ci --only auth,firestore
+          "node --test tools/ci/firestore.check.mjs && npm test -- tests/firestore.integration.test.ts && node --test tools/ci/authenticated-matchmaking.check.mjs"
       - name: Write verification summary
         if: ${{ always() && steps.evidence_node.outcome == 'success' }}
         env:

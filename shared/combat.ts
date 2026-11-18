@@ -371,6 +371,8 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
   const next: DuelState = structuredClone(state);
   next.phase = 'resolving';
   const roundLogs: string[] = [`— Round ${next.round} —`];
+  let effectSequence = 0;
+  const nextEffectId = (source: 'pet' | 'wright') => `${source}_${next.round}_${effectSequence++}`;
 
   const allCombatants = [...next.playerTeam, ...next.enemyTeam];
   for (const c of allCombatants) {
@@ -537,7 +539,7 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
               actor.discard.push(baseId);
             }
 
-            executeSpellEffect(next, actor, target, spell, isEnchanted, coopResonance && next.playerTeam.includes(actor), rng, roundLogs);
+            executeSpellEffect(next, actor, target, spell, isEnchanted, coopResonance && next.playerTeam.includes(actor), rng, roundLogs, nextEffectId);
           }
         }
       }
@@ -558,17 +560,17 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
           target.hp = Math.max(0, target.hp - petDmg);
           roundLogs.push(`${activePet.nickname} used ${skill.name} for ${petDmg} ${ELEMENTS[activePet.element].name} damage!`);
         } else if (skill.kind === 'buff') {
-          actor.blades.push({ id: `pet_${Date.now()}`, label: `${activePet.nickname} +${skill.value}%`, kind: 'blade', element: activePet.element, pct: skill.value });
+          actor.blades.push({ id: nextEffectId('pet'), label: `${activePet.nickname} +${skill.value}%`, kind: 'blade', element: activePet.element, pct: skill.value });
           roundLogs.push(`${activePet.nickname} boosted ${actor.name} (+${skill.value}% Blade).`);
         } else if (skill.kind === 'shield') {
-          actor.shields.push({ id: `pet_${Date.now()}`, label: `${activePet.nickname} -${skill.value}%`, kind: 'shield', element: 'universal', pct: skill.value });
+          actor.shields.push({ id: nextEffectId('pet'), label: `${activePet.nickname} -${skill.value}%`, kind: 'shield', element: 'universal', pct: skill.value });
           roundLogs.push(`${activePet.nickname} wrapped ${actor.name} in -${skill.value}% Ward.`);
         } else if (skill.kind === 'heal') {
           const healAmt = Math.round(skill.value * stageScale);
           actor.hp = Math.min(actor.maxHp, actor.hp + healAmt);
           roundLogs.push(`${activePet.nickname} mended ${actor.name} for +${healAmt} HP.`);
         } else if (skill.kind === 'debuff') {
-          target.traps.push({ id: `pet_${Date.now()}`, label: `${activePet.nickname} Trap +${skill.value}%`, kind: 'trap', element: activePet.element, pct: skill.value });
+          target.traps.push({ id: nextEffectId('pet'), label: `${activePet.nickname} Trap +${skill.value}%`, kind: 'trap', element: activePet.element, pct: skill.value });
           roundLogs.push(`${activePet.nickname} set a +${skill.value}% Trap on ${target.name}.`);
         }
       }
@@ -676,6 +678,7 @@ function executeSpellEffect(
   coopResonance: boolean,
   rng: () => number,
   logs: string[],
+  nextEffectId: (source: 'wright') => string,
 ) {
   const actorInPlayerTeam = state.playerTeam.some((p) => p.id === actor.id);
   const foes = actorInPlayerTeam ? state.enemyTeam : state.playerTeam;
@@ -693,7 +696,7 @@ function executeSpellEffect(
       logs.push(`${actor.name} cast ${spell.name}${res.crit ? ' (CRIT!)' : ''} on ${target.name} for ${res.damage} dmg!`);
     }
     applySpellStatusEffect(actor, target, spell, res.finalElement, rng, logs);
-    applyWrightingSecondary(actor, spell, logs);
+    applyWrightingSecondary(actor, spell, logs, nextEffectId);
   } else if (spell.kind === 'aoe') {
     for (const f of foes) {
       if (f.hp <= 0) continue;
@@ -726,7 +729,7 @@ function executeSpellEffect(
     if (pet) pet.hp = Math.min(pet.maxHp, pet.hp + Math.round(amt * 0.6));
     logs.push(`${actor.name} cast ${spell.name}, healing +${amt} HP!`);
     applySpellStatusEffect(actor, target, spell, spell.element, rng, logs);
-    applyWrightingSecondary(actor, spell, logs);
+    applyWrightingSecondary(actor, spell, logs, nextEffectId);
   } else if (spell.kind === 'regen') {
     const regenVal = spell.baseValue;
     const regenTurns = spell.dotTurns ?? 3;
@@ -771,14 +774,14 @@ function executeSpellEffect(
   }
 }
 
-function applyWrightingSecondary(actor: CombatantState, spell: SpellDefinition, logs: string[]) {
+function applyWrightingSecondary(actor: CombatantState, spell: SpellDefinition, logs: string[], nextEffectId: (source: 'wright') => string) {
   if (actor.spellwrighting[spell.id] !== 'B' || !spell.wrightB) return;
   const eff = spell.wrightB.bonusEffect;
   if (eff === 'extra_blade') {
-    actor.blades.push({ id: `wright_${Date.now()}`, label: 'Spellwright +20%', kind: 'blade', element: spell.element, pct: 20 });
+    actor.blades.push({ id: nextEffectId('wright'), label: 'Spellwright +20%', kind: 'blade', element: spell.element, pct: 20 });
     logs.push(`${actor.name}'s Spellwrighting left a +20% Blade.`);
   } else if (eff === 'extra_shield') {
-    actor.shields.push({ id: `wright_${Date.now()}`, label: 'Spellwright -35%', kind: 'shield', element: 'universal', pct: 35 });
+    actor.shields.push({ id: nextEffectId('wright'), label: 'Spellwright -35%', kind: 'shield', element: 'universal', pct: 35 });
     logs.push(`${actor.name}'s Spellwrighting raised a -35% Shield.`);
   } else if (eff === 'heal_120') {
     actor.hp = Math.min(actor.maxHp, actor.hp + 120);
