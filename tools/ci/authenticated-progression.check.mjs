@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { after, before, test } from 'node:test';
+import { setTimeout as delay } from 'node:timers/promises';
 import WebSocket from 'ws';
 
 const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
@@ -206,13 +207,11 @@ test('archived cloud records stay outside signed-in gameplay', { timeout: 45000 
   assert.equal((await cloudDb.collection('wizards').doc('archive-' + player.uid).get()).get('level'), 10);
 });
 
-test('campus activity uses the authenticated realm presence and server node definitions', { timeout: 45000 }, async (context) => {
-  const player = await createPlayer();
-  const activity = { type: 'world', id: 'fountain_main' };
-  await gameplay(player, activity, randomUUID(), 409);
+async function joinCampus(player, context) {
+  const serverConnection = once(hub, 'connection', { signal: AbortSignal.timeout(10000) });
   const socket = new WebSocket('ws://127.0.0.1:' + httpServer.address().port + '/ws', { handshakeTimeout: 10000 });
   context.after(() => socket.terminate());
-  await once(socket, 'open');
+  const [[serverSocket]] = await Promise.all([serverConnection, once(socket, 'open')]);
   const joined = once(socket, 'message', { signal: AbortSignal.timeout(10000) });
   socket.send(JSON.stringify({
     type: 'join_world',
@@ -222,7 +221,31 @@ test('campus activity uses the authenticated realm presence and server node defi
   }));
   const [message] = await joined;
   assert.equal(JSON.parse(message).type, 'world_joined');
+  return { socket, serverSocket };
+}
+
+test('signed-in campus presence survives idle, clears on disconnect, and returns on reconnect', { timeout: 150000 }, async (context) => {
+  const player = await createPlayer();
+  const activity = { type: 'world', id: 'fountain_main' };
+  const missing = await gameplay(player, activity, randomUUID(), 409);
+  assert.equal(missing.error, 'Move closer to that activity.');
+  const { socket, serverSocket } = await joinCampus(player, context);
+
+  // Stay still past the original 90-second position expiry. The socket only answers protocol pings.
+  await delay(92_000, undefined, { signal: context.signal });
   const result = await gameplay(player, activity);
   assert.equal(result.wizard.progression.mana, result.wizard.progression.maxMana);
   assert.equal(result.wizard.progression.flasks, result.wizard.progression.maxFlasks);
+
+  const disconnected = once(serverSocket, 'close', { signal: AbortSignal.timeout(10000) });
+  socket.close();
+  await disconnected;
+  const afterDisconnect = await gameplay(player, activity, randomUUID(), 409);
+  assert.equal(afterDisconnect.error, missing.error);
+
+  // Use the same account and wizard on a fresh socket. The fountain cooldown still applies.
+  await delay(600, undefined, { signal: context.signal });
+  await joinCampus(player, context);
+  const reconnected = await gameplay(player, activity);
+  assert.equal(reconnected.wizard.progression.mana, reconnected.wizard.progression.maxMana);
 });

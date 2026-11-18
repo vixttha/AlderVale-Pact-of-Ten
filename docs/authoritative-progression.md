@@ -24,6 +24,10 @@ The world still uses the existing client-driven movement protocol. Server-observ
 proximity and cooldowns bound the named activity grant. They do not certify a
 player's physical movement or prevent all automation.
 
+Authenticated WebSocket heartbeats keep the last observed position usable while
+the player stands still. Disconnecting clears that session's presence. Rejoining
+creates fresh presence for the newly authenticated connection.
+
 ## Earlier saves and guest play
 
 Existing cloud progress remains in its original documents. Signed-in players can

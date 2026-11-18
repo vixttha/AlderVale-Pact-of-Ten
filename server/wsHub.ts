@@ -4,7 +4,7 @@ import { verifyFirebaseBearerToken } from './authVerify.ts';
 import { ownedActiveCreature, settleTrade, awardLiveVictory, RequestError } from './market.ts';
 import { resolveLiveCombatCreature, sanitizeGuestCreatureSelection } from './creatureSelection.ts';
 import { ownedProgressionWizard } from './progressionState.ts';
-import { setGameplayPresence, clearGameplayPresence } from './gameplayPresence.ts';
+import { setGameplayPresence, refreshGameplayPresence, clearGameplayPresence } from './gameplayPresence.ts';
 import { duelView, readDuelAction } from './duelView.ts';
 import { ELEMENTS } from '../shared/elements.ts';
 import { RACES } from '../shared/wardrobe.ts';
@@ -56,6 +56,7 @@ interface ClientConn {
   presence: LivePlayerPresence | null;
   duelId: string | null;
   verifiedUid: string | null;
+  heartbeatChallenge: string | null;
   joining: boolean;
   duelElement: ElementId;
   duelRace: RaceId;
@@ -325,18 +326,43 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     }
   }, 1000);
   sweep.unref();
+
+  // WebSocket clients answer protocol pings even while the player is idle.
+  const heartbeat = setInterval(() => {
+    for (const conn of clients.values()) {
+      if (!conn.verifiedUid || !conn.presence || conn.ws.readyState !== WebSocket.OPEN) continue;
+      if (conn.heartbeatChallenge !== null) {
+        clearGameplayPresence(conn.sessionId);
+        conn.ws.terminate();
+        continue;
+      }
+      conn.heartbeatChallenge = randomUUID();
+      conn.ws.ping(conn.heartbeatChallenge);
+    }
+  }, 25_000);
+  heartbeat.unref();
+
   wss.on('close', () => {
     clearInterval(sweep);
+    clearInterval(heartbeat);
     for (const timer of reconnectTimers.values()) clearTimeout(timer);
   });
 
   wss.on('connection', (ws) => {
     const sessionId = randomUUID();
-    const conn: ClientConn = { ws, sessionId, presence: null, duelId: null, verifiedUid: null, joining: false, duelElement: 'ember', duelRace: 'human' };
+    const conn: ClientConn = {
+      ws, sessionId, presence: null, duelId: null, verifiedUid: null, heartbeatChallenge: null,
+      joining: false, duelElement: 'ember', duelRace: 'human',
+    };
     clients.set(sessionId, conn);
     send(conn, { type: 'welcome', sessionId });
 
     ws.on('error', () => ws.terminate());
+    ws.on('pong', (data) => {
+      if (ws.readyState !== WebSocket.OPEN || data.toString() !== conn.heartbeatChallenge) return;
+      conn.heartbeatChallenge = null;
+      refreshGameplayPresence(sessionId);
+    });
     ws.on('message', async (raw) => {
       try {
         const msg = JSON.parse(raw.toString()) as Record<string, unknown>;

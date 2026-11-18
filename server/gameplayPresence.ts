@@ -17,6 +17,11 @@ export function setGameplayPresence(session: string, presence: Omit<ProgressionP
   sessions.set(session, { ...presence, updatedAt: Date.now() });
 }
 
+export function refreshGameplayPresence(session: string) {
+  const presence = sessions.get(session);
+  if (presence) presence.updatedAt = Date.now();
+}
+
 export function clearGameplayPresence(session: string) {
   sessions.delete(session);
 }
