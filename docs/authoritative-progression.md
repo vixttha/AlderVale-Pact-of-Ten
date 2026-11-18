@@ -20,13 +20,23 @@ writes it with a receipt. Retransmitting the same action ID does not issue the
 reward again. Firestore denies gameplay document writes from browser clients and
 keeps internal progression, turns, cooldowns, and receipts server-only.
 
-The world still uses the existing client-driven movement protocol. Server-observed
-proximity and cooldowns bound the named activity grant. They do not certify a
-player's physical movement or prevent all automation.
+The world still renders movement on the client, but signed-in WebSocket movement
+is limited by a server-timed travel budget (16 units/second with at most 3 units
+of burst allowance), zone boundaries, and zone transitions that land only at the
+destination spawn. Rejected movement returns the server position for visual
+correction and cannot advance resource or fishing proximity. Legitimate guests
+keep the existing offline and live movement behavior. The server does not fully
+simulate collisions or input physics; gradual bot movement and automation are
+not certified as human.
 
-Authenticated WebSocket heartbeats keep the last observed position usable while
-the player stands still. Disconnecting clears that session's presence. Rejoining
-creates fresh presence for the newly authenticated connection.
+Authenticated `update_appearance` messages never grant public rank, title,
+element, lineage, cosmetics or companion traits from the client. Each signed-in
+projection refreshes from the enrolled wizard and selected server creature;
+invalid creature selections keep their roster eligibility restricted.
+WebSocket heartbeats keep a stationary signed-in player active; disconnect
+clears the session's economy presence immediately. A matching reconnect can
+restore its last server-observed position for up to 60 seconds on that server.
+A new session starts at the chosen zone spawn if no matching position exists.
 
 ## Earlier saves and guest play
 
