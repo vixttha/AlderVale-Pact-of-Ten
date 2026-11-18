@@ -6,10 +6,10 @@
     "branch": "Launcher-Agent-Template",
     "version": "v0.0.1",
     "status": "draft",
-    "home_commit": "b096cab0bf5e80ba7dd1d9e8451be71fc290abda",
+    "home_commit": "3c6240d6f12e51647fba8c3200c96875c447b33c",
     "source_commit": "1aea00da941d556185496326a6240c858ba6d652",
     "source_path": "workspace/v0.0.1/template",
-    "graph_receipt_sha256": "5dffb8011344d8edd3f101295956718c821f4739ccb7fb1d4e11ac726010b40f",
+    "graph_receipt_sha256": "b175b15af82e6bc7788700da3c356f6194de69c7047f629bd396e0695234605b",
     "files": {
       "AGENTS.template.md": "531f0e9e960775a72e12614d9a0c94bc91786374f9bd7cbb475067589dbaf740",
       "bindings.schema.json": "9b8f7d85533014f4120ce584609305de9b421f743c96a86c202785a65edd24fa",
