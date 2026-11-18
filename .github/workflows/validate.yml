@@ -172,8 +172,6 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
-      - name: Provide unzip for Bun setup in the Playwright image
-        run: apt-get update -qq && apt-get install -y --no-install-recommends unzip
       # Pinned Bun npm distribution avoids unzip absent from the official Playwright image.
       - name: Install Bun 1.4.4 in Playwright container
         run: |
@@ -240,8 +238,6 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
-      - name: Provide unzip for Bun setup in the Playwright image
-        run: apt-get update -qq && apt-get install -y --no-install-recommends unzip
       # Pinned Bun npm distribution avoids unzip absent from the official Playwright image.
       - name: Install Bun 1.4.4 in Playwright container
         run: |
