@@ -2,11 +2,21 @@
 
 Element HQ is the design reference for the mechanics and lore behind AlderVale’s elements. It covers elemental identities, combat matchups, spells, creature lineages, fusions, and progression. The playable game and its implementation live on [`main`](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/main).
 
+## Locked element and fusion decisions
+
+**Plant replaces Forest** in the ten-base-element roster. The base elements are Fire, Water, Lightning, Frost, Wind, Earth, Light, Dark, Metal, and Plant. Time and Space remain outside the elemental system.
+
+The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Wind ↔ Earth**, **Light ↔ Dark**, and **Metal ↔ Plant**.
+
+**Fire + Earth → Magma** is locked for the current fusion roster. Fire and Earth are reserved for Magma for this pass. Prefer one fusion per base element across the current roster wherever possible.
+
+**Water + Metal → Rust** remains a favored candidate with no parent overlap with Magma. **Fire + Water → Steam** and **Lightning + Earth → Glass** are liked ideas on hold for this pass. **Metal + Plant → Ironwood** remains conditional on designing a metal for AlderVale. It shares Metal with Rust.
+
 ## Start here
 
 | Document | Use it for |
 | --- | --- |
-| [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the initial design snapshot. The [locked ten-element roster](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/84a490507db14ad3d90be5f7497f9ecf2db33fcb/element-hq/designs/aldervale-element-system-v1.md#v1-elemental-opposition-decision) records the current base elements and oppositions. |
+| [AlderVale element design v1](element-hq/designs/aldervale-element-system-v1.md) | Read the initial design snapshot. The [current base roster and fusion decisions](#locked-element-and-fusion-decisions) govern active design. |
 | [Fusion pairing chart](element-hq/designs/aldervale-fusion-pairing-chart.md) | Compare all 45 cross-element pairings and their proposed outcomes. |
 | [Fusion HQ](element-hq/designs/aldervale-fusion-guide-v1.md) | Read the earlier encounter concepts, existing recipes, and conflict audit. |
 | [Element design template](element-hq/templates/element-design.md) | Draft an element, fusion, or change to an existing rule. |

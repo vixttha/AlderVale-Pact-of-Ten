@@ -1,6 +1,6 @@
 # AlderVale Fusion HQ
 
-**Status** · The roster is under review. [Open the fusion pairing chart](aldervale-fusion-pairing-chart.md) for the current options and owner feedback. Fire + Forest → Magma below is an earlier prototype recipe the owner rejected for the design. Tempest and Glacier are being compared with alternatives. Eclipse is being considered as a phenomenon. The locked base roster is linked in the chart.
+**Current decision** · [Element HQ locks Plant and Fire + Earth → Magma](../../README.md#locked-element-and-fusion-decisions). Fire and Earth are reserved for Magma in the current roster. The recipe, encounter, and conflict notes below record earlier work, including the rejected Fire + Forest prototype. Use the [pairing chart](aldervale-fusion-pairing-chart.md) for current candidate status.
 
 ## Earlier roster proposal
 
