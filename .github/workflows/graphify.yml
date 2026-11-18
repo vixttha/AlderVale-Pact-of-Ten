@@ -2,7 +2,7 @@ name: AlderVale Graphify
 
 on:
   push:
-    branches: [main]
+    branches: [main, AlderVale-Test-Vault]
     tags: ['v[0-9]*']
   pull_request:
     paths:
@@ -18,6 +18,9 @@ on:
 
 permissions:
   contents: read
+
+env:
+  GRAPHIFY_SOURCE_PREFIX: ${{ (github.ref == 'refs/heads/AlderVale-Test-Vault' || github.base_ref == 'AlderVale-Test-Vault') && 'tests/vault/' || 'src/' }}
 
 concurrency:
   group: aldervale-graphify-${{ github.ref }}
@@ -114,6 +117,7 @@ jobs:
       github.event.repository.private == false &&
       (
         github.ref == 'refs/heads/main' ||
+        github.ref == 'refs/heads/AlderVale-Test-Vault' ||
         github.ref_type == 'tag' ||
         (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_commit_snapshot == 'true')
       )
@@ -136,5 +140,5 @@ jobs:
       - name: Publish without replacing history
         env:
           GH_TOKEN: ${{ github.token }}
-          GRAPHIFY_PUBLISH_COMMIT: ${{ (github.ref != 'refs/heads/main' && github.ref_type != 'tag') && '1' || '0' }}
+          GRAPHIFY_PUBLISH_COMMIT: ${{ (github.ref != 'refs/heads/main' && github.ref != 'refs/heads/AlderVale-Test-Vault' && github.ref_type != 'tag') && '1' || '0' }}
         run: bash tools/graphify/publish.sh "$RUNNER_TEMP/snapshot"

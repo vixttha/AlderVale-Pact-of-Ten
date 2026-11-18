@@ -2,13 +2,14 @@
 
 import asyncio
 import json
-import re
 import subprocess
 import sys
 from pathlib import Path
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
+from snapshot import find_source_node
 
 
 async def query(graph_path, commit, node, node_count, edge_count):
@@ -50,17 +51,10 @@ def main():
     if graph.get("built_at_commit") != commit:
         raise ValueError("Transferred graph does not match this runner checkout")
     nodes, links = graph["nodes"], graph["links"]
-    candidates = [
-        node for node in nodes
-        if node.get("source_file", "").startswith("src/")
-        and node.get("file_type") == "code"
-        and re.fullmatch(r"L\d+(?::\d+)?(?:-L\d+(?::\d+)?)?", node.get("source_location") or "")
-    ]
-    if not candidates:
-        raise ValueError("No source symbol available for the MCP readback")
-    node = min(candidates, key=lambda item: item["id"])
+    node = find_source_node(nodes)
     asyncio.run(query(graph_path, commit, node, len(nodes), len(links)))
     print(f"Graphify MCP readback verified {len(nodes)} nodes and {len(links)} edges at {commit}")
+    print(f"Indexed source: {node['source_file']} {node['source_location']}")
 
 
 if __name__ == "__main__":
