@@ -42,6 +42,22 @@ The current pass prefers one fusion per base element where possible. A score ran
 | [Lightning + Plant](pairs/lightning-plant.md) | Rubber | As a fantasy rule, Lightning cures Plant latex into a springy insulator for rebound and protection. Parked while Glass reserves Lightning. |
 | [Earth + Light](pairs/earth-light.md) | Phosphor | Earth supplies a substance that stores Light and releases it later to reveal or mark targets. Parked while Glass reserves Earth. |
 
+## Latest rated names
+
+These pairs use parents that are free under the Rust and Glass locks. Ideas on the same pair or sharing a parent compete for that slot.
+
+| Pair | Name | Score /10 | Status | Direction |
+| --- | --- | ---: | --- | --- |
+| [Fire + Plant](pairs/fire-plant.md) | Tar | 10 | Candidate | Sticky terrain and seals. |
+| [Wind + Plant](pairs/wind-plant.md) | Thread | 9 | Candidate | Tethers, pulls, and woven cover. |
+| [Dark + Plant](pairs/dark-plant.md) | Lacquer | 9 | Exploratory | Layered, opaque armor. |
+| [Light + Plant](pairs/light-plant.md) | Starch | 9 | Exploratory | Stored energy and impact-absorbing paste. |
+| [Frost + Wind](pairs/frost-wind.md) | Liquid Air | 9 | Exploratory | A liquid deposit that releases a gust as it warms. |
+| [Frost + Plant](pairs/frost-plant.md) | Pulp | 8 | Exploratory | Soft terrain that muffles movement and absorbs impact. |
+| [Fire + Plant](pairs/fire-plant.md) | Pitch | 9 | Reference | A thicker material in the Tar family. |
+| [Light + Plant](pairs/light-plant.md) | Syrup | 8 | Reference | A liquid form of Sugar for slowing effects. |
+
+
 ## Rating guide
 
 | Criterion | Points | How to score it |

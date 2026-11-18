@@ -67,6 +67,7 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Dry Ice | Frozen air component | 3 / 3 / 1 / 2 | 9 | Exploratory |
+| Liquid Air | Liquefied air | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Blizzard | Wind-driven frost | 3 / 1 / 2 / 2 | 8 | Reference |
 | Ice Dust | Wind-driven frost | 3 / 1 / 2 / 2 | 8 | Reference |
 | Snowpack | Wind-driven frost | 3 / 2 / 2 / 1 | 8 | Rejected |
@@ -136,6 +137,7 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Frozen Sap | Frozen plant matter | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Dormancy | Frosted growth | 3 / 1 / 2 / 2 | 8 | Reference |
+| Pulp | Fibrous plant paste | 2 / 2 / 2 / 2 | 8 | Exploratory |
 | Rimewood | Frozen plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Winterwood | Frozen plant matter | 2 / 2 / 2 / 2 | 8 | Exploratory |
 | Frostbloom | Frosted growth | 2 / 2 / 2 / 1 | 7 | Reference |

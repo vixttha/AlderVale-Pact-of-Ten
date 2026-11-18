@@ -24,7 +24,7 @@ Each pair links to its rated names. Parent overlap refers to the current prefere
 | [Fire + Light](pairs/fire-light.md) | Reference only | Reference | 6 |
 | [Fire + Dark](pairs/fire-dark.md) | Smoke | Open | 7 |
 | [Fire + Metal](pairs/fire-metal.md) | Slag | Shares a locked parent | 7 |
-| [Fire + Plant](pairs/fire-plant.md) | Ash | Open | 8 |
+| [Fire + Plant](pairs/fire-plant.md) | Ash | Open | 10 |
 | [Water + Lightning](pairs/water-lightning.md) | Hydrogen | Shares a locked parent | 8 |
 | [Water + Frost](pairs/water-frost.md) | Ice | Shares a locked parent | 10 |
 | [Water + Wind](pairs/water-wind.md) | Reference only | Shares a locked parent | 7 |
@@ -40,24 +40,24 @@ Each pair links to its rated names. Parent overlap refers to the current prefere
 | [Lightning + Dark](pairs/lightning-dark.md) | Dark Arc | Shares a locked parent | 6 |
 | [Lightning + Metal](pairs/lightning-metal.md) | Reference only | Shares a locked parent | 7 |
 | [Lightning + Plant](pairs/lightning-plant.md) | Rubber | Shares a locked parent | 8 |
-| [Frost + Wind](pairs/frost-wind.md) | Dry Ice | Open | 8 |
+| [Frost + Wind](pairs/frost-wind.md) | Dry Ice | Open | 9 |
 | [Frost + Earth](pairs/frost-earth.md) | Rime Shale | Shares a locked parent | 6 |
 | [Frost + Light](pairs/frost-light.md) | Frostglass | Open | 6 |
 | [Frost + Dark](pairs/frost-dark.md) | Nightfrost | Open | 6 |
 | [Frost + Metal](pairs/frost-metal.md) | Reference only | Shares a locked parent | 7 |
-| [Frost + Plant](pairs/frost-plant.md) | Frozen Sap | Open | 7 |
+| [Frost + Plant](pairs/frost-plant.md) | Frozen Sap | Open | 8 |
 | [Wind + Earth](pairs/wind-earth.md) | Dust | Shares a locked parent | 7 |
 | [Wind + Light](pairs/wind-light.md) | Mirage | Open | 6 |
 | [Wind + Dark](pairs/wind-dark.md) | Reference only | Reference | 6 |
 | [Wind + Metal](pairs/wind-metal.md) | Reference only | Shares a locked parent | 6 |
-| [Wind + Plant](pairs/wind-plant.md) | Reference only | Reference | 6 |
+| [Wind + Plant](pairs/wind-plant.md) | Thread | Open | 7 |
 | [Earth + Light](pairs/earth-light.md) | Phosphor | Shares a locked parent | 7 |
 | [Earth + Dark](pairs/earth-dark.md) | Black Clay | Shares a locked parent | 6 |
 | [Earth + Metal](pairs/earth-metal.md) | Reference only | Shares a locked parent | 6 |
 | [Earth + Plant](pairs/earth-plant.md) | Amber | Shares a locked parent | 7 |
 | [Light + Dark](pairs/light-dark.md) | Reference only | Reference | 8 |
 | [Light + Metal](pairs/light-metal.md) | Reference only | Shares a locked parent | 7 |
-| [Light + Plant](pairs/light-plant.md) | Sugar | Favorite | 8 |
+| [Light + Plant](pairs/light-plant.md) | Sugar | Favorite | 10 |
 | [Dark + Metal](pairs/dark-metal.md) | Reference only | Shares a locked parent | 7 |
-| [Dark + Plant](pairs/dark-plant.md) | Black Ink | Open | 7 |
+| [Dark + Plant](pairs/dark-plant.md) | Black Ink | Open | 8 |
 | [Metal + Plant](pairs/metal-plant.md) | Ironwood | Shares a locked parent | 7 |

@@ -134,6 +134,7 @@ Breakdown order is parents, identity, name, and gameplay.
 | Black Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
 | Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
 | Night Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Lacquer | Opaque plant coating | 2 / 3 / 2 / 2 | 9 | Exploratory |
 | Lightless Pigment | Light-absorbing plant pigment | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Nightbloom | Dark-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Shadevine | Dark-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |

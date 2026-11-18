@@ -132,8 +132,10 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Ash | Plant ash | 3 / 3 / 2 / 2 | 10 | Candidate |
+| Tar | Resin distillate | 3 / 3 / 2 / 2 | 10 | Candidate |
 | Biochar | Charred plant matter | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Charcoal | Charred plant matter | 3 / 3 / 2 / 1 | 9 | Exploratory |
+| Pitch | Resin distillate | 3 / 3 / 1 / 2 | 9 | Reference |
 | Char | Charred plant matter | 3 / 3 / 1 / 1 | 8 | Exploratory |
 | Emberwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Cinder Bark | Charred plant matter | 3 / 2 / 1 / 1 | 7 | Exploratory |

@@ -132,8 +132,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Starch | Stored plant energy | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Sugar | Stored plant energy | 3 / 2 / 2 / 2 | 9 | Favorite |
 | Daybloom | Light-fed plant growth | 3 / 1 / 2 / 2 | 8 | Reference |
+| Syrup | Stored plant energy | 3 / 2 / 2 / 1 | 8 | Reference |
 | Nectar | Light-fed plant growth | 2 / 1 / 2 / 2 | 7 | Reference |
 | Photosynthesis | Light-fed plant growth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Sunbloom | Light-fed plant growth | 2 / 2 / 2 / 1 | 7 | Reference |

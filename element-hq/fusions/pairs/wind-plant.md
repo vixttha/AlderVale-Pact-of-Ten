@@ -6,6 +6,7 @@
 
 | Name | Concept | Status | Parents /3 | Identity /3 | Name /2 | Gameplay /2 | Total /10 | Rationale and origin |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Thread | Spun plant fiber | Candidate | 2 | 3 | 2 | 2 | 9 | Plant supplies fibers and Wind magic twists them into tensile strands. Thread could tether enemies, pull allies, and weave barriers. The spinning is a fantasy rule. New concept proposal. |
 | Pollen Cloud | Plant dispersal | Reference | 3 | 1 | 2 | 2 | 8 | Wind keeps Plant particles airborne. It gives the pair a clear area effect while staying within Plant's kit. Expanded naming pass. |
 | Seedstorm | Plant dispersal | Reference | 3 | 1 | 2 | 2 | 8 | Both parents sustain spreading growth. It reads as a Plant move family. Earlier chart: Wind spreads winged seeds that establish new growth. |
 | Winged Seed | Plant dispersal | Reference | 3 | 1 | 2 | 2 | 8 | A Plant seed uses Wind for dispersal. It fits a growth pattern or creature move that changes range. Expanded naming pass. |

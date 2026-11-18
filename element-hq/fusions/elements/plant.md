@@ -24,8 +24,10 @@ Breakdown order is parents, identity, name, and gameplay.
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
 | Ash | Plant ash | 3 / 3 / 2 / 2 | 10 | Candidate |
+| Tar | Resin distillate | 3 / 3 / 2 / 2 | 10 | Candidate |
 | Biochar | Charred plant matter | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Charcoal | Charred plant matter | 3 / 3 / 2 / 1 | 9 | Exploratory |
+| Pitch | Resin distillate | 3 / 3 / 1 / 2 | 9 | Reference |
 | Char | Charred plant matter | 3 / 3 / 1 / 1 | 8 | Exploratory |
 | Emberwood | Charred plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Cinder Bark | Charred plant matter | 3 / 2 / 1 / 1 | 7 | Exploratory |
@@ -69,6 +71,7 @@ Breakdown order is parents, identity, name, and gameplay.
 | --- | --- | ---: | ---: | --- |
 | Frozen Sap | Frozen plant matter | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Dormancy | Frosted growth | 3 / 1 / 2 / 2 | 8 | Reference |
+| Pulp | Fibrous plant paste | 2 / 2 / 2 / 2 | 8 | Exploratory |
 | Rimewood | Frozen plant matter | 3 / 2 / 1 / 2 | 8 | Exploratory |
 | Winterwood | Frozen plant matter | 2 / 2 / 2 / 2 | 8 | Exploratory |
 | Frostbloom | Frosted growth | 2 / 2 / 2 / 1 | 7 | Reference |
@@ -81,6 +84,7 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Thread | Spun plant fiber | 2 / 3 / 2 / 2 | 9 | Candidate |
 | Pollen Cloud | Plant dispersal | 3 / 1 / 2 / 2 | 8 | Reference |
 | Seedstorm | Plant dispersal | 3 / 1 / 2 / 2 | 8 | Reference |
 | Winged Seed | Plant dispersal | 3 / 1 / 2 / 2 | 8 | Reference |
@@ -108,8 +112,10 @@ Breakdown order is parents, identity, name, and gameplay.
 
 | Name | Concept | Breakdown | Total /10 | Status |
 | --- | --- | ---: | ---: | --- |
+| Starch | Stored plant energy | 3 / 2 / 2 / 2 | 9 | Exploratory |
 | Sugar | Stored plant energy | 3 / 2 / 2 / 2 | 9 | Favorite |
 | Daybloom | Light-fed plant growth | 3 / 1 / 2 / 2 | 8 | Reference |
+| Syrup | Stored plant energy | 3 / 2 / 2 / 1 | 8 | Reference |
 | Nectar | Light-fed plant growth | 2 / 1 / 2 / 2 | 7 | Reference |
 | Photosynthesis | Light-fed plant growth | 3 / 1 / 1 / 2 | 7 | Reference |
 | Sunbloom | Light-fed plant growth | 2 / 2 / 2 / 1 | 7 | Reference |
@@ -126,6 +132,7 @@ Breakdown order is parents, identity, name, and gameplay.
 | Black Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
 | Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
 | Night Ink | Light-absorbing plant pigment | 3 / 3 / 2 / 2 | 10 | Exploratory |
+| Lacquer | Opaque plant coating | 2 / 3 / 2 / 2 | 9 | Exploratory |
 | Lightless Pigment | Light-absorbing plant pigment | 3 / 3 / 1 / 2 | 9 | Exploratory |
 | Nightbloom | Dark-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
 | Shadevine | Dark-fed growth | 2 / 2 / 2 / 1 | 7 | Reference |
