@@ -303,7 +303,7 @@ test('authenticated reconnect restores an off-spawn resource position without mo
   assert.deepEqual(restored.acknowledgment.position, { x: -14, y: 0, z: 1, rotY: 0.75 });
   assert.equal(restored.acknowledgment.zone, 'hub');
   const collected = await gameplay(player, resource);
-  assert.match(collected.notice, /Harvested/);
+  assert.match(collected.feedback.notice, /Harvested/);
   assert.ok(collected.wizard.resources.starstone > 0);
 
   const closedAgain = once(restored.serverSocket, 'close', { signal: AbortSignal.timeout(10000) });
