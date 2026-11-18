@@ -19,8 +19,13 @@ def retained_extraction(root, record, sources):
     if not path.resolve().is_relative_to(root.resolve()) or path.is_symlink():
         raise ValueError("Semantic artifact escapes repository")
     data = json.loads(path.read_text(encoding="utf-8"))
-    expected = {entry[0]: hashlib.sha256((root / entry[0]).read_bytes()).hexdigest()
-                for entry in sources.values()}
+    # Retained extraction identifies original source files. Approved copies
+    # move to versions/<tag>; validate those bytes without depending on the
+    # mutable retained workspace, then remap output evidence to the snapshot.
+    snapshots = {record["source_path"] + "/" + name: entry[0]
+                 for name, entry in sources.items()}
+    expected = {canonical: hashlib.sha256((root / snapshot).read_bytes()).hexdigest()
+                for canonical, snapshot in snapshots.items()}
     if data["source_commit"] != record["source_commit"] or data["source_files"] != expected:
         raise ValueError("Retained semantic extraction does not match pinned corpus")
     payload = data["extraction"]
@@ -40,7 +45,7 @@ def retained_extraction(root, record, sources):
         if not match:
             raise ValueError("Semantic evidence needs exact line locations")
         end = int(match[2] or match[1])
-        if not 1 <= int(match[1]) <= end <= len((root / source).read_text(encoding="utf-8").splitlines()):
+        if not 1 <= int(match[1]) <= end <= len((root / snapshots[source]).read_text(encoding="utf-8").splitlines()):
             raise ValueError("Semantic evidence line is outside source")
     for n in nodes:
         if n.get("file_type") not in allowed:
@@ -59,6 +64,8 @@ def retained_extraction(root, record, sources):
         e["_origin"] = "semantic"
     if payload.get("hyperedges"):
         raise ValueError("This initial replay contract does not support semantic hyperedges")
+    for item in nodes + edges:
+        item["source_file"] = snapshots[item["source_file"]]
     return data, hashlib.sha256(path.read_bytes()).hexdigest()
 
 

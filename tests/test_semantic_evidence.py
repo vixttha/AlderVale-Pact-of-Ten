@@ -12,6 +12,7 @@ class SemanticContracts(unittest.TestCase):
     git = fixtures.VersionContracts.git
     commit = fixtures.VersionContracts.commit
     write_manifest = fixtures.VersionContracts.write_manifest
+    archive_fixture = fixtures.VersionContracts.archive_fixture
 
     def setUp(self):
         fixtures.VersionContracts.setUp(self)
@@ -53,3 +54,13 @@ class SemanticContracts(unittest.TestCase):
         self.save()
         with self.assertRaisesRegex(ValueError, "unknown endpoint"):
             maps.semantic_maps.retained_extraction(self.root, self.record, self.sources)
+
+    def test_archive_replay_uses_frozen_bytes_and_archive_locations(self):
+        self.archive_fixture()
+        archived = maps.read_archive("v0.0.1", self.record)
+        # The current workspace is not authority for an approved snapshot.
+        self.file.write_text("changed retained workspace", encoding="utf-8")
+        retained, digest = maps.semantic_maps.retained_extraction(self.root, self.record, archived)
+        self.assertEqual(retained["extraction"]["nodes"][0]["source_file"],
+                         "versions/v0.0.1/README.md")
+        self.assertEqual(len(digest), 64)
