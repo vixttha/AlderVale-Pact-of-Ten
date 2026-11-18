@@ -1,0 +1,74 @@
+name: Formwright v0.0.1 HQ validation and Graphify
+
+on:
+  push:
+    branches: [character-forge-hq]
+    paths:
+      - 'character-forge/**'
+      - '.github/workflows/formwright.yml'
+  pull_request:
+    paths:
+      - 'character-forge/**'
+      - '.github/workflows/formwright.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formwright-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  template:
+    name: Formwright structure, scope and negative paths
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Record exact checkout and base
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          printf 'Formwright validation checkout: %s\n\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          printf 'Reference main: %s\n\n' "$(git rev-parse origin/main)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Validate template, source isolation and frozen versions
+        run: python3 character-forge/tools/verify_formwright.py --base origin/main
+      - name: Validate negative paths and portable-template constraints
+        run: python3 -m unittest discover -s character-forge/tools -p 'test_*.py' -v
+
+  graphify:
+    name: Code-only Graphify at exact checkout
+    needs: template
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Install existing locked Graphify dependencies
+        run: python3 -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
+      - name: Extract, verify Graphify MCP and record source receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          graphify extract . --code-only --max-workers 2 --out "$RUNNER_TEMP/formwright"
+          python3 tools/graphify/snapshot.py "$RUNNER_TEMP/formwright/graphify-out/graph.json"
+          python3 tools/graphify/mcp_readback.py "$RUNNER_TEMP/formwright/graphify-out/graph.json"
+          {
+            printf 'Formwright code graph checkout: %s\n\n' "$(git rev-parse HEAD)"
+            printf 'Code-only graph (does not map Markdown semantics or validate 3D rig fit).\n\n'
+            cat "$RUNNER_TEMP/formwright/graphify-out/receipt.json"
+          } >> "$GITHUB_STEP_SUMMARY"
