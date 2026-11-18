@@ -158,6 +158,10 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      # Checkout's temporary HOME does not carry its safe.directory across container steps.
+      - name: Trust checked-out workspace in container
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Record tested checkout
         id: checkout_revision
         shell: bash
