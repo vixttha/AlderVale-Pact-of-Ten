@@ -17,6 +17,7 @@ concurrency:
 
 env:
   TEMPLATE: graphify-hq/versions/v0.0.7
+  MANIFEST: graphify-hq/versions/v0.0.7/examples/first-spark.json
   PIP_DISABLE_PIP_VERSION_CHECK: '1'
   PYTHONHASHSEED: '0'
 
@@ -40,8 +41,10 @@ jobs:
           python -m pip check
       - name: Test manifest and provenance checks
         run: python -m unittest discover -s "$TEMPLATE" -p 'test_*.py' -v
-      - name: Fetch the pinned First Spark commit
-        run: git fetch --no-tags origin 5364cd19c862dbf071faeea58d9245e110d3b377
+      - name: Fetch the pinned manifest commit
+        run: |
+          source_commit="$(jq -er '.source_commit | select(type == "string" and test("^[0-9a-f]{40}$"))' "$MANIFEST")"
+          git fetch --no-tags origin "$source_commit"
       - name: Verify live GitHub PR provenance and read the feature graph over MCP
         env:
           GH_TOKEN: ${{ github.token }}
@@ -51,13 +54,13 @@ jobs:
           printf '## Graphify HQ v0.0.7\n\nTemplate checkout: `%s`\n\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           {
             printf '### Live PR provenance\n\n~~~text\n'
-            python "$TEMPLATE/evidence_map.py" "$TEMPLATE/examples/first-spark.json" "$output" --verify-pr
+            python "$TEMPLATE/evidence_map.py" "$MANIFEST" "$output" --verify-pr
             printf '~~~\n'
           } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Rebuild independently and compare graph and receipt bytes
         run: |
           output="$RUNNER_TEMP/first-spark"
-          python "$TEMPLATE/evidence_map.py" "$TEMPLATE/examples/first-spark.json" "$output" --check
+          python "$TEMPLATE/evidence_map.py" "$MANIFEST" "$output" --check
           {
             printf '\n### First Spark verification receipt\n\n~~~json\n'
             cat "$output/receipt.json"

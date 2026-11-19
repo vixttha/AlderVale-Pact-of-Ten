@@ -24,10 +24,12 @@ application CI for game test outcomes.
 1. Copy this version folder and adapt the [public-runner workflow](../../../.github/workflows/graphify-hq-template.yml).
    Use CPython 3.12 on Linux x86-64 and keep `pip --require-hashes`.
    The lock pins the Graphify 0.9.109 wheels used by this environment.
-2. Replace the example manifest with your project title, GitHub
-   `owner/repository`, and full source commit SHA. Fetch that Git object before
-   building. For a candidate PR, set its number and source branch and pass
-   `--verify-pr` with read-only `contents` and `pull-requests` permissions.
+2. Copy the example to a new project manifest and set the title, GitHub
+   `owner/repository`, and full source commit SHA. Keep the First Spark example
+   for the included unit tests. Set `MANIFEST` in the copied workflow to point
+   at your new file. For a candidate PR, set its number and source branch and
+   pass `--verify-pr` with read-only `contents` and `pull-requests` permissions.
+   For a branch or release commit, run the build without `--verify-pr`.
 3. Add feature IDs and links as needed, or use an empty `features` list for
    source-only evidence. Each link has a repository-relative path and one
    exact line from the source with indentation removed. Use an existing
