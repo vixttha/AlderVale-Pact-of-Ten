@@ -1,9 +1,10 @@
 {
   "issueNumber": 162,
   "claimId": "lydite-checkpoint-0043-issue-162-eb6e099",
-  "status": "active",
+  "status": "released",
   "worker": "lydite-vaultwright",
-  "expiresAt": "2026-11-19T13:22:35.000Z",
+  "expiresAt": "2026-11-19T11:22:35Z",
   "baseSha": "a6c2060b8175f505cc6327ccb5658cc00a458b24",
-  "workBranch": "test-vault/java-asset-delivery"
+  "workBranch": "test-vault/java-asset-delivery",
+  "resultSha": "3feb8810c05330bb69f5aca491b647ef4ffe6c15"
 }
