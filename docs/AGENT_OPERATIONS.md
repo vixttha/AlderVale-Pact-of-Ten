@@ -28,7 +28,7 @@ The [First Spark graph](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/gr
 
 ## Read a runner-produced graph via MCP
 
-Install the lock with `python3.12 -m pip install --require-hashes --no-deps --only-binary=:all: -r graphify-hq/versions/v0.0.7/requirements.txt` in an isolated Python 3.12 environment on Linux x86-64. From the repository checkout:
+Install the lock with `python3.12 -m pip install --require-hashes --no-deps --only-binary=:all: -r tools/graphify/first-spark-kit/requirements.txt` in an isolated Python 3.12 environment on Linux x86-64. From the repository checkout:
 
 ```bash
 git fetch origin main graphify-snapshots

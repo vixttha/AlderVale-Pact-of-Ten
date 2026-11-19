@@ -8,7 +8,6 @@ on:
     paths:
       - '.github/workflows/graphify.yml'
       - 'tools/graphify/**'
-      - 'graphify-hq/versions/v0.0.7/**'
       - 'docs/test-vault/README.md'
       - 'docs/test-vault/aldervale/cases.md'
       - 'tests/vault/guestQuestSave.test.ts'
@@ -55,7 +54,7 @@ jobs:
       - name: Install locked Graphify and MCP packages
         run: >-
           python -m pip install --require-hashes --no-cache-dir --only-binary=:all: --no-deps
-          -r graphify-hq/versions/v0.0.7/requirements.txt
+          -r tools/graphify/first-spark-kit/requirements.txt
       - name: Audit Graphify and list retained versions
         run: |
           python tools/graphify/audit_cli.py | tee -a "$GITHUB_STEP_SUMMARY"
@@ -107,7 +106,7 @@ jobs:
       - name: Install locked Graphify and MCP packages
         run: >-
           python -m pip install --require-hashes --no-cache-dir --only-binary=:all: --no-deps
-          -r graphify-hq/versions/v0.0.7/requirements.txt
+          -r tools/graphify/first-spark-kit/requirements.txt
       - name: Query the transferred graph over MCP
         env:
           SNAPSHOT_0: ${{ needs.graph.outputs.snapshot_0 }}
