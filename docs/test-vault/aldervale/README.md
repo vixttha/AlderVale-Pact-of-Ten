@@ -18,7 +18,7 @@ These suites are wired into the AlderVale workflows. Each linked run establishes
 | Bash and Graphify MCP | Publisher contracts, graph construction and source readback. | [Merged #134 Graphify](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44415852841) · [Snapshot receipt](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/graphify-snapshots/test-vault) |
 | First Spark shared evidence (merged #134) | Chromium guest duel and reload, C# save checks, F# reward and replay model, and retained synthetic receipt artifacts. | [7-job game validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44410706488) · [Evidence artifact](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44410706488/artifacts/14476813698) |
 | Haskell spell cards (merged #131) | Hand refills, discards, targeting, Keen Ink, sideboard and reshuffle against the live combat resolver. | [Haskell 5/5 and Vault CI](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44417001341) · [Graphify at merged SHA](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44418935255) |
-| Lua campus movement (merged #132) | Open ground, island bounds and obstacles compared with the live campus helper. | [Post-merge Vault adoption](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44425552696) · [Suite guide][lua-movement] |
+| Lua campus movement (merged #132) | Open ground, island bounds and obstacles compared with the live campus helper. | [Lua cases on merge checkout `cba804a`](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44425552696/job/135229329453) · [Suite guide][lua-movement] |
 
 ### Draft suites
 
