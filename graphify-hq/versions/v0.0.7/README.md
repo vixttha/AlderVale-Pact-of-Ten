@@ -19,11 +19,25 @@ deterministic graph and receipt after an MCP readback and a second rebuild.
 Graphify validates the links to test definitions. See PR #134 and its
 application CI for game test outcomes.
 
+## Blender-Agent portability example
+
+The [second manifest](examples/blender-agent.json) maps atomic output
+publication at the [Blender-Agent v0.0.2 tag][blender-tag]. It links the
+[architecture rule][blender-architecture] and [changelog entry][blender-change]
+to two Python `unittest` cases for [late destination creation][blender-late]
+and [concurrent writers][blender-race].
+
+The public runner fetches the tag into a separate Git repository, checks the
+tag against the manifest's full SHA, and runs the same Graphify template
+against that Git history. The run summary includes this example's graph and
+receipt. See [Blender-Agent application CI][blender-ci] for test outcomes.
+
 ## Adopt it in another public repository
 
 1. Copy this version folder and adapt the [public-runner workflow](../../../.github/workflows/graphify-hq-template.yml).
    Use CPython 3.12 on Linux x86-64 and keep `pip --require-hashes`.
-   The lock pins the Graphify 0.9.109 wheels used by this environment.
+   The lock pins the Graphify 0.9.109 wheels used by this environment. Keep the
+   main verification steps and select the example steps you want to run.
 2. Copy the example to a new project manifest and set the title, GitHub
    `owner/repository`, and full source commit SHA. Keep the First Spark example
    for the included unit tests. Set `MANIFEST` in the copied workflow to point
@@ -47,3 +61,10 @@ promotion. The PR check supports same-repository PRs with a GitHub-visible
 head and commit history.
 
 See [Graphify HQ version history](../../README.md).
+
+[blender-tag]: https://github.com/vixttha/Blender-Agent/tree/v0.0.2
+[blender-architecture]: https://github.com/vixttha/Blender-Agent/blob/cb945bd8531ee425615c1968612ab6503849369d/docs/ARCHITECTURE.md#L23
+[blender-change]: https://github.com/vixttha/Blender-Agent/blob/cb945bd8531ee425615c1968612ab6503849369d/CHANGELOG.md#L5
+[blender-late]: https://github.com/vixttha/Blender-Agent/blob/cb945bd8531ee425615c1968612ab6503849369d/tests/test_jobs.py#L99
+[blender-race]: https://github.com/vixttha/Blender-Agent/blob/cb945bd8531ee425615c1968612ab6503849369d/tests/test_jobs.py#L108
+[blender-ci]: https://github.com/vixttha/Blender-Agent/actions/runs/44438741759

@@ -8,7 +8,7 @@ for PR provenance, feature links, and hash-locked setup.
 
 | Version | Contents | Status |
 | --- | --- | --- |
-| [v0.0.7](versions/v0.0.7/README.md) | Standalone Graphify HQ toolkit with an AlderVale First Spark example | Candidate |
+| [v0.0.7](versions/v0.0.7/README.md) | Standalone Graphify HQ toolkit with AlderVale and Blender-Agent examples | Candidate |
 | [v0.0.1–v0.0.6][legacy] | Archived maps of the matching README HQ template versions | Archived |
 
 The standalone toolkit continues the visible HQ numbering. The most recent

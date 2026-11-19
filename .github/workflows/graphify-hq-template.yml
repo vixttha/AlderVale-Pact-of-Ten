@@ -1,6 +1,11 @@
 name: Graphify HQ template
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'graphify-hq/**'
+      - '.github/workflows/graphify-hq-template.yml'
   pull_request:
     paths:
       - 'graphify-hq/**'
@@ -23,7 +28,7 @@ env:
 
 jobs:
   verify:
-    name: Verify Graphify HQ template and First Spark example
+    name: Verify Graphify HQ template and portability examples
     if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -65,6 +70,31 @@ jobs:
             printf '\n### First Spark verification receipt\n\n~~~json\n'
             cat "$output/receipt.json"
             printf '~~~\n\n<details><summary>Graphify graph JSON</summary>\n\n~~~json\n'
+            cat "$output/graph.json"
+            printf '\n~~~\n</details>\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify the portable Python example from Blender-Agent v0.0.2
+        run: |
+          manifest="$GITHUB_WORKSPACE/$TEMPLATE/examples/blender-agent.json"
+          template="$GITHUB_WORKSPACE/$TEMPLATE/evidence_map.py"
+          source_repo="$RUNNER_TEMP/blender-agent-source"
+          output="$RUNNER_TEMP/blender-agent-evidence"
+          git init -q "$source_repo"
+          git -C "$source_repo" fetch --depth=1 --no-tags \
+            https://github.com/vixttha/Blender-Agent.git refs/tags/v0.0.2
+          actual="$(git -C "$source_repo" rev-parse 'FETCH_HEAD^{commit}')"
+          expected="$(jq -er '.source_commit' "$manifest")"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::Blender-Agent v0.0.2 no longer resolves to the pinned source commit"
+            exit 1
+          fi
+          cd "$source_repo"
+          python "$template" "$manifest" "$output"
+          python "$template" "$manifest" "$output" --check
+          {
+            printf '\n### Blender-Agent portability receipt\n\n~~~json\n'
+            cat "$output/receipt.json"
+            printf '~~~\n\n<details><summary>Portable graph JSON</summary>\n\n~~~json\n'
             cat "$output/graph.json"
             printf '\n~~~\n</details>\n'
           } >> "$GITHUB_STEP_SUMMARY"
