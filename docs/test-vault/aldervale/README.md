@@ -1,5 +1,7 @@
 # AlderVale Test Vault
 
+Start from the canonical game-specific [`AlderVale-Test-Vault`](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/AlderVale-Test-Vault) branch, using the exact capitalization in links and PR bases. The [historical Vault checkout](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/bb1d5e609e0cc0a5c1a047df81dfc6e63df704e3) remains available as a pinned reference.
+
 Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The reusable starter is maintained on [`Test-Vault`](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/Test-Vault). For v0.0.3 setup and execution receipts, use the [pinned starter guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/557f640f2c5b847733d779fb6bd320481df58d0d/starter/test-vault/README.md). The [in-branch historical starter](../public-template/README.md) supplies the existing adoption fixtures. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## Suite status and CI evidence
