@@ -141,6 +141,31 @@ test('signed-in browser renders WebGL, corrects forged travel, reconnects and re
   expect(realm.status).toBe(200);
   expect(realm.data.wizardIds).toHaveLength(1);
   await page.reload();
+  await page.waitForTimeout(1200);
+  const reloadStatus = await page.evaluate(async () => {
+    const { auth } = await import('/src/lib/firebase.ts');
+    await auth.authStateReady();
+    let cloudWizards = null;
+    let cloudError = null;
+    if (auth.currentUser) {
+      try {
+        const { loadCloudWizardsForRealm } = await import('/src/lib/storage.ts');
+        cloudWizards = (await loadCloudWizardsForRealm(auth.currentUser.uid, 'breeze')).length;
+      } catch (error) {
+        cloudError = String(error);
+      }
+    }
+    return {
+      restoredAuth: Boolean(auth.currentUser),
+      cloudWizards,
+      cloudError,
+      pageText: document.body.innerText.slice(0, 750),
+    };
+  });
+  // Diagnostic is synthetic emulator state only, without any credentials.
+  console.log('CI signed-in reload status:', JSON.stringify(reloadStatus));
+  expect(reloadStatus.restoredAuth).toBe(true);
+  expect(reloadStatus.cloudWizards).toBe(1);
   await expect(page.getByText('Emulator Rowan', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /Enter Aldervale/ })).toBeVisible();
   expect(pageErrors).toEqual([]);
