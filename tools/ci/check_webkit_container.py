@@ -38,7 +38,7 @@ def check_webkit_setup(workflow: str, version: str) -> list[str]:
         problems.append("WebKit must not install browsers or operating-system dependencies during CI")
     if not re.search(r"(?m)^\s*run:\s*.*npm run test:browser\b[^\n]*--project=webkit\b", active):
         problems.append("WebKit must execute the original Playwright webkit test project")
-    if not re.search(r"(?m)^\s*run:\s*.*bun run build\b", active):
+    if not re.search(r"(?m)^\s*(?:-\s*)?run:\s*.*bun run build\b", active):
         problems.append("WebKit must build the game")
     if not re.search(r"(?m)^\s*run:\s*.*npm ci --prefix tools/ci\b", active):
         problems.append("WebKit must install locked validation tools")

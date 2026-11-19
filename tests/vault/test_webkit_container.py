@@ -27,6 +27,10 @@ class WebkitContainerPolicyTest(unittest.TestCase):
             "run: npx playwright install --with-deps webkit && xvfb-run --auto-servernum npm run test:browser -- --project=webkit",
         ), "must not install")
 
+    def test_rejects_missing_build_step(self):
+        self.must_fail(BASE.replace("- run: bun run build", "- run: echo skip-build"),
+                       "must build the game")
+
     def test_rejects_apt_package_install(self):
         self.must_fail(BASE.replace(
             "run: xvfb-run --auto-servernum npm run test:browser -- --project=webkit",
