@@ -1,0 +1,100 @@
+name: Graphify HQ template
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'graphify-hq/**'
+      - '.github/workflows/graphify-hq-template.yml'
+  pull_request:
+    paths:
+      - 'graphify-hq/**'
+      - '.github/workflows/graphify-hq-template.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: graphify-hq-template-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TEMPLATE: graphify-hq/versions/v0.0.7
+  MANIFEST: graphify-hq/versions/v0.0.7/examples/first-spark.json
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+  PYTHONHASHSEED: '0'
+
+jobs:
+  verify:
+    name: Verify Graphify HQ template and portability examples
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Install hash-locked wheels
+        run: |
+          python -m pip install --require-hashes --no-cache-dir --no-deps --only-binary=:all: -r "$TEMPLATE/requirements.txt"
+          python -m pip check
+      - name: Test manifest and provenance checks
+        run: python -m unittest discover -s "$TEMPLATE" -p 'test_*.py' -v
+      - name: Fetch the pinned manifest commit
+        run: |
+          source_commit="$(jq -er '.source_commit | select(type == "string" and test("^[0-9a-f]{40}$"))' "$MANIFEST")"
+          git fetch --no-tags origin "$source_commit"
+      - name: Verify live GitHub PR provenance and read the feature graph over MCP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          output="$RUNNER_TEMP/first-spark"
+          printf '## Graphify HQ v0.0.7\n\nTemplate checkout: `%s`\n\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          {
+            printf '### Live PR provenance\n\n~~~text\n'
+            python "$TEMPLATE/evidence_map.py" "$MANIFEST" "$output" --verify-pr
+            printf '~~~\n'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Rebuild independently and compare graph and receipt bytes
+        run: |
+          output="$RUNNER_TEMP/first-spark"
+          python "$TEMPLATE/evidence_map.py" "$MANIFEST" "$output" --check
+          {
+            printf '\n### First Spark verification receipt\n\n~~~json\n'
+            cat "$output/receipt.json"
+            printf '~~~\n\n<details><summary>Graphify graph JSON</summary>\n\n~~~json\n'
+            cat "$output/graph.json"
+            printf '\n~~~\n</details>\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify the portable Python example from Blender-Agent v0.0.2
+        run: |
+          manifest="$GITHUB_WORKSPACE/$TEMPLATE/examples/blender-agent.json"
+          template="$GITHUB_WORKSPACE/$TEMPLATE/evidence_map.py"
+          source_repo="$RUNNER_TEMP/blender-agent-source"
+          output="$RUNNER_TEMP/blender-agent-evidence"
+          git init -q "$source_repo"
+          git -C "$source_repo" fetch --depth=1 --no-tags \
+            https://github.com/vixttha/Blender-Agent.git refs/tags/v0.0.2
+          actual="$(git -C "$source_repo" rev-parse 'FETCH_HEAD^{commit}')"
+          expected="$(jq -er '.source_commit' "$manifest")"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::Blender-Agent v0.0.2 no longer resolves to the pinned source commit"
+            exit 1
+          fi
+          cd "$source_repo"
+          python "$template" "$manifest" "$output"
+          python "$template" "$manifest" "$output" --check
+          {
+            printf '\n### Blender-Agent portability receipt\n\n~~~json\n'
+            cat "$output/receipt.json"
+            printf '~~~\n\n<details><summary>Portable graph JSON</summary>\n\n~~~json\n'
+            cat "$output/graph.json"
+            printf '\n~~~\n</details>\n'
+          } >> "$GITHUB_STEP_SUMMARY"

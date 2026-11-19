@@ -1,0 +1,33 @@
+{
+  "repository": "vixttha/Blender-Agent",
+  "source_commit": "cb945bd8531ee425615c1968612ab6503849369d",
+  "title": "Blender-Agent v0.0.2 feature evidence",
+  "features": [
+    {
+      "id": "atomic-output-publication",
+      "label": "Atomic output publication",
+      "documented_in": [
+        {
+          "path": "docs/ARCHITECTURE.md",
+          "anchor": "2. Output paths are resolved inside the workspace, checked again before publication, and existing outputs are protected by an atomic hard-link operation when overwrite is disabled."
+        }
+      ],
+      "changed_in": [
+        {
+          "path": "CHANGELOG.md",
+          "anchor": "- Repair the default output overwrite race using atomic no-clobber publication; add simultaneous-writer negative regression tests."
+        }
+      ],
+      "tested_by": [
+        {
+          "path": "tests/test_jobs.py",
+          "anchor": "def test_atomic_no_overwrite_even_when_destination_appears_late(self):"
+        },
+        {
+          "path": "tests/test_jobs.py",
+          "anchor": "def test_parallel_writers_exactly_one_wins(self):"
+        }
+      ]
+    }
+  ]
+}
