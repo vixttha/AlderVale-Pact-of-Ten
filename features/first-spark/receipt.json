@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "template_version": "v0.0.7",
+  "repository": "vixttha/AlderVale-Pact-of-Ten",
+  "source_commit": "5632aec210d184552abbbc3290bc1e201f1eb9b2",
+  "pull_request": null,
+  "scope": "feature-evidence",
+  "graphify_version": "0.9.109",
+  "graph_sha256": "5527262acb159a8a69d79064d7c6e6f7a8adf5c836008b1d710b7c3fe8d9147c",
+  "nodes": 6,
+  "edges": 5,
+  "feature_links": {
+    "feature:first-spark-rewards": {
+      "documented_in": 1,
+      "changed_in": 1,
+      "tested_by": 2
+    }
+  },
+  "source_sha256": {
+    "docs/test-vault/README.md": "ca419a5e9db490aeba65f9c3407b2944d9e7cdde29fd5db05681b560835ce3c2",
+    "docs/test-vault/aldervale/cases.md": "5fc283cffaacc569f62a529c7775db68aa3096977bc2e5a26b22a6290c065336",
+    "tests/vault/guestQuestSave.test.ts": "f4aefabfbb37bc5f3b3a8e9be90a09fe24d3d1f6a92a0356eb6989fd81e08f7d",
+    "tools/ci/human.pw.mjs": "e0c00dbfd7f9497fc1ba7fee3be9cdaa3d7492a1f79b8aa83215c76cd74bfba5"
+  },
+  "mcp_verified": true
+}
