@@ -754,6 +754,13 @@ export const WorldViewport: React.FC<WorldViewportProps> = ({
           x: reconnectPosition.x, z: reconnectPosition.z, rotY: reconnectPosition.rotY,
         });
         appliedPositionKeyRef.current = `${reconnectPosition.sessionId}:${reconnectPosition.revision}`;
+        // Disposable CI-only observation of the actual Three.js position setter.
+        // No production build or public gameplay path exposes this data attribute.
+        if (import.meta.env.DEV && import.meta.env.VITE_ALDERVALE_CI_AUTH === 'demo-aldervale-ci' &&
+            window.location.hostname === '127.0.0.1') {
+          container.dataset.ciAppliedPosition = [playerContainer.position.x, playerContainer.position.z]
+            .map((value) => value.toFixed(2)).join(',');
+        }
         pendingPositionRef.current = null;
       }
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Compass, Sparkles, Shield, Users, LogIn, Plus, ArrowRight, Lock } from 'lucide-react';
 import { REALM_LIST, REALMS, type RealmId } from '../../../shared/realms.ts';
 import { STARTER_ELEMENTS, ELEMENTS, type ElementId } from '../../../shared/elements.ts';
@@ -63,6 +63,19 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   const pendingEnrollment = useRef<{ scope: string; id: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [creating, setCreating] = useState(wizards.length === 0);
+  // The signed-in wizard list arrives asynchronously after Auth restores.
+  // Reveal existing slots when the list hydrates, but preserve an intentional
+  // "Enroll New Wizard" selection while slots are already populated.
+  const awaitingWizardsRef = useRef(wizards.length === 0);
+  useEffect(() => {
+    if (wizards.length === 0) {
+      awaitingWizardsRef.current = true;
+      setCreating(true);
+    } else if (awaitingWizardsRef.current) {
+      awaitingWizardsRef.current = false;
+      setCreating(false);
+    }
+  }, [wizards.length]);
   const [name, setName] = useState('Rowan Skyweaver');
   const [raceId, setRaceId] = useState<RaceId>('human');
   const [beastClan, setBeastClan] = useState<BeastClanId>('ember_fox');

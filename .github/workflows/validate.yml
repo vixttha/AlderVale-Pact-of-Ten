@@ -312,6 +312,32 @@ jobs:
           tools/ci/node_modules/.bin/firebase emulators:exec
           --config firebase.ci.json --project demo-aldervale-ci --only auth,firestore
           "node --test tools/ci/firestore.check.mjs && npm test -- tests/firestore.integration.test.ts && node --test tools/ci/authenticated-matchmaking.check.mjs && node --test tools/ci/authenticated-progression.check.mjs"
+      # Execute a real browser against isolated demo Auth + Firestore emulators.
+      # The Vite app redirects Firebase only when the loopback CI flag is present.
+      - name: Install Chromium for signed-in WebGL smoke
+        working-directory: tools/ci
+        run: npx playwright install --with-deps chromium
+      - name: Verify signed-in browser reconnect and server corrections (demo only)
+        id: signed_in_browser
+        env:
+          GOOGLE_CLOUD_PROJECT: demo-aldervale-ci
+          FIRESTORE_DATABASE_ID: '(default)'
+          VITE_ALDERVALE_CI_AUTH: demo-aldervale-ci
+          GEMINI_API_KEY: ''
+        run: >-
+          tools/ci/node_modules/.bin/firebase emulators:exec
+          --config firebase.ci.json --project demo-aldervale-ci --only auth,firestore
+          "xvfb-run --auto-servernum npm run test:browser --prefix tools/ci -- --config=playwright.signed-in.config.mjs --project=chromium"
+      - name: Retain signed-in failure trace briefly
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: signed-in-browser-${{ github.run_attempt }}
+          path: |
+            tools/ci/playwright-report/
+            tools/ci/test-results/
+          retention-days: 1
+          if-no-files-found: ignore
       - name: Write verification summary
         if: ${{ always() && steps.evidence_node.outcome == 'success' }}
         env:
