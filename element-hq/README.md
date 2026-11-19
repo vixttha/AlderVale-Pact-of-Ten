@@ -18,6 +18,7 @@ GitHub is the public, versioned source for these design documents and engineerin
 - **[Fusion mind map](designs/fusion-system-mind-map.md)**: linked concept and dependency graph.
 - **[Ten skill trees and 45 fusion research gateways — draft](designs/skill-tree-feasibility-2026-11-18.md)**: level budgets, race fairness and integration costs, not approved mechanics.
 - **[Hybrid Skill Web screenshot audit](designs/ui-audits/skill-web-visual-audit-2026-11-18.md)**: direct image review, UI design blockers and precise verification limitations.
+- **[Water Focus second screenshot audit](designs/ui-audits/focused-water-v2-visual-audit-2026-11-18.md)**: delta against the earlier mockup; visible gains, remaining point/node contradictions and gameplay-state gates.
 
 - [Element registry and current combat snapshot](element-registry.md)
 - [Fusion System v1 — design proposal](fusion-system-v1.md)

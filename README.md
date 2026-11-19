@@ -32,6 +32,7 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 | [Fusion system mind map](element-hq/designs/fusion-system-mind-map.md) | See the law, selected recipes, discovery and casting options in one dependency map. |
 | [Ten elemental skill-tree feasibility charts](element-hq/designs/skill-tree-feasibility-2026-11-18.md) | Exploratory study of ten charts, 45 shared gateways, points, levels, racial perks and development costs. |
 | [Hybrid Skill Web screenshot audit](element-hq/designs/ui-audits/skill-web-visual-audit-2026-11-18.md) | Reviewed the generated radial/web/constellation UI against progression, FQ-001, and accessibility; design-only findings. |
+| [Focused Water second-iteration audit](element-hq/designs/ui-audits/focused-water-v2-visual-audit-2026-11-18.md) | Compares the improved screen to first-pass findings; documents point/node discrepancies and Rust gateway refinements. |
 | [Earlier fusion architecture audit](element-hq/designs/fusion-architecture-audit-2026-11-18.md) | Historical comparison written before the latest owner decisions; consult the current decision record first. |
 | [Fusion Name Atlas](element-hq/fusions/README.md) | Browse ten element charts and compare rated names for every pairing. |
 | [Fusion pairing chart](element-hq/designs/aldervale-fusion-pairing-chart.md) | Compare all 45 cross-element pairings and their proposed outcomes. |

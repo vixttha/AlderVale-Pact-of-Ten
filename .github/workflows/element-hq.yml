@@ -49,6 +49,7 @@ jobs:
               "element-hq/designs/fusion-system-revamp-proposal.md",
               "element-hq/designs/fusion-system-mind-map.md",
               "element-hq/designs/ui-audits/skill-web-visual-audit-2026-11-18.md",
+              "element-hq/designs/ui-audits/focused-water-v2-visual-audit-2026-11-18.md",
           }
           tracked = set(git("ls-files", "-z").rstrip("\0").split("\0"))
           missing = (documents | {"README.md", workflow, "element-hq/fusions/build_atlas.py"}) - tracked
@@ -105,6 +106,13 @@ jobs:
           # Guard the optional even-level point model without mislabeling it implemented.
           assert (12 + 1) // 2 == 6  # live rank formula at level 12
           assert len(range(2, 13, 2)) == 6  # *proposed* mastery-point schedule
+          revised_audit = Path("element-hq/designs/ui-audits/focused-water-v2-visual-audit-2026-11-18.md").read_text(encoding="utf-8")
+          revised_required = ("WF2-01", "WF2-02", "WF2-03", "WF2-04",
+                             "6 earned", "4 spent", "2 available", "FQ-001",
+                             "static image", "six small green")
+          if missing := [part for part in revised_required if part.lower() not in revised_audit.lower()]:
+              raise SystemExit(f"Second screenshot audit missing required evidence: {missing}")
+          print("Verified second Water screenshot audit document and illustrative point math; no pixel/DOM test")
           print("Verified screenshot audit checklist + conditional level-12 arithmetic; no image pixels tested")
           print("Verified FQ-001: all four owner-required quality gates")
           print(f"Verified Element HQ documents at {head}")
