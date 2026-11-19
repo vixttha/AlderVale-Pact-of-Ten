@@ -305,6 +305,7 @@ def main():
                      REPO / "element-hq/designs/fusion-system-revamp-proposal.md",
                      REPO / "element-hq/designs/fusion-system-mind-map.md",
                      REPO / "element-hq/designs/fusion-roster-decisions-2026-11-18.md",
+                     REPO / "element-hq/designs/ui-audits/skill-web-visual-audit-2026-11-18.md",
                      *sorted(ATLAS.glob("*/*.md"))]:
             check_links(path)
     else:

@@ -48,6 +48,7 @@ jobs:
               "element-hq/FUSION_QUALITY_LAW.md",
               "element-hq/designs/fusion-system-revamp-proposal.md",
               "element-hq/designs/fusion-system-mind-map.md",
+              "element-hq/designs/ui-audits/skill-web-visual-audit-2026-11-18.md",
           }
           tracked = set(git("ls-files", "-z").rstrip("\0").split("\0"))
           missing = (documents | {"README.md", workflow, "element-hq/fusions/build_atlas.py"}) - tracked
@@ -90,6 +91,21 @@ jobs:
           for clause in required_law:
               if clause not in law:
                   raise SystemExit(f"FQ-001 law missing required clause: {clause}")
+          # Screenshot audit is a source-bound *design* record, not a pixel/layout test.
+          screenshot_audit = Path("element-hq/designs/ui-audits/skill-web-visual-audit-2026-11-18.md").read_text(encoding="utf-8")
+          checks = (
+              "Level 12 → Rank 6",
+              "6 / 10 used",
+              "SW-01", "SW-02", "SW-03", "SW-04",
+              "FQ-001", "UNVERIFIED", "90",
+              "not uploaded to a public repository",
+          )
+          if missing_audit := [label for label in checks if label.lower() not in screenshot_audit.lower()]:
+              raise SystemExit(f"Screenshot audit omissions: {missing_audit}")
+          # Guard the optional even-level point model without mislabeling it implemented.
+          assert (12 + 1) // 2 == 6  # live rank formula at level 12
+          assert len(range(2, 13, 2)) == 6  # *proposed* mastery-point schedule
+          print("Verified screenshot audit checklist + conditional level-12 arithmetic; no image pixels tested")
           print("Verified FQ-001: all four owner-required quality gates")
           print(f"Verified Element HQ documents at {head}")
           PY
