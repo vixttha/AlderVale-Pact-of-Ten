@@ -1,0 +1,60 @@
+name: Capture verified Graphify HQ v0.0.7 archive
+
+on:
+  push:
+    branches: [ops/graphify-hq-v0.0.7-archive]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  TEMPLATE: graphify-hq/versions/v0.0.7
+  TEMPLATE_SHA: 5632aec210d184552abbbc3290bc1e201f1eb9b2
+  PYTHONHASHSEED: '0'
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+
+jobs:
+  capture:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TEMPLATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Verify both examples from the merged template and emit archival bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$TEMPLATE_SHA"
+          echo "VERIFIED_TEMPLATE_CHECKOUT $TEMPLATE_SHA"
+          template="$GITHUB_WORKSPACE/$TEMPLATE"
+          python -m pip install --quiet --require-hashes --no-cache-dir --no-deps --only-binary=:all: -r "$template/requirements.txt"
+          python -m pip check
+          first_spark="$template/examples/first-spark.json"
+          git fetch --no-tags origin "$(jq -er '.source_commit' "$first_spark")"
+          python "$template/evidence_map.py" "$first_spark" "$RUNNER_TEMP/first-spark" --verify-pr
+          python "$template/evidence_map.py" "$first_spark" "$RUNNER_TEMP/first-spark" --check
+          unset GH_TOKEN
+
+          blender="$template/examples/blender-agent.json"
+          source="$RUNNER_TEMP/blender-source"
+          git init -q "$source"
+          git -C "$source" fetch --depth=1 --no-tags https://github.com/vixttha/Blender-Agent.git refs/tags/v0.0.2
+          test "$(git -C "$source" rev-parse 'FETCH_HEAD^{commit}')" = "$(jq -er '.source_commit' "$blender")"
+          cd "$source"
+          python "$template/evidence_map.py" "$blender" "$RUNNER_TEMP/blender-agent"
+          python "$template/evidence_map.py" "$blender" "$RUNNER_TEMP/blender-agent" --check
+
+          for example in first-spark blender-agent; do
+            for file in graph.json receipt.json; do
+              printf 'VERIFIED_ARCHIVE_FILE %s/%s ' "$example" "$file"
+              base64 -w0 "$RUNNER_TEMP/$example/$file"
+              printf '\n'
+            done
+          done
