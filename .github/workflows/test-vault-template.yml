@@ -15,6 +15,8 @@ on:
       - 'shared/**'
       - 'src/lib/storage.ts'
       - 'src/lib/firebase.ts'
+      - 'src/engine/campusCollision.ts'
+      - 'tests/vault/lua/**'
       - 'public/models/**.glb'
   push:
     branches: [main, AlderVale-Test-Vault]
@@ -31,6 +33,8 @@ on:
       - 'shared/**'
       - 'src/lib/storage.ts'
       - 'src/lib/firebase.ts'
+      - 'src/engine/campusCollision.ts'
+      - 'tests/vault/lua/**'
       - 'public/models/**.glb'
   workflow_dispatch:
 
@@ -200,3 +204,27 @@ jobs:
             node tests/vault/cpp/export-observations.mjs > "$build_dir/observed-v1.tsv"
             ctest --test-dir "$build_dir" --output-on-failure --verbose
           ) 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Compare campus movement with Lua fixtures
+        shell: bash
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          work=$(mktemp -d "$RUNNER_TEMP/lua-movement.XXXXXX")
+          trap 'rm -rf "$work"' EXIT
+          {
+            printf 'Tested checkout: %s\n' "$(git rev-parse HEAD)"
+            printf 'Base: %s\nHead: %s\nRun / attempt: %s / %s\n' "${BASE:-n/a}" "${HEAD:-n/a}" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            curl --fail --silent --show-error --location --retry 2 --connect-timeout 10 --max-time 30 \
+              --output "$work/lua-5.4.8.tar.gz" https://www.lua.org/ftp/lua-5.4.8.tar.gz
+            printf '%s  %s\n' '4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae' \
+              "$work/lua-5.4.8.tar.gz" | sha256sum --check --status
+            tar -xzf "$work/lua-5.4.8.tar.gz" -C "$work"
+            make -s -j2 -C "$work/lua-5.4.8" linux
+            lua="$work/lua-5.4.8/src/lua"
+            "$lua" -v
+            "$lua" tests/vault/lua/movement-contracts.lua fixtures > "$work/fixtures.tsv"
+            node tests/vault/lua/observe-movement.mjs "$work/fixtures.tsv" > "$work/observed.tsv"
+            "$lua" tests/vault/lua/movement-contracts.lua verify "$work/observed.tsv"
+          } 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"

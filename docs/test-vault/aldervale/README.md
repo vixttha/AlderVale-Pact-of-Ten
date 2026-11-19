@@ -15,7 +15,8 @@ These suites are wired into the AlderVale workflows. Each linked run establishes
 | Go and PowerShell | Guest presence on Linux and the Windows owner-play launcher. | [Vault game validation for the consolidation checkout](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43934451734) |
 | Bash and Graphify MCP | Publisher contracts, graph construction and source readback. | [Merged #134 Graphify](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44415852841) · [Snapshot receipt](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/graphify-snapshots/test-vault) |
 | First Spark shared evidence (merged #134) | Chromium guest duel and reload, C# save checks, F# reward and replay model, and retained synthetic receipt artifacts. | [7-job game validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44410706488) · [Evidence artifact](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44410706488/artifacts/14476813698) |
-| Haskell spell cards (candidate #131) | Hand refills, discards, targeting, Keen Ink, sideboard and reshuffle compared to the live combat resolver. | [Historical candidate check](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44005225831) · [Suite guide][haskell-cards] |
+| Haskell spell cards (merged #131) | Hand refills, discards, targeting, Keen Ink, sideboard and reshuffle against the live combat resolver. | [Haskell 5/5 and Vault CI](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44417001341) · [Graphify at merged SHA](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44418935255) |
+| Lua campus movement (candidate #132) | Open ground, island bounds and obstacles compared with the live campus helper. | [Historical candidate validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44013506140) · [Suite guide][lua-movement] |
 
 ### Draft suites
 
@@ -24,7 +25,6 @@ These results come from review checkouts. Keep that scope when citing them.
 | Draft | Coverage | Evidence |
 |---|---|---|
 | [Java asset delivery #128](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/128) | Built frontend assets and full, partial, and conditional model responses. | [Linux Core job](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43992240187/job/133735492406) |
-| [Lua campus movement #132](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/132) | Campus movement, boundaries, and obstacle collision. | [Vault catalog job](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44013506140/job/133805823710) |
 
 Use the [validation workflow](../../../.github/workflows/validate.yml), [Vault adoption workflow](../../../.github/workflows/test-vault-template.yml), and [Graphify workflow](../../../.github/workflows/graphify.yml) for new runs. Record the actual tested checkout, PR base and head, and run attempt. Keep automated results and [owner playthroughs](#owner-desktop-playthrough--g36-001) separate. For graph-based findings, match the graph receipt to the current branch SHA and confirm the pinned source.
 
@@ -45,6 +45,7 @@ See the [scenario fixture and report contract](../../../tests/vault/first-spark/
 | G13-003, G13-004 | [#13][issue13] | First Spark replay and the three published payout schedules | [Python reference][python], [Ruby catalog][ruby] | Vault catalog | Arbor and Rare Trial in-game completion |
 | G13-005 to G13-009 | [#13][issue13] | Harmony's two paths, mixed events, Rare Trial victory, and one-time payouts across saves | [Guest quest save tests][save] | Core | In-game event eligibility and delivery |
 | G17-001, G21-002 | | Equipped gear persistence, Classic fallback, and Rowan model retry | [Rowan browser suite][human], [lifecycle Vitest][rowan] | Browser, Core | |
+| G20-001 to G20-005 | | Open ground, island limits, glancing collision, center hits and edge pushback | [Lua campus movement suite][lua-movement] | Vault catalog | Collision helper only; browser movement and swept paths remain separate. |
 | G21-003 to G21-007 | | Embedded GLB bounds, mesh strides, skin indices and matrices, and animation sampler shape | [Rust asset contract][rust-assets] | Vault catalog | Embedded, non-sparse glTF 2.0 geometry and animation. Rendering and animation feel have separate checks. |
 | G28-003 to G28-005 | | Corrupt save recovery and failed replacement without affecting another realm | [Save tests][save], [guest browser suite][guest] | Core, Browser | |
 | G28-006 | [#22][issue22] | Settings boundaries, corruption and write recovery | [Guest settings Vitest][settings] | Core | Signed-in settings reload |
@@ -64,6 +65,7 @@ See the [scenario fixture and report contract](../../../tests/vault/first-spark/
 [issue10]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/10
 [issue13]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/13
 [issue22]: https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/22
+[lua-movement]: ../../../tests/vault/lua/README.md
 [rust-assets]: ../../../tests/vault/rust/tests/glb_contract.rs
 [reducer]: ../../../tests/questRewards.test.ts
 [human]: ../../../tools/ci/human.pw.mjs
@@ -104,6 +106,7 @@ Run these from the repository root unless the command specifies a prefix. Use No
 | Browser | `npm --prefix tools/ci run test:browser -- --project=chromium`. The Linux CI lane uses `xvfb-run` with the headed browser and repeats on Firefox and WebKit. |
 | Firestore rules | `npm --prefix tools/ci run test:rules` with Java 21. The full CI lane also runs the Firestore integration tests in the same demo emulator. |
 | Independent rule reference | `python3 tests/vault/first_playable_reference.py -v` with Python 3.12 and Node 24. |
+| Lua campus movement | Follow the [Lua and Node fixture commands][lua-movement]. |
 | Ruby quest catalog | `ruby tests/vault/quest_catalog.rb` with Node 24 and the Ruby bundled on the public Ubuntu runner. |
 | Rust binary asset contract | `cargo +1.95.0 test --locked --manifest-path tests/vault/rust/Cargo.toml` |
 | Go realm presence | From `tests/vault/go`, run `go test -mod=readonly -count=1 -timeout=2m -v ./...` with Go 1.27.4, Node 24, and the repository’s installed dependencies. |
