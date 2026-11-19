@@ -1,0 +1,67 @@
+name: Graphify HQ template
+
+on:
+  pull_request:
+    paths:
+      - 'graphify-hq/**'
+      - '.github/workflows/graphify-hq-template.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: graphify-hq-template-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TEMPLATE: graphify-hq/versions/v0.0.7
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+  PYTHONHASHSEED: '0'
+
+jobs:
+  verify:
+    name: Verify Graphify HQ template and First Spark example
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Install hash-locked wheels
+        run: |
+          python -m pip install --require-hashes --no-cache-dir --no-deps --only-binary=:all: -r "$TEMPLATE/requirements.txt"
+          python -m pip check
+      - name: Test manifest and provenance checks
+        run: python -m unittest discover -s "$TEMPLATE" -p 'test_*.py' -v
+      - name: Fetch the pinned First Spark commit
+        run: git fetch --no-tags origin 5364cd19c862dbf071faeea58d9245e110d3b377
+      - name: Verify live GitHub PR provenance and read the feature graph over MCP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          output="$RUNNER_TEMP/first-spark"
+          printf '## Graphify HQ v0.0.7\n\nTemplate checkout: `%s`\n\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          {
+            printf '### Live PR provenance\n\n~~~text\n'
+            python "$TEMPLATE/evidence_map.py" "$TEMPLATE/examples/first-spark.json" "$output" --verify-pr
+            printf '~~~\n'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Rebuild independently and compare graph and receipt bytes
+        run: |
+          output="$RUNNER_TEMP/first-spark"
+          python "$TEMPLATE/evidence_map.py" "$TEMPLATE/examples/first-spark.json" "$output" --check
+          {
+            printf '\n### First Spark verification receipt\n\n~~~json\n'
+            cat "$output/receipt.json"
+            printf '~~~\n\n<details><summary>Graphify graph JSON</summary>\n\n~~~json\n'
+            cat "$output/graph.json"
+            printf '\n~~~\n</details>\n'
+          } >> "$GITHUB_STEP_SUMMARY"

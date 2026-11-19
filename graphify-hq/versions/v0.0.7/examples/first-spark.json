@@ -1,0 +1,37 @@
+{
+  "repository": "vixttha/AlderVale-Pact-of-Ten",
+  "source_commit": "5364cd19c862dbf071faeea58d9245e110d3b377",
+  "title": "AlderVale First Spark evidence",
+  "pull_request": {
+    "number": 134,
+    "source_branch": "test-vault/first-spark-evidence"
+  },
+  "features": [
+    {
+      "id": "first-spark-rewards",
+      "label": "First Spark rewards and reload persistence",
+      "documented_in": [
+        {
+          "path": "docs/test-vault/aldervale/cases.md",
+          "anchor": "| G13-001 | First Spark rewards | P0 | Vitest and Playwright | The controlled Breeze duel reports +388 XP, +273 Florins, and +5 Spell Shards in total. The quest completion and saved rewards survive reload. The Vitest storage regression checks that replay cannot pay the quest a second time. |"
+        }
+      ],
+      "changed_in": [
+        {
+          "path": "docs/test-vault/README.md",
+          "anchor": "## First Spark — G13-001"
+        }
+      ],
+      "tested_by": [
+        {
+          "path": "tests/vault/guestQuestSave.test.ts",
+          "anchor": "it('G13-001 grants the quest rewards once and retains them with the guest wizard after reload', () => {"
+        },
+        {
+          "path": "tools/ci/human.pw.mjs",
+          "anchor": "test('a guest wins as Rowan and keeps First Spark and its rewards after reload', async ({ page }) => {"
+        }
+      ]
+    }
+  ]
+}
