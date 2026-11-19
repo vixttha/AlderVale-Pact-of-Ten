@@ -1,4 +1,4 @@
-name: Capture verified Graphify HQ v0.0.7 archive
+name: Seed verified First Spark graph for current main
 
 on:
   push:
@@ -27,34 +27,19 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.12'
-      - name: Verify both examples from the merged template and emit archival bytes
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Build and verify First Spark on the merged main checkout
         run: |
           test "$(git rev-parse HEAD)" = "$TEMPLATE_SHA"
-          echo "VERIFIED_TEMPLATE_CHECKOUT $TEMPLATE_SHA"
+          echo "FEATURE_SOURCE_CHECKOUT $TEMPLATE_SHA"
           template="$GITHUB_WORKSPACE/$TEMPLATE"
           python -m pip install --quiet --require-hashes --no-cache-dir --no-deps --only-binary=:all: -r "$template/requirements.txt"
           python -m pip check
-          first_spark="$template/examples/first-spark.json"
-          git fetch --no-tags origin "$(jq -er '.source_commit' "$first_spark")"
-          python "$template/evidence_map.py" "$first_spark" "$RUNNER_TEMP/first-spark" --verify-pr
-          python "$template/evidence_map.py" "$first_spark" "$RUNNER_TEMP/first-spark" --check
-          unset GH_TOKEN
-
-          blender="$template/examples/blender-agent.json"
-          source="$RUNNER_TEMP/blender-source"
-          git init -q "$source"
-          git -C "$source" fetch --depth=1 --no-tags https://github.com/vixttha/Blender-Agent.git refs/tags/v0.0.2
-          test "$(git -C "$source" rev-parse 'FETCH_HEAD^{commit}')" = "$(jq -er '.source_commit' "$blender")"
-          cd "$source"
-          python "$template/evidence_map.py" "$blender" "$RUNNER_TEMP/blender-agent"
-          python "$template/evidence_map.py" "$blender" "$RUNNER_TEMP/blender-agent" --check
-
-          for example in first-spark blender-agent; do
-            for file in graph.json receipt.json; do
-              printf 'VERIFIED_ARCHIVE_FILE %s/%s ' "$example" "$file"
-              base64 -w0 "$RUNNER_TEMP/$example/$file"
-              printf '\n'
-            done
+          jq --arg source "$TEMPLATE_SHA" '.source_commit = $source | del(.pull_request)' \
+            "$template/examples/first-spark.json" > "$RUNNER_TEMP/first-spark.json"
+          python "$template/evidence_map.py" "$RUNNER_TEMP/first-spark.json" "$RUNNER_TEMP/feature"
+          python "$template/evidence_map.py" "$RUNNER_TEMP/first-spark.json" "$RUNNER_TEMP/feature" --check
+          for file in graph.json receipt.json; do
+            printf 'VERIFIED_FEATURE_FILE %s ' "$file"
+            base64 -w0 "$RUNNER_TEMP/feature/$file"
+            printf '\n'
           done
