@@ -159,11 +159,8 @@ test('signed-in browser renders WebGL, corrects forged travel, reconnects and re
       restoredAuth: Boolean(auth.currentUser),
       cloudWizards,
       cloudError,
-      pageText: document.body.innerText.slice(0, 750),
     };
   });
-  // Diagnostic is synthetic emulator state only, without any credentials.
-  console.log('CI signed-in reload status:', JSON.stringify(reloadStatus));
   expect(reloadStatus.restoredAuth).toBe(true);
   expect(reloadStatus.cloudWizards).toBe(1);
   await expect(page.getByText('Emulator Rowan', { exact: true })).toBeVisible();
