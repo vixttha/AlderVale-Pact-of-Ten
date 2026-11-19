@@ -76,6 +76,11 @@ These cases build on the [Vault case catalog](../public-template/case-catalog.md
 | E24-005 | Launcher without Node | P1 | PowerShell | Show Node installation guidance, exit 1 and skip installation under a restricted PATH. |
 | E24-006 | Failed launcher update recovery | P0 | PowerShell | Start the saved build after an unavailable fetch and keep its revision receipt. |
 | E24-007 | Occupied launcher port | P1 | PowerShell | Explain the port collision, exit 1 and keep the previous working-build receipt. |
+| E28-001 | HTTP asset revalidation | P1 | Java 21 HTTP client | Matching ETags produce a bodyless 304 and nonmatching ETags return the full current GLB. |
+| E30-001 | Built JavaScript delivery | P0 | Java 21 HTTP client | Each entry-page module script resolves to a JavaScript response matching the built bytes. |
+| E30-002 | Built CSS delivery | P0 | Java 21 HTTP client | Each entry-page local stylesheet returns CSS with the exact built bytes. |
+| E30-003 | Full GLB HTTP delivery | P1 | Java 21 HTTP client | The server returns bytes equal to the built Rowan and prototype model files. |
+| E30-004 | GLB HTTP byte ranges | P1 | Java 21 HTTP client | First and last ranges of each model return 206, the exact Content-Range and the matching bytes. |
 | E32-001 | Stale Graphify main snapshot | P0 | Bash and Git | Skip an older source revision when remote main advances and preserve the archived snapshot branch. |
 | E32-002 | Unsupported Graphify publication ref | P0 | Bash and Git | Refuse a feature-ref publication without explicit opt-in and preserve the archived snapshot. |
 | E32-003 | Explicit Graphify commit snapshot | P1 | Bash and Git | Append a snapshot under the exact commit SHA and preserve the main graph and receipt. |

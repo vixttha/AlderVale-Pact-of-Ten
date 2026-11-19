@@ -35,8 +35,7 @@ for one day. The test tool dependencies live separately in tools/ci so AI Studio
 application manifest and Bun lockfile are unchanged.
 
 The Test Vault adoption workflow runs its copy-in fixtures and AlderVale language
-catalog checks. The legacy npm/audit-emulator workflow stays on the standalone
-`AlderVale-test-Vault` branch. Brand asset PRs render and validate PNG exports
+catalog checks. The canonical game-specific Vault is [`AlderVale-Test-Vault`](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/AlderVale-Test-Vault). Use that exact spelling for current work and PR bases. [`Test-Vault`](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/Test-Vault) is the reusable template branch. The differently capitalized [historic checkout](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/bb1d5e609e0cc0a5c1a047df81dfc6e63df704e3) is retained as an archive reference. Brand asset PRs render and validate PNG exports
 with pinned dependencies and one-day review artifacts.
 
 ## Run locally

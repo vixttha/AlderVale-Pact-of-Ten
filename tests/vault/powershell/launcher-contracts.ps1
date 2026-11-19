@@ -94,11 +94,19 @@ function Invoke-Launcher {
     $child = New-LauncherProcess -Launcher $Launcher -Arguments $Arguments -Environment $Environment
     try {
         if (-not $child.Process.WaitForExit($TimeoutMs)) {
-            throw "Launcher did not exit within $TimeoutMs ms"
+            $timedOut = $child
+            $child = $null
+            Stop-LauncherProcess $timedOut
+            $output = if ($timedOut.Out.IsCompletedSuccessfully -and $timedOut.Err.IsCompletedSuccessfully) {
+                ((Read-LauncherOutput $timedOut) -split '\r?\n' | Select-Object -Last 35) -join "`n"
+            } else {
+                'Launcher output streams did not close.'
+            }
+            throw "Launcher did not exit within $TimeoutMs ms. Last child output:`n$output"
         }
         @{ ExitCode = $child.Process.ExitCode; Output = Read-LauncherOutput $child }
     } finally {
-        Stop-LauncherProcess $child
+        if ($null -ne $child) { Stop-LauncherProcess $child }
     }
 }
 

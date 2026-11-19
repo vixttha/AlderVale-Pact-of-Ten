@@ -17,10 +17,11 @@ The [GitHub Linguist registry](https://github.com/github-linguist/linguist/blob/
 | C++ | Verify live TypeScript combat observations and guest save v1 records against independent expectations. Includes damage, health, team order, save recovery and deterministic replay. | Implemented in the existing Ubuntu Vault catalog job |
 | F# | Compare the saga reducer and guest saves against an independent model of quest completion, interleaving, reloads and one-time payouts. | Implemented in the Ubuntu Vault catalog job |
 | Haskell | Model hand, deck, discard and sideboard transitions and compare them with the live duel resolver. | Implemented in the public Ubuntu Vault catalog job; merged PR #131 validated. |
-| Lua | Compare campus positions with the live collision helper across mirrored, rotated and scaled layouts. | Implemented in public Ubuntu Vault catalog (candidate #132; fresh combined-checkout validation required). |
+| Lua | Compare campus positions with the live collision helper across mirrored, rotated and scaled layouts. | Implemented in public Ubuntu Vault catalog (merged #132; exact merged-SHA game 7/7 and adoption 4/4 passed). |
 | R or Julia | Analyze duel wins, round duration and balance variance against a fixed seed corpus. | Proposed |
 | Bash | Test Graphify snapshot publication against local Git remotes, including stale builds, unsupported refs, integrity failures and concurrent retries. | Implemented in the public Ubuntu Graphify job |
 | PowerShell | Windows launcher path, build identity, failure exits and saved-build recovery. | Implemented in Windows Core |
+| Java | Check built module scripts, CSS, full GLBs, HTTP ranges and ETag revalidation using the JDK HTTP client. | Implemented in public Linux Core |
 | Firestore Rules and Java | Execute Rules checks and save transactions in the Java-backed demo emulator. | Existing |
 | HTML and CSS | Check accessible names, focus, responsive controls and 200%/400% zoom. | Narrow enrollment exists. Zoom proposed. |
 | GLSL or WGSL | Check shader compilation and fallback for the actual shipped renderer. WebGPU-specific checks depend on adopting it. | Conditional |

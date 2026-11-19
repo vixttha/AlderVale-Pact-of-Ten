@@ -67,7 +67,9 @@ async function build({ repo, sha }) {
       ? resolve(process.execPath, '..', 'node_modules')
       : resolve(process.execPath, '..', '..', 'lib', 'node_modules');
     const npm = join(npmDirectory, 'npm', 'bin', 'npm-cli.js');
+    console.log('Installing locked game dependencies…');
     await run(process.execPath, [npm, 'ci', '--no-audit', '--no-fund', '--include=dev'], source);
+    console.log('Building the game…');
     await run(process.execPath, [npm, 'run', 'build'], source);
     await access(join(source, 'dist', 'index.html'));
     try {
@@ -83,6 +85,13 @@ async function build({ repo, sha }) {
   }
 }
 
+async function closeGame(server, hub) {
+  await Promise.all([
+    new Promise((resolve, reject) => hub.close(error => error ? reject(error) : resolve())),
+    new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve())),
+  ]);
+}
+
 async function startGame(directory, listenPort) {
   process.chdir(directory);
   process.env.NODE_ENV = 'production';
@@ -92,18 +101,19 @@ async function startGame(directory, listenPort) {
   const { createAldervaleApp } = await fromGame('server.ts');
   const { attachAldervaleWebSocketServer } = await fromGame('server/wsHub.ts');
   const server = createServer(await createAldervaleApp());
-  attachAldervaleWebSocketServer(server);
-  server.listen(listenPort, host);
-  await once(server, 'listening');
-  const url = `http://${host}:${server.address().port}`;
+  const hub = attachAldervaleWebSocketServer(server);
   try {
+    server.listen(listenPort, host);
+    await once(server, 'listening');
+    const url = `http://${host}:${server.address().port}`;
     const health = await fetch(`${url}/api/health`, { signal: AbortSignal.timeout(5_000) });
     const page = await fetch(url, { signal: AbortSignal.timeout(5_000) });
     if (!health.ok || !(await health.json()).ok || !page.ok || !(await page.text()).includes('/assets/')) {
       throw new Error('The installed game failed its startup check.');
     }
-    return { server, url };
+    return { server, hub, url };
   } catch (error) {
+    hub?.close();
     server.close();
     throw error;
   }
@@ -132,8 +142,8 @@ try {
   }
 
   if (smoke) {
+    await closeGame(game.server, game.hub);
     console.log(`AlderVale ${sha} passed the install and startup check.`);
-    game.server.close();
   } else {
     if (sha !== installed) {
       const pending = join(installation, `current-${process.pid}.txt`);
@@ -145,8 +155,8 @@ try {
       }
     }
     if (installOnly) {
+      await closeGame(game.server, game.hub);
       console.log(`Installed AlderVale ${sha}.`);
-      game.server.close();
     } else {
       console.log(`AlderVale ${sha.slice(0, 12)} is ready at ${game.url}. Close this window to stop playing.`);
       const browser = spawn('explorer.exe', [game.url], { detached: true, stdio: 'ignore' });
