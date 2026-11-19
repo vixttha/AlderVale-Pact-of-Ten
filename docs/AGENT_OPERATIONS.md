@@ -24,9 +24,11 @@ The Graphify workflow builds a code-only graph on public standard Ubuntu runners
 
 After the workflow reaches `main`, successful snapshots publish to the dedicated `graphify-snapshots` Git branch. `main/graph.json` and `main/receipt.json` identify the latest graph from `main`. Use a tag such as `v1.2.3` on a commit that contains this workflow and is reachable from `main` to retain `versions/v1.2.3/graph.json` and its receipt. A version snapshot stays tied to its original commit. A rerun that is neither `main` nor a version tag can store `commits/<sha>/` for the commit it indexed. That path is the graph of that commit, not a new product version. A Git tag is enough for graph generation, so a graph run does not publish a game release. The build hands off a bounded compressed payload to the later jobs through ephemeral job outputs. Git holds the retained history.
 
+The [First Spark graph](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/graphify-snapshots/features/first-spark) links the reward and reload requirements to their Test Vault case, documentation, Vitest test, and Playwright test. The workflow resolves those links from its exact checkout using [the First Spark manifest](../tools/graphify/first-spark.json) and publishes the graph and receipt with the main code graph. The [v0.0.7 example archive](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/85820f11a595e0e6ee2179f9a29ccb65f609965a/graphify-hq/v0.0.7) preserves the two examples at their original source commits. Automated test outcomes are recorded in the corresponding game validation runs.
+
 ## Read a runner-produced graph via MCP
 
-Install the pinned environment once with `python3.12 -m pip install -r tools/graphify/requirements.txt` in an isolated Python 3.12 environment. From the repository checkout:
+Install the lock with `python3.12 -m pip install --require-hashes --no-deps --only-binary=:all: -r graphify-hq/versions/v0.0.7/requirements.txt` in an isolated Python 3.12 environment on Linux x86-64. From the repository checkout:
 
 ```bash
 git fetch origin main graphify-snapshots
@@ -40,6 +42,8 @@ python tools/graphify/read_snapshot.py /tmp/aldervale-mcp/graph.json "$source_sh
 ```
 
 Register the final `python` invocation as the MCP client's stdio command and arguments, using absolute paths. To read a version, replace `main/` with `versions/<tag>/` and derive the expected source SHA with `git rev-parse '<tag>^{commit}'` after fetching that tag. For a commit snapshot, use `commits/<sha>/` and pass that same SHA. `graph_stats` confirms the version, `query_graph` finds relevant systems, and `get_node` gives source paths and lines. If the latest snapshot is behind `main`, wait for its run or inspect the exact source directly. When comparing versions, resolve and query each snapshot at its own SHA.
+
+For the First Spark scope, use `features/first-spark/` and query `get_neighbors` with node ID `feature:first-spark-rewards`.
 
 The runner-side MCP process ends with the job. A Web UI that supports remote MCP needs an independently reachable streamable HTTP endpoint for the same verified snapshots. A Web UI without that support can read the GitHub SHA, receipt, and source links. GitHub MCP's `repos` and `actions` toolsets can locate files and runs. Use the existing authenticated Notion connection for private handoffs. Public CI has no Notion or model-provider tokens.
 
