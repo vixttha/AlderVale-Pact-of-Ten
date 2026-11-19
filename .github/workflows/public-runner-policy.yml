@@ -24,5 +24,7 @@ jobs:
           fi
       - name: Reject local, dynamic, and nonstandard runner labels
         run: python3 tools/ci/check_runner_policy.py
+      - name: Reject slow WebKit dependency installation
+        run: python3 tools/ci/check_webkit_container.py
       - name: Run Test Vault Python regressions
         run: python3 -m unittest discover -s tests/vault -p 'test_*.py' -v
