@@ -2,6 +2,7 @@
 set -euo pipefail
 
 snapshot="$1"
+first_spark=${2:-}
 source_sha=$(git rev-parse HEAD)
 case "$GITHUB_REF" in
   refs/heads/main) destination=main ;;
@@ -24,6 +25,10 @@ case "$GITHUB_REF" in
     fi
     ;;
 esac
+if [[ -n "$first_spark" && "$destination" != main ]]; then
+  echo 'First Spark is published with the main snapshot.' >&2
+  exit 1
+fi
 
 remote=$(git remote get-url origin)
 workdir=$(mktemp -d)
@@ -79,6 +84,12 @@ PY
   mkdir -p "$target"
   cp "$snapshot/graph.json" "$snapshot/receipt.json" "$target/"
   git -C "$workdir" add -- "$destination/graph.json" "$destination/receipt.json"
+  if [[ -n "$first_spark" ]]; then
+    feature_path=features/first-spark
+    mkdir -p "$workdir/$feature_path"
+    cp "$first_spark/graph.json" "$first_spark/receipt.json" "$workdir/$feature_path/"
+    git -C "$workdir" add -- "$feature_path/graph.json" "$feature_path/receipt.json"
+  fi
   if git -C "$workdir" diff --cached --quiet; then
     exit 0
   fi

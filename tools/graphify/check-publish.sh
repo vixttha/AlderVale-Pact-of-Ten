@@ -2,6 +2,10 @@
 set -euo pipefail
 
 snapshot=$(realpath "$1")
+first_spark=${2:-}
+if [[ -n "$first_spark" ]]; then
+  first_spark=$(realpath "$first_spark")
+fi
 repo=$(git rev-parse --show-toplevel)
 workdir=$(mktemp -d)
 trap 'rm -rf "$workdir"' EXIT
@@ -23,11 +27,18 @@ git -C "$workdir/source" remote set-url origin "$workdir/remote.git"
 git -C "$workdir/source" push -q origin HEAD:refs/heads/main
 
 cd "$workdir/source"
-GITHUB_REF=refs/heads/main bash "$repo/tools/graphify/publish.sh" "$snapshot"
+GITHUB_REF=refs/heads/main bash "$repo/tools/graphify/publish.sh" "$snapshot" "$first_spark"
 GITHUB_REF=refs/tags/v0.0.0-test bash "$repo/tools/graphify/publish.sh" "$snapshot"
 GITHUB_REF=refs/tags/v0.0.0-test bash "$repo/tools/graphify/publish.sh" "$snapshot"
 
 git fetch -q origin refs/heads/graphify-snapshots
+if [[ -n "$first_spark" ]]; then
+  for file in graph.json receipt.json; do
+    git show "FETCH_HEAD:features/first-spark/$file" > "$workdir/feature-$file"
+    cmp "$first_spark/$file" "$workdir/feature-$file"
+  done
+  printf 'First Spark graph and receipt survived publishing main and a version tag.\n'
+fi
 for destination in main versions/v0.0.0-test; do
   git show "FETCH_HEAD:$destination/graph.json" > "$workdir/graph.json"
   git show "FETCH_HEAD:$destination/receipt.json" > "$workdir/receipt.json"
