@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "template_version": "v0.0.7",
+  "template_commit": "5632aec210d184552abbbc3290bc1e201f1eb9b2",
+  "merge_pr": "https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/156",
+  "main_verification": "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44443163254",
+  "archive_verification": "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/44443355769/job/135289409547",
+  "examples": {
+    "first-spark": {
+      "repository": "vixttha/AlderVale-Pact-of-Ten",
+      "source_commit": "5364cd19c862dbf071faeea58d9245e110d3b377",
+      "graph_sha256": "696f1bab065520ee88a9c11d4f08d4d6bf7eef97db4ab9a7cacdebb41bb60906",
+      "receipt_sha256": "4d3b644852c5951f316f0ad8cfb69bd92919fe0f262f560b528e8e57cddfdaf9",
+      "scope": "feature-evidence"
+    },
+    "blender-agent": {
+      "repository": "vixttha/Blender-Agent",
+      "source_commit": "cb945bd8531ee425615c1968612ab6503849369d",
+      "graph_sha256": "df63c33433e1853d7260fcbc1b8436b554d64e647da6a3c3fbd3adaab36215b4",
+      "receipt_sha256": "997c4828664d3cf238dfca981fdabba28feaa635c7c604d84d9c8e1e8681b833",
+      "scope": "feature-evidence"
+    }
+  }
+}

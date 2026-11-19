@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "template_version": "v0.0.7",
+  "repository": "vixttha/Blender-Agent",
+  "source_commit": "cb945bd8531ee425615c1968612ab6503849369d",
+  "pull_request": null,
+  "scope": "feature-evidence",
+  "graphify_version": "0.9.109",
+  "graph_sha256": "df63c33433e1853d7260fcbc1b8436b554d64e647da6a3c3fbd3adaab36215b4",
+  "nodes": 6,
+  "edges": 5,
+  "feature_links": {
+    "feature:atomic-output-publication": {
+      "documented_in": 1,
+      "changed_in": 1,
+      "tested_by": 2
+    }
+  },
+  "source_sha256": {
+    "CHANGELOG.md": "cca66f7e6fa3cda07a2786ce4c1680eb6b0fb9ee28af1d4153b8962f53337e93",
+    "docs/ARCHITECTURE.md": "4a1a50d49e47196553fe9e101c3ee6114f70bd7a709ac94a9142c20eeed2f105",
+    "tests/test_jobs.py": "e7b14dee28f12ac3cfb17c4e11085ad9193e2396789f89c79b1c08ee78f5ff2e"
+  },
+  "mcp_verified": true
+}
