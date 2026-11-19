@@ -45,6 +45,9 @@ class FormwrightVerifierTests(unittest.TestCase):
     def test_rejects_out_of_scope_changes(self):
         self.assertTrue(is_allowed_path("character-forge/README.md"))
         self.assertTrue(is_allowed_path(".github/workflows/formwright.yml"))
+        self.assertTrue(is_allowed_path(".github/workflows/public-runner-policy.yml"))
+        self.assertTrue(is_allowed_path("tools/ci/check_webkit_container.py"))
+        self.assertTrue(is_allowed_path("tests/vault/test_webkit_container.py"))
         self.assertFalse(is_allowed_path("README.md"))
         self.assertFalse(is_allowed_path("shared/wardrobe.ts"))
         self.assertFalse(is_allowed_path(".github/workflows/validate.yml"))

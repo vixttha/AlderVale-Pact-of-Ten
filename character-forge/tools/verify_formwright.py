@@ -24,7 +24,12 @@ PORTABLE_FORBIDDEN = (
     "notion.com", "github.com/", "shared/wardrobe.ts", "src/engine/",
     "13 races",
 )
-ALLOWED_PATH = re.compile(r"^(character-forge/|\.github/workflows/formwright\.yml$)")
+# These three exact paths are the owner-authorized repo-wide WebKit prevention gate.
+ALLOWED_PATH = re.compile(
+    r"^(character-forge/|\.github/workflows/(?:formwright|public-runner-policy)\.yml$"
+    r"|tools/ci/check_webkit_container\.py$"
+    r"|tests/vault/test_webkit_container\.py$)"
+)
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 SHA40 = re.compile(r"^[0-9a-f]{40}$")
 VERSION = re.compile(r"^v\d+\.\d+\.\d+$")
