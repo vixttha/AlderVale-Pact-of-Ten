@@ -1,14 +1,17 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { randomUUID } from 'node:crypto';
 import { verifyFirebaseBearerToken } from './authVerify.ts';
-import { ownedWizard, ownedActiveCreature, settleTrade, awardLiveVictory, RequestError } from './market.ts';
+import { ownedActiveCreature, settleTrade, awardLiveVictory, RequestError } from './market.ts';
 import { resolveLiveCombatCreature, sanitizeGuestCreatureSelection } from './creatureSelection.ts';
+import { ownedProgressionWizard } from './progressionState.ts';
+import { setGameplayPresence, refreshGameplayPresence, clearGameplayPresence } from './gameplayPresence.ts';
 import { duelView, readDuelAction } from './duelView.ts';
 import { ELEMENTS } from '../shared/elements.ts';
 import { RACES } from '../shared/wardrobe.ts';
 import { ZONES } from '../shared/world.ts';
 import type { Server } from 'node:http';
 import type { RealmId } from '../shared/realms.ts';
+import type { MarketAccount } from '../shared/market.ts';
 import type { ZoneId } from '../shared/world.ts';
 import type { ElementId } from '../shared/elements.ts';
 import type { BeastClanId, RaceId, WizardSculpt } from '../shared/wardrobe.ts';
@@ -54,7 +57,10 @@ interface ClientConn {
   presence: LivePlayerPresence | null;
   duelId: string | null;
   verifiedUid: string | null;
+  heartbeatChallenge: string | null;
   joining: boolean;
+  movementAllowance: number;
+  lastMovementAt: number;
   duelElement: ElementId;
   duelRace: RaceId;
 }
@@ -100,6 +106,8 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
   const tradeInvites = new Map<string, TradeInvite>();
   const guestTickets = new Map<string, { wizardId: string; realm: RealmId; expiresAt: number }>();
   const reconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  // Short-lived last server-observed location; never preserves gameplay presence after a disconnect.
+  const reconnectPositions = new Map<string, { zone: ZoneId; x: number; y: number; z: number; rotY: number; expiresAt: number }>();
 
   function send(conn: ClientConn, payload: unknown) {
     if (conn.ws.readyState === WebSocket.OPEN) {
@@ -305,6 +313,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
   const sweep = setInterval(() => {
     const now = Date.now();
     for (const [ticket, guest] of guestTickets) if (guest.expiresAt <= now) guestTickets.delete(ticket);
+    for (const [key, pos] of reconnectPositions) if (pos.expiresAt <= now) reconnectPositions.delete(key);
     for (const room of duels.values()) {
       if (room.finishedAt && now - room.finishedAt > 60_000) duels.delete(room.duelId);
       if (room.state.phase === 'planning' && room.turnDeadline && now >= room.turnDeadline) {
@@ -323,18 +332,44 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     }
   }, 1000);
   sweep.unref();
+
+  // WebSocket clients answer protocol pings even while the player is idle.
+  const heartbeat = setInterval(() => {
+    for (const conn of clients.values()) {
+      if (!conn.verifiedUid || !conn.presence || conn.ws.readyState !== WebSocket.OPEN) continue;
+      if (conn.heartbeatChallenge !== null) {
+        clearGameplayPresence(conn.sessionId);
+        conn.ws.terminate();
+        continue;
+      }
+      conn.heartbeatChallenge = randomUUID();
+      conn.ws.ping(conn.heartbeatChallenge);
+    }
+  }, 25_000);
+  heartbeat.unref();
+
   wss.on('close', () => {
     clearInterval(sweep);
+    clearInterval(heartbeat);
     for (const timer of reconnectTimers.values()) clearTimeout(timer);
   });
 
   wss.on('connection', (ws) => {
     const sessionId = randomUUID();
-    const conn: ClientConn = { ws, sessionId, presence: null, duelId: null, verifiedUid: null, joining: false, duelElement: 'ember', duelRace: 'human' };
+    const conn: ClientConn = {
+      ws, sessionId, presence: null, duelId: null, verifiedUid: null, heartbeatChallenge: null,
+      joining: false, movementAllowance: 1.5, lastMovementAt: Date.now(),
+      duelElement: 'ember', duelRace: 'human',
+    };
     clients.set(sessionId, conn);
     send(conn, { type: 'welcome', sessionId });
 
     ws.on('error', () => ws.terminate());
+    ws.on('pong', (data) => {
+      if (ws.readyState !== WebSocket.OPEN || data.toString() !== conn.heartbeatChallenge) return;
+      conn.heartbeatChallenge = null;
+      refreshGameplayPresence(sessionId);
+    });
     ws.on('message', async (raw) => {
       try {
         const msg = JSON.parse(raw.toString()) as Record<string, unknown>;
@@ -352,14 +387,27 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
             let activeCreatureId = typeof p.activeCreatureId === 'string' ? p.activeCreatureId : '';
             let name = p.name.trim().slice(0, 24) || 'Alder Initiate';
             const realm = p.realmId;
+            let serverWizard: Awaited<ReturnType<typeof ownedProgressionWizard>> | null = null;
+            let serverCreature: Awaited<ReturnType<typeof ownedActiveCreature>> | null = null;
             if (typeof msg.idToken === 'string') {
               const principal = await verifyFirebaseBearerToken(`Bearer ${msg.idToken}`);
               if (!principal?.emailVerified) throw new RequestError(401, 'Sign in again to connect to AlderVale.');
-              const wizard = await ownedWizard(principal.uid, p.wizardId, realm);
+              const wizard = await ownedProgressionWizard(principal.uid, p.wizardId, realm);
+              serverWizard = wizard;
+              try {
+                serverCreature = await ownedActiveCreature(principal.uid, wizard.id, realm);
+              } catch (error) {
+                // Live realm display stays available for an invalid roster; the
+                // existing matchmaking gate still rejects the invalid selection.
+                if (!(error instanceof RequestError)) throw error;
+              }
               activeCreatureId = wizard.activeCreatureId;
               conn.verifiedUid = principal.uid;
               identity = wizard.id;
               name = wizard.name;
+              p.level = wizard.level;
+              p.rank = wizard.rank;
+              p.titleBadge = wizard.progression.titleBadge;
               p.raceId = Object.hasOwn(RACES, wizard.raceId) ? wizard.raceId : 'human';
               p.elementId = Object.hasOwn(ELEMENTS, wizard.elementId) ? wizard.elementId : 'ember';
             } else {
@@ -374,18 +422,49 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
               throw new RequestError(409, 'This wizard already has a live session.');
             }
             const spawn = ZONES[p.zone].spawnPos;
-            const selectedCreature = sanitizeGuestCreatureSelection({ ...p, activeCreatureId });
+            const reconnectKey = conn.verifiedUid ? `${conn.verifiedUid}:${realm}:${identity}` : null;
+            const prior = reconnectKey ? reconnectPositions.get(reconnectKey) : undefined;
+            if (reconnectKey) reconnectPositions.delete(reconnectKey);
+            const restored = prior && prior.expiresAt > Date.now() && prior.zone === p.zone &&
+              Math.hypot(prior.x, prior.z) <= 25 && Math.abs(prior.y) <= 10 ? prior : undefined;
+            const selectedCreature = serverCreature
+              ? sanitizeGuestCreatureSelection({
+                  activeCreatureId: serverCreature.id, activeCreatureSpeciesId: serverCreature.speciesId,
+                  activeCreatureNickname: serverCreature.nickname, activeCreatureStage: serverCreature.stage,
+                  activeCreatureChromatic: serverCreature.chromatic, activeCreatureBranchChoice: serverCreature.branchChoice,
+                  activeCreatureTalents: serverCreature.talents,
+                })
+              : conn.verifiedUid
+                ? sanitizeGuestCreatureSelection({ activeCreatureId, activeCreatureSpeciesId: 'cinder_kitsune' })
+                : sanitizeGuestCreatureSelection({ ...p, activeCreatureId });
             conn.presence = {
               ...p, ...selectedCreature, sessionId, wizardId: identity, ownerId: '', name, realmId: realm, zone: p.zone,
               raceId: p.raceId, elementId: p.elementId,
               level: Number.isFinite(p.level) ? Math.min(50, Math.max(1, Number(p.level))) : 1,
               rank: Number.isFinite(p.rank) ? Math.min(20, Math.max(1, Number(p.rank))) : 1,
               titleBadge: typeof p.titleBadge === 'string' ? p.titleBadge.slice(0, 40) : '',
-              x: spawn[0], y: spawn[1], z: spawn[2], rotY: 0, mountId: null, inDuel: false,
+              x: restored?.x ?? spawn[0], y: restored?.y ?? spawn[1], z: restored?.z ?? spawn[2],
+              rotY: restored?.rotY ?? 0,
+              mountId: serverWizard?.progression.equippedMountId ?? null,
+              ...(serverWizard ? {
+                beastClan: serverWizard.beastClan,
+                sculpt: serverWizard.sculpt, equipped: serverWizard.wardrobe?.equipped,
+                stitching: serverWizard.stitching,
+              } : {}),
+              inDuel: false,
             };
+            conn.movementAllowance = 1.5;
+            conn.lastMovementAt = Date.now();
             conn.duelElement = p.elementId;
             conn.duelRace = p.raceId;
-            send(conn, { type: 'world_joined' });
+            if (conn.verifiedUid && conn.presence) setGameplayPresence(sessionId, { ...conn.presence, uid: conn.verifiedUid });
+            send(conn, {
+              type: 'world_joined',
+              ...(conn.verifiedUid ? {
+                zone: conn.presence.zone,
+                position: { x: conn.presence.x, y: conn.presence.y, z: conn.presence.z, rotY: conn.presence.rotY },
+              } : {}),
+            });
           } catch (error) {
             send(conn, { type: 'world_notice', text: error instanceof RequestError ? error.message : 'Multiplayer is temporarily unavailable.' });
             ws.close(1013, 'Unable to join');
@@ -422,12 +501,42 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           const prevZone = conn.presence.zone;
           const nextZone = typeof msg.zone === 'string' && Object.hasOwn(ZONES, msg.zone) ? msg.zone as ZoneId : prevZone;
           if (![msg.x, msg.y, msg.z, msg.rotY].every((v) => v === undefined || typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= 1000)) return;
-          conn.presence.x = Number(msg.x ?? conn.presence.x);
-          conn.presence.y = Number(msg.y ?? conn.presence.y);
-          conn.presence.z = Number(msg.z ?? conn.presence.z);
-          conn.presence.rotY = Number(msg.rotY ?? conn.presence.rotY);
-          conn.presence.mountId = (msg.mountId as string | null) ?? null;
+          const x = Number(msg.x ?? conn.presence.x);
+          const y = Number(msg.y ?? conn.presence.y);
+          const z = Number(msg.z ?? conn.presence.z);
+          const rotY = Number(msg.rotY ?? conn.presence.rotY);
+          if (conn.verifiedUid) {
+            // Movement is client-rendered, but it cannot grant instant economy proximity.
+            // A small time-based travel budget permits sprint/mount and network jitter;
+            // idle time cannot bank enough distance for a teleport.
+            const now = Date.now();
+            const elapsed = Math.max(0, (now - conn.lastMovementAt) / 1000);
+            const allowance = Math.min(3, conn.movementAllowance + elapsed * 16);
+            conn.lastMovementAt = now;
+            const spawn = ZONES[nextZone].spawnPos;
+            const travel = Math.hypot(x - conn.presence.x, z - conn.presence.z);
+            const isZoneTravel = nextZone !== prevZone;
+            const allowed = Math.hypot(x, z) <= (nextZone === 'sanctuary' ? 12.5 : 22.5) &&
+              y >= 0 && y <= 4 &&
+              (isZoneTravel
+                ? Math.hypot(x - spawn[0], y - spawn[1], z - spawn[2]) < 0.2
+                : travel <= allowance + 0.01 && Math.abs(y - conn.presence.y) <= 3);
+            if (!allowed) {
+              send(conn, {
+                type: 'world_position_correction', zone: conn.presence.zone,
+                position: { x: conn.presence.x, y: conn.presence.y, z: conn.presence.z, rotY: conn.presence.rotY },
+              });
+              return;
+            }
+            conn.movementAllowance = isZoneTravel ? 1.5 : Math.max(0, allowance - travel);
+          }
+          conn.presence.x = x;
+          conn.presence.y = y;
+          conn.presence.z = z;
+          conn.presence.rotY = rotY;
+          conn.presence.mountId = conn.verifiedUid ? conn.presence.mountId : (msg.mountId as string | null) ?? null;
           conn.presence.zone = nextZone;
+          if (conn.verifiedUid) setGameplayPresence(sessionId, { ...conn.presence, uid: conn.verifiedUid });
           if (prevZone !== nextZone) {
             broadcastRealmZone(conn.presence.realmId, prevZone, { type: 'player_left', sessionId });
             send(conn, { type: 'zone_snapshot', players: getZoneSnapshot(conn.presence.realmId, nextZone, conn), activeDuels: spectateDuelsForRealm(conn.presence.realmId) });
@@ -437,15 +546,44 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
           }
         } else if (type === 'update_appearance' && conn.presence) {
           const patch = msg.patch as Partial<LivePlayerPresence>;
-          if (patch) {
-            if (patch.raceId && Object.hasOwn(RACES, patch.raceId)) conn.presence.raceId = patch.raceId;
-            if (patch.elementId && Object.hasOwn(ELEMENTS, patch.elementId)) conn.presence.elementId = patch.elementId;
-            Object.assign(conn.presence, sanitizeGuestCreatureSelection({ ...conn.presence, ...patch }));
-            if (typeof patch.titleBadge === 'string') conn.presence.titleBadge = patch.titleBadge.slice(0, 40);
-            if (typeof patch.level === 'number' && Number.isInteger(patch.level) && patch.level >= 1 && patch.level <= 50) conn.presence.level = patch.level;
-            if (typeof patch.rank === 'number' && Number.isInteger(patch.rank) && patch.rank >= 1 && patch.rank <= 20) conn.presence.rank = patch.rank;
-            for (const key of ['sculpt', 'equipped', 'stitching', 'mountId'] as const) {
-              if (patch[key] !== undefined) Object.assign(conn.presence, { [key]: patch[key] });
+          if (patch && typeof patch === 'object' && !Array.isArray(patch)) {
+            if (conn.verifiedUid) {
+              // Ignore *all* client-supplied progression, identity and roster display
+              // fields. Refresh the public projection from the saved enrolled wizard.
+              const uid = conn.verifiedUid;
+              const wizardId = conn.presence.wizardId;
+              const realm = conn.presence.realmId;
+              const [wizard, creature] = await Promise.all([
+                ownedProgressionWizard(uid, wizardId, realm),
+                ownedActiveCreature(uid, wizardId, realm),
+              ]);
+              if (!creature || !conn.presence || conn.verifiedUid !== uid ||
+                  conn.presence.wizardId !== wizardId || conn.presence.realmId !== realm) return;
+              Object.assign(conn.presence, {
+                raceId: wizard.raceId, elementId: wizard.elementId, level: wizard.level,
+                rank: wizard.rank, titleBadge: wizard.progression.titleBadge,
+                beastClan: wizard.beastClan, sculpt: wizard.sculpt,
+                equipped: wizard.wardrobe?.equipped, stitching: wizard.stitching,
+                mountId: wizard.progression.equippedMountId ?? null,
+                ...sanitizeGuestCreatureSelection({
+                  activeCreatureId: creature.id, activeCreatureSpeciesId: creature.speciesId,
+                  activeCreatureNickname: creature.nickname, activeCreatureStage: creature.stage,
+                  activeCreatureChromatic: creature.chromatic, activeCreatureBranchChoice: creature.branchChoice,
+                  activeCreatureTalents: creature.talents,
+                }),
+              });
+              conn.duelElement = wizard.elementId;
+              conn.duelRace = wizard.raceId;
+            } else {
+              if (patch.raceId && Object.hasOwn(RACES, patch.raceId)) conn.presence.raceId = patch.raceId;
+              if (patch.elementId && Object.hasOwn(ELEMENTS, patch.elementId)) conn.presence.elementId = patch.elementId;
+              Object.assign(conn.presence, sanitizeGuestCreatureSelection({ ...conn.presence, ...patch }));
+              if (typeof patch.titleBadge === 'string') conn.presence.titleBadge = patch.titleBadge.slice(0, 40);
+              if (typeof patch.level === 'number' && Number.isInteger(patch.level) && patch.level >= 1 && patch.level <= 50) conn.presence.level = patch.level;
+              if (typeof patch.rank === 'number' && Number.isInteger(patch.rank) && patch.rank >= 1 && patch.rank <= 20) conn.presence.rank = patch.rank;
+              for (const key of ['sculpt', 'equipped', 'stitching', 'mountId'] as const) {
+                if (patch[key] !== undefined) Object.assign(conn.presence, { [key]: patch[key] });
+              }
             }
             broadcastRealmZone(conn.presence.realmId, conn.presence.zone, { type: 'player_updated', player: conn.presence }, sessionId);
           }
@@ -785,6 +923,7 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
     });
 
     ws.on('close', () => {
+      clearGameplayPresence(sessionId);
       cancelInvitesForSession(sessionId, 'Trade invitation ended because a player disconnected.');
       for (const trade of trades.values()) if (trade.aSession === sessionId || trade.bSession === sessionId) cancelTrade(trade, 'A trader disconnected.');
       for (const room of duels.values()) room.spectators.delete(sessionId);
@@ -797,7 +936,12 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
         if (idx >= 0) q.splice(idx, 1);
       }
       if (conn.presence) {
-        const { realmId, zone, wizardId } = conn.presence;
+        const { realmId, zone, wizardId, x, y, z, rotY } = conn.presence;
+        if (conn.verifiedUid && Math.hypot(x, z) <= 25 && Math.abs(y) <= 10 && Number.isFinite(rotY)) {
+          reconnectPositions.set(`${conn.verifiedUid}:${realmId}:${wizardId}`, {
+            zone, x, y, z, rotY, expiresAt: Date.now() + 60_000,
+          });
+        }
         broadcastRealmZone(realmId, zone, { type: 'player_left', sessionId });
         if (conn.duelId) {
           const room = duels.get(conn.duelId);
@@ -816,5 +960,13 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
       clients.delete(sessionId);
     });
   });
-  return wss;
+  return Object.assign(wss, {
+    publishMarketWallet(realm: RealmId, uid: string, wallet: MarketAccount) {
+      for (const conn of clients.values()) {
+        if (conn.verifiedUid === uid && conn.presence?.realmId === realm) {
+          send(conn, { type: 'market_wallet', wallet });
+        }
+      }
+    },
+  });
 }

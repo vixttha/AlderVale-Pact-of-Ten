@@ -1,6 +1,6 @@
 import type { ElementId } from './elements.ts';
 import type { RealmId } from './realms.ts';
-import type { BeastClanId, RaceId, WizardSculpt } from './wardrobe.ts';
+import { GEAR_BY_ID, type BeastClanId, type RaceId, type WizardSculpt } from './wardrobe.ts';
 import { SPECIES_BY_ID } from './creatures.ts';
 import { getStarterDeckForElement } from './spells.ts';
 
@@ -8,6 +8,30 @@ export type ResourceId = 'sunleaf' | 'dewglass' | 'starstone' | 'copper_wire' | 
 
 export const CRAFT_XP_PER_RANK = 100;
 export const CRAFT_XP_PER_TRANSMUTE = 25;
+
+type EquippedGear = WizardDocument['wardrobe']['equipped'];
+const GEAR_SLOTS: (keyof EquippedGear)[] = ['headgear', 'torso', 'back', 'footwear', 'staff'];
+
+export function wearableEquipment(
+  wardrobe: WizardDocument['wardrobe'],
+  bazaarGear: Record<string, number> | undefined,
+): EquippedGear {
+  if (bazaarGear === undefined) return wardrobe.equipped;
+  const equipped = { ...wardrobe.equipped };
+  const owns = (id: string) => wardrobe.ownedGearIds.includes(id) || (bazaarGear[id] ?? 0) > 0;
+  let changed = false;
+  for (const slot of GEAR_SLOTS) {
+    const current = equipped[slot];
+    if (!current || (GEAR_BY_ID[current]?.slot === slot && owns(current))) continue;
+    const replacement = wardrobe.ownedGearIds.find((id) => GEAR_BY_ID[id]?.slot === slot)
+      ?? Object.keys(bazaarGear).find((id) => GEAR_BY_ID[id]?.slot === slot && owns(id))
+      ?? '';
+    if (replacement === current) continue;
+    equipped[slot] = replacement;
+    changed = true;
+  }
+  return changed ? equipped : wardrobe.equipped;
+}
 
 export function craftProgressionAfterGain(craftXp: number, gained: number) {
   const nextXp = craftXp + gained;
@@ -67,6 +91,7 @@ export interface WizardLoadout {
 }
 
 export interface WizardDocument {
+  serverProgressionVersion?: number;
   id: string;
   ownerId: string;
   realmId: RealmId;

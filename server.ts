@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express, { type Request, type Response, type NextFunction } from 'express';
-import { buyListing, cancelListing, changeHouseMembership, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, unpublishTour, RequestError } from './server/market.ts';
+import { buyListing, cancelListing, changeHouseMembership, createHouse, listHouses, listBazaar, listTours, postListing, publishTour, reconcileBazaarEquipment, unpublishTour, RequestError } from './server/market.ts';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
@@ -8,14 +8,24 @@ import { verifyFirebaseBearerToken } from './server/authVerify.ts';
 import { resourceStore } from './server/authzStore.ts';
 import { generateArchivistAdvice, type StrategizeRequest } from './server/lecternAi.ts';
 import { attachAldervaleWebSocketServer } from './server/wsHub.ts';
+import { advanceSolo, claimServerTerm, finishSolo, readProgressionRealm, readServerTerm, startSolo } from './server/soloProgress.ts';
+import { applyGameplayAction } from './server/gameplayActions.ts';
+import { enrollWizard } from './server/wizardEnrollment.ts';
 import type { RealmId } from './shared/realms.ts';
+import type { MarketAccount } from './shared/market.ts';
 
 
 function isRealmId(val: string): val is RealmId {
   return val === 'breeze' || val === 'horizon' || val === 'everpeak';
 }
 
-export async function createAldervaleApp({ frontend = true } = {}) {
+export async function createAldervaleApp({
+  frontend = true,
+  publishMarketWallet,
+}: {
+  frontend?: boolean;
+  publishMarketWallet?: (realm: RealmId, uid: string, wallet: MarketAccount) => void;
+} = {}) {
   const app = express();
   app.use('/api/academy/strategize', express.json({ limit: '4kb' }));
   app.use('/api', express.json({ limit: '32kb' }));
@@ -57,18 +67,54 @@ export async function createAldervaleApp({ frontend = true } = {}) {
     return principal.uid;
   }
 
+  app.get('/api/progression/:realmId/realm', realmRoute(async (req, res, realm) => {
+    res.json(await readProgressionRealm(await requireAccount(req), realm));
+  }));
+  app.post('/api/progression/:realmId/action', realmRoute(async (req, res, realm) => {
+    res.json(await applyGameplayAction(await requireAccount(req), realm, req.body ?? {}));
+  }));
+  app.post('/api/progression/:realmId/enroll', realmRoute(async (req, res, realm) => {
+    res.json(await enrollWizard(await requireAccount(req), realm, req.body ?? {}));
+  }));
+  app.get('/api/progression/:realmId/term', realmRoute(async (req, res, realm) => {
+    res.json(await readServerTerm(await requireAccount(req), realm));
+  }));
+  app.post('/api/progression/:realmId/term', realmRoute(async (req, res, realm) => {
+    res.json(await claimServerTerm(await requireAccount(req), realm, req.body?.wizardId, req.body?.tier));
+  }));
+  app.post('/api/progression/:realmId/solo/:action(start|round|enchant|finish)', realmRoute(async (req, res, realm) => {
+    const uid = await requireAccount(req);
+    const body = req.body ?? {};
+    const { wizardId, duelId } = body;
+    if (req.params.action === 'start') res.json(await startSolo(uid, realm, wizardId, body));
+    else if (req.params.action === 'finish') res.json(await finishSolo(uid, realm, wizardId, duelId));
+    else res.json(await advanceSolo(uid, realm, wizardId, body, req.params.action === 'enchant'));
+  }));
+
   app.get('/api/bazaar/:realmId', realmRoute(async (req, res, realm) => {
     const uid = req.headers.authorization ? await requireAccount(req) : undefined;
     res.json(await listBazaar(realm, uid));
   }));
+  app.post('/api/bazaar/:realmId/reconcile-equipment', realmRoute(async (req, res, realm) => {
+    await reconcileBazaarEquipment(realm, await requireAccount(req), req.body?.wizardId);
+    res.sendStatus(204);
+  }));
   app.post('/api/bazaar/:realmId/list', realmRoute(async (req, res, realm) => {
-    res.status(201).json(await postListing(realm, await requireAccount(req), req.body ?? {}));
+    const uid = await requireAccount(req);
+    const result = await postListing(realm, uid, req.body ?? {});
+    publishMarketWallet?.(realm, uid, result.wallet);
+    res.status(201).json(result);
   }));
   app.post('/api/bazaar/:realmId/buy/:listingId', realmRoute(async (req, res, realm) => {
-    res.json(await buyListing(realm, await requireAccount(req), req.body?.wizardId, req.params.listingId));
+    const { wallet, sellerUpdate } = await buyListing(realm, await requireAccount(req), req.body?.wizardId, req.params.listingId);
+    if (sellerUpdate) publishMarketWallet?.(realm, sellerUpdate.uid, sellerUpdate.wallet);
+    res.json({ wallet });
   }));
   app.post('/api/bazaar/:realmId/cancel/:listingId', realmRoute(async (req, res, realm) => {
-    res.json(await cancelListing(realm, await requireAccount(req), req.params.listingId));
+    const uid = await requireAccount(req);
+    const result = await cancelListing(realm, uid, req.params.listingId);
+    publishMarketWallet?.(realm, uid, result.wallet);
+    res.json(result);
   }));
   app.get('/api/houses/:realmId', realmRoute(async (req, res, realm) => {
     const uid = req.headers.authorization ? await requireAccount(req) : undefined;
@@ -151,11 +197,22 @@ export async function createAldervaleApp({ frontend = true } = {}) {
   return app;
 }
 
+export async function createAldervaleServer(options: { frontend?: boolean } = {}) {
+  const httpServer = createServer();
+  const hub = attachAldervaleWebSocketServer(httpServer);
+  try {
+    const app = await createAldervaleApp({ ...options, publishMarketWallet: hub.publishMarketWallet });
+    httpServer.on('request', app);
+    return { httpServer, hub };
+  } catch (error) {
+    hub.close();
+    throw error;
+  }
+}
+
 if (process.env.VITEST !== 'true') {
   const port = Number(process.env.PORT ?? 3000);
-  createAldervaleApp().then((app) => {
-    const httpServer = createServer(app);
-    attachAldervaleWebSocketServer(httpServer);
+  createAldervaleServer().then(({ httpServer }) => {
     httpServer.listen(port, '0.0.0.0', () => {
       console.log(`Aldervale: Pact of Ten listening on http://0.0.0.0:${port}`);
     });

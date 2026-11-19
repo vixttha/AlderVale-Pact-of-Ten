@@ -1,3 +1,4 @@
+import { runeCursorAt, type RunGameplayAction } from '../../../shared/gameplayActions.ts';
 import React, { useEffect, useState } from 'react';
 import { Heart, Sparkles, Egg, Target } from 'lucide-react';
 import {
@@ -16,6 +17,7 @@ import { academyAudio } from '../../engine/audioSynth.ts';
 
 interface CreaturesArborPanelProps {
   wizard: WizardDocument;
+  onCloudAction?: RunGameplayAction;
   creatures: OwnedCreature[];
   onUpdateWizard: (next: WizardDocument) => void;
   onUpdateCreatures: (next: OwnedCreature[], newCreature?: OwnedCreature) => void;
@@ -25,6 +27,7 @@ interface CreaturesArborPanelProps {
 
 export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
   wizard,
+  onCloudAction,
   creatures,
   onUpdateWizard,
   onUpdateCreatures,
@@ -32,6 +35,8 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
   onClose,
 }) => {
   const [tab, setTab] = useState<'kennel' | 'train' | 'adopt' | 'breed'>('kennel');
+  const [onlineStart, setOnlineStart] = useState<number | null>(null);
+  const [onlinePending, setOnlinePending] = useState(false);
   const [runeCursor, setRuneCursor] = useState(10);
   const [runeDir, setRuneDir] = useState(1);
   const [runeStatus, setRuneStatus] = useState<string>('Time your catch inside the golden rune zone (40–62%)!');
@@ -43,6 +48,15 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
 
   useEffect(() => {
     if (tab !== 'train') return;
+    if (onCloudAction) {
+      if (onlineStart === null) return;
+      const timer = setInterval(() => {
+        const elapsed = performance.now() - onlineStart;
+        if (elapsed > 14_000) setOnlineStart(null);
+        else setRuneCursor(runeCursorAt(elapsed));
+      }, 45);
+      return () => clearInterval(timer);
+    }
     const id = setInterval(() => {
       setRuneCursor((c) => {
         const next = c + runeDir * 4;
@@ -58,18 +72,43 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
       });
     }, 45);
     return () => clearInterval(id);
-  }, [tab, runeDir]);
+  }, [tab, runeDir, Boolean(onCloudAction), onlineStart]);
 
   const setLeadCreature = (cid: string) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'lead', id: cid });
+      return;
+    }
     onUpdateWizard({ ...wizard, activeCreatureId: cid });
   };
 
   const toggleBranch = (cid: string, branch: 'A' | 'B') => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'branch', id: cid, branch });
+      return;
+    }
     onUpdateCreatures(creatures.map((c) => (c.id === cid ? { ...c, branchChoice: branch } : c)));
   };
 
   const handleCatchAttempt = () => {
     if (!activePet) return;
+    if (onCloudAction) {
+      if (onlinePending) return;
+      setOnlinePending(true);
+      void (async () => {
+        if (onlineStart === null) {
+          const result = await onCloudAction({ type: 'runeStart' });
+          if (result?.rune) setOnlineStart(performance.now() + result.rune.startedAt - result.rune.serverNow);
+        } else {
+          const result = await onCloudAction({ type: 'runeCatch' });
+          if (result) {
+            setOnlineStart(null);
+            setRuneStatus(result.notice);
+          }
+        }
+      })().finally(() => setOnlinePending(false));
+      return;
+    }
     const bullseye = runeCursor >= 40 && runeCursor <= 62;
     const harmony = hasStratumHarmony(wizardStratum, activePet.speciesId);
     const baseXp = bullseye ? 45 : 18;
@@ -93,6 +132,10 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
   };
 
   const adoptWithSeal = (speciesId: string) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'adopt', id: speciesId });
+      return;
+    }
     const sp = SPECIES_BY_ID[speciesId];
     if (!sp || wizard.currencies.bondingSeals < sp.bondSealCost) return;
     const roll = Math.random();
@@ -125,6 +168,10 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
   };
 
   const forgeHybridEgg = () => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'egg', first: parentAId, second: parentBId });
+      return;
+    }
     const cA = creatures.find((c) => c.id === parentAId);
     const cB = creatures.find((c) => c.id === parentBId);
     if (!cA || !cB || cA.id === cB.id) return;
@@ -273,10 +320,11 @@ export const CreaturesArborPanel: React.FC<CreaturesArborPanelProps> = ({
             </div>
 
             <button
+              disabled={onlinePending || (onlineStart !== null && performance.now() < onlineStart)}
               onClick={handleCatchAttempt}
               className="rounded-xl bg-[#241b16] px-6 py-2.5 text-sm font-bold text-[#f4c98b] hover:bg-[#3a2d25]"
             >
-              Catch Rune Now!
+              {onCloudAction && onlineStart === null ? 'Start Rune-Catch' : 'Catch Rune Now!'}
             </button>
           </div>
         )}

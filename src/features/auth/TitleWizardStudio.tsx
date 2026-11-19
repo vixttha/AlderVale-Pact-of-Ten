@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Compass, Sparkles, Shield, Users, LogIn, Plus, ArrowRight, Lock } from 'lucide-react';
 import { REALM_LIST, REALMS, type RealmId } from '../../../shared/realms.ts';
 import { STARTER_ELEMENTS, ELEMENTS, type ElementId } from '../../../shared/elements.ts';
@@ -24,6 +24,8 @@ interface TitleWizardStudioProps {
   selectedRealm: RealmId;
   realmAccount: RealmAccountState;
   wizards: WizardDocument[];
+  legacyWizards: WizardDocument[];
+  onCopyLegacy: (wizard: WizardDocument) => void;
   onSignInGoogle: () => void;
   onSelectRealm: (realmId: RealmId) => void;
   onEnterWorld: (wizard: WizardDocument) => void;
@@ -47,6 +49,8 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   selectedRealm,
   realmAccount,
   wizards,
+  legacyWizards,
+  onCopyLegacy,
   onSignInGoogle,
   onSelectRealm,
   onEnterWorld,
@@ -56,6 +60,7 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
   enrollmentError,
   realmReady,
 }) => {
+  const pendingEnrollment = useRef<{ scope: string; id: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [creating, setCreating] = useState(wizards.length === 0);
   const [name, setName] = useState('Rowan Skyweaver');
@@ -115,8 +120,12 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
     if (submitting || !realmReady) return;
     const trimmedName = name.trim().slice(0, 24);
     const cleanName = trimmedName.length >= 2 ? trimmedName : 'Alder Initiate';
+    const scope = `${realmAccount.uid}:${selectedRealm}`;
+    const id = isSignedIn && pendingEnrollment.current?.scope === scope ? pendingEnrollment.current.id
+      : `wiz_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    if (isSignedIn) pendingEnrollment.current = { scope, id };
     const wiz = createStarterWizard({
-      id: `wiz_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      id,
       ownerId: realmAccount.uid,
       realmId: selectedRealm,
       name: cleanName,
@@ -127,7 +136,10 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
     });
     setSubmitting(true);
     try {
-      if (await onCreateWizard(wiz)) setCreating(false);
+      if (await onCreateWizard(wiz)) {
+        pendingEnrollment.current = null;
+        setCreating(false);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -138,6 +150,18 @@ export const TitleWizardStudio: React.FC<TitleWizardStudioProps> = ({
       <div className="mx-auto max-w-6xl space-y-5">
         {notice && <p role="status" className="rounded-xl bg-[#202942] p-3">{notice}</p>}
         {isSignedIn && <button onClick={onSignOut} className="text-sm underline">Sign out</button>}
+        {isSignedIn && legacyWizards.length > 0 && (
+          <section className="space-y-2 rounded-xl border border-[#d7c7a9]/25 bg-[#202942] p-4">
+            <h2 className="font-display text-lg">Earlier cloud saves</h2>
+            <p className="text-sm">Copy an earlier wizard to this device, then sign out to play it as a guest.</p>
+            {legacyWizards.map((wizard) => (
+              <button key={wizard.id} onClick={() => onCopyLegacy(wizard)}
+                className="mr-3 rounded-lg border border-[#d7c7a9]/25 px-3 py-1.5 text-sm">
+                Copy {wizard.name} to guest saves
+              </button>
+            ))}
+          </section>
+        )}
         {/* Header Bar */}
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#d7c7a9]/25 bg-[#202942]/95 px-6 py-4 shadow-xl">
           <div>

@@ -24,7 +24,9 @@ The validation workflow runs seven independent jobs:
 - Firestore emulator on Java 21: permitted operations plus ownership, identity,
   PII, realm, timestamp, ID-length, and Bazaar state/price rejection scenarios.
   The same emulator job also checks multi-hatch saves, Term rewards, private
-  Sky-Lens galleries, and server-side Bazaar and trade settlement.
+  Sky-Lens galleries, and server-side Bazaar and trade settlement. It also runs
+  the signed-in enrollment, gameplay actions, solo and Term claim HTTP flows against the Auth and Firestore
+  emulators, including a repeat settlement, simultaneous claims, and fleeing.
 
 The Linux core job writes built asset sizes, SHA-256 hashes, and GLB header checks
 to the job summary. It also type-checks the standalone agent packages using their
