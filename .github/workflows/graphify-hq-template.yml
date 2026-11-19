@@ -2,11 +2,12 @@ name: Graphify HQ template
 
 on:
   push:
-    branches: [main]
+    branches: [graphify-hq]
     paths:
       - 'graphify-hq/**'
       - '.github/workflows/graphify-hq-template.yml'
   pull_request:
+    branches: [graphify-hq]
     paths:
       - 'graphify-hq/**'
       - '.github/workflows/graphify-hq-template.yml'
