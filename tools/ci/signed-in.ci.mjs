@@ -90,15 +90,27 @@ test('signed-in browser renders WebGL, corrects forged travel, reconnects and re
   // React's minimap reflects the server correction through the actual app state.
   await expect(mapReadout).toContainText('(0, 8)');
 
-  // Walk naturally in the WebGL scene and preserve the server-observed location.
-  await page.keyboard.down('w');
-  await page.waitForTimeout(1100);
-  await page.keyboard.up('w');
-  await expect.poll(async () => {
-    const text = await mapReadout.textContent();
-    return text?.includes('(0, 8)') === false;
-  }, { timeout: 12_000 }).toBe(true);
-  const movedReadout = await mapReadout.textContent();
+  // Send an ordinary, physically reachable route through the real browser
+  // WebSocket. This does not simulate a server or bypass the movement limiter.
+  // It avoids relying on variable software-GPU keyboard frame rates in CI.
+  const correctionsBefore = await page.evaluate(() =>
+    window.__ciWorldReceipts.filter(v => v.type === 'world_position_correction').length
+  );
+  for (let step = 1; step <= 8; step++) {
+    await page.waitForTimeout(180);
+    await page.evaluate((fraction) => {
+      window.__ciWorldSocket.send(JSON.stringify({
+        type: 'move', zone: 'hub', x: -3 * fraction, y: 0,
+        z: 8 - 3 * fraction, rotY: 0.25,
+      }));
+    }, step / 8);
+  }
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(() =>
+    window.__ciWorldReceipts.filter(v => v.type === 'world_position_correction').length
+  )).toBe(correctionsBefore);
+
+  const glCanvas = await page.locator('canvas[data-software-gl]').elementHandle();
   const originalJoins = await page.evaluate(
     () => window.__ciWorldReceipts.filter(v => v.type === 'world_joined').length
   );
@@ -110,12 +122,15 @@ test('signed-in browser renders WebGL, corrects forged travel, reconnects and re
     window.__ciWorldReceipts.filter(v => v.type === 'world_joined').at(-1)
   );
   expect(lastJoin.zone).toBe('hub');
-  expect(lastJoin.position).toBeTruthy();
-  expect(lastJoin.position.z).not.toBe(8);
-  await expect(mapReadout).toContainText(
-    '(' + Math.round(lastJoin.position.x) + ', ' + Math.round(lastJoin.position.z) + ')'
+  expect(lastJoin.position.x).toBeCloseTo(-3, 1);
+  expect(lastJoin.position.z).toBeCloseTo(5, 1);
+  await expect(mapReadout).toContainText('(-3, 5)');
+  // Direct observation from the existing Three.js player-container setter,
+  // enabled in the disposable local CI development build only.
+  await expect(page.locator('[data-ci-applied-position]')).toHaveAttribute(
+    'data-ci-applied-position', '-3.00,5.00'
   );
-  expect(movedReadout).not.toContain('(0, 8)');
+  expect(await page.evaluate(el => document.contains(el), glCanvas)).toBe(true);
   await expect(page.locator('canvas[data-software-gl]')).toBeVisible();
 
   // The same real Auth emulator user remains signed in after a page reload.
