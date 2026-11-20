@@ -40,3 +40,11 @@ For a code-wide view, open the [AlderVale game graph][game] or the
 [vault]: https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/graphify-snapshots/test-vault
 
 [archive]: https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/85820f11a595e0e6ee2179f9a29ccb65f609965a/graphify-hq/v0.0.7
+
+## Veraphify v0.0.9 adoption
+
+Use [Veraphify v0.0.9 at `ed56500`](https://github.com/vixttha/Veraphify/commit/ed5650085e33cf142a37de695757a4df999a7cf3) to import, verify, and look up source-linked archives. This Git SHA is the merged mechanical revision. The [adopter walkthrough](https://github.com/vixttha/Veraphify/blob/ed5650085e33cf142a37de695757a4df999a7cf3/docs/adopter-walkthrough.md) documents the archive commands and limits. The Graphify producer and the Veraphify archive reader have separate version pins.
+
+The public adoption check archives pinned game source and verifies the saga event implementation citation. Game CI, First Spark drafts, and the existing snapshot publisher keep their own approval and evidence paths.
+
+The [public workflow](../.github/workflows/veraphify-adoption.yml) checks the source pin, runs the Graphify MCP check, compares the archive SHA-256, and verifies the citation against the exact Git blob. The disposable archive version `v0.0.0.1` identifies the probe. Each public run retains a small receipt with the adopter SHA, Veraphify SHA, and citation.
