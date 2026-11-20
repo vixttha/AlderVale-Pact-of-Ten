@@ -1,0 +1,25 @@
+name: Veraphify v0.0.9 adoption
+
+on:
+  push:
+    branches: ["graphify-hq", "chore/veraphify-v0.0.9"]
+    paths:
+      - ".github/workflows/veraphify-adoption.yml"
+      - "graphify-hq/README.md"
+  pull_request:
+    branches: ["graphify-hq"]
+    paths:
+      - ".github/workflows/veraphify-adoption.yml"
+      - "graphify-hq/README.md"
+
+permissions:
+  contents: read
+
+jobs:
+  adoption:
+    if: github.event.repository.private == false
+    uses: vixttha/Veraphify/.github/workflows/verify-adopter-v0.0.9.yml@156331636fab4fafdd4ca8d05c5047cb14e5385e
+    with:
+      source_sha: "a6c2060b8175f505cc6327ccb5658cc00a458b24"
+      source_file: "shared/quests.ts"
+      source_anchor: "export function applySagaEvent("
