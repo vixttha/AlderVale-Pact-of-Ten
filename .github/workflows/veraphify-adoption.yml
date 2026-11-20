@@ -28,6 +28,7 @@ jobs:
       ADOPTER_SHA: "a6c2060b8175f505cc6327ccb5658cc00a458b24"
       ADOPTER_FILE: "shared/quests.ts"
       ADOPTER_ANCHOR: "export function applySagaEvent("
+      ADOPTER_REFERENCES: "{\"documented_in\":[{\"path\":\"docs/bug-library/v0.0.3/receipts/13-first-spark.md\",\"anchor\":\"# Issue #13 · First Spark coverage\"}],\"changed_in\":[{\"path\":\"docs/bug-library/v0.0.3/receipts/13-first-spark.md\",\"anchor\":\"scenario “a guest wins as Rowan and keeps First Spark\"}],\"tested_by\":[{\"path\":\"tests/questRewards.test.ts\",\"anchor\":\"adds First Spark rewards on top of the normal Breeze solo-duel payout\"}]}"
       GRAPHIFY_QUERY_LOG_DISABLE: '1'
       PYTHONHASHSEED: '0'
     steps:
@@ -66,7 +67,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: vixttha/Veraphify
-          ref: 64b3b3005d7442aaacf5dc6ca45255ca673cba53
+          ref: bd04eddb54006bc0f7a155405fe87241903343de
           path: adoption-tools
           persist-credentials: false
       - name: Build the pinned evidence map and verify the archive and citation
