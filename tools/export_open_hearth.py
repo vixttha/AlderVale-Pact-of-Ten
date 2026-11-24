@@ -31,3 +31,38 @@ for name in names:
     print(name+': vector structure, transparent 32/96/1024 render and lower opening passed')
 shutil.copyfile(source/'README.md',out/'README.md')
 print('Five SVG masters and five 1024x1024 transparent PNG exports; no art acceptance implied.')
+
+# Separate review B export; keep A untouched.
+import hashlib, os, subprocess
+source_b=source/'review-b'
+out_b=out/'review-b'
+out_b.mkdir(parents=True,exist_ok=True)
+expected={"01-open-circlet":"689fa782895288f89b5a23328b4c943862a16d23ccb893ef29bc5b4236a42332","02-hearth-gate":"3fcf41ff67f7a0885b02622b9e4c2be27770a11e570683dde00889573314bc79","03-oath-of-embers":"115a2f3af49ec3eb40b501d71e5da0bde067d8199334cdc55edcd0e39c7d3628","04-kilnback-seal":"0bbf60a0f613cd6c7c181d2d4ee22f8f3e42a79905a91230d3558d575672ec6c","05-keeper-of-warmth":"2f529636c009e549218d55c8801b03a174ac0b659e89e96cf7aa2657f74f6b30"}
+assert {p.stem for p in source_b.glob('*.svg')}==set(expected)
+assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()==os.environ['GITHUB_SHA']
+for name,digest in expected.items():
+    raw=(source_b/(name+'.svg')).read_bytes()
+    assert hashlib.sha256(raw).hexdigest()==digest,name
+    xml=ET.fromstring(raw)
+    assert xml.attrib['viewBox']=='0 0 256 256'
+    assert all(e.tag in {ns+'svg',ns+'g',ns+'path'} for e in xml.iter())
+    assert all(not any(k.lower().startswith('on') or 'href' in k.lower() or 'url(' in v for k,v in e.attrib.items()) for e in xml.iter())
+    (out_b/(name+'.svg')).write_bytes(raw)
+    cairosvg.svg2png(bytestring=raw,write_to=str(out_b/(name+'.png')),output_width=1024,output_height=1024)
+    with Image.open(out_b/(name+'.png')) as im:
+        assert im.mode=='RGBA' and im.size==(1024,1024)
+        alpha=im.getchannel('A')
+        assert alpha.getextrema()==(0,255)
+        x0,y0,x1,y1=alpha.getbbox()
+        assert 30<x0<x1<994 and 30<y0<y1<994
+        assert alpha.crop((500,760,524,1024)).getbbox() is None,name+' threshold closed'
+        assert all(alpha.getpixel(xy)==0 for xy in [(0,0),(1023,0),(0,1023),(1023,1023)])
+        proof=Image.new('RGBA',(112,64),(243,238,228,255))
+        proof.paste((34,38,34,255),(56,0,112,64))
+        tiny=im.resize((48,48),Image.Resampling.LANCZOS)
+        proof.alpha_composite(tiny,(4,8))
+        proof.alpha_composite(tiny,(60,8))
+        proof.convert('RGB').save(out_b/(name+'-proof.png'))
+    print('Review B:',name,digest,'1024 RGBA; open threshold; 48px light/dark proof')
+shutil.copyfile(source_b/'README.md',out_b/'README.md')
+print('Five review B SVG masters match chat source SHA-256; five transparent PNGs exported. Visual approval pending.')

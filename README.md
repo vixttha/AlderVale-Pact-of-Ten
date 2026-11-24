@@ -15,3 +15,5 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 [Fire — The Open Hearth](canon/fire-founding-partnership.md) — first complete candidate dossier, awaiting owner review.
 
 [Open Hearth seal studies](art/open-hearth/README.md) — five editable vector candidates, PNG exports generated on the public runner; no selected emblem.
+
+[Open Hearth review set B](art/open-hearth/review-b/README.md) — five chat alternatives, separate from preserved set A. Owner selects before production.

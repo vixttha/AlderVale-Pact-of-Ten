@@ -11,3 +11,7 @@ All candidate, no selected or production mark. The owner likes the open-ring con
 | 05 Kilnback Seal | Avarn's layered plates protect warmth | Center may look like a shield or badge |
 
 Recommendation for review: 04, with 01 as the architectural alternative. Neither accepted. Future single-color, dark/light, embroidery, 32–96px, game UI, and distinctive mark clearance require review. No exclusive rights or final trademark clearance asserted. SVG masters contain only paths and title; transparent PNG 1024x1024 derived on public CI. Run artifact retention one day; editable masters stay here. No production art import. 
+
+## Separate review set B
+
+[Five additional chat preview studies](review-b/README.md). Preserve original five studies as set A. Use A01–A05 or B01–B05 when selecting; numbers alone are ambiguous. Neither set is accepted.
