@@ -1,0 +1,10 @@
+# Legacy guest save reader — preparatory slice for #187
+
+The ten-school Element HQ design governs future gameplay. This isolated decoder recognizes the historical unversioned envelope stored under the realm-specific v1 key without introducing any new gameplay semantics. No mapping, entitlement grants, storage writes or cloud access. Raw bytes remain available for every non-missing outcome. A recognized envelope is not a validated WizardDocument, a migration receipt or a playable loadout. Unknown non-element fields are retained, not interpreted; unknown and retired affinity references require recovery. Missing legacy fusion entitlements remain absent. Explicit embedded version fields are not interpreted because the shipped v1 format has no such field.
+
+## Evidence and limits
+- Main source: `3f8fc59317cca811f2958b6871737cc68e167376`; historical comparison PR #120 passed on its separate checkout. This candidate does not incorporate or merge that PR.
+- Tests: `tests/vault/legacyGuestSave.test.ts` (synthetic three-realm data, malformed/absent, repeated reads, earned progress, unknown extensions, retired and unknown affinity IDs, owner/membership/realm mismatches).
+- Tests execute through existing public-hosted core jobs. Fresh receipts pending. No claim of full record validation, cloud compatibility, duplicate JSON key detection, active duel migration, or production persistence safety.
+- Existing browser test "recovers a corrupt Breeze guest save in the browser without changing Horizon" expects replacement of corrupt data. This preparation deliberately does not alter that behavior. Live integration must introduce non-destructive recovery with a separately reviewed UI and revised regression expectation, not silently change the test.
+- Do not use this decoder's output as a trusted game object or as permission to overwrite a save. Further field/schema validation, version policy, multi-tab writes and recovery/export UX are required before runtime adoption. No new gameplay milestone, feature cutover or merge authorization inferred.
