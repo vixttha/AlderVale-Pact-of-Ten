@@ -131,6 +131,19 @@ jobs:
                              "single primary affinity", "FQ-001", "No gameplay changes until authorized"):
                   if clause not in proposal:
                       raise SystemExit(f"Foundation decision boundary missing: {clause}")
+          combat = "element-hq/designs/combat-identities-and-hybrid-extension-v1.md"
+          if combat in tracked:
+              assert f"]({combat})" in guide, "Combat design not indexed"
+              rows = [line.strip("|").split("|") for line in Path(combat).read_text(encoding="utf-8").splitlines() if line.startswith("| ")]
+              schools = {"Fire", "Water", "Lightning", "Frost", "Wind", "Earth", "Light", "Dark", "Metal", "Plant"}
+              school_rows = [[cell.strip() for cell in row] for row in rows if row[0].strip() in schools]
+              assert len(school_rows) == 10 and {row[0] for row in school_rows} == schools
+              assert all(len(row) == 9 and all(row) for row in school_rows)
+              assert len({row[1] for row in school_rows}) == len({row[2] for row in school_rows}) == 10
+              assert len({name for row in school_rows for name in row[5:9]}) == 40
+              hybrid_rows = {row[0].strip(): row[1].strip() for row in rows if row[0].strip() in {"Rust", "Sugar", "Magnetism"}}
+              assert hybrid_rows == {"Rust": "Water + Metal", "Sugar": "Light + Plant", "Magnetism": "Earth + Metal"}
+              print("Verified design table: 10 schools, 40 distinct ability concepts, three selected recipes (document structure only)")
           print(f"Verified Element HQ documents at {head}")
           PY
       - name: Verify Fusion Name Atlas

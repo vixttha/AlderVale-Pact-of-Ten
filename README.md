@@ -22,6 +22,10 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 
 [Elemental foundation reaffirmed 2026-11-24](element-hq/designs/element-foundation-confirmation-2026-11-24.md) records the ten-school roster, creature design boundary and migration questions. Consult Element HQ before new elemental, creature, spell, fusion or progression recommendations. Acorn Sprout is exploratory; selected fusion recipes do not approve creature species.
 
+## Combat and hybrid design candidate
+
+[Combat identities and expandable hybrid architecture v1](element-hq/designs/combat-identities-and-hybrid-extension-v1.md) defines ten combat identities, 40 initial ability concepts, a coherent EA-001 loadout model and extensible FQ-001 recipe records. New details are for review, not gameplay locks.
+
 ## Start here
 
 **Owner law:** [Fusion Quality Law FQ-001](element-hq/FUSION_QUALITY_LAW.md) requires strong two-parent logic, a distinct visual identity, a unique combat purpose and meaningful counterplay before any fusion becomes playable. Recipes are curated, not a fixed quota.
