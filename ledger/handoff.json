@@ -1,6 +1,15 @@
 {
   "schema_version": 1,
-  "active": null,
+  "active": {
+    "issue": 13,
+    "version": "v0.0.0.2",
+    "phase": "Worker",
+    "next_action": "Reconcile existing #129 test-only PR against 914dee182df5dea37476b9b0eaf71d7a32190e06; review merged #86 and existing browser coverage, add missing relevant integration regressions without changing eligibility policy. Claim 7328a328ab7bf9effad9fbd18d561bc89a294ae4.",
+    "fix_sha": null,
+    "candidate_sha": null,
+    "pull_request": null,
+    "evidence": []
+  },
   "history": [
     {
       "handoff": {

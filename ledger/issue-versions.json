@@ -11,6 +11,16 @@
         "Standalone enchant casts from hand or sideboard are rejected or conserved without consuming the card; invalid fusion pairs cannot mutate combat state.",
         "Guest and signed-in solo fusion remain functional; targeted regressions, existing game CI, Graphify and applicable Test Vault checks run on the exact candidate."
       ]
+    },
+    {
+      "issue": 13,
+      "version": "v0.0.0.2",
+      "state": "in_progress",
+      "acceptance": [
+        "First Spark, successful Rune-Catch, two eligible lead-creature wins and Rare Trial victory deliver the published quest reward exactly once in addition to ordinary rewards.",
+        "Verify persistence and no duplicate quest payout after reload/replay; retain established eligibility and realm rules (#44/#50/#51/#56 separate).",
+        "Reconcile PR #129 on current main; exact candidate public-runner game matrix and applicable regression evidence, audit and owner integration decision."
+      ]
     }
   ]
 }
