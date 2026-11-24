@@ -1,20 +1,6 @@
 {
   "schema_version": 1,
-  "active": {
-    "issue": 13,
-    "version": "v0.0.0.2",
-    "phase": "Head",
-    "next_action": "Internal audit complete, return to Head for explicit owner integration decision. PR #129 exact head 00e28ca8cf9b04ab57cf046266a6ffe5c8004979, base 914dee182df5dea37476b9b0eaf71d7a32190e06, tested merge 04d4476a504e30bbc21930552316e098a598324f, identical tree; compare main shows only two test files, 219 additions, zero deletions; no runtime or policy changes. No direct overlap with open #154/#157/#130/#102/#120 relevant paths. All 7 jobs exact checkout/head, all 3 browsers 21/21 incl quest + First Spark + Keen Ink, authenticated two-lead/Trial concurrent/replay named case and persisted rewards pass; core 131 passed/7 skipped each, Graphify build/readback 1395 nodes/3499 edges, publication skipped, Semgrep/policy pass. CodeRabbit comment 7131883052 reviewed exact head: no actionable comments, minimal merge risk, no specific architecture concern; formal GitHub approval absent. #86 helper coverage already merged; #13 is test-only follow-up to existing reward fix. Separate eligibility #44/#50/#51/#56 unchanged. Synthetic late-game and final-round emulator fixtures do not establish production or full signed-in browser acceptance; owner playthrough outstanding. Standalone Vault workflow path-filtered; relevant core tests pass. Connector-only receipt review, no VIB CLI/Bug Library executable checker claim. Recommend owner authorize merge and conditional issue closure after exact merged-SHA validation. No merge/closure/release performed.",
-    "fix_sha": "00e28ca8cf9b04ab57cf046266a6ffe5c8004979",
-    "candidate_sha": "00e28ca8cf9b04ab57cf046266a6ffe5c8004979",
-    "pull_request": 129,
-    "evidence": [
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640403/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640344/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640558/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640480/attempts/1"
-    ]
-  },
+  "active": null,
   "history": [
     {
       "handoff": {
@@ -72,6 +58,30 @@
       "disposition": "integrated",
       "decision": "Owner explicitly authorized PR #185 merge and conditional #70 closure; post-merge conditions verified at 914dee182df5dea37476b9b0eaf71d7a32190e06: all seven jobs exact SHA, three core suites 131 passed/7 skipped each, real PvP/co-op, G09-003 guest all browsers 20/20 and authenticated emulator passed. Graphify publication, Vault 4/4, policy, Semgrep passed. Merged tree identical to reviewed candidate. Manual production/owner acceptance remains separate. Merged receipts: https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385375979/attempts/1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385375917/attempts/1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385375906/attempts/1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385375941/attempts/1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385376161/attempts/1",
       "merged_sha": "914dee182df5dea37476b9b0eaf71d7a32190e06"
+    },
+    {
+      "handoff": {
+        "issue": 13,
+        "version": "v0.0.0.2",
+        "phase": "Head",
+        "next_action": "Internal audit complete, return to Head for explicit owner integration decision. PR #129 exact head 00e28ca8cf9b04ab57cf046266a6ffe5c8004979, base 914dee182df5dea37476b9b0eaf71d7a32190e06, tested merge 04d4476a504e30bbc21930552316e098a598324f, identical tree; compare main shows only two test files, 219 additions, zero deletions; no runtime or policy changes. No direct overlap with open #154/#157/#130/#102/#120 relevant paths. All 7 jobs exact checkout/head, all 3 browsers 21/21 incl quest + First Spark + Keen Ink, authenticated two-lead/Trial concurrent/replay named case and persisted rewards pass; core 131 passed/7 skipped each, Graphify build/readback 1395 nodes/3499 edges, publication skipped, Semgrep/policy pass. CodeRabbit comment 7131883052 reviewed exact head: no actionable comments, minimal merge risk, no specific architecture concern; formal GitHub approval absent. #86 helper coverage already merged; #13 is test-only follow-up to existing reward fix. Separate eligibility #44/#50/#51/#56 unchanged. Synthetic late-game and final-round emulator fixtures do not establish production or full signed-in browser acceptance; owner playthrough outstanding. Standalone Vault workflow path-filtered; relevant core tests pass. Connector-only receipt review, no VIB CLI/Bug Library executable checker claim. Recommend owner authorize merge and conditional issue closure after exact merged-SHA validation. No merge/closure/release performed.",
+        "fix_sha": "00e28ca8cf9b04ab57cf046266a6ffe5c8004979",
+        "candidate_sha": "00e28ca8cf9b04ab57cf046266a6ffe5c8004979",
+        "pull_request": 129,
+        "evidence": [
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640403/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640344/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640558/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640480/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45400371871/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45400372174/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45400371828/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45400372192/attempts/1"
+        ]
+      },
+      "disposition": "integrated",
+      "decision": "Owner explicitly authorized PR #129 integration and #13 closure after exact merged-SHA validation, then reaffirmed completion and audit. Exact main 3f8fc59317cca811f2958b6871737cc68e167376, merged PR #129, reviewed head 00e28ca8cf9b04ab57cf046266a6ffe5c8004979, base 914dee182df5dea37476b9b0eaf71d7a32190e06; merge tree 1b99e2fa72f4cd031652159ee5bef0177c6d317a matches tested PR checkout 04d4476a504e30bbc21930552316e098a598324f. Post-merge attempt 1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45400371871/attempts/1: all 7 success, three core jobs 131 passed/7 skipped, three browsers 21/21, Firestore emulator passed named authenticated Arbor/Trial duplicate settlement/persistence/replay and Keen Ink. Mac and WebKit logs inspected at exact SHA; Rune-Catch guest save/replay, First Spark and Rare Trial/Arbor reward/reload verified. Graphify 1395 nodes/3499 edges https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45400372174/attempts/1; Semgrep 0 findings/0 errors https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45400371828/attempts/1; public runner policy https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45400372192/attempts/1. CodeRabbit exact-head no actionable comments (7131883052), no formal approval. Existing gameplay fix #34 and follow-up #61/#86/#129. Owner personal playthrough, production sign-in and eligibility issues #44/#50/#51/#56 separate. Connector-only evidence review; VIB CLI and Bug Library executable receipt checker not executed. No release/deployment.",
+      "merged_sha": "3f8fc59317cca811f2958b6871737cc68e167376"
     }
   ]
 }
