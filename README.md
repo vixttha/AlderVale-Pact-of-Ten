@@ -19,3 +19,5 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 [Open Hearth review set B](art/open-hearth/review-b/README.md) — five chat alternatives, separate from preserved set A. Owner selects before production.
 
 [Hearth Gate R1](art/open-hearth/hearth-gate-r1/README.md) — current preferred direction, four coordinated variants; final approval pending.
+
+[Hearth Gate R2 — carved sanctuary](art/open-hearth/hearth-gate-r2/README.md) — four refinement candidates; R1 preserved.

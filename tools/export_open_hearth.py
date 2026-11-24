@@ -109,3 +109,48 @@ assert len(set(geometry.values()))==1,'inconsistent gate silhouette'
 assert [el.attrib['d'] for el in ET.parse(r1/'01-hero.svg').getroot()]==[el.attrib['d'] for el in ET.parse(r1/'04-dark-background.svg').getroot()]
 shutil.copyfile(r1/'README.md',r1out/'README.md')
 print('Hearth Gate R1: four SVG and PNG pairs; shared gate geometry; monochrome cutout; dark hero geometry; visual acceptance pending.')
+
+# R2 carved sanctuary: preserve and verify all previous sets, including R1.
+r2=source/'hearth-gate-r2'
+r2out=out/'hearth-gate-r2'
+r2out.mkdir(parents=True,exist_ok=True)
+assert sorted(p.stem for p in r2.glob('*.svg'))==r1names
+shapes2={}
+for name in r1names:
+    raw=(r2/(name+'.svg')).read_bytes()
+    svg=ET.fromstring(raw)
+    assert svg.tag==ns+'svg' and svg.attrib['viewBox']=='0 0 256 256'
+    assert all(el.tag in {ns+'svg',ns+'path'} for el in svg.iter())
+    assert all(not any(k.lower().startswith('on') or 'href' in k.lower() or 'url(' in v for k,v in el.attrib.items()) for el in svg.iter())
+    shapes2[name]=list(svg)
+    (r2out/(name+'.svg')).write_bytes(raw)
+    for size in (32,48,96,1024):
+        png=cairosvg.svg2png(bytestring=raw,output_width=size,output_height=size)
+        from io import BytesIO
+        with Image.open(BytesIO(png)) as im:
+            assert im.mode=='RGBA' and im.size==(size,size)
+            alpha=im.getchannel('A')
+            assert alpha.getextrema()==(0,255)
+            assert all(alpha.getpixel(xy)==0 for xy in [(0,0),(size-1,0),(0,size-1),(size-1,size-1)])
+            assert alpha.crop((int(size*.45),int(size*.78),int(size*.55),size)).getbbox() is None,name+' threshold blocked'
+            assert alpha.getpixel((int(size*60/256),int(size*175/256)))==255
+            assert alpha.getpixel((int(size*196/256),int(size*175/256)))==255
+            if name=='03-monochrome':
+                assert alpha.getpixel((int(size*128/256),int(size*165/256)))==0,'monochrome cutout filled'
+            if size==1024:
+                (r2out/(name+'.png')).write_bytes(png)
+            if size in (32,96):
+                proof=Image.new('RGBA',(size*2+24,size+16),(243,238,228,255))
+                proof.paste((34,38,34,255),(size+12,0,size*2+24,size+16))
+                proof.alpha_composite(im,(6,8));proof.alpha_composite(im,(size+18,8))
+                proof.convert('RGB').save(r2out/(name+'-'+str(size)+'-proof.png'))
+    print('Hearth Gate R2:',name,hashlib.sha256(raw).hexdigest(),'32/48/96/1024 render; transparent opening')
+hero2,icon2,mono2,dark2=[shapes2[n] for n in r1names]
+assert [el.attrib['d'] for el in hero2]==[el.attrib['d'] for el in dark2]
+assert len({s[0].attrib['d'] for s in shapes2.values()})==1
+assert [el.attrib['d'] for el in hero2[-2:]]==[el.attrib['d'] for el in icon2[-2:]]
+assert mono2[-1].attrib['d']==' '.join(el.attrib['d'] for el in hero2[-2:])
+assert mono2[-1].attrib['fill-rule']=='evenodd' and {el.attrib['fill'] for el in mono2}=={'#27251F'}
+assert hero2[-2].attrib['d']!=ET.parse(r1/'01-hero.svg').getroot()[-2].attrib['d']
+shutil.copyfile(r2/'README.md',r2out/'README.md')
+print('Hearth Gate R2: four SVG/PNG pairs; shared arch/flame, true monochrome cutout, hero/dark geometry and prior sets verified; visual approval pending.')

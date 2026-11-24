@@ -10,3 +10,5 @@ Owner selected B02 Hearth Gate "for now" and requested four coordinated variants
 | 04 Dark background | Same hero geometry; higher-luminance gold and ember colors, transparent for dark surfaces |
 
 All share gate and flame silhouette, transparent bottom opening and 256 square viewBox. Gate means public sanctuary; keystone suggests shared construction; opening stays unobstructed; flame represents warmth rather than supremacy. Decorative shapes are not magical runes or a new canon event. Hero palette #B58A49 #76502D #E7B96D #B64D30; dark palette #E0B66E #A97A3F #F5D89F #F0804C #FFE1A2. Colors, geometry, production and final adoption await owner review. SVGs editable paths only; PNG exports 1024 RGBA from pinned public runner; 32/96px light/dark proofs. Monochrome cutout is not a white fill. Dark variant is transparent, not a baked background. No game logo or base affinity icon replacement. No Water work.
+
+R1 preserved for comparison; owner requested [R2 refinement](../hearth-gate-r2/README.md). Neither final artwork.

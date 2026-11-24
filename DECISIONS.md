@@ -25,3 +25,7 @@ Owner explicitly accepts both architecture decisions and authorizes development 
 ## Hearth Gate preference — 2026-11-24
 
 Owner selects B02 Hearth Gate for now and authorizes hero, simple icon, monochrome and dark-surface refinements plus continued Fire pair review. Preferred direction only; no final seal, names, canon, production assets, gameplay or merge accepted. Preserve both previous sets. See [R1](art/open-hearth/hearth-gate-r1/README.md).
+
+## Hearth Gate R2 refinement — 2026-11-24
+
+Owner authorizes another refinement of R1 focused on flame distinction, justified ornament and ancient civic character. Hearth Gate remains preferred; R2 visual and narrative decisions await review. No final artwork adoption or Water scope. [R2](art/open-hearth/hearth-gate-r2/README.md).
