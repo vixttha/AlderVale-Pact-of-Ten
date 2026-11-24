@@ -57,3 +57,67 @@ These are distinct from Metal's immediate pierce, Plant's regeneration and Wind'
 ## Acceptance plan
 
 Design check: exact ten identities and signatures; four nonempty distinct ability names per row; all 40 names unique; five existing EA-001 clauses; FQ-001; indexed design; three selected recipes unchanged; no gameplay files. Future runtime tests (not executed): ten starters and specialist viability; unlock idempotence and persistence; reject third or duplicate affinity and unlearned school; reject in-duel swaps and forged actions; preserve mastery and recipe knowledge after changing loadout; 100 base matchup cells unchanged by new recipe; both parent orders; new recipe add/disable without old save loss; unknown/duplicate IDs and invalid parents rejected; all FQ-001 gate failures block activation; separate discovery, equip and cast checks; no free action/pip duplication; bounded damage, cleanse, pierce, drain, status stacking and counterplay; guest/signed-in, solo/PvP/co-op. Paper-prototype Water/Metal/Rust first as prior feasibility study recommends. No creature anatomy or assets approved here; use school identity after owner review, not legacy 48 forms. No new gameplay feature milestone authorization; milestone fit unverified.
+
+## Connected mastery, world and creature system — design candidate
+
+This elaborates the owner-requested design exploration. EA-001 remains locked; the new mechanics, zone layout, taxonomy, ability names and acquisition routes below await owner review. No original species or asset is approved.
+
+### Affinity journey and mechanical rules
+
+- Start with one freely chosen primary of the ten. Introduce the optional secondary slot through an early quest; discover the first additional school in the world. Do not grant two fully developed schools immediately. A player may keep only their primary.
+- A school can be unknown, discovered (clue), learned (trial completed), or mastered to earned prerequisites. Attunement is a separate loadout choice, not another permanent unlock or mastery rank. Up to ten learned; maximum two distinct equipped; no free extra deck, turns, companions or pip pool.
+- Proposed primary anchors defensive typing; secondary may swap at safe locations outside encounters. Primary change policy open. Freeze validated affinities, deck and companion eligibility for each duel; attacking card supplies its explicit base school. Learned but unequipped schools are inactive except expressly defined neutral utilities. Preserve knowledge and points through switches; reject illegal queued actions and stale loadouts server-side and in guest validation.
+- Shared finite mastery budget and normal deck/action economy preserve specialist value. A hybrid requires both learned and attuned parents, prerequisites, separate recipe discovery and eligible equipped card. It never occupies a third affinity. No guarantee that each pair has a hybrid.
+
+### Skill web
+
+Use the existing radial + constellation + interconnected design: overview shows ten school hubs; focused school view shows its three existing learning themes (see [ten exploratory charts](skill-tree-feasibility-2026-11-18.md)); Fusion Library is a separate view of canonical recipes with mirrored gateways. Do not draw every edge at once. Unknown schools show a clue, learned schools open foundation, allocated nodes show purchased state, equipped schools show an independent marker. Every node shows prerequisites, cost, effect, and available points; color is not the only cue.
+
+Prototype structure per school: foundation (free on learning), three branches with core techniques, specializations and advanced capstones. Preserve existing theme names rather than create competing trees. Proposed shared pool: one point at each even wizard level, 25 total at current level-50 cap, not 25 per school. Example level 12: 6 earned, 4 spent, 2 available, rank 6 under current rank formula. Spend e.g. 4 Water / 2 Metal OR 6 Water for specialization (hypothetical costs, not a finished tree). One point cannot fund both. Rank/proficiency and exploration prerequisites are distinct from spending. No repeated trial points, passive mastery bonuses from inactive schools, or points purchased with real money. A prerequisite remains valid only while required allocations are active; respec at a safe location returns spent points and retains recipe discovery, but ineligible spells are removed/blocked until prerequisites restored. Whether respec has an in-game fee remains open. Mastery beyond level cap can provide knowledge/cosmetics/sidegrades, not unlimited points without separate balance approval.
+
+Example Water: Flow Attunement -> Pressure / Purification / Reactive Flow -> advanced nodes; Metal: Forge Attunement -> Alloycraft / Surface Chemistry / Polarity. Rust gateway mirrors the same recipe in both trees; satisfying node requirements reveals a separate discovery trial, not an automatic unlock. Pilot Water/Metal/Rust paper design first. Keep all ten introductory kits viable before imposing advanced numerical gates.
+
+### Ten elemental territories (working names)
+
+Regions are geographical content, not new server realms or replacements for existing strata. Current main defines Breeze/Horizon/Everpeak realms (pacing), and waters/canopy/deeproot/bridging strata; preserve these independent axes and integrate the territory map later. One elemental stronghold per school is a world-building direction, not an obligation to build all ten at once or one school per entire biome. Border regions can mix schools. All characters may visit the same regions; no forced opposing-school gate. Each region provides habitat, NPC mentor, repeatable encounters, discovery trial, guardian and optional secrets. Challenge mechanics teach the school's strength and counterplay using general tools; combat is not the only means of discovery. No exact quest chain or release order approved.
+
+| Territory | School | Habitat | Lesson and challenge | Creature motif (not species) |
+| --- | --- | --- | --- | --- |
+| Cinderreach | Fire | Volcanic slopes, warm valleys | Burn pressure, wards, timed cleanse | Heat-adapted wildlife, ember spirits |
+| Silverwater Basin | Water | Rivers, springs and flooded ruins | Reactive defense, cleansing | Aquatic fauna, current spirits |
+| Stormspire Heights | Lightning | Storm ridges and charged caverns | Telegraph, charge and grounding | Conductive fauna, storm entities |
+| Rimewild | Frost | Tundra, glacial grottos | Suppression, timing and outlasting | Insulated fauna, ice spirits |
+| Skyweft Cliffs | Wind | High canopies, cliffs and open skies | Accuracy, evasion and reliable attacks | Gliding fauna, air spirits |
+| Stoneheart Range | Earth | Mountains, caves and mineral beds | Shields, pierce and attrition | Burrowers, stone beings |
+| Dawnward Sanctum | Light | Sunlit meadows, temples and observatories | Empowerment, dispel and curse removal | Luminous fauna, radiant spirits |
+| Gloamroot Hollow | Dark | Deep forests and subterranean ruins | Curses, drain and purification | Nocturnal fauna, shadow spirits |
+| Ironvein Reach | Metal | Ore seams, foundries and old workshops | Armor and penetration | Metallic fauna, constructs |
+| Elderwild Grove | Plant | Ancient forests, gardens and wetlands | Gradual growth and removal | Symbiotic fauna, living plant beings |
+
+### Creature ontology and bond system
+
+Use **creatures** as the broad player-facing term (working codex name: Bestiary); monster means a hostile encounter, not a biological species or an automatic collectable. Classify by independent axes: origin/type, affinity, behavior, encounter role, bond eligibility, and rarity. A divine title is not a rarity tier or a promise of superior stats. No requirement that every school has one of each type.
+
+| Type | Meaning | Bond policy proposal |
+| --- | --- | --- |
+| Wildlife | Natural animals, including ordinary nonmagical fauna | Some bondable; many environmental only |
+| Magical beast | Living animal-like fantasy organism with elemental adaptations | Core bondable candidates, some hostile only |
+| Elemental | Living magic or animate natural matter | Selective bonding after appropriate trials |
+| Spirit | Supernatural being tied to place, memory or nature | Selective voluntary pact, not forced capture |
+| Construct | Crafted or animated artifact | Selective awakening or crafted bond |
+| Divine being | Rare mythic intelligence, deity or primordial power | World/story entity; no ordinary capture, optional blessing/avatar pact only after separate approval |
+
+Guardian/boss, companion, mount, NPC, hostile and ambient are roles/behaviors, not species types. One species can have peaceful and hostile encounters without changing its biology. Rarity is independent of combat power; legendary encounters may be non-bondable. A dual-affinity creature or divine avatar is optional later design, not a third player affinity or an automatic fusion. Natural biology and invented magical mechanisms are distinguished. Deities need not be literal gods; lore choice remains open.
+
+Proposed creature loop: encounter -> observe/learn -> satisfy species-specific bond conditions (rescue, trust, trial, combat victory if appropriate, awakening or egg where biologically sensible) -> voluntary pact -> train and earn bond XP -> optional growth/maturity or form change -> equip eligible companion outside combat. Defeating an animal does not automatically award ownership. No universal egg, forced capture, evolution count, sacrificial fusion or creature requirement for wizard school discovery. Use an independent codex discovery record and creature instance, with stable ownership/realm IDs and species-specific acquisition policy. Preserve current one-active-creature constraint as an initial prototype recommendation; companion actions have existing-style bounded costs/turn economy, never an unbounded extra action or independent affinity slot. Secondary wizard affinity does not automatically summon another creature. A different-affinity companion may coexist under an explicit legal action policy, not bypass wizard affinity/fusion eligibility. No paid acquisition requirement.
+
+Creature Forge spec per species: stable species ID, name, type, habitat/territory, primary elemental identity, biology/origin, behavior, silhouette, scale, materials, anatomy/locomotion, bond eligibility and method, encounter role, finite ability kit/counterplay, optional growth stages, rig/animation requirements and asset provenance. Separate species concept approval, art approval, model acceptance, gameplay implementation and balance. Existing Acorn Sprout remains exploratory Plant artwork; no legacy 48-form production and no fusion species automatically inferred. Creature creation may mean the player bond system or the developer asset pipeline: keep both separate.
+
+### Prototype and audit order
+
+1. Owner accepts school identities and chooses affinity/mastery approach. Test Water + Metal + Rust paper build against pure Water and a general-purpose opponent; compare shared point economy and action cost.
+2. Map one existing area or small territory encounter to a school and one discovery trial; no ten-zone build commitment. Verify that all starting schools could complete discovery without owning target school or matching creature.
+3. Design one original bondable creature and one non-bondable encounter from approved identity; then approve concept, turnaround, model and GLB separately. No artwork lock today.
+4. Before authorized implementation: test valid/invalid affinity, points earned/spent/refund, inactive bonuses, respec dependencies, all ten region-school references, one-time trials, persistence, guest/realm ownership, no creature double-grant, companion and boss eligibility, recipe expansion/retirement, stable base matchups, and all FQ-001 gates. Need actual playtests for balance; document validation cannot prove it.
+
+Open decisions: primary re-attunement, exact node costs and rewards, quest difficulty and geographic names/links, creature terminology and divine cosmology, party/companion capacity, growth and acquisition specifics. No gameplay change, merge, release, new species or cost authorization.
