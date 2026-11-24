@@ -196,14 +196,26 @@
     {
       "id": "AV-STORY-001",
       "kind": "campaign",
-      "status": "unwritten",
-      "name": "Main campaign"
+      "status": "candidate",
+      "name": "Main campaign",
+      "document": "canon/pact-of-ten.md",
+      "depends_on": [
+        "AV-CONFLICT-001"
+      ]
     },
     {
       "id": "AV-ERA-001",
       "kind": "history",
-      "status": "unwritten",
-      "name": "Historical eras"
+      "status": "candidate",
+      "name": "Historical eras",
+      "document": "canon/pact-of-ten.md",
+      "depends_on": [
+        "AV-ERA-002",
+        "AV-ERA-003",
+        "AV-EVENT-001",
+        "AV-EVENT-002",
+        "AV-ERA-004"
+      ]
     },
     {
       "id": "AV-SECRET-001",
@@ -216,6 +228,77 @@
       "kind": "activity",
       "status": "candidate",
       "name": "Optional social and everyday interactions"
+    },
+    {
+      "id": "AV-PACT-001",
+      "kind": "agreement",
+      "name": "Pact of Ten",
+      "depends_on": [
+        "AV-WORLD-001",
+        "AV-EVENT-002"
+      ],
+      "status": "candidate",
+      "document": "canon/pact-of-ten.md"
+    },
+    {
+      "id": "AV-ERA-002",
+      "kind": "era",
+      "name": "The Unbound Age",
+      "depends_on": [
+        "AV-WORLD-001"
+      ],
+      "status": "candidate",
+      "document": "canon/pact-of-ten.md"
+    },
+    {
+      "id": "AV-ERA-003",
+      "kind": "era",
+      "name": "The Age of Dominion",
+      "depends_on": [
+        "AV-ERA-002"
+      ],
+      "status": "candidate",
+      "document": "canon/pact-of-ten.md"
+    },
+    {
+      "id": "AV-EVENT-001",
+      "kind": "event",
+      "name": "The Great Sundering",
+      "depends_on": [
+        "AV-ERA-003"
+      ],
+      "status": "candidate",
+      "document": "canon/pact-of-ten.md"
+    },
+    {
+      "id": "AV-EVENT-002",
+      "kind": "event",
+      "name": "The Founding Pact",
+      "depends_on": [
+        "AV-EVENT-001"
+      ],
+      "status": "candidate",
+      "document": "canon/pact-of-ten.md"
+    },
+    {
+      "id": "AV-ERA-004",
+      "kind": "era",
+      "name": "The Age of Fractured Oaths",
+      "depends_on": [
+        "AV-PACT-001"
+      ],
+      "status": "candidate",
+      "document": "canon/pact-of-ten.md"
+    },
+    {
+      "id": "AV-CONFLICT-001",
+      "kind": "conflict",
+      "name": "Control, restoration and freedom",
+      "depends_on": [
+        "AV-ERA-004"
+      ],
+      "status": "candidate",
+      "document": "canon/pact-of-ten.md"
     }
   ]
 }

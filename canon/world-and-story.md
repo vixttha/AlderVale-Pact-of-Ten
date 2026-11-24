@@ -8,9 +8,9 @@ Ten schools: Fire, Water, Lightning, Frost, Wind, Earth, Light, Dark, Metal, Pla
 
 Veyrath — renewal after disaster; Orsenn — navigation and hospitality; Tavrik — controlled invention; Iskeld — shelter and memory; Avelis — freedom and travel; Durnovar — collective duty; Serevan — education and restoration; Nhalem — privacy and remembrance; Korr — engineering; Ossara — stewardship. Names and fictional founding accounts await owner approval. See public design linked in README. Every city needs cultural institutions, economy, history, distinct architecture, social tensions and relationships.
 
-## Campaign and history — not written yet
+## Campaign and history — candidate
 
-Open questions: what the Pact of Ten actually is, who made it, what came before it, why the player matters, what the current conflict is, how the ten schools relate to one another, origin of each race and creature class, timeline and competing historical accounts. Do not convert working explanations into locked events. Record era IDs, event IDs, locations, participants, causes, effects, knowledge boundaries and canon status. Distinguish objective history from in-world belief and player-specific outcomes.
+See [the proposed Pact and campaign foundation](pact-of-ten.md). Founder identities, calendar, origins of races and creature classes, exact chronology and competing historical accounts remain open. Do not convert working explanations into locked events. Record era IDs, event IDs, locations, participants, causes, effects, knowledge boundaries and canon status. Distinguish objective history from in-world belief and player-specific outcomes.
 
 ## Living world
 
