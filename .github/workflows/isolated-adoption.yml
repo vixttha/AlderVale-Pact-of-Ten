@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '24'
       - run: |
+          set -euo pipefail
           git rev-parse HEAD
-          python3 tools/verify_adoption.py
+          for fixture in python-cli go-api docs-only; do
+            python3 tools/verify_adoption.py --fixture "$fixture"
+          done
           python3 tools/verify_evidence_adoption.py
