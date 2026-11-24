@@ -1,79 +1,72 @@
-# AlderVale: Pact of Ten
+# Provenistem — v0.0.2
 
-![AlderVale Workmark v1 with a green leaf wreath and gold lettering](assets/aldervale-workmark-v1.webp)
+**Product:** Provenistem · **Versioning:** independent · **Mode:** portable, standalone and optionally host-integrated. Governance-Branch can offer a separately authorized optional adapter without becoming dependent on Provenistem; Provenistem does not require Governance. This branch documents a future neutral package contract and does not republish the historical v0.0.2 release.
 
-AlderVale is a 3D browser RPG set at a spellcasting academy among floating islands. Create a wizard, explore the campus, and build a deck for turn-based duels.
+The earlier v0.0.1 design remains a historical baseline; the v0.0.2 private tag is immutable. See the [product-neutral provenance boundary](docs/PROVENANCE.md) and [owner-locked optional integration rules](docs/PORTABILITY-AND-MODULE-CONTRACT.md). Internal development audit reports and CI machinery are excluded from portable packages.
 
-**In development · Local guest play.** Start in Breeze and earn your first quest rewards in a solo duel. You can play as a guest without a Google account or API key.
+**Provenistem is a portable Ideas & Features tracker for any project.** Record ideas and features, connect related items, and follow their status and development progress. Decision, origin, testing and evidence-reference fields are supporting tracking details—not a broader governance or verification product. [This simple scope is owner-locked.](docs/PRODUCT-SCOPE-LOCK.md)
 
-[Play on Windows](#play-on-windows) · [Run from source](#run-from-source) · [First playthrough](#first-playthrough) · [Bazaar](#bazaar) · [Report a bug](#report-a-bug)
+Provenistem contains exactly two portable record libraries:
 
-## Play on Windows
+- [Ideas](ideas/README.md): possibilities, pros/cons, reasons, exploration, and human decisions.
+- [Features](features/README.md): stable capability identities, implementation status, scoped evidence, and references to ideas.
 
-In your local copy of the repository, open **AlderVale Play** and double-click **Play AlderVale.cmd**. Install Git and Node.js **24.12.0 or later** first. The launcher builds the game and opens it at [http://127.0.0.1:4178](http://127.0.0.1:4178). Keep the launcher window open while you play. [Windows launcher guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/AlderVale%20Play/README.md)
+A human can use the files directly in GitHub. An LLM can read and suggest edits by following [the agent guide](LIBRARY-AGENT-GUIDE.md). No plugin, Governance installation, cloud service, runner, Python, or local environment is required to *use the records*.
 
-## Run from source
+**Starts empty.** `ideas/records/` and `features/records/` intentionally contain no real adopter records. Documents in `templates/` are synthetic examples only, never canonical project data.
 
-Install Git, Node.js **24.12.0 or later**, and Bun **1.4.4**. The 3D campus requires WebGL 2.
+## Quick use (GitHub website only)
 
-```bash
-git clone https://github.com/vixttha/AlderVale-Pact-of-Ten.git
-cd AlderVale-Pact-of-Ten
-bun install --frozen-lockfile
-bun run dev
-```
+1. Copy `ideas/`, `features/`, **and `templates/` if following the examples below** into an isolated, collision-free location in your repository. The agent guide is optional. Never overwrite existing paths. See [adoption instructions](docs/ADOPTION.md).
+2. For a new idea, copy [the example](templates/idea.example.json) into `ideas/records/IDEA-000001.json`, edit its ID, title, and facts. For a new feature, use [the feature example](templates/feature.example.json) at `features/records/FEAT-000001.json`. Use the next unused ID, never recycle an ID.
+3. Link features to existing ideas by `idea_ids`; keep decisions, implementation, tests, and release claims separate.
+4. Edit or regenerate `INDEX.md` as a **read-only view** of records; records always prevail if an index becomes stale. An optional standard-library-only Python helper can validate and generate indexes, but is *not required*.
 
-Keep the terminal open and visit [http://localhost:3000](http://localhost:3000). Guest saves are stored by browser profile and address. Stick with the launcher address or the source address to resume the same save.
+Run optional checks when Python happens to be available: `python tools/library.py check`, `python tools/library.py build`, `python -m unittest discover -s tests -v`. Copy `tools/` and `tests/` if those helpers are wanted. **v0.0.2 adds count-neutral populated-adopter tests, a bounded validator, local `maxLength` schema support and read-only `python tools/adopter.py <host-library-root>` no-clobber planning.** Starter publishers can also use `python tools/library.py check --expect-empty`; do **not** apply that flag to populated adopters.
 
-![Rowan stands before the fountain in Breeze’s Central Academy Commons, surrounded by academy characters. The First Spark quest is visible in the HUD.](assets/breeze-campus.webp)
+No GitHub Actions workflow, runner configuration, release authorization, or development test-arm file is included in this portable package. Any CI is optional and host-owned. Prior source/host test receipts do not imply independent external security certification.
 
-*Breeze’s Central Academy Commons. In-game capture from build `3fa20bc`.*
+## One-way Governance isolation
 
-## First playthrough
+[The interoperability boundary](docs/ONE-WAY-BOUNDARY.md) allows Governance-Branch to *offer* Provenistem as an opt-in, host-owned module, but forbids mandatory dependencies, upstream mutations, silent installation, schema conversion and overwriting canonical `ideas/` or `features/` paths. The adapter is a future design, not a shipped integration.
 
-1. **Create your wizard.** Choose **Breeze**, enter a wizard name, and pick **Alder Human** with the **Rowan** appearance. Select **Begin Academy Journey**.
-2. **Enter a duel.** On campus, open **Duel** and select **Frost** under **Solo Academy Skirmishes**. Pick an affordable spell and select **Cast Turn**, or use **Pass (+Gain Pip)** to build pips.
-3. **Claim First Spark.** After winning, select **Claim Rewards & Return**. Open **Active Saga Quest** and check that **First Spark in the Ring** shows **Completed**.
-4. **Resume your wizard.** Reload the page, select the same wizard in Breeze, and choose **Enter Aldervale**. Check that the quest is still complete and your Florin and Spell Shard totals match what you saw before reloading.
+## Authority and trust
 
-![Round one of Rowan’s solo duel in Breeze. Rowan faces a Frost Sky-Duelist, with both fighters’ health and pips shown above the available spell cards.](assets/breeze-first-spark-duel.webp)
+An idea is not approval to implement. A feature record is not permission to run a tool, proof of test success, or evidence of release. This library never supersedes project owner decisions, `AGENTS.md`, code owners, protected branches, official release records or external acceptance gates.
 
-*First Spark in Breeze. In-game capture from build `3fa20bc`.*
+Only an actual project's release authority can assert shipped versions. The template's `release_membership` field must stay `NOT_ASSERTED`. Evidence references and SHAs are *claims to independently check*, not authenticated receipts.
 
-### Choose a realm
+## Read next
 
-| Realm | In-game pacing label |
-| --- | --- |
-| **Breeze** | ~25-Min Fast Path |
-| **Horizon** | ~1-Hr Balanced Path |
-| **Everpeak** | ~3-Hr Classic Saga |
+- [Library agent guide](LIBRARY-AGENT-GUIDE.md)
+- [Lifecycle and state meanings](docs/LIFECYCLE.md)
+- [Zero-install adoption](docs/ADOPTION.md)
+- [Isolation / threat boundaries](docs/ISOLATION.md)
+- [Provenance and source separation](docs/PROVENANCE.md)
 
-The labels describe progression tuning. Actual playtime varies.
+Provenistem version: `0.0.2`; frozen experimental library baseline: `0.0.1`. Neither is the adopting project's product version. A private GitHub release must refer to the exact 24-file package commit, not the larger development branch.
 
-## Bazaar
+## Owner-approved engineering ecosystem laws
 
-Sign in to buy and sell gear in your wizard’s realm. The Bazaar uses the Florins in that realm’s Bazaar wallet. Academy shops use your wizard’s Florins.
+Decision ENGINEERING-ECOSYSTEM-LAWS-001 (2026-11-24). Mission: Build a toolkit that gives compatible LLM agents a structured engineering environment, rather than building another AI model.
 
-- **Buy gear.** Select **Buy** on a listing you can afford. The item becomes available in **Tailor → Equip Gear**.
-- **Sell gear.** If the item is equipped, equip a different piece in the same slot in **Tailor**. In the Bazaar, select the item and choose **List for Florins**. One copy is reserved until it sells or you choose **Cancel listing**. When it sells, your Bazaar wallet updates automatically if you’re still connected in that realm.
+<!-- engineering-laws:start -->
+1. **Independence:** Every tool must remain independently installable, usable, versioned and maintained.
+2. **Composability:** Installing additional tools expands the agent's capabilities without creating mandatory dependencies.
+3. **Portability:** No mandatory AI provider, model, agent harness or paid execution service.
+4. **Persistence:** Project knowledge, decisions, progress and evidence survive the termination of an AI session.
+5. **Verification:** Development claims must be supported by reproducible, revision-bound evidence.
+6. **Owner authority:** The human retains control over scope, architectural decisions, integration and releases.
+<!-- engineering-laws:end -->
 
-## Troubleshooting
+Remain standalone. Other tools are optional; their absence must not block normal operation. Preserve project-local authority and evidence; never automatically install, merge, synchronize or write to another tool's branch. No mandatory seventh coordinator, paid service or AI provider. Existing product scope remains authoritative. Change these laws only by explicit owner approval.
 
-- **3D world unavailable.** Try **Retry 3D**. You can still access your wizard and menus.
-- **Guest save failed.** Allow browser site storage, then select **Retry save** before reloading or closing the tab.
-- **Wizard missing after reload.** Use the same browser profile, local address, and realm. Clearing site data removes local guest saves.
+## Agent capability discovery — v1
 
-## Development and testing
+<!-- agent-capability:v1
+{"schema_version":1,"id":"provenistem","branch":"Provenistem","entrypoint":"LIBRARY-AGENT-GUIDE.md","scope":"Ideas and features; owner decisions and progress","required_ecosystem_tools":[],"authority":"owner","discovery":"read-only","versioning":"independent"}
+-->
 
-Run `bun run validate:core` for type checking, rules lint, tests, the production build, and HTTP and WebSocket checks. GitHub Actions also runs guest journeys in Chromium, Firefox, and WebKit and checks Firestore rules in an emulator.
+A compatible agent may enumerate the target repository's branch refs, resolve this branch to a commit, and read its entry point at that exact commit. Read-only discovery confers no execution, write, integration or release authority. If this branch or marker is absent, the tool is absent or legacy/unverified; continue independently. Check the target's own instructions and owner scope before any action. The marker describes a capability, not a required registry or package version.
 
-- [Validation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md) · [GitHub Actions](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions)
-- [First-playable test coverage and desktop checklist](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/aldervale/README.md) · [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md)
-
-### AI-assisted development
-
-AI assists with implementation, debugging, and test design. The First Spark browser test uses the game controls to win a duel, claim the payout, and verify the quest and rewards after reload. [Test changes](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/61) · [Build validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43917481646)
-
-## Report a bug
-
-Search [GitHub Issues](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues) first. Include the build or commit, browser, operating system, and realm. List the steps to reproduce the bug, what you expected, and what actually happened.
+Installation convention: human or agent selects a reviewed exact source SHA, checks the dedicated target branch and collisions, follows this product's own installation guide, and records source/target SHA and preserved product state. Never merge a template workspace wholesale into product source. Existing installations require explicit reviewed upgrades; preserve local records and prior receipts. Optional evidence links do not authorize writes. No mandatory coordinator or other ecosystem tool.
