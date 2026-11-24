@@ -1,0 +1,23 @@
+name: Lydite isolated starter adoption
+on:
+  push:
+    branches: [Lydite-Test-Vault]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - run: |
+          git rev-parse HEAD
+          python3 tools/verify_adoption.py
+          python3 tools/verify_evidence_adoption.py
