@@ -19,3 +19,5 @@ Current focus: [Eighth review — complete Fire history candidate](canon/fire-fo
 Owner accepted the eighth-review historical foundation at 6e523bc81c263b489f61485f77fa61c49fe6149d. Current action: BART 3D stone monument, bronze plaque and cloth banner evaluation using unchanged R3; final visual acceptance remains pending. No Water work.
 
 3D surface evaluation candidate: [R3 procedure](art/open-hearth/hearth-gate-r3/3D-EVALUATION.md). Actual public runner results and owner visual review required. Water held.
+
+Current owner scope: Avarn physical exploration, [five separate anatomy studies](art/avarn/concepts-a/README.md), visual choice pending. Historical foundation and R3 unchanged. No final visual lock or Water work.

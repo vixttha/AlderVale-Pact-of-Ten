@@ -42,3 +42,11 @@ jobs:
           path: dist/open-hearth/
           if-no-files-found: error
           retention-days: 1
+      - name: Export Avarn anatomy studies
+        run: python tools/export_avarn_concepts.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: avarn-five-anatomy-studies
+          path: dist/avarn-concepts/
+          if-no-files-found: error
+          retention-days: 1
