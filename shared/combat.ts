@@ -277,6 +277,19 @@ export interface TurnActionInput {
   archmasteryElement?: ElementId;
 }
 
+/** Only a real, unenchanted attack in the same hand may receive Keen Ink. */
+export function isValidInHandEnchantPair(
+  hand: readonly string[], value: unknown,
+): value is NonNullable<TurnActionInput['enchantPair']> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const { enchantCardIdx, targetCardIdx } = value as Partial<NonNullable<TurnActionInput['enchantPair']>>;
+  const inHand = (index: unknown): index is number =>
+    typeof index === 'number' && Number.isInteger(index) && index >= 0 && index < hand.length;
+  return inHand(enchantCardIdx) && inHand(targetCardIdx) && enchantCardIdx !== targetCardIdx &&
+    SPELL_BY_ID[hand[enchantCardIdx]]?.kind === 'enchant' &&
+    ['attack', 'drain', 'aoe'].includes(SPELL_BY_ID[hand[targetCardIdx]]?.kind ?? '');
+}
+
 export function resolveSpellDamage(params: {
   caster: CombatantState;
   target: CombatantState;
@@ -371,6 +384,8 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
   const next: DuelState = structuredClone(state);
   next.phase = 'resolving';
   const roundLogs: string[] = [`— Round ${next.round} —`];
+  let effectSequence = 0;
+  const nextEffectId = (source: 'pet' | 'wright') => `${source}_${next.round}_${effectSequence++}`;
 
   const allCombatants = [...next.playerTeam, ...next.enemyTeam];
   for (const c of allCombatants) {
@@ -386,17 +401,17 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
     if (act.archmasteryElement) actor.archmasteryElement = act.archmasteryElement;
 
     const originalIndices = actor.hand.map((_, index) => index);
-    if (act.enchantPair) {
+    if (isValidInHandEnchantPair(actor.hand, act.enchantPair) &&
+        act.cardIndex === act.enchantPair.targetCardIdx &&
+        act.useSideboardIndex == null &&
+        !act.discardIndices?.some(index =>
+          index === act.enchantPair!.enchantCardIdx || index === act.enchantPair!.targetCardIdx)) {
       const { enchantCardIdx, targetCardIdx } = act.enchantPair;
-      const enchId = actor.hand[enchantCardIdx];
       const tgtId = actor.hand[targetCardIdx];
-      if (enchantCardIdx !== targetCardIdx && enchId && tgtId && SPELL_BY_ID[enchId]?.kind === 'enchant' &&
-          ['attack', 'drain', 'aoe'].includes(SPELL_BY_ID[tgtId]?.kind)) {
-        actor.hand[targetCardIdx] = `${tgtId}+keen`;
-        actor.hand.splice(enchantCardIdx, 1);
-        originalIndices.splice(enchantCardIdx, 1);
-        roundLogs.push(`${actor.name} fused Keen Ink onto ${SPELL_BY_ID[tgtId].name}!`);
-      }
+      actor.hand[targetCardIdx] = `${tgtId}+keen`;
+      actor.hand.splice(enchantCardIdx, 1);
+      originalIndices.splice(enchantCardIdx, 1);
+      roundLogs.push(`${actor.name} fused Keen Ink onto ${SPELL_BY_ID[tgtId].name}!`);
     }
 
     const discard = new Set(act.discardIndices ?? []);
@@ -511,7 +526,9 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
       const target = findActor(act.targetId) ?? (next.playerTeam.includes(actor) ? next.enemyTeam[0] : next.playerTeam[0]);
 
       if (spell && target) {
-        if (totalAvailablePipsForSchool(actor, spell.element) < spell.pipCost) {
+        if (spell.kind === 'enchant') {
+          roundLogs.push(`${actor.name} cannot cast ${spell.name} directly; it must fuse onto an attack.`);
+        } else if (totalAvailablePipsForSchool(actor, spell.element) < spell.pipCost) {
           roundLogs.push(`${actor.name} lacked pips for ${spell.name} and passed.`);
         } else {
           // Accuracy Check (Classic Fizzle = full Pip refund!)
@@ -537,7 +554,7 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
               actor.discard.push(baseId);
             }
 
-            executeSpellEffect(next, actor, target, spell, isEnchanted, coopResonance && next.playerTeam.includes(actor), rng, roundLogs);
+            executeSpellEffect(next, actor, target, spell, isEnchanted, coopResonance && next.playerTeam.includes(actor), rng, roundLogs, nextEffectId);
           }
         }
       }
@@ -558,17 +575,17 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
           target.hp = Math.max(0, target.hp - petDmg);
           roundLogs.push(`${activePet.nickname} used ${skill.name} for ${petDmg} ${ELEMENTS[activePet.element].name} damage!`);
         } else if (skill.kind === 'buff') {
-          actor.blades.push({ id: `pet_${Date.now()}`, label: `${activePet.nickname} +${skill.value}%`, kind: 'blade', element: activePet.element, pct: skill.value });
+          actor.blades.push({ id: nextEffectId('pet'), label: `${activePet.nickname} +${skill.value}%`, kind: 'blade', element: activePet.element, pct: skill.value });
           roundLogs.push(`${activePet.nickname} boosted ${actor.name} (+${skill.value}% Blade).`);
         } else if (skill.kind === 'shield') {
-          actor.shields.push({ id: `pet_${Date.now()}`, label: `${activePet.nickname} -${skill.value}%`, kind: 'shield', element: 'universal', pct: skill.value });
+          actor.shields.push({ id: nextEffectId('pet'), label: `${activePet.nickname} -${skill.value}%`, kind: 'shield', element: 'universal', pct: skill.value });
           roundLogs.push(`${activePet.nickname} wrapped ${actor.name} in -${skill.value}% Ward.`);
         } else if (skill.kind === 'heal') {
           const healAmt = Math.round(skill.value * stageScale);
           actor.hp = Math.min(actor.maxHp, actor.hp + healAmt);
           roundLogs.push(`${activePet.nickname} mended ${actor.name} for +${healAmt} HP.`);
         } else if (skill.kind === 'debuff') {
-          target.traps.push({ id: `pet_${Date.now()}`, label: `${activePet.nickname} Trap +${skill.value}%`, kind: 'trap', element: activePet.element, pct: skill.value });
+          target.traps.push({ id: nextEffectId('pet'), label: `${activePet.nickname} Trap +${skill.value}%`, kind: 'trap', element: activePet.element, pct: skill.value });
           roundLogs.push(`${activePet.nickname} set a +${skill.value}% Trap on ${target.name}.`);
         }
       }
@@ -676,6 +693,7 @@ function executeSpellEffect(
   coopResonance: boolean,
   rng: () => number,
   logs: string[],
+  nextEffectId: (source: 'wright') => string,
 ) {
   const actorInPlayerTeam = state.playerTeam.some((p) => p.id === actor.id);
   const foes = actorInPlayerTeam ? state.enemyTeam : state.playerTeam;
@@ -693,7 +711,7 @@ function executeSpellEffect(
       logs.push(`${actor.name} cast ${spell.name}${res.crit ? ' (CRIT!)' : ''} on ${target.name} for ${res.damage} dmg!`);
     }
     applySpellStatusEffect(actor, target, spell, res.finalElement, rng, logs);
-    applyWrightingSecondary(actor, spell, logs);
+    applyWrightingSecondary(actor, spell, logs, nextEffectId);
   } else if (spell.kind === 'aoe') {
     for (const f of foes) {
       if (f.hp <= 0) continue;
@@ -726,7 +744,7 @@ function executeSpellEffect(
     if (pet) pet.hp = Math.min(pet.maxHp, pet.hp + Math.round(amt * 0.6));
     logs.push(`${actor.name} cast ${spell.name}, healing +${amt} HP!`);
     applySpellStatusEffect(actor, target, spell, spell.element, rng, logs);
-    applyWrightingSecondary(actor, spell, logs);
+    applyWrightingSecondary(actor, spell, logs, nextEffectId);
   } else if (spell.kind === 'regen') {
     const regenVal = spell.baseValue;
     const regenTurns = spell.dotTurns ?? 3;
@@ -771,14 +789,14 @@ function executeSpellEffect(
   }
 }
 
-function applyWrightingSecondary(actor: CombatantState, spell: SpellDefinition, logs: string[]) {
+function applyWrightingSecondary(actor: CombatantState, spell: SpellDefinition, logs: string[], nextEffectId: (source: 'wright') => string) {
   if (actor.spellwrighting[spell.id] !== 'B' || !spell.wrightB) return;
   const eff = spell.wrightB.bonusEffect;
   if (eff === 'extra_blade') {
-    actor.blades.push({ id: `wright_${Date.now()}`, label: 'Spellwright +20%', kind: 'blade', element: spell.element, pct: 20 });
+    actor.blades.push({ id: nextEffectId('wright'), label: 'Spellwright +20%', kind: 'blade', element: spell.element, pct: 20 });
     logs.push(`${actor.name}'s Spellwrighting left a +20% Blade.`);
   } else if (eff === 'extra_shield') {
-    actor.shields.push({ id: `wright_${Date.now()}`, label: 'Spellwright -35%', kind: 'shield', element: 'universal', pct: 35 });
+    actor.shields.push({ id: nextEffectId('wright'), label: 'Spellwright -35%', kind: 'shield', element: 'universal', pct: 35 });
     logs.push(`${actor.name}'s Spellwrighting raised a -35% Shield.`);
   } else if (eff === 'heal_120') {
     actor.hp = Math.min(actor.maxHp, actor.hp + 120);
@@ -793,7 +811,7 @@ export function chooseAiAction(ai: CombatantState, foes: CombatantState[]): Turn
 
   ai.hand.forEach((rawId, idx) => {
     const sp = SPELL_BY_ID[rawId.replace('+keen', '')];
-    if (!sp) return;
+    if (!sp || sp.kind === 'enchant') return;
     if (totalAvailablePipsForSchool(ai, sp.element) < sp.pipCost) return;
     let score = sp.baseValue + sp.pipCost * 25;
     if ((sp.kind === 'heal' || sp.kind === 'regen') && ai.hp > ai.maxHp * 0.65) score = 5;

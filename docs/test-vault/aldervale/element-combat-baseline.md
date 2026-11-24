@@ -1,5 +1,7 @@
 # Element combat baseline
 
+> **Historical fixture, not current design authority.** This document records the legacy behavior at the original pinned checkout. The newer ten-school design excludes Chronos from foundational schools and treats new resonance techniques separately. The historical Magma, other fusion and Hatchery statements below do not authorize new content. See #187 for migration scope. Reconciliation against main `3f8fc59317cca811f2958b6871737cc68e167376` retains the original matrix and expected damage values; new CI must establish whether the current implementation still matches them.
+
 Observed game behavior on [`219a6bda1f9b2e01f06fd97350a66ed8f470f0d1`](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/219a6bda1f9b2e01f06fd97350a66ed8f470f0d1). The [v1 decision record](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/2df250f0fe01bf0e8b21b6f14eb599c9f114481c/element-hq/designs/aldervale-element-system-v1.md#v1-creature-and-fusion-rules) supplies the agreed roster and fusion rules. This baseline supplies expected results for regression comparison before a balance change.
 
 ## Roster reconciliation

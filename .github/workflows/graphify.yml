@@ -8,6 +8,16 @@ on:
     paths:
       - '.github/workflows/graphify.yml'
       - 'tools/graphify/**'
+      - 'shared/combat.ts'
+      - 'shared/soloDuel.ts'
+      - 'server/soloProgress.ts'
+      - 'tools/ci/keen-ink.pw.mjs'
+      - 'tools/ci/authenticated-progression.check.mjs'
+      - 'server/duelView.ts'
+      - 'server/wsHub.ts'
+      - 'tools/ci/server.check.mjs'
+      - 'src/features/duel/DuelArenaModal.tsx'
+      - 'tests/vault/keenInk.test.ts'
   workflow_dispatch:
     inputs:
       publish_commit_snapshot:
@@ -88,12 +98,14 @@ jobs:
         run: >-
           python -m pip install --no-cache-dir --only-binary=:all: --no-deps -r tools/graphify/requirements.txt
       - name: Query the transferred graph over MCP
+        shell: bash
         env:
           SNAPSHOT_0: ${{ needs.graph.outputs.snapshot_0 }}
           SNAPSHOT_1: ${{ needs.graph.outputs.snapshot_1 }}
           SNAPSHOT_2: ${{ needs.graph.outputs.snapshot_2 }}
           SNAPSHOT_3: ${{ needs.graph.outputs.snapshot_3 }}
         run: |
+          set -o pipefail
           python tools/graphify/transfer.py unpack "$RUNNER_TEMP/snapshot"
           python tools/graphify/mcp_readback.py "$RUNNER_TEMP/snapshot/graph.json" | tee -a "$GITHUB_STEP_SUMMARY"
           cat "$RUNNER_TEMP/snapshot/receipt.json" >> "$GITHUB_STEP_SUMMARY"

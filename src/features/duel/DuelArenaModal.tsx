@@ -18,17 +18,14 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { ELEMENTS, ELEMENT_LIST, type ElementId } from '../../../shared/elements.ts';
-import { SPELL_BY_ID, getStarterDeckForElement, getTrialGuardianDeckForElement, getSpellUseLockReason } from '../../../shared/spells.ts';
+import { SPELL_BY_ID } from '../../../shared/spells.ts';
 import {
-  drawUpToSeven,
   resolveDuelRound,
   chooseAiAction,
   isDuelComplete,
   totalAvailablePipsForSchool,
-  computeWizardDerivedStats,
+  isValidInHandEnchantPair,
   leadCreatureQualifiedForArborWin,
-  ownedCreatureToCombatSlot,
-  pickDuelCreatureRoster,
   STATUS_EFFECT_META,
   type CombatantState,
   type DuelState,
@@ -36,7 +33,9 @@ import {
   type StatusEffectKind,
   type TurnActionInput,
 } from '../../../shared/combat.ts';
+import { createSoloDuel, type SoloDuelMode } from '../../../shared/soloDuel.ts';
 import type { WizardDocument } from '../../../shared/economy.ts';
+import type { cloudSolo, CloudSoloSettlement, CloudSoloState } from '../../lib/cloudProgression.ts';
 import type { OwnedCreature } from '../../lib/storage.ts';
 import { ElementCrest } from '../../lib/elementIcons.tsx';
 import { academyAudio } from '../../engine/audioSynth.ts';
@@ -116,6 +115,8 @@ interface DuelArenaModalProps {
   worldConnected: boolean;
   activeLiveDuels: { duelId: string; mode: string; round: number; title: string }[];
   solo2xDefault: boolean;
+  signedInSolo?: ReturnType<typeof cloudSolo>;
+  onCloudSoloSettled: (result: CloudSoloSettlement) => void;
   onStartLocalDuel: (state: DuelState) => void;
   onUpdateLocalDuel: (state: DuelState | null) => void;
   onSubmitLiveAction: (action: TurnActionInput) => boolean;
@@ -143,6 +144,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   worldConnected,
   activeLiveDuels,
   solo2xDefault,
+  signedInSolo,
+  onCloudSoloSettled,
   onStartLocalDuel,
   onUpdateLocalDuel,
   onSubmitLiveAction,
@@ -152,6 +155,10 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   onDuelFinished,
   onClose,
 }) => {
+  const cloudPending = useRef(false);
+  const cloudRevision = useRef(0);
+  const [cloudBusy, setCloudBusy] = useState(false);
+  const [cloudError, setCloudError] = useState('');
   const [localDuel, setLocalDuel] = useState<DuelState | null>(null);
   const [speed2x, setSpeed2x] = useState(solo2xDefault);
   const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
@@ -161,6 +168,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   const [discardMode, setDiscardMode] = useState(false);
   const [discardSet, setDiscardSet] = useState<number[]>([]);
   const [enchantModeIdx, setEnchantModeIdx] = useState<number | null>(null);
+  const [liveEnchantPair, setLiveEnchantPair] = useState<TurnActionInput['enchantPair']>();
   const [archmastery, setArchmastery] = useState<ElementId>(wizard.elementId);
   const [trialTargetElement, setTrialTargetElement] = useState<ElementId | undefined>(undefined);
   const [rewardClaimed, setRewardClaimed] = useState(false);
@@ -173,7 +181,15 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   useEffect(() => {
     turnInFlight.current = false;
     setTurnPending(false);
-  }, [duel?.duelId, duel?.round, duel?.phase, worldConnected]);
+    setEnchantModeIdx(null);
+    setLiveEnchantPair(undefined);
+    if (liveDuelState) {
+      setSelectedCardIdx(null);
+      setSelectedSideIdx(null);
+      setDiscardSet([]);
+      setDiscardMode(false);
+    }
+  }, [duel?.duelId, duel?.round, duel?.phase, worldConnected, Boolean(liveDuelState)]);
 
   useEffect(() => () => {
     if (localTimer.current) clearTimeout(localTimer.current);
@@ -191,153 +207,48 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     return () => clearInterval(id);
   }, [duel?.duelId, duel?.round, duel?.phase, turnDeadline]);
 
-  function buildPlayerCombatant(gearlessSpire = false): CombatantState {
-    const { roster: duelRoster, activeCreatureIdx } = pickDuelCreatureRoster(creatures, wizard.activeCreatureId);
-    const activeTalents = duelRoster[activeCreatureIdx]?.talents ?? creatures[0]?.talents ?? [];
-    const stats = gearlessSpire
-      ? { maxHp: 460, powerPct: 5, accuracyBonus: 2, piercePct: 2, critPct: 10, blockPct: 8 }
-      : computeWizardDerivedStats({
-          level: wizard.level,
-          raceId: wizard.raceId,
-          element: wizard.elementId,
-          equippedGearIds: Object.values(wizard.wardrobe.equipped),
-          socketedRunestoneIds: wizard.wardrobe.socketedRunestones,
-          creatureTalents: activeTalents,
-        });
-
-    const spellUnlockState = {
-      rank: wizard.rank,
-      unlockedElements: wizard.progression.unlockedElements,
-      unlockedFusions: wizard.progression.unlockedFusions,
-    };
-    const isSpellUsable = (spellId: string) => {
-      const spell = SPELL_BY_ID[spellId];
-      return Boolean(spell && !getSpellUseLockReason(spell, spellUnlockState));
-    };
-    const starterDeck = getStarterDeckForElement(wizard.elementId).filter(isSpellUsable);
-    const fallbackDeck = starterDeck.length > 0 ? starterDeck : getStarterDeckForElement('ember');
-    const deckList = gearlessSpire ? [...starterDeck] : wizard.progression.deck.filter(isSpellUsable);
-    while (deckList.length < 24) deckList.push(fallbackDeck[deckList.length % fallbackDeck.length] ?? 'ember_cinder_dart');
-    const shuffled = [...deckList].sort(() => Math.random() - 0.5);
-
-    const c: CombatantState = {
-      id: wizard.id,
-      name: wizard.name,
-      isPlayer: true,
-      raceId: wizard.raceId,
-      element: wizard.elementId,
-      archmasteryElement: archmastery,
-      hp: stats.maxHp,
-      maxHp: stats.maxHp,
-      powerPips: 1,
-      regularPips: 1,
-      schoolPips: 1,
-      accuracyBonus: stats.accuracyBonus,
-      powerBonusPct: stats.powerPct,
-      piercePct: stats.piercePct,
-      critPct: stats.critPct,
-      blockPct: stats.blockPct,
-      stunnedTurns: 0,
-      stunBlocks: 0,
-      blades: [],
-      shields: [],
-      traps: [],
-      weaknesses: [],
-      prisms: [],
-      dots: [],
-      statusEffects: [],
-      hand: [],
-      deck: shuffled,
-      discard: [],
-      sideboard: wizard.progression.sideboard.filter(isSpellUsable),
-      spellwrighting: { ...wizard.progression.spellwrighting },
-      creatures: duelRoster.map((pet) => ownedCreatureToCombatSlot(pet)),
-      activeCreatureIdx,
-    };
-    drawUpToSeven(c);
-    return c;
+  function runCloudSolo(operation: () => Promise<void>) {
+    if (cloudPending.current) return;
+    cloudPending.current = true;
+    setCloudBusy(true);
+    setCloudError('');
+    void operation().catch((error: unknown) => {
+      setCloudError(error instanceof Error ? error.message : 'The duel request failed. Try again.');
+    }).finally(() => {
+      cloudPending.current = false;
+      setCloudBusy(false);
+    });
   }
 
-  function launchSolo(mode: 'solo' | 'trial' | 'spire', el: ElementId, spireFloor?: number) {
+  function showCloudDuel(result: CloudSoloState) {
+    cloudRevision.current = result.revision;
+    setLocalDuel(result.duel);
+    onUpdateLocalDuel(result.duel);
+  }
+
+  function launchSolo(mode: SoloDuelMode, el: ElementId, spireFloor?: number) {
+    if (signedInSolo) {
+      runCloudSolo(async () => showCloudDuel(await signedInSolo.start(mode, el)));
+      return;
+    }
     setRewardClaimed(false);
     setTrialTargetElement(mode === 'trial' ? el : undefined);
-    const gearless = mode === 'spire';
-    const player = buildPlayerCombatant(gearless);
-    const enemyHp =
-      mode === 'trial'
-        ? 920
-        : mode === 'spire'
-          ? 380 + (spireFloor ?? 1) * 95
-          : 340 + wizard.level * 55;
-    const enemyDeck = mode === 'trial' ? getTrialGuardianDeckForElement(el) : getStarterDeckForElement(el);
-    const enemy: CombatantState = {
-      id: `npc_foe_${Date.now()}`,
-      name:
-        mode === 'trial'
-          ? `${ELEMENTS[el].name} Trial Guardian`
-          : mode === 'spire'
-            ? `Spire Sentinel Fl.${spireFloor ?? 1}`
-            : `Sky-Duelist (${ELEMENTS[el].name})`,
-      isPlayer: false,
-      isNpc: true,
-      raceId: mode === 'trial' ? 'astral_kin' : 'stoneborn',
-      element: el,
-      archmasteryElement: el,
-      hp: enemyHp,
-      maxHp: enemyHp,
-      powerPips: mode === 'trial' ? 2 : 1,
-      regularPips: 1,
-      schoolPips: 0,
-      accuracyBonus: mode === 'trial' ? 6 : 0,
-      powerBonusPct: mode === 'trial' ? 16 : 4,
-      piercePct: mode === 'trial' ? 8 : 0,
-      critPct: 10,
-      blockPct: 6,
-      stunnedTurns: 0,
-      stunBlocks: 0,
-      blades: [],
-      shields: [],
-      traps: [],
-      weaknesses: [],
-      prisms: [],
-      dots: [],
-      statusEffects: [],
-      hand: [],
-      deck: enemyDeck,
-      discard: [],
-      sideboard: [],
-      spellwrighting: {},
-      creatures: [],
-      activeCreatureIdx: 0,
-      bossCheatPattern:
-        mode === 'trial' ? (el === 'chronos' ? 'chronos_steal_pip' : 'shield_on_blade') : undefined,
-    };
-    drawUpToSeven(enemy);
-
-    const fresh: DuelState = {
-      duelId: `solo_${Date.now()}`,
-      mode,
-      spireFloor,
-      round: 1,
-      turnTimerSeconds: null, // Unlimited solo planning time
-      arenaBubble: null,
-      playerTeam: [player],
-      enemyTeam: [enemy],
-      firstTeam: 'player',
-      phase: 'planning',
-      logs: [`Battle engaged against ${enemy.name}! Solo timer: Unlimited.`],
-      telegraphedCheat: enemy.bossCheatPattern
-        ? 'Boss Cheat Active: Guardian reacts if you stack 2+ Blades or every 3rd Chronos round.'
-        : null,
-    };
+    const fresh = createSoloDuel(wizard, creatures, mode, el, archmastery, `solo_${Date.now()}`, spireFloor);
     setLocalDuel(fresh);
     onStartLocalDuel(fresh);
   }
 
   const handleCastOrPass = (pass = false) => {
-    if (!duel || duel.phase !== 'planning' || spectating || turnInFlight.current) return;
+    if (!duel || duel.phase !== 'planning' || spectating || turnInFlight.current || cloudPending.current) return;
     const me = duel.playerTeam[0];
     if (!me) return;
+    const chosen = selectedSideIdx !== null ? me.sideboard[selectedSideIdx]
+      : selectedCardIdx !== null ? me.hand[selectedCardIdx] : undefined;
+    if (!pass && chosen && SPELL_BY_ID[chosen.replace('+keen', '')]?.kind === 'enchant') return;
+    if (!pass && liveEnchantPair && (
+      !isValidInHandEnchantPair(me.hand, liveEnchantPair) ||
+      selectedCardIdx !== liveEnchantPair.targetCardIdx || selectedSideIdx !== null
+    )) return;
 
     const action: TurnActionInput = {
       actorId: me.id,
@@ -348,7 +259,24 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
       swapCreatureIdx: creatureMode === 'swap' ? swapIdx : undefined,
       discardIndices: discardSet.length > 0 ? discardSet : undefined,
       archmasteryElement: archmastery,
+      ...(liveDuelState && !pass && liveEnchantPair ? { enchantPair: liveEnchantPair } : {}),
     };
+
+    if (signedInSolo && !liveDuelState) {
+      runCloudSolo(async () => {
+        const result = await signedInSolo.round(duel.duelId, cloudRevision.current, action);
+        showCloudDuel(result);
+        setSelectedCardIdx(null);
+        setSelectedSideIdx(null);
+        setLiveEnchantPair(undefined);
+        setEnchantModeIdx(null);
+        setDiscardSet([]);
+        setDiscardMode(false);
+        setCreatureMode('skill');
+        academyAudio.playChime(result.duel.phase === 'victory' ? 'victory' : 'cast');
+      });
+      return;
+    }
 
     if (liveDuelState && !onSubmitLiveAction(action)) return;
     turnInFlight.current = true;
@@ -356,6 +284,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     academyAudio.playChime('cast');
     setSelectedCardIdx(null);
     setSelectedSideIdx(null);
+    setLiveEnchantPair(undefined);
+    setEnchantModeIdx(null);
     setDiscardSet([]);
     setDiscardMode(false);
     setCreatureMode('skill');
@@ -380,12 +310,37 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   };
 
   const handleInHandEnchant = (targetIdx: number) => {
-    if (enchantModeIdx === null || !duel || liveDuelState) return;
+    if (enchantModeIdx === null || !duel || turnInFlight.current || cloudPending.current) return;
     const me = duel.playerTeam[0];
-    const enchId = me.hand[enchantModeIdx];
-    const tgtId = me.hand[targetIdx];
-    if (!enchId || !tgtId || targetIdx === enchantModeIdx || !['attack', 'drain', 'aoe'].includes(SPELL_BY_ID[tgtId]?.kind)) {
+    const pair = { enchantCardIdx: enchantModeIdx, targetCardIdx: targetIdx };
+    if (!isValidInHandEnchantPair(me.hand, pair)) {
       setEnchantModeIdx(null);
+      return;
+    }
+    const tgtId = me.hand[targetIdx];
+    if (liveDuelState) {
+      // Do not mutate the server-owned hand. Bind the pair to the selected attack.
+      const spell = SPELL_BY_ID[tgtId];
+      if (totalAvailablePipsForSchool(me, spell.element) < spell.pipCost) {
+        setEnchantModeIdx(null);
+        return;
+      }
+      setLiveEnchantPair(pair);
+      setSelectedCardIdx(targetIdx);
+      setSelectedSideIdx(null);
+      setDiscardSet([]);
+      setEnchantModeIdx(null);
+      return;
+    }
+    if (signedInSolo) {
+      const source = enchantModeIdx;
+      runCloudSolo(async () => {
+        showCloudDuel(await signedInSolo.enchant(duel.duelId, cloudRevision.current, source, targetIdx));
+        setSelectedCardIdx(null);
+        setSelectedSideIdx(null);
+        setDiscardSet([]);
+        setEnchantModeIdx(null);
+      });
       return;
     }
     const copy = structuredClone(duel);
@@ -393,10 +348,22 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     copy.playerTeam[0].hand.splice(enchantModeIdx, 1);
     copy.logs.push(`In-Hand Fusion: Keen Ink boosted ${SPELL_BY_ID[tgtId]?.name ?? tgtId} (+65 Power, +8% Acc)!`);
     setLocalDuel(copy);
+    onUpdateLocalDuel(copy);
+    setSelectedCardIdx(null);
+    setSelectedSideIdx(null);
+    setDiscardSet([]);
     setEnchantModeIdx(null);
   };
 
   const handleClaimExit = (won: boolean) => {
+    if (signedInSolo && duel && !liveDuelState && !spectating) {
+      runCloudSolo(async () => {
+        const outcome = await signedInSolo.finish(duel.duelId);
+        onCloudSoloSettled(outcome);
+        onClose();
+      });
+      return;
+    }
     if (!rewardClaimed && duel && !spectating) {
       setRewardClaimed(true);
       const me = duel.playerTeam[0];
@@ -421,6 +388,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     const nextSpire = Math.min(10, wizard.progression.spireBestFloor + 1);
     return (
       <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#101522]/85 p-4">
+        {cloudError && <p role="alert" className="mt-2 rounded-lg bg-red-950 px-3 py-2 text-sm text-white">{cloudError}</p>}
         <div className="storybook-panel w-full max-w-4xl rounded-3xl p-6 max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-between border-b border-[#d7c7a9] pb-3">
             <div>
@@ -445,6 +413,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                 {(['ember', 'frost', 'gale', 'bramble', 'tide', 'spark'] as ElementId[]).map((el) => (
                   <button
                     key={el}
+                    disabled={cloudBusy}
                     onClick={() => launchSolo('solo', el)}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-[#d7c7a9] bg-[#fbf6ec] px-3 py-1.5 text-xs font-bold hover:border-[#241b16]"
                   >
@@ -473,7 +442,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                   return (
                     <button
                       key={el}
-                      disabled={locked}
+                      disabled={cloudBusy || locked}
                       onClick={() => launchSolo('trial', el)}
                       className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-bold ${
                         locked ? 'bg-[#ebe3d3] text-[#8a7d6b] cursor-not-allowed' : 'bg-[#fbf6ec] border-[#d7c7a9] hover:border-[#241b16]'
@@ -497,6 +466,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
               </div>
               <p className="text-xs text-[#615346]">Equalized 10-floor solo puzzle-duel climb where pure deck skill rules.</p>
               <button
+                disabled={cloudBusy}
                 onClick={() => launchSolo('spire', ELEMENT_LIST[nextSpire % 6].id, nextSpire)}
                 className="w-full rounded-xl bg-[#2f8a73] py-2 text-xs font-bold text-white hover:bg-[#389e85]"
               >
@@ -569,6 +539,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     <div className="fixed inset-0 z-40 flex flex-col justify-between bg-[#121829]/88 p-3 md:p-5 text-[#f7f0e2]">
       {/* Top Arena Status Bar */}
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d7c7a9]/30 bg-[#1e263d]/95 px-4 py-2.5">
+        {cloudError && <p role="alert" className="mt-2 rounded-lg bg-red-950 px-3 py-2 text-sm text-white">{cloudError}</p>}
         <div className="flex items-center gap-3">
           <span className="font-display text-lg font-bold">Round {duel.round}</span>
           <span className="rounded-lg bg-[#2a3554] px-2.5 py-0.5 text-xs font-semibold">
@@ -592,7 +563,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
           </button>
           {!isDuelComplete(duel.phase) && (
             <button
-              onClick={() => handleClaimExit(false)}
+              disabled={cloudBusy}
+                  onClick={() => handleClaimExit(false)}
               className="inline-flex items-center gap-1 rounded-xl border border-red-400/40 bg-red-950/50 px-3 py-1.5 text-xs font-bold text-red-200 hover:bg-red-900/60"
             >
               <Flag className="h-3.5 w-3.5" /> {spectating ? 'Leave Spectator View' : 'Flee'}
@@ -711,6 +683,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                 {duel.phase === 'victory' ? 'Victory Achieved!' : duel.phase === 'draw' ? 'Draw in the Ring' : 'Defeated in the Ring'}
               </div>
               <button
+                disabled={cloudBusy}
                 onClick={() => handleClaimExit(duel.phase === 'victory')}
                 className="mt-2 rounded-xl bg-[#f4c98b] px-5 py-2 text-xs font-bold text-[#241b16]"
               >
@@ -776,6 +749,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                 onClick={() => {
                   setDiscardMode((v) => !v);
                   setEnchantModeIdx(null);
+                  if (liveEnchantPair) setSelectedCardIdx(null);
+                  setLiveEnchantPair(undefined);
                 }}
                 className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 font-bold border ${
                   discardMode ? 'border-rose-400 bg-rose-900/60' : 'border-white/20 bg-[#27314d]'
@@ -783,6 +758,9 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
               >
                 <RefreshCw className="h-3.5 w-3.5" /> {discardMode ? `Cycle (${discardSet.length})` : 'Discard Cycle'}
               </button>
+              {liveEnchantPair && (
+                <span className="rounded-lg bg-amber-500/20 border border-amber-400 px-2.5 py-1 text-amber-200 font-bold">Keen Ink queued for this attack</span>
+              )}
               {enchantModeIdx !== null && (
                 <span className="rounded-lg bg-amber-500/20 border border-amber-400 px-2.5 py-1 text-amber-200 font-bold">
                   Click an Attack card to fuse Keen Ink (+65 Power)!
@@ -799,7 +777,11 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                 return (
                   <button
                     key={`${sid}_${idx}`}
+                    disabled={sp.kind === 'enchant'}
+                    title={sp.kind === 'enchant' ? 'Keen Ink can only fuse from your hand' : undefined}
                     onClick={() => {
+                      setLiveEnchantPair(undefined);
+                      setEnchantModeIdx(null);
                       setSelectedSideIdx(selectedSideIdx === idx ? null : idx);
                       setSelectedCardIdx(null);
                     }}
@@ -807,7 +789,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                       selectedSideIdx === idx ? 'border-[#f4c98b] bg-[#3b4b75]' : 'border-white/15 bg-[#141a2b]'
                     }`}
                   >
-                    {sp.name} ({sp.pipCost})
+                    {sp.name} {sp.kind === 'enchant' ? '(hand only)' : `(${sp.pipCost})`}
                   </button>
                 );
               })}
@@ -818,7 +800,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
             {/* 7-Card Hand */}
             <div className="flex flex-1 gap-2 overflow-x-auto py-1">
               {me.hand.map((rawId, idx) => {
-                const enchanted = rawId.endsWith('+keen');
+                const enchanted = rawId.endsWith('+keen') || liveEnchantPair?.targetCardIdx === idx;
                 const sp = SPELL_BY_ID[rawId.replace('+keen', '')];
                 if (!sp) return null;
                 const affordable = totalAvailablePipsForSchool(me, sp.element) >= sp.pipCost;
@@ -837,11 +819,16 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                         handleInHandEnchant(idx);
                         return;
                       }
-                      if (sp.kind === 'enchant' && !liveDuelState) {
+                      if (sp.kind === 'enchant') {
+                        setLiveEnchantPair(undefined);
+                        setSelectedCardIdx(null);
+                        setSelectedSideIdx(null);
+                        setDiscardSet([]);
                         setEnchantModeIdx(idx);
                         return;
                       }
                       if (!affordable) return;
+                      setLiveEnchantPair(undefined);
                       setSelectedCardIdx(isSelected ? null : idx);
                       setSelectedSideIdx(null);
                     }}
@@ -904,14 +891,14 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
             <div className="flex flex-col gap-2 shrink-0">
               <button
                 onClick={() => handleCastOrPass(false)}
-                disabled={turnPending || Boolean(liveDuelState && !worldConnected) || (selectedCardIdx === null && selectedSideIdx === null && discardSet.length === 0)}
+                disabled={cloudBusy || turnPending || Boolean(liveDuelState && !worldConnected) || (selectedCardIdx === null && selectedSideIdx === null && discardSet.length === 0)}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#f4c98b] px-5 py-2.5 text-xs font-bold text-[#241b16] disabled:opacity-45"
               >
                 <Wand2 className="h-4 w-4" /> Cast Turn
               </button>
               <button
                 onClick={() => handleCastOrPass(true)}
-                disabled={turnPending || Boolean(liveDuelState && !worldConnected)}
+                disabled={cloudBusy || turnPending || Boolean(liveDuelState && !worldConnected)}
                 className="rounded-xl border border-white/25 bg-[#27314d] px-4 py-1.5 text-xs font-semibold hover:bg-[#334063]"
               >
                 {turnPending ? 'Waiting for turn…' : 'Pass (+Gain Pip)'}

@@ -1,3 +1,4 @@
+import type { RunGameplayAction } from '../../../shared/gameplayActions.ts';
 import React, { useEffect, useState } from 'react';
 import { auth } from '../../lib/firebase.ts';
 import { Home, Sprout, Camera, Globe, Move } from 'lucide-react';
@@ -9,6 +10,7 @@ import { formatDormTourRating, type DormTourListing } from '../../../shared/dorm
 
 interface SanctuaryPanelProps {
   wizard: WizardDocument;
+  onCloudAction?: RunGameplayAction;
   sanctuary: SanctuaryState;
   galleryImages: string[];
   onUpdateWizard: (next: WizardDocument) => void;
@@ -20,6 +22,7 @@ interface SanctuaryPanelProps {
 
 export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
   wizard,
+  onCloudAction,
   sanctuary,
   galleryImages,
   onUpdateWizard,
@@ -49,6 +52,10 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
   }, [tab, wizard.realmId]);
 
   const placeItem = (catalogId: string) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'dormBuy', id: catalogId });
+      return;
+    }
     const def = DORM_CATALOG.find((i) => i.id === catalogId);
     if (!def || wizard.currencies.florins < def.priceFlorins) return;
     const angle = sanctuary.items.length * 0.9;
@@ -72,6 +79,10 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
   };
 
   const adjustPlaced = (uid: string, patch: Partial<{ x: number; y: number; z: number; scale: number; rotY: number }>) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'dormMove', id: uid, patch });
+      return;
+    }
     onUpdateSanctuary({
       ...sanctuary,
       items: sanctuary.items.map((it) => (it.uid === uid ? { ...it, ...patch } : it)),
@@ -79,6 +90,10 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
   };
 
   const plantGarden = (plotIdx: number, elId: typeof STARTER_ELEMENTS[number]['id']) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'gardenPlant', index: plotIdx, element: elId });
+      return;
+    }
     const now = Date.now();
     const gardens = [...sanctuary.gardens];
     while (gardens.length <= plotIdx) {
@@ -89,6 +104,10 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
   };
 
   const harvestGarden = (plotIdx: number) => {
+    if (onCloudAction) {
+      void onCloudAction({ type: 'gardenHarvest', index: plotIdx });
+      return;
+    }
     const g = sanctuary.gardens[plotIdx];
     if (!g || !g.seedElement || Date.now() < g.readyAt) return;
     const gardens = sanctuary.gardens.map((p, i) => (i === plotIdx ? { ...p, seedElement: null, plantedAt: 0, readyAt: 0 } : p));
@@ -192,7 +211,7 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
                 {DORM_THEMES.map((th) => (
                   <button
                     key={th.id}
-                    onClick={() => onUpdateSanctuary({ ...sanctuary, themeId: th.id })}
+                    onClick={() => onCloudAction ? void onCloudAction({ type: 'dormTheme', id: th.id }) : onUpdateSanctuary({ ...sanctuary, themeId: th.id })}
                     className={`rounded-xl px-3 py-1.5 font-bold border ${
                       sanctuary.themeId === th.id ? 'border-[#241b16] bg-[#241b16] text-white' : 'border-[#d7c7a9] bg-[#fbf6ec]'
                     }`}
@@ -205,7 +224,7 @@ export const SanctuaryPanel: React.FC<SanctuaryPanelProps> = ({
                 {DORM_WEATHERS.map((w) => (
                   <button
                     key={w}
-                    onClick={() => onUpdateSanctuary({ ...sanctuary, weatherId: w })}
+                    onClick={() => onCloudAction ? void onCloudAction({ type: 'dormWeather', id: w }) : onUpdateSanctuary({ ...sanctuary, weatherId: w })}
                     className={`rounded-lg px-2.5 py-1 capitalize border ${
                       sanctuary.weatherId === w ? 'border-[#38a3a5] bg-[#38a3a5] text-white' : 'border-[#d7c7a9]'
                     }`}
