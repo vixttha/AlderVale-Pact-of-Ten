@@ -37,7 +37,7 @@ Water + Metal = Rust; Light + Plant = Sugar; Earth + Metal = Magnetism. These ar
 
 The existing matchup helper uses 0.85x mirror, 1.25x opposition, and 1.0x neutral. Retaining those values for the new ten-school matrix is a proposal, not a balance lock. All 100 directed cells would be covered. Suggested tactical identities: Fire sustained damage/burst; Water adaptation/cleanse; Lightning burst/disruption; Frost control/mitigation; Wind speed/accuracy; Earth stability/heavy impacts; Light purification/empowerment; Dark weakening/drain; Metal penetration/reinforcement; Plant recovery/restraint. Not final spell kits or balance.
 
-Open: starter/rare access, school switching, point economy, exact spell and status mechanics, creature counts/growth stages, affinity rules, fusion acquisition and combat costs, data migration for Chronos and legacy fusion IDs, final visual crests/palettes. No fixed creature or fusion quota.
+Open: detailed school switching, point economy, exact spell and status mechanics, creature counts/growth stages, detailed affinity rules, fusion acquisition and combat costs, data migration for Chronos and legacy fusion IDs, final visual crests/palettes. The access foundation is locked below. No fixed creature or fusion quota.
 
 ## Proposed migration sequence (no game writes)
 
@@ -49,11 +49,19 @@ Open: starter/rare access, school switching, point economy, exact spell and stat
 
 Existing milestone expired; milestone fit unverified for new gameplay changes. Use standard public GitHub-hosted runners only; no spending, deployment, release or merge authorized by this design record.
 
-## Element access — hybrid B/C/D proposal (2026-11-24)
+## Element access — hybrid B/C/D (owner locked 2026-11-24)
 
-**Preference recorded:** C is liked, with interest also in B and D. No final hybrid, numerical limits, gates or implementation are approved.
+**Owner-approved — LOCKED (EA-001).** This supersedes the earlier preference-only record. The owner explicitly approved the combined summary and requested the lock.
 
-Proposed design: all ten schools are selectable as a single primary affinity at character creation (C). Every school offers a viable introductory kit without a rarity-based power premium. The remaining nine schools may be discovered and learned through optional world quests, trials and mentors (B + D); this is not a six/four restriction on initial choice. Distinguish discovery (knowledge), school access (permission), mastery (earned progression), and equipped abilities (active build). Preserve learned knowledge on respec; exact respec and equip rules remain open. A player can remain a primary-school specialist without mandatory multi-school grind.
+- All ten elements selectable at character creation.
+- Additional elements discovered through exploration and trials.
+- Advanced power earned through mastery.
+- Potentially all ten schools learnable, with two equipped affinities at a time.
+- Fusion techniques earned separately.
+
+The architecture supports potentially learning all ten, not a guarantee of specific unlocks; maximum two equipped affinities at a time. Detailed unlock requirements, balance and implementation are not locked. Only explicit owner approval may change this foundation.
+
+Design elaboration (details remain proposed): all ten schools are selectable as a single primary affinity at character creation (C). Every school offers a viable introductory kit without a rarity-based power premium. The remaining nine schools may be discovered and learned through optional world quests, trials and mentors (B + D); this is not a six/four restriction on initial choice. Distinguish discovery (knowledge), school access (permission), mastery (earned progression), and equipped abilities (active build). Preserve learned knowledge on respec; exact respec and equip rules remain open. A player can remain a primary-school specialist without mandatory multi-school grind.
 
 | Stage | Proposed result |
 | --- | --- |
@@ -67,6 +75,6 @@ Illustrative Water path: choose Water, learn basic spells, optionally discover M
 
 Related existing proposals: [mastery feasibility](skill-tree-feasibility-2026-11-18.md) and [Fusion Library](fusion-system-revamp-proposal.md). Keep point allocations separate from permanent discovery; no race-exclusive mandatory access, duplicate point grants, or permanent rarity power advantage in the recommended model. Existing legacy rare tiers and unlocks require migration rather than direct promotion.
 
-Open owner choices: one vs multiple learned secondary schools; one vs multiple equipped secondary schools; whether primary can switch; exact unlock trials, point schedule and respec cost; whether race changes access; how cross-school spells are gated and balanced. Recommend learning all ten eventually while limiting active secondary loadout to one initially; this is a proposal, not a lock.
+Open owner choices: exact attainable school unlocks within the potentially ten-school architecture; whether primary can switch; timing and rules of equipping a secondary within the two-affinity cap; exact unlock trials, point schedule and respec cost; how race flavor and cross-school spells interact with universal initial selection. Worked examples and suggested guarantees outside the five locked clauses remain proposals. No mandatory two-affinity loadout.
 
 Future acceptance tests: all ten selectable with viable decks; no invalid ID or unauthorized secondary access; unlock/retry idempotence and save/reload; primary-only completion; legal loadout and unchanged primary matchup; separate resonance discovery and equip checks; no legacy save loss. No gameplay changes until authorized.
