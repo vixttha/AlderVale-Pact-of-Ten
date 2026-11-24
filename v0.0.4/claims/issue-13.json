@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "issueNumber": 13,
   "claimId": "AV-CLAIM-13-2026-11-24T12:44:04Z",
-  "status": "active",
+  "status": "released",
   "worker": "chatgpt-vib-worker",
   "host": "chatgpt.com",
   "model": "GPT-6.2",
@@ -12,5 +12,5 @@
   "workBranch": "ci/issue-13-campus-quests",
   "claimedAt": "2026-11-24T12:44:04Z",
   "expiresAt": "2026-11-24T13:44:04Z",
-  "note": "Owner requested #70 then #13 completion. #70 integrated and closed. Prior #13 claim released; resume existing draft PR #129 only. Remaining reward-path verification and repairs within established behavior; no merge or closure authorization inferred."
+  "note": "Owner requested #70 then #13 completion. #70 integrated and closed. Prior #13 claim released; resume existing draft PR #129 only. Remaining reward-path verification and repairs within established behavior; no merge or closure authorization inferred. | Owner-authorized exact-SHA closeout: #13 closed completed, VIB integrated b7da1f410b280e3a6896b8e1901fc5278172d6b1; all seven public runner jobs passed on 3f8fc59317cca811f2958b6871737cc68e167376. Released 2026-11-24T13:22:02.868Z."
 }
