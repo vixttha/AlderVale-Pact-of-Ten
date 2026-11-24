@@ -23,3 +23,5 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 [Hearth Gate R2 — carved sanctuary](art/open-hearth/hearth-gate-r2/README.md) — four refinement candidates; R1 preserved.
 
 [Hearth Gate R3 — Eternal Ember](art/open-hearth/hearth-gate-r3/README.md) — candidate variants and three world-surface studies, R2 preserved, owner acceptance pending.
+
+R3 is now the owner-approved leading candidate; final lock requires separate BART 3D evaluation and owner visual acceptance. Current writing focus: [The Cold Hearth historical treatment](canon/fire-founding-partnership.md#sixth-review--historical-treatment-the-cold-hearth), candidate history only.

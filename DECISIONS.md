@@ -33,3 +33,7 @@ Owner authorizes another refinement of R1 focused on flame distinction, justifie
 ## Hearth Gate R3 authorization
 
 Owner explicitly requests preserve R2, refine R3 and evaluate fantasy-world surfaces before locking. All artwork and surface uses remain candidate; no final canon, production, merge or release approval.
+
+## R3 leading candidate and Fire history — 2026-11-24
+
+Owner approves retaining R3 as leading candidate and genuine 3D evaluation of stone monument, bronze plaque and cloth banner via BART before permanent emblem lock. Owner requests focus on Maren and Avarn histories now. Preserve exact R3, all prior artwork and approved architecture. BART evaluation authorized, pending; no final artwork, biography, names, dates, gameplay, merge or release accepted. See sixth review in [Fire dossier](canon/fire-founding-partnership.md).

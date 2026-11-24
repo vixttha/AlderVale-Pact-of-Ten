@@ -9,3 +9,5 @@ B02 Hearth Gate preferred for now. Review [R1 variants](art/open-hearth/hearth-g
 Review R2 carved sanctuary against preserved R1. Hold Water until Fire identity/history and emblem accepted; no production adoption.
 
 Review [R3 and surface studies](art/open-hearth/hearth-gate-r3/README.md) against preserved R2; resolve Fire identity/history and visual acceptance before Water. Physical fabrication and actual game-scene verification separate.
+
+Current focus: [Fire historical treatment — The Cold Hearth](canon/fire-founding-partnership.md#sixth-review--historical-treatment-the-cold-hearth), owner review of Maren/Avarn personal histories and shared crisis. R3 accepted as leading candidate only. Separate approved BART evaluation: genuine 3D stone monument, bronze plaque and cloth banner; preserve master shapes, record BART revision, asset provenance, material/geometry and renderer evidence on free public runners before final visual acceptance. Pending, not executed in history pass. Water held.
