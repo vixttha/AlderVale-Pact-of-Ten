@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "world_id": "aldervale",
+  "records": [
+    {
+      "id": "AV-WORLD-001",
+      "kind": "world",
+      "status": "approved_direction",
+      "name": "AlderVale: Pact of Ten",
+      "summary": "Expandable living fantasy world; ten school strongholds are not the limit of geography."
+    },
+    {
+      "id": "AV-CITY-001",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Veyrath",
+      "school": "Fire"
+    },
+    {
+      "id": "AV-CITY-002",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Orsenn",
+      "school": "Water"
+    },
+    {
+      "id": "AV-CITY-003",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Tavrik",
+      "school": "Lightning"
+    },
+    {
+      "id": "AV-CITY-004",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Iskeld",
+      "school": "Frost"
+    },
+    {
+      "id": "AV-CITY-005",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Avelis",
+      "school": "Wind"
+    },
+    {
+      "id": "AV-CITY-006",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Durnovar",
+      "school": "Earth"
+    },
+    {
+      "id": "AV-CITY-007",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Serevan",
+      "school": "Light"
+    },
+    {
+      "id": "AV-CITY-008",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Nhalem",
+      "school": "Dark"
+    },
+    {
+      "id": "AV-CITY-009",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Korr",
+      "school": "Metal"
+    },
+    {
+      "id": "AV-CITY-010",
+      "kind": "city",
+      "status": "candidate",
+      "name": "Ossara",
+      "school": "Plant"
+    },
+    {
+      "id": "AV-RACE-001",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "human"
+    },
+    {
+      "id": "AV-RACE-002",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "stoneborn"
+    },
+    {
+      "id": "AV-RACE-003",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "dryad"
+    },
+    {
+      "id": "AV-RACE-004",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "beastfolk"
+    },
+    {
+      "id": "AV-RACE-005",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "tide_siren"
+    },
+    {
+      "id": "AV-RACE-006",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "river_naiad"
+    },
+    {
+      "id": "AV-RACE-007",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "sky_avian"
+    },
+    {
+      "id": "AV-RACE-008",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "cloud_sylph"
+    },
+    {
+      "id": "AV-RACE-009",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "dwarf"
+    },
+    {
+      "id": "AV-RACE-010",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "high_elf"
+    },
+    {
+      "id": "AV-RACE-011",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "dark_elf"
+    },
+    {
+      "id": "AV-RACE-012",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "draconic_kin"
+    },
+    {
+      "id": "AV-RACE-013",
+      "kind": "playable_race",
+      "status": "existing_roster",
+      "name": "astral_kin"
+    },
+    {
+      "id": "AV-CLASS-001",
+      "kind": "creature_class",
+      "status": "approved_direction",
+      "name": "Wildlife"
+    },
+    {
+      "id": "AV-CLASS-002",
+      "kind": "creature_class",
+      "status": "approved_direction",
+      "name": "Magical beast"
+    },
+    {
+      "id": "AV-CLASS-003",
+      "kind": "creature_class",
+      "status": "approved_direction",
+      "name": "Elemental"
+    },
+    {
+      "id": "AV-CLASS-004",
+      "kind": "creature_class",
+      "status": "approved_direction",
+      "name": "Spirit"
+    },
+    {
+      "id": "AV-CLASS-005",
+      "kind": "creature_class",
+      "status": "approved_direction",
+      "name": "Construct"
+    },
+    {
+      "id": "AV-CLASS-006",
+      "kind": "creature_class",
+      "status": "approved_direction",
+      "name": "Divine being"
+    },
+    {
+      "id": "AV-STORY-001",
+      "kind": "campaign",
+      "status": "unwritten",
+      "name": "Main campaign"
+    },
+    {
+      "id": "AV-ERA-001",
+      "kind": "history",
+      "status": "unwritten",
+      "name": "Historical eras"
+    },
+    {
+      "id": "AV-SECRET-001",
+      "kind": "secret",
+      "status": "candidate",
+      "name": "Hidden discoveries"
+    },
+    {
+      "id": "AV-LIFE-001",
+      "kind": "activity",
+      "status": "candidate",
+      "name": "Optional social and everyday interactions"
+    }
+  ]
+}

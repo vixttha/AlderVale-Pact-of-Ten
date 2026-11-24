@@ -1,0 +1,20 @@
+name: Universe HQ documents
+on:
+  push:
+    branches: [universe-hq]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: universe-hq-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - run: python3 tools/validate_universe.py
