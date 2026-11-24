@@ -1,0 +1,27 @@
+name: VIB issue 70 independent-process recovery check
+on:
+  push:
+    branches: ['ops/vib-issue-70-recovery-check']
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+jobs:
+  recover:
+    if: github.repository == 'vixttha/AlderVale-Pact-of-Ten' && github.event.repository.private == false && github.event.created == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.12'
+      - name: Recover VIB checkpoint using installed package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m acceptance_issue70 | tee "$GITHUB_STEP_SUMMARY"
