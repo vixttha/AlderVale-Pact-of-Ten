@@ -1,0 +1,9 @@
+{
+  "issueNumber": 70,
+  "claimId": "vib-aldervale-70-20261124",
+  "status": "active",
+  "worker": "chatgpt-vib-worker",
+  "expiresAt": "2026-11-24T15:00:00Z",
+  "baseSha": "a6c2060b8175f505cc6327ccb5658cc00a458b24",
+  "workBranch": "ci/vib-issue-70-keen-ink"
+}
