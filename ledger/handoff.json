@@ -3,12 +3,28 @@
   "active": {
     "issue": 70,
     "version": "v0.0.0.1",
-    "phase": "Validate",
-    "next_action": "Inspect the exact PR #185 proposed-merge checkout and public game, Graphify and Test Vault runs. Reject incomplete or failing evidence; return to Worker for corrections.",
-    "fix_sha": "14afa25c5f2e6185db36567f51c744b4d5d9d2ed",
-    "candidate_sha": "14afa25c5f2e6185db36567f51c744b4d5d9d2ed",
-    "pull_request": 185,
+    "phase": "Worker",
+    "next_action": "Internal review found live starter cards excluded Keen Ink from hand; move the already granted copy into the opening hand and cover both real PvP and co-op WebSocket rounds. Retain prior candidate evidence.",
+    "fix_sha": null,
+    "candidate_sha": null,
+    "pull_request": null,
     "evidence": []
   },
-  "history": []
+  "history": [
+    {
+      "handoff": {
+        "issue": 70,
+        "version": "v0.0.0.1",
+        "phase": "Validate",
+        "next_action": "Inspect the exact PR #185 proposed-merge checkout and public game, Graphify and Test Vault runs. Reject incomplete or failing evidence; return to Worker for corrections.",
+        "fix_sha": "14afa25c5f2e6185db36567f51c744b4d5d9d2ed",
+        "candidate_sha": "14afa25c5f2e6185db36567f51c744b4d5d9d2ed",
+        "pull_request": 185,
+        "evidence": []
+      },
+      "disposition": "rework",
+      "decision": "Internal review found live starter cards excluded Keen Ink from hand; move the already granted copy into the opening hand and cover both real PvP and co-op WebSocket rounds. Retain prior candidate evidence.",
+      "merged_sha": null
+    }
+  ]
 }
