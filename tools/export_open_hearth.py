@@ -66,3 +66,46 @@ for name,digest in expected.items():
     print('Review B:',name,digest,'1024 RGBA; open threshold; 48px light/dark proof')
 shutil.copyfile(source_b/'README.md',out_b/'README.md')
 print('Five review B SVG masters match chat source SHA-256; five transparent PNGs exported. Visual approval pending.')
+
+# R1: four coordinated variants; older review sets remain independently checked.
+r1=source/'hearth-gate-r1'
+r1out=out/'hearth-gate-r1'
+r1out.mkdir(parents=True,exist_ok=True)
+r1names=['01-hero','02-simple-icon','03-monochrome','04-dark-background']
+assert sorted(p.stem for p in r1.glob('*.svg'))==r1names
+geometry={}
+for name in r1names:
+    raw=(r1/(name+'.svg')).read_bytes()
+    svg=ET.fromstring(raw)
+    assert svg.tag==ns+'svg' and svg.attrib['viewBox']=='0 0 256 256'
+    assert all(el.tag in {ns+'svg',ns+'path'} for el in svg.iter())
+    assert all(not any(k.lower().startswith('on') or 'href' in k.lower() or 'url(' in v for k,v in el.attrib.items()) for el in svg.iter())
+    shapes=list(svg)
+    geometry[name]=shapes[0].attrib['d']
+    if name=='03-monochrome':
+        assert {el.attrib['fill'] for el in shapes}=={'#27251F'}
+        assert shapes[-1].attrib.get('fill-rule')=='evenodd'
+    (r1out/(name+'.svg')).write_bytes(raw)
+    for size in (32,96,1024):
+        png=cairosvg.svg2png(bytestring=raw,output_width=size,output_height=size)
+        from io import BytesIO
+        with Image.open(BytesIO(png)) as im:
+            assert im.mode=='RGBA' and im.size==(size,size)
+            alpha=im.getchannel('A')
+            assert alpha.getextrema()==(0,255)
+            assert all(alpha.getpixel(xy)==0 for xy in [(0,0),(size-1,0),(0,size-1),(size-1,size-1)])
+            assert alpha.crop((int(size*.47),int(size*.77),int(size*.53),size)).getbbox() is None,name+' closed threshold'
+            if name=='03-monochrome':
+                assert alpha.getpixel((int(size*129/256),int(size*165/256)))==0,'monochrome cutout filled'
+            if size==1024:
+                (r1out/(name+'.png')).write_bytes(png)
+            else:
+                proof=Image.new('RGBA',(size*2+24,size+16),(243,238,228,255))
+                proof.paste((34,38,34,255),(size+12,0,size*2+24,size+16))
+                proof.alpha_composite(im,(6,8));proof.alpha_composite(im,(size+18,8))
+                proof.convert('RGB').save(r1out/(name+'-'+str(size)+'-proof.png'))
+    print('Hearth Gate R1:',name,hashlib.sha256(raw).hexdigest(),'32/96/1024 render; transparent opening')
+assert len(set(geometry.values()))==1,'inconsistent gate silhouette'
+assert [el.attrib['d'] for el in ET.parse(r1/'01-hero.svg').getroot()]==[el.attrib['d'] for el in ET.parse(r1/'04-dark-background.svg').getroot()]
+shutil.copyfile(r1/'README.md',r1out/'README.md')
+print('Hearth Gate R1: four SVG and PNG pairs; shared gate geometry; monochrome cutout; dark hero geometry; visual acceptance pending.')

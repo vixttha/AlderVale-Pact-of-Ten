@@ -17,3 +17,5 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 [Open Hearth seal studies](art/open-hearth/README.md) — five editable vector candidates, PNG exports generated on the public runner; no selected emblem.
 
 [Open Hearth review set B](art/open-hearth/review-b/README.md) — five chat alternatives, separate from preserved set A. Owner selects before production.
+
+[Hearth Gate R1](art/open-hearth/hearth-gate-r1/README.md) — current preferred direction, four coordinated variants; final approval pending.

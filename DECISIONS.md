@@ -21,3 +21,7 @@ Owner requests relationship refinement, deliberate meaningful biographies, explo
 ## Founding Covenant and Foundational/Derived School acceptance — 2026-11-24
 
 Owner explicitly accepts both architecture decisions and authorizes development of the Fire magician and Sovereign together as the first complete historical partnership. AV-COVMODEL-001 and AV-ARCH-001 approved direction; individual historical details, names, dates, titles, gameplay, art, other pairs and institutions not approved. Preserve EA-001/FQ-001, Pact meaning, no new playable recipes. [Fire candidate](canon/fire-founding-partnership.md). No merge/release authority.
+
+## Hearth Gate preference — 2026-11-24
+
+Owner selects B02 Hearth Gate for now and authorizes hero, simple icon, monochrome and dark-surface refinements plus continued Fire pair review. Preferred direction only; no final seal, names, canon, production assets, gameplay or merge accepted. Preserve both previous sets. See [R1](art/open-hearth/hearth-gate-r1/README.md).

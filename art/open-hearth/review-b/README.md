@@ -11,3 +11,5 @@ Preserve set A in the parent directory. These are the five alternative images sh
 | B05 Keeper of Warmth | Paired sculpted arms shelter an ember |
 
 Editable path-based SVG, transparent 1024x1024 PNG and small light/dark proofs exported on public CI. Chat PNGs are separately rendered from identical SVGs using CairoSVG 2.8.2; renderer bytes can differ. Recommended B03 for ceremonial heraldry, B04 for Sovereign symbolism; no selection inferred. External similarity and monochrome production proofs remain pending. No final canon, production import or Water work.
+
+Owner prefers B02 Hearth Gate provisionally; [R1 four-variant refinement](../hearth-gate-r1/README.md). All prior studies retained.
