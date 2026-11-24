@@ -47,6 +47,11 @@ export function createSoloDuel(
     const deckList = gearlessSpire ? [...starterDeck] : wizard.progression.deck.filter(isSpellUsable);
     while (deckList.length < 24) deckList.push(fallbackDeck[deckList.length % fallbackDeck.length] ?? 'ember_cinder_dart');
     const shuffled = [...deckList].sort(() => random() - 0.5);
+    const sideboard = wizard.progression.sideboard.filter(isSpellUsable);
+    // Enchants are in-hand only. Move the already-owned sideboard copies into
+    // this duel's draw pile without changing the saved deck or granting cards.
+    const enchants = sideboard.filter(id => SPELL_BY_ID[id]?.kind === 'enchant');
+    const [openingEnchant, ...remainingEnchants] = enchants;
 
     const c: CombatantState = {
       id: wizard.id,
@@ -75,9 +80,9 @@ export function createSoloDuel(
       dots: [],
       statusEffects: [],
       hand: [],
-      deck: shuffled,
+      deck: openingEnchant ? [openingEnchant, ...shuffled, ...remainingEnchants] : shuffled,
       discard: [],
-      sideboard: wizard.progression.sideboard.filter(isSpellUsable),
+      sideboard: sideboard.filter(id => SPELL_BY_ID[id]?.kind !== 'enchant'),
       spellwrighting: { ...wizard.progression.spellwrighting },
       creatures: duelRoster.map((pet) => ownedCreatureToCombatSlot(pet)),
       activeCreatureIdx,

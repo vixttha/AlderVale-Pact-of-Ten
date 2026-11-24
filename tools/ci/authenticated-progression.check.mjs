@@ -143,6 +143,39 @@ test('a signed-in solo win settles once and earns one Term claim', { timeout: 55
   assert.deepEqual(preserved.get('claimedTermTiers'), [2]);
 });
 
+test('G09-003 signed-in solo moves existing Keen Ink into hand and fuses through the authenticated endpoint', { timeout: 55000 }, async () => {
+  const player = await createPlayer();
+  const { wizardId } = player;
+  const ink = 'uni_enchant_keen';
+  const attack = 'ember_cinder_dart';
+  const start = await call(player, 'solo/start', { wizardId, mode: 'solo', element: 'ember' });
+  const { duelId } = start.duel;
+  const actor = start.duel.playerTeam[0];
+  assert.equal(actor.hand.filter(id => id === ink).length, 1);
+  assert.equal(actor.sideboard.includes(ink), false);
+  const source = actor.hand.indexOf(ink);
+  const roomRef = cloudDb.collection('worldRealms').doc('breeze').collection('soloDuels').doc(wizardId);
+  const initial = (await roomRef.get()).data();
+  // Reject a real standalone cast without consuming the card or advancing revision.
+  await call(player, 'solo/round', { wizardId, duelId, revision: start.revision, action: { cardIndex: source, creatureAction: 'none' } }, 400);
+  assert.deepEqual((await roomRef.get()).data(), initial);
+  // Controlled hand after real start avoids random draw assumptions.
+  const state = initial.state;
+  state.playerTeam[0].hand = [ink, attack];
+  await roomRef.update({ state });
+  await call(player, 'solo/enchant', { wizardId, duelId, revision: start.revision, source: 0, target: 0 }, 400);
+  const fused = await call(player, 'solo/enchant', { wizardId, duelId, revision: start.revision, source: 0, target: 1 });
+  assert.equal(fused.revision, start.revision + 1);
+  assert.deepEqual(fused.duel.playerTeam[0].hand, [attack + '+keen']);
+  const replay = await call(player, 'solo/enchant', { wizardId, duelId, revision: start.revision, source: 0, target: 1 });
+  assert.equal(replay.revision, fused.revision);
+  assert.deepEqual(replay.duel.playerTeam[0].hand, [attack + '+keen']);
+  const round = await call(player, 'solo/round', { wizardId, duelId, revision: fused.revision, action: { cardIndex: 0, creatureAction: 'none' } });
+  assert.equal(round.revision, fused.revision + 1);
+  assert.ok(round.duel.playerTeam[0].discard.includes(attack) || round.duel.playerTeam[0].hand.includes(attack + '+keen'));
+  await call(player, 'solo/finish', { wizardId, duelId });
+});
+
 test('leaving an unfinished signed-in duel creates no earned rewards', { timeout: 45000 }, async () => {
   const player = await createPlayer();
   const { wizardId } = player;
