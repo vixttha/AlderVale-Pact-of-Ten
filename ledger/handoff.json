@@ -3,11 +3,11 @@
   "active": {
     "issue": 70,
     "version": "v0.0.0.1",
-    "phase": "Worker",
-    "next_action": "Internal review found live starter cards excluded Keen Ink from hand; move the already granted copy into the opening hand and cover both real PvP and co-op WebSocket rounds. Retain prior candidate evidence.",
-    "fix_sha": null,
-    "candidate_sha": null,
-    "pull_request": null,
+    "phase": "Validate",
+    "next_action": "Verify exact updated PR checkout: unit, real socket fusion, browser, emulator, Graphify and Test Vault. Return to Head only after reviewing evidence.",
+    "fix_sha": "bdf82c0859a2d7511bc643f270e4612a94ef6727",
+    "candidate_sha": "bdf82c0859a2d7511bc643f270e4612a94ef6727",
+    "pull_request": 185,
     "evidence": []
   },
   "history": [
