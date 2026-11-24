@@ -1,6 +1,8 @@
 import struct
 import json
 import unittest
+import hashlib
+from unittest.mock import patch
 from avarn_intake import load_glb, verify_source, guarded_region, contact_counts, PADS
 
 class IntakeTests(unittest.TestCase):
@@ -14,6 +16,21 @@ class IntakeTests(unittest.TestCase):
             load_glb(raw[:-1])
         with self.assertRaisesRegex(ValueError,"SHA-256"):
             verify_source(raw)
+
+    def test_same_size_wrong_digest_rejected_before_geometry(self):
+        raw = b"same-size-source"
+        digest = hashlib.sha256(b"wrong").hexdigest()
+        with patch("avarn_intake.SOURCE_SIZE", len(raw)), patch("avarn_intake.SOURCE_SHA", digest), patch("avarn_intake.geometry") as decode:
+            with self.assertRaisesRegex(ValueError, "SHA-256"):
+                verify_source(raw)
+            decode.assert_not_called()
+
+    def test_same_size_matching_digest_reaches_geometry(self):
+        raw = b"same-size-source"
+        digest = hashlib.sha256(raw).hexdigest()
+        with patch("avarn_intake.SOURCE_SIZE", len(raw)), patch("avarn_intake.SOURCE_SHA", digest), patch("avarn_intake.geometry", return_value=([(0, 0, 0)], [])) as decode:
+            self.assertEqual(verify_source(raw), ([(0, 0, 0)], []))
+            decode.assert_called_once_with(raw)
 
     def test_seven_and_six_contact_fixture(self):
         points=[(x,-.28,z) for x,z in PADS]
