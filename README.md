@@ -63,3 +63,5 @@ The original workspace notes, registry, and fusion proposal are preserved as sna
 This branch lives alongside `main`. Bring selected design documents into the game branch through a separately scoped change when needed. The **Element HQ documents** Actions check verifies the documentation checkout on a standard GitHub-hosted Ubuntu runner.
 
 [Owner decision addendum and expandable fusion schema](element-hq/designs/owner-decisions-2026-11-24.md) — approved directions, proposed data contract, no playable activation.
+
+[Derived disciplines and Sovereigns](element-hq/designs/derived-schools-and-sovereigns.md) — candidate institution model, no new fundamental school.

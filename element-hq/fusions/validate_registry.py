@@ -28,7 +28,7 @@ validate(data)
 assert {r['id']:set(r['parents']) for r in data['recipes'] if r['status']=='selected'}=={'fusion.rust':{'water','metal'},'fusion.sugar':{'light','plant'},'fusion.magnetism':{'earth','metal'}}
 assert not any(r['status']=='playable' for r in data['recipes'])
 x=copy.deepcopy(data); other=copy.deepcopy(x['recipes'][0]); other.update(id='fusion.fixture',name='Fixture',status='exploratory'); x['recipes'].append(other); validate(x)
-for mutate in (lambda x:x['recipes'].append(copy.deepcopy(x['recipes'][0])),lambda x:x['recipes'][0].update(parents=['water','water']),lambda x:x['recipes'][0].update(parents=['water','rust']),lambda x:x['recipes'][0].update(status='playable'),lambda x:x['recipes'][0].update(revision=True)):
+for mutate in (lambda x:x['recipes'].append(copy.deepcopy(x['recipes'][0])),lambda x:x['recipes'][0].update(parents=['water','water']),lambda x:x['recipes'][0].update(parents=['water','rust']),lambda x:x['recipes'][0].update(status='playable',gameplay_approved=False),lambda x:x['recipes'][0].update(revision=True)):
     x=copy.deepcopy(data); mutate(x)
     try: validate(x)
     except AssertionError: pass
