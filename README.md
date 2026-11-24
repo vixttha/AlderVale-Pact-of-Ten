@@ -18,6 +18,10 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 
 **Fusion architecture decision:** retain exactly ten elemental schools. Fusion results are **named resonance techniques, not additional elemental damage/resistance schools**. Collectible fusion creatures are a possible later feature; no new creature pipeline, combat behavior or implementation is approved by these recipe locks.
 
+## Confirmed creature design boundary
+
+[Elemental foundation reaffirmed 2026-11-24](element-hq/designs/element-foundation-confirmation-2026-11-24.md) records the ten-school roster, creature design boundary and migration questions. Consult Element HQ before new elemental, creature, spell, fusion or progression recommendations. Acorn Sprout is exploratory; selected fusion recipes do not approve creature species.
+
 ## Start here
 
 **Owner law:** [Fusion Quality Law FQ-001](element-hq/FUSION_QUALITY_LAW.md) requires strong two-parent logic, a distinct visual identity, a unique combat purpose and meaningful counterplay before any fusion becomes playable. Recipes are curated, not a fixed quota.
