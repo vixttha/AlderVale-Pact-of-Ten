@@ -13,3 +13,5 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 [Founding covenants and derived schools](canon/covenants-and-derived-schools.md) — owner-approved relationship and derived school architecture, ten candidate seeds, biography worksheet, fusion expansion and conflict register.
 
 [Fire — The Open Hearth](canon/fire-founding-partnership.md) — first complete candidate dossier, awaiting owner review.
+
+[Open Hearth seal studies](art/open-hearth/README.md) — five editable vector candidates, PNG exports generated on the public runner; no selected emblem.

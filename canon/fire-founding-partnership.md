@@ -74,3 +74,20 @@ A damaged communal hearth and an access dispute reveal competing interpretations
 | Narrative completeness | First dossier covers motives, history, costs, culture, symbol, relationships, limitations, evidence and player relevance. Owner review required before next partnership. |
 
 No final approval of this historical partnership is inferred from approval of the framework. 
+
+## Second review — identities, agency and symbolism
+
+All refinements are candidates, not acceptance. Owner likes the open-ring concept but asks for more artistic design; the existing emblem is a study, not the final mark. [Five vector seal studies](../art/open-hearth/README.md).
+
+Narrative issues and proposed improvements:
+
+- Maren is competent but his current motivation is abstract. Give his first major decision a personal cost: the bakehouse where he learned his trade is among the households he orders to reduce fuel use. His mentor challenges the allocation, not his magical talent. His apology must precede the restoration of trust. Do not introduce a tragic death merely for drama.
+- Avarn currently risks becoming a passive test of Maren's virtue. Give it independent agency: before the first meeting it redirects its migration away from depleted thermal corridors, jeopardizing its own recovery. At the failed bargain it discovers that all hearths are not identical when households maintain a small refuge without extracting from its resting grounds. It returns voluntarily only after the community proposes a shared maintenance arrangement. This is reciprocal discovery, not obedience.
+- Repair chronology wording: Maren born during the Sundering (candidate -46); not necessarily late in the earlier decades. The first -7 encounter and -6 failed agreement remain distinct. No final date or lifespan.
+- Pact obligations and local covenant must remain distinct; household access and reciprocal aid are one regional application, not a replacement of the accepted three obligations. No new institution controls Fire magic.
+- Clarify how negotiations occurred: interpreters observe Avarn's warning calls and gestures; agreement is recognized through repeated voluntary actions, not magical mind-reading. Human delegates record their own obligations, not a contract imposing ownership on Avarn.
+- Open ring signifies public access; flame signifies shared warmth, not supremacy. Candidate 04 two flame silhouettes plus ember show both parties and the people served, with open lower passage. It is a cultural covenant seal rather than the universal Fire affinity icon, city flag, brand logo, or a mechanically active spell rune. Keep the broader elemental visual system separate.
+- Origin myth and present-day whereabouts remain unknown; no arbitrary immortality or settled biography ending. Name etymologies remain invented candidate associations; Veyrath/Veyra still needs language and city-history review. No external trademark or name clearance claimed.
+- Keep public historical framework and private reveals separate. No new character or story lock, Water development, spell, fusion, gameplay, asset implementation or release.
+
+Decision requested: choose a seal study, review personal-cost and Sovereign-agency refinements, then resolve names and city chronology before locking the first pair.
