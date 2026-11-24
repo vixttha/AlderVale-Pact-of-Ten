@@ -3,12 +3,17 @@
   "active": {
     "issue": 13,
     "version": "v0.0.0.2",
-    "phase": "Validate",
-    "next_action": "Verify fresh public-runner exact candidate, guest Rune-Catch and trial, new authenticated two-lead-win and trial replay regressions. No eligibility changes. Preserve #70. Review CodeRabbit and all applicable logs before owner decision.",
+    "phase": "Internal Auditor",
+    "next_action": "Audit exact PR #129 candidate 00e28ca8cf9b04ab57cf046266a6ffe5c8004979, tested merge 04d4476a504e30bbc21930552316e098a598324f, identical tree 1b99e2fa72f4cd031652159ee5bef0177c6d317a. All seven public game jobs passed attempt 1; core 131/7 skipped per OS; browsers 21/21 each incl Arbor/Trial and First Spark, emulator named two-lead/Trial settlement replay passes; Graphify build/readback pass, publication skipped; Semgrep and runner policy pass. CodeRabbit reviewed exact head, zero actionable findings, minimal merge risk. Check scope, prior fixes and residual gaps; no merge.",
     "fix_sha": "00e28ca8cf9b04ab57cf046266a6ffe5c8004979",
     "candidate_sha": "00e28ca8cf9b04ab57cf046266a6ffe5c8004979",
     "pull_request": 129,
-    "evidence": []
+    "evidence": [
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640403/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640344/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640558/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45396640480/attempts/1"
+    ]
   },
   "history": [
     {
