@@ -144,6 +144,39 @@ test('protects a corrupt Breeze guest save without changing Horizon', async ({ p
   expect(errors).toEqual([]);
 });
 
+test('a direct guest read cannot rebase stale wizard updates onto newer progress', async ({ page }) => {
+  await installGuestSaveFailure(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+  await page.evaluate(key => {
+    const save = JSON.parse(localStorage.getItem(key));
+    save.account.termXp = 60;
+    localStorage.setItem(key, JSON.stringify(save));
+  }, breezeSaveKey);
+  await page.reload();
+  await page.getByRole('button', { name: /Enter Aldervale/ }).click();
+  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
+
+  const newer = await page.evaluate(key => {
+    const save = JSON.parse(localStorage.getItem(key));
+    save.wizards[0].currencies.florins += 777;
+    const raw = JSON.stringify(save);
+    localStorage.setItem(key, raw);
+    return raw;
+  }, breezeSaveKey);
+  await page.getByRole('button', { name: 'Quests, Term & Codex', exact: true }).click();
+  const claim = page.getByRole('button', { name: 'Claim Free', exact: true });
+  await expect(claim).toBeEnabled();
+  await claim.click();
+  await expect(page.getByText('The Term reward could not be saved. Please try again.', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Stamp Almanac Today' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Guest progress could not be saved' })).toBeVisible();
+  expect(await page.evaluate(key => localStorage.getItem(key), breezeSaveKey)).toBe(newer);
+  await page.getByRole('button', { name: 'Retry save' }).click();
+  expect(await page.evaluate(key => localStorage.getItem(key), breezeSaveKey)).toBe(newer);
+});
+
 test('mobile creation controls remain reachable', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');

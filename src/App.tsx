@@ -78,6 +78,7 @@ type ActiveOverlay =
   | { type: 'hub'; tab: HubModalTab };
 
 type GuestProgressUpdate = (bundle: GuestRealmBundle) => void;
+type GuestRecoveryNotice = GuestRecovery | { kind: 'source-changed'; raw: string | null };
 
 export function App() {
   const [fbUser, setFbUser] = useState<User | null>(null);
@@ -86,9 +87,9 @@ export function App() {
   const [realmAccount, setRealmAccount] = useState<RealmAccountState>(() => ('bundle' in initialGuest ? initialGuest.bundle : emptyGuestRealm('breeze')).account);
   const [legacyWizards, setLegacyWizards] = useState<WizardDocument[]>([]);
   const [wizards, setWizards] = useState<WizardDocument[]>(() => 'bundle' in initialGuest ? initialGuest.bundle.wizards : []);
-  const [guestRecovery, setGuestRecovery] = useState<Partial<Record<RealmId, GuestRecovery>>>(() =>
+  const [guestRecovery, setGuestRecovery] = useState<Partial<Record<RealmId, GuestRecoveryNotice>>>(() =>
     'bundle' in initialGuest ? {} : { breeze: initialGuest });
-  const guestSources = useRef(new Map<RealmId, string | null>());
+  const guestSources = useRef(new Map<RealmId, string | null>('bundle' in initialGuest ? [['breeze', initialGuest.raw]] : []));
   const pendingGuestSources = useRef(new Map<RealmId, string | null>());
   const [activeWizard, setActiveWizard] = useState<WizardDocument | null>(null);
   const [creatures, setCreatures] = useState<OwnedCreature[]>([]);
@@ -195,15 +196,21 @@ export function App() {
     setTimeout(() => setToast((curr) => (curr === msg ? null : curr)), 4000);
   }, []);
 
-  const readGuestProgress = useCallback((realm: RealmId) => {
+  const readGuestProgress = useCallback((realm: RealmId, refresh = false) => {
     const inspection = inspectGuestRealm(realm);
     if (!('bundle' in inspection)) {
       setGuestRecovery(current => ({ ...current, [realm]: inspection }));
       throw new Error('Guest save needs recovery; original data has not been replaced.');
     }
-    if (pendingGuestProgress.current.has(realm) &&
-      (!pendingGuestSources.current.has(realm) || pendingGuestSources.current.get(realm) !== inspection.raw)) {
-      throw new Error('Guest save changed while progress was pending. Original data has not been replaced.');
+    const pending = pendingGuestProgress.current.has(realm);
+    const pendingChanged = pending &&
+      (!pendingGuestSources.current.has(realm) || pendingGuestSources.current.get(realm) !== inspection.raw);
+    const sourceChanged = guestSources.current.has(realm) && guestSources.current.get(realm) !== inspection.raw;
+    // A storage read during play must not silently rebase the displayed wizard or other realm state.
+    // Only a title-screen reload may adopt a newer source, and never over unsaved pending edits.
+    if (pendingChanged || (sourceChanged && (!refresh || pending))) {
+      setGuestRecovery(current => ({ ...current, [realm]: { kind: 'source-changed', raw: inspection.raw } }));
+      throw new Error('Guest save changed since it was loaded. Original data has not been replaced.');
     }
     guestSources.current.set(realm, inspection.raw);
     setGuestRecovery(current => {
@@ -220,6 +227,9 @@ export function App() {
     if (!guestSources.current.has(realm) || !saveGuestRealm(realm, bundle, guestSources.current.get(realm))) {
       const inspection = inspectGuestRealm(realm);
       if (!('bundle' in inspection)) setGuestRecovery(current => ({ ...current, [realm]: inspection }));
+      else if (guestSources.current.get(realm) !== inspection.raw) {
+        setGuestRecovery(current => ({ ...current, [realm]: { kind: 'source-changed', raw: inspection.raw } }));
+      }
       return false;
     }
     guestSources.current.set(realm, JSON.stringify(bundle));
@@ -274,10 +284,13 @@ export function App() {
   // Load realm state (Cloud if signed in, else Guest localStorage)
   const loadRealmData = useCallback(async (user: User | null, realm: RealmId, version: number) => {
     if (!user) {
+      // Auth notifications can recur during play. Do not reload only part of a live guest session.
+      if (currentPresence.current.activeWizard?.ownerId === 'guest_local' &&
+          currentPresence.current.activeWizard.realmId === realm) return;
       setPlayerSettings(loadGuestSettings());
       setLegacyWizards([]);
       try {
-        const guest = readGuestProgress(realm);
+        const guest = readGuestProgress(realm, true);
         setRealmAccount(guest.account);
         setWizards(guest.wizards);
       } catch {
@@ -1064,6 +1077,7 @@ export function App() {
   );
 
   const recovery = guestRecovery[selectedRealm];
+  const recoveryRaw = recovery && 'raw' in recovery ? recovery.raw : null;
   if (!activeWizard && !fbUser && recovery) {
     return (
       <main className="min-h-screen overflow-y-auto bg-[#182033] p-4 text-[#f7f0e2]">
@@ -1072,15 +1086,17 @@ export function App() {
           <h1 className="font-display text-2xl">Guest save recovery — {REALMS[selectedRealm].name}</h1>
           <p role="alert">{recovery.kind === 'storage-unavailable'
             ? 'Browser storage is unavailable. Nothing has been replaced.'
-            : 'This save cannot be read safely. The original data is preserved.'}</p>
+            : recovery.kind === 'source-changed'
+              ? 'This save changed since it was loaded. The stored data is preserved. Pending progress cannot be applied to a different save.'
+              : 'This save cannot be read safely. The original data is preserved.'}</p>
           <p>Retry the read or keep a local backup. Other realms and online saves remain separate.</p>
           <div className="flex flex-wrap gap-3">
             <button type="button" className="rounded-lg bg-[#f4c98b] px-4 py-2 font-bold text-[#241b16]" onClick={() => {
               setEnrollmentError(null);
               void loadRealmData(null, selectedRealm, realmLoad.current);
             }}>Retry read</button>
-            {recovery.kind === 'recovery-required' && <button type="button" className="rounded-lg border px-4 py-2" onClick={() => {
-              const url = URL.createObjectURL(new Blob([guestRecoveryExport(selectedRealm, recovery.raw)], { type: 'application/json' }));
+            {recoveryRaw !== null && <button type="button" className="rounded-lg border px-4 py-2" onClick={() => {
+              const url = URL.createObjectURL(new Blob([guestRecoveryExport(selectedRealm, recoveryRaw)], { type: 'application/json' }));
               const link = document.createElement('a');
               link.href = url;
               link.download = `aldervale-${selectedRealm}-recovery.json`;
@@ -1102,6 +1118,12 @@ export function App() {
         </section>
       </main>
     );
+  }
+
+  // Recovery unmounts the title studio. Never remount it using a different realm's
+  // empty placeholder: the studio initializes its creation/slot view from wizards.
+  if (!activeWizard && !fbUser && realmAccount.realmId !== selectedRealm) {
+    return <main className="min-h-screen bg-[#182033] p-6 text-[#f7f0e2]">{guestSaveWarning}<p role="status">Loading realm saves…</p></main>;
   }
 
   if (!activeWizard) {
@@ -1148,6 +1170,11 @@ export function App() {
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#182033]">
       {guestSaveWarning}
+      {!fbUser && recovery?.kind === 'source-changed' && (
+        <p role="alert" className="fixed bottom-4 left-1/2 z-50 max-w-[90%] -translate-x-1/2 rounded-xl bg-[#502d39] p-3 text-sm text-white">
+          Guest save changed in another session. Further writes from this session are blocked until the source is restored or the wizard is reloaded. Unsaved progress may be lost on reload.
+        </p>
+      )}
       {/* Full-Viewport 3D Sky-Island World (>=85% unobstructed) */}
       <WorldViewport
         wizard={equippedWizard}
