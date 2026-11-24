@@ -1,21 +1,6 @@
 {
   "schema_version": 1,
-  "active": {
-    "issue": 70,
-    "version": "v0.0.0.1",
-    "phase": "Head",
-    "next_action": "Internal audit complete for candidate 5acf7f376af6135572819f1762713e14a6967ea3; review required, not integration approval. Exact PR merge 05b156ff48e8849ae445859448c046f0ba4e4e80 tree matches head; all seven game jobs, four Vault jobs, Graphify build/readback, policy and Semgrep passed. CodeRabbit reviewed exact head, minimal merge risk, no concrete blocker. PR #157 overlaps Graphify and #102 overlaps wsHub; reconcile those separately. Manual live UI/production, independent host and post-merge evidence remain separate. Owner must explicitly authorize integration and issue closure; next #13 follows completed #70. No second active claim.",
-    "fix_sha": "5acf7f376af6135572819f1762713e14a6967ea3",
-    "candidate_sha": "5acf7f376af6135572819f1762713e14a6967ea3",
-    "pull_request": 185,
-    "evidence": [
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885406/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885270/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885348/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885375/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885539/attempts/1"
-    ]
-  },
+  "active": null,
   "history": [
     {
       "handoff": {
@@ -52,6 +37,27 @@
       "disposition": "rework",
       "decision": "Internal audit found starter Keen Ink remains stranded in solo sideboard (shared/soloDuel.ts); move existing copies to drawable deck without modifying saved loadout; exercise actual guest UI and emulator enchant endpoint. Preserve prior evidence.",
       "merged_sha": null
+    },
+    {
+      "handoff": {
+        "issue": 70,
+        "version": "v0.0.0.1",
+        "phase": "Head",
+        "next_action": "Internal audit complete for candidate 5acf7f376af6135572819f1762713e14a6967ea3; review required, not integration approval. Exact PR merge 05b156ff48e8849ae445859448c046f0ba4e4e80 tree matches head; all seven game jobs, four Vault jobs, Graphify build/readback, policy and Semgrep passed. CodeRabbit reviewed exact head, minimal merge risk, no concrete blocker. PR #157 overlaps Graphify and #102 overlaps wsHub; reconcile those separately. Manual live UI/production, independent host and post-merge evidence remain separate. Owner must explicitly authorize integration and issue closure; next #13 follows completed #70. No second active claim.",
+        "fix_sha": "5acf7f376af6135572819f1762713e14a6967ea3",
+        "candidate_sha": "5acf7f376af6135572819f1762713e14a6967ea3",
+        "pull_request": 185,
+        "evidence": [
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885406/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885270/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885348/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885375/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885539/attempts/1"
+        ]
+      },
+      "disposition": "integrated",
+      "decision": "Owner explicitly authorized PR #185 merge and conditional #70 closure; post-merge conditions verified at 914dee182df5dea37476b9b0eaf71d7a32190e06: all seven jobs exact SHA, three core suites 131 passed/7 skipped each, real PvP/co-op, G09-003 guest all browsers 20/20 and authenticated emulator passed. Graphify publication, Vault 4/4, policy, Semgrep passed. Merged tree identical to reviewed candidate. Manual production/owner acceptance remains separate. Merged receipts: https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385375979/attempts/1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385375917/attempts/1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385375906/attempts/1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385375941/attempts/1 https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45385376161/attempts/1",
+      "merged_sha": "914dee182df5dea37476b9b0eaf71d7a32190e06"
     }
   ]
 }
