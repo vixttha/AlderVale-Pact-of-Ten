@@ -1,9 +1,10 @@
 {
   "issueNumber": 70,
   "claimId": "vib-aldervale-70-20261124",
-  "status": "active",
+  "status": "released",
   "worker": "chatgpt-vib-worker",
-  "expiresAt": "2026-11-24T15:00:00Z",
+  "expiresAt": "2026-11-24T12:44:04Z",
   "baseSha": "a6c2060b8175f505cc6327ccb5658cc00a458b24",
-  "workBranch": "ci/vib-issue-70-keen-ink"
+  "workBranch": "ci/vib-issue-70-keen-ink",
+  "note": "Issue #70 closed under owner authorization following exact merged-SHA validation; VIB integrated at 0bcda62a9b5cc889fc51232234203278710beb64."
 }
