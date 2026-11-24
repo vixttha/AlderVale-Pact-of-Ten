@@ -9,3 +9,7 @@ Owner-approved design directions (not implementation acceptance):
 - Five design workstreams accepted: world identity, ecosystem, economy, mastery, 3D production. World is expandable beyond ten cities; include meaningful secrets/easter eggs. Requested smoking cigarettes and other everyday actions as fictional adult-character activity concept; audience/content-rating decision, mechanics and animations still open. No real-world tobacco promotion or rewards required.
 
 No final city name, new species, story chronology, stat formula, release or gameplay code authorized. Existing milestone expired; milestone fit unverified for gameplay expansion.
+
+## Pact meaning acceptance — 2026-11-24
+
+Owner explicitly accepts meaning of Pact of Ten and requests conflict audit. AV-PACT-001 accepted scope: meaning and three founding obligations only. Original signatories, calendar, civilizations, mythical apex model and antagonist are candidate. User requests magician leaders alongside mythical representatives and potential fusion exemplars. No new implementation or merge authority.

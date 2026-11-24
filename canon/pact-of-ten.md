@@ -1,12 +1,12 @@
 # The Pact of Ten — narrative foundation v0.0.2 candidate
 
-Status: PROPOSED CANON. All new history, names, motives and story beats require owner acceptance. This is a non-spoiler project-facing premise; detailed unrevealed plot material stays private. No gameplay implementation.
+Status: meaning and three founding obligations OWNER-APPROVED (2026-11-24); all new history, names, motives and story beats remain candidate. This is a non-spoiler project-facing premise; detailed unrevealed plot material stays private. No gameplay implementation.
 
 ## AV-PACT-001 — meaning and origin
 
 The Pact is a treaty between representatives of ten elemental schools, a tradition of reciprocal magical stewardship, and a foundation for shared civilization. It did not create the schools or make them scarce by decree. Ten means ten schools, not ten gods, races, territories or immutable seats of political authority. Additional settlements and peoples may participate; membership and political representation are separate from magical taxonomy.
 
-Three proposed founding obligations:
+Three owner-approved founding obligations:
 1. No civilization may claim exclusive ownership of an element.
 2. Knowledge may be shared, but mastery must be earned.
 3. No school may preserve its prosperity by destroying another civilization's ability to survive.
@@ -64,4 +64,4 @@ Story expansion: optional quests and secrets should reveal regional histories, r
 
 ## Next owner decisions
 
-Approve or revise meaning, historical cause, era names, conflict positions and campaign framing. Then develop founders, calendar, regional founding histories and one quest slice. Keep antagonist identities, final reveals and secret solutions in private planning. No new feature authorization implied.
+Meaning accepted; review historical cause, era names, conflict positions and campaign framing. See [founding peoples and mythology](founders-and-mythology.md). Then develop founders, calendar, regional founding histories and one quest slice. Keep antagonist identities, final reveals and secret solutions in private planning. No new feature authorization implied.

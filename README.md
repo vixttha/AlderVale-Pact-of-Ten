@@ -6,4 +6,6 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 
 ## Current candidate
 
-[Version](VERSION): 0.0.2-candidate. [Pact and campaign foundation](canon/pact-of-ten.md) is proposed, not approved. [Source pins](canon/source-pins.json) distinguish canonical Element HQ and its latest draft candidate. No private template installed; no release claimed.
+[Version](VERSION): 0.0.3-candidate. [Pact and campaign foundation](canon/pact-of-ten.md) has owner-approved meaning; history and campaign remain proposed. [Source pins](canon/source-pins.json) distinguish canonical Element HQ and its latest draft candidate. No private template installed; no release claimed.
+
+[Founders, mythical representatives and historical connections](canon/founders-and-mythology.md) — candidate.

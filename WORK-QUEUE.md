@@ -1,3 +1,3 @@
 # Single design queue
 
-Current: review the Pact of Ten foundation candidate; owner decision before finalizing city names, founders, calendar and detailed history. Then city cultures and geography; creature ecosystem; customization and exchange; mastery mechanics and extensible fusion schema (Element HQ); 3D production (Character Forge/BART). Worldbuilding and engineering remain coordinated, not new parallel gameplay claims. Ideas may be captured without authorizing coding. Keep detailed proposals in their owning branch and reference them by stable ID and commit. Preserve active gameplay lane and its existing acceptance order.
+Current: review [founding peoples and mythology](canon/founders-and-mythology.md), calendar and historical links. Pact meaning accepted; other canon awaits owner approval. Then one regional quest paper prototype, ecosystem, economy, mastery and 3D production. Preserve active gameplay acceptance lane. No new gameplay feature authorization.

@@ -15,3 +15,7 @@ See [the proposed Pact and campaign foundation](pact-of-ten.md). Founder identit
 ## Living world
 
 Candidate layers: regional trade routes, guilds, food, festivals, language, relationships, law, jobs, housing, everyday interactions, exploration secrets, optional quests and consequences. Hidden discoveries should be meaningful and coherent; keep spoiler contents in private planning unless authorized for public disclosure. Candidate cigarette-smoking interaction is a fictional optional adult activity; content-rating and audience review before implementation. No final reward or animation contract yet.
+
+## Founding connections
+
+See [founders and mythology](founders-and-mythology.md). Pact meaning accepted; civilization histories, dates and beings remain candidate. No race-exclusive school, automatic fusion species or fixed world size.

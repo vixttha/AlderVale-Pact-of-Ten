@@ -14,70 +14,110 @@
       "kind": "city",
       "status": "candidate",
       "name": "Veyrath",
-      "school": "Fire"
+      "school": "Fire",
+      "depends_on": [
+        "AV-CIV-001",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-002",
       "kind": "city",
       "status": "candidate",
       "name": "Orsenn",
-      "school": "Water"
+      "school": "Water",
+      "depends_on": [
+        "AV-CIV-002",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-003",
       "kind": "city",
       "status": "candidate",
       "name": "Tavrik",
-      "school": "Lightning"
+      "school": "Lightning",
+      "depends_on": [
+        "AV-CIV-003",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-004",
       "kind": "city",
       "status": "candidate",
       "name": "Iskeld",
-      "school": "Frost"
+      "school": "Frost",
+      "depends_on": [
+        "AV-CIV-004",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-005",
       "kind": "city",
       "status": "candidate",
       "name": "Avelis",
-      "school": "Wind"
+      "school": "Wind",
+      "depends_on": [
+        "AV-CIV-005",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-006",
       "kind": "city",
       "status": "candidate",
       "name": "Durnovar",
-      "school": "Earth"
+      "school": "Earth",
+      "depends_on": [
+        "AV-CIV-006",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-007",
       "kind": "city",
       "status": "candidate",
       "name": "Serevan",
-      "school": "Light"
+      "school": "Light",
+      "depends_on": [
+        "AV-CIV-007",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-008",
       "kind": "city",
       "status": "candidate",
       "name": "Nhalem",
-      "school": "Dark"
+      "school": "Dark",
+      "depends_on": [
+        "AV-CIV-008",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-009",
       "kind": "city",
       "status": "candidate",
       "name": "Korr",
-      "school": "Metal"
+      "school": "Metal",
+      "depends_on": [
+        "AV-CIV-009",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-CITY-010",
       "kind": "city",
       "status": "candidate",
       "name": "Ossara",
-      "school": "Plant"
+      "school": "Plant",
+      "depends_on": [
+        "AV-CIV-010",
+        "AV-EVENT-002"
+      ]
     },
     {
       "id": "AV-RACE-001",
@@ -234,11 +274,11 @@
       "kind": "agreement",
       "name": "Pact of Ten",
       "depends_on": [
-        "AV-WORLD-001",
-        "AV-EVENT-002"
+        "AV-WORLD-001"
       ],
-      "status": "candidate",
-      "document": "canon/pact-of-ten.md"
+      "status": "approved_direction",
+      "document": "canon/pact-of-ten.md",
+      "approved_scope": "meaning_and_three_obligations_only"
     },
     {
       "id": "AV-ERA-002",
@@ -275,7 +315,17 @@
       "kind": "event",
       "name": "The Founding Pact",
       "depends_on": [
-        "AV-EVENT-001"
+        "AV-EVENT-001",
+        "AV-FOUNDER-001",
+        "AV-FOUNDER-002",
+        "AV-FOUNDER-003",
+        "AV-FOUNDER-004",
+        "AV-FOUNDER-005",
+        "AV-FOUNDER-006",
+        "AV-FOUNDER-007",
+        "AV-FOUNDER-008",
+        "AV-FOUNDER-009",
+        "AV-FOUNDER-010"
       ],
       "status": "candidate",
       "document": "canon/pact-of-ten.md"
@@ -299,6 +349,416 @@
       ],
       "status": "candidate",
       "document": "canon/pact-of-ten.md"
+    },
+    {
+      "id": "AV-FOUNDER-001",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Maren Voss",
+      "school": "Fire",
+      "race_id": "AV-RACE-001",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-001",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-001",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Avarn, the Kilnback",
+      "school": "Fire",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-001",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "Hearth Compact",
+      "school": "Fire",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-001",
+        "AV-MYTHIC-001",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-002",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Ilyra Sen",
+      "school": "Water",
+      "race_id": "AV-RACE-005",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-005",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-002",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Oruven, the Turning Sea",
+      "school": "Water",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-002",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "River Assembly",
+      "school": "Water",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-002",
+        "AV-MYTHIC-002",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-003",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Kes Talren",
+      "school": "Lightning",
+      "race_id": "AV-RACE-007",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-007",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-003",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Sarrik, the Living Circuit",
+      "school": "Lightning",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-003",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "Signal League",
+      "school": "Lightning",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-003",
+        "AV-MYTHIC-003",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-004",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Neris Vael",
+      "school": "Frost",
+      "race_id": "AV-RACE-010",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-010",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-004",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Eshval, the Stillkeeper",
+      "school": "Frost",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-004",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "Winter Archives",
+      "school": "Frost",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-004",
+        "AV-MYTHIC-004",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-005",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Tovan Siel",
+      "school": "Wind",
+      "race_id": "AV-RACE-008",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-008",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-005",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Aulith, the Unbound Sail",
+      "school": "Wind",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-005",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "Free Road Fellowship",
+      "school": "Wind",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-005",
+        "AV-MYTHIC-005",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-006",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Bren Ordal",
+      "school": "Earth",
+      "race_id": "AV-RACE-002",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-002",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-006",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Dorran, the Bearing Deep",
+      "school": "Earth",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-006",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "Shelter Union",
+      "school": "Earth",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-006",
+        "AV-MYTHIC-006",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-007",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Sela Ardent",
+      "school": "Light",
+      "race_id": "AV-RACE-006",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-006",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-007",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Lumeir, the Clear Witness",
+      "school": "Light",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-007",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "Open Ledger",
+      "school": "Light",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-007",
+        "AV-MYTHIC-007",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-008",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Nim Orell",
+      "school": "Dark",
+      "race_id": "AV-RACE-011",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-011",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-008",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Nareth, the Quiet Archive",
+      "school": "Dark",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-008",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "House of Refuge",
+      "school": "Dark",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-008",
+        "AV-MYTHIC-008",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-009",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Dara Kest",
+      "school": "Metal",
+      "race_id": "AV-RACE-009",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-009",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-009",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Kethrin, the Seamwright",
+      "school": "Metal",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-009",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "Common Forge",
+      "school": "Metal",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-009",
+        "AV-MYTHIC-009",
+        "AV-EVENT-001"
+      ]
+    },
+    {
+      "id": "AV-FOUNDER-010",
+      "kind": "founder",
+      "status": "candidate",
+      "name": "Evin Thale",
+      "school": "Plant",
+      "race_id": "AV-RACE-003",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-RACE-003",
+        "AV-ERA-003"
+      ]
+    },
+    {
+      "id": "AV-MYTHIC-010",
+      "kind": "mythic_representative",
+      "status": "candidate",
+      "name": "Ossuin, the Living Canopy",
+      "school": "Plant",
+      "creature_class_id": "AV-CLASS-006",
+      "domain": "base",
+      "playable": false,
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-CLASS-006",
+        "AV-ERA-002"
+      ]
+    },
+    {
+      "id": "AV-CIV-010",
+      "kind": "founding_civilization",
+      "status": "candidate",
+      "name": "Seed Covenant",
+      "school": "Plant",
+      "document": "canon/founders-and-mythology.md",
+      "depends_on": [
+        "AV-FOUNDER-010",
+        "AV-MYTHIC-010",
+        "AV-EVENT-001"
+      ]
     }
   ]
 }

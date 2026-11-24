@@ -16,9 +16,9 @@ assert 'Rowan is rejected' in (root/'DECISIONS.md').read_text()
 assert 'every designated special accessory' in (root/'DECISIONS.md').read_text()
 assert 'FQ-001' in (root/'DECISIONS.md').read_text()
 tracked=set(subprocess.check_output(['git','ls-files'],cwd=root,text=True).splitlines())
-assert tracked=={'README.md','DECISIONS.md','WORK-QUEUE.md','canon/registry.json','canon/world-and-story.md','tools/validate_universe.py','.github/workflows/universe-validate.yml','canon/pact-of-ten.md','canon/source-pins.json','VERSION'}
+assert tracked=={'README.md','DECISIONS.md','WORK-QUEUE.md','canon/registry.json','canon/world-and-story.md','tools/validate_universe.py','.github/workflows/universe-validate.yml','canon/pact-of-ten.md','canon/source-pins.json','VERSION','canon/founders-and-mythology.md'}
 pins=json.loads((root/'canon/source-pins.json').read_text())
-assert (root/'VERSION').read_text().strip()==pins['workspace_version']=='0.0.2-candidate'
+assert (root/'VERSION').read_text().strip()==pins['workspace_version']=='0.0.3-candidate'
 element=pins['element_hq']
 assert set(element['schools'])=={r['school'] for r in cities}
 assert len(element['oppositions'])==5 and {frozenset(p) for p in element['oppositions']}=={frozenset(p) for p in [('Fire','Water'),('Lightning','Frost'),('Wind','Earth'),('Light','Dark'),('Metal','Plant')]}
@@ -32,7 +32,9 @@ def graph_check(records):
         for target in graph[r['id']]:
             assert target in graph and target!=r['id']
         if 'document' in r:
-            assert r['status']=='candidate' and r['document']=='canon/pact-of-ten.md' and (root/r['document']).is_file()
+            assert r['status']==('approved_direction' if r['id']=='AV-PACT-001' else 'candidate')
+            assert r['document'] in {'canon/pact-of-ten.md','canon/founders-and-mythology.md'} and (root/r['document']).is_file()
+            assert r['id'] in (root/r['document']).read_text()
     visiting=set(); done=set()
     def visit(node):
         assert node not in visiting, 'cycle: '+node
@@ -48,7 +50,7 @@ for r in rows:
 import copy
 for mode in ('dangling','cycle','promotion'):
     fixture=copy.deepcopy(rows)
-    node=next(r for r in fixture if r['id']=='AV-PACT-001')
+    node=next(r for r in fixture if r['id']=='AV-ERA-004')
     if mode=='dangling': node['depends_on']=['AV-MISSING-001']
     elif mode=='cycle': node['depends_on']=['AV-STORY-001']
     else: node['status']='approved_direction'
@@ -59,3 +61,16 @@ print(f'Canon dependency graph: {len(graph)} nodes, {sum(map(len,graph.values())
 sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
 assert sha==os.environ['GITHUB_SHA']
 print(f'Universe registry: {len(rows)} records; 10 candidate cities, 13 races, six creature classes; isolated tree; checkout {sha}. Structural evidence only.')
+
+byid={r['id']:r for r in rows}
+assert byid['AV-PACT-001']['approved_scope']=='meaning_and_three_obligations_only'
+assert byid['AV-PACT-001']['status']=='approved_direction'
+for kind in ('founder','mythic_representative','founding_civilization'):
+    group=[r for r in rows if r['kind']==kind]
+    assert len(group)==10 and {r['school'] for r in group}==set(element['schools']) and all(r['status']=='candidate' for r in group)
+for r in rows:
+    if r['kind']=='founder': assert byid[r['race_id']]['kind']=='playable_race' and r['race_id'] in r['depends_on']
+    if r['kind']=='mythic_representative': assert r['domain']=='base' and r['playable'] is False and byid[r['creature_class_id']]['name']=='Divine being'
+    if r['kind']=='city': assert any(byid[d]['kind']=='founding_civilization' and byid[d]['school']==r['school'] for d in r['depends_on'])
+assert sum(r['kind']=='founder' for r in (byid[d] for d in byid['AV-EVENT-002']['depends_on']))==10
+print('Founding alignment: ten magician delegates, ten non-playable mythical representatives, ten coalitions, ten linked cities; meaning-only acceptance.')
