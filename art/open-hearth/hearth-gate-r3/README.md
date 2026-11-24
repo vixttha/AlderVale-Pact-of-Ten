@@ -13,3 +13,5 @@ Validation: existing runner exports 4 transparent 1024-square PNGs, SVG masters 
 R3 is accepted as the leading candidate, not a final lock. Owner approves genuine 3D stone monument, bronze plaque and cloth banner evaluation through BART before permanent emblem acceptance. Retain exact R3 masters and earlier versions. Next active writing focus is Maren/Avarn history; 3D evaluation remains an authorized separate pending task. No new production asset or release approved.
 
 Historical foundation subsequently accepted; this does not lock the R3 artwork. Genuine BART evaluation and final owner review remain required.
+
+[3D BART evaluation procedure](3D-EVALUATION.md): pinned tools and bounded CPU proofs, not final lock.

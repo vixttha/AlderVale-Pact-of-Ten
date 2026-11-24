@@ -17,3 +17,5 @@ Current focus: [Seventh review — ancient origins and childhood](canon/fire-fou
 Current focus: [Eighth review — complete Fire history candidate](canon/fire-founding-partnership.md#eighth-review--complete-fire-history-candidate). Stages 1–5 developed, stage 6 worker review prepared; owner narrative acceptance pending. Separate R3 BART 3D surface tests and final visual approval pending. Water held.
 
 Owner accepted the eighth-review historical foundation at 6e523bc81c263b489f61485f77fa61c49fe6149d. Current action: BART 3D stone monument, bronze plaque and cloth banner evaluation using unchanged R3; final visual acceptance remains pending. No Water work.
+
+3D surface evaluation candidate: [R3 procedure](art/open-hearth/hearth-gate-r3/3D-EVALUATION.md). Actual public runner results and owner visual review required. Water held.

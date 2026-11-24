@@ -1,0 +1,64 @@
+name: Hearth Gate R3 - BART 3D review
+on:
+  push:
+    branches: [universe-hq]
+    paths:
+      - 'tools/*hearth_gate_3d.py'
+      - '.github/workflows/hearth-gate-3d.yml'
+      - 'art/open-hearth/hearth-gate-r3/*.svg'
+permissions:
+  contents: read
+concurrency:
+  group: hearth-gate-3d-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  surface-evaluation:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.12'
+      - name: Pin and verify BART and Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-checkout https://github.com/vixttha/Blender-Agent-Refinement-Toolkit.git "$RUNNER_TEMP/bart"
+          git -C "$RUNNER_TEMP/bart" checkout --detach 392d8d7a1c262227cba3c08d5577af38c74b4e25
+          test "$(git -C "$RUNNER_TEMP/bart" rev-parse HEAD)" = "392d8d7a1c262227cba3c08d5577af38c74b4e25"
+          echo "PYTHONPATH=$RUNNER_TEMP/bart/src" >> "$GITHUB_ENV"
+          release=release/Blender4.5/blender-4.5.0-linux-x64.tar.xz
+          curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://download.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz" ||
+            curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://mirror.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz"
+          printf '%s  %s\n' 1188b95cc12321c770b631939f7c25a096910b6f884a990bf9c0f62d52b38aec "$RUNNER_TEMP/blender.tar.xz" | sha256sum --check -
+          mkdir "$RUNNER_TEMP/blender"
+          tar -xf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP/blender" --strip-components=1
+          echo "BLENDER_BIN=$RUNNER_TEMP/blender/blender" >> "$GITHUB_ENV"
+          python -m pip install --disable-pip-version-check --only-binary=:all: --no-deps -r tools/open_hearth_requirements.txt
+      - name: Build project-owned scene geometry and run BART
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python -m blender_agent version
+          out="$GITHUB_WORKSPACE/dist/hearth-gate-3d"
+          python tools/prepare_hearth_gate_3d.py "$out"
+          for role in stone bronze banner; do
+            "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python tools/hearth_gate_3d.py -- build "$role" "$out"
+            before=$(sha256sum "$out/$role.blend")
+            python -m blender_agent --workspace "$out" --blender "$BLENDER_BIN" --timeout 180 convert "$role.blend" "$role.glb" | tee "$out/$role-conversion.json"
+            test "$before" = "$(sha256sum "$out/$role.blend")"
+            python -m blender_agent --workspace "$out" inspect "$role.glb" | tee "$out/$role-inspect.json"
+            "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python tools/hearth_gate_3d.py -- render "$role" "$out"
+          done
+          python tools/validate_hearth_gate_3d.py "$out"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: hearth-gate-r3-bart-3d-review
+          path: dist/hearth-gate-3d/
+          if-no-files-found: error
+          retention-days: 1
