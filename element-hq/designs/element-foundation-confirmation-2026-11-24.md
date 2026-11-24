@@ -48,3 +48,25 @@ Open: starter/rare access, school switching, point economy, exact spell and stat
 5. Review and obtain explicit merge/acceptance. Only then promote validated game content; independently review creature art and GLB production.
 
 Existing milestone expired; milestone fit unverified for new gameplay changes. Use standard public GitHub-hosted runners only; no spending, deployment, release or merge authorized by this design record.
+
+## Element access — hybrid B/C/D proposal (2026-11-24)
+
+**Preference recorded:** C is liked, with interest also in B and D. No final hybrid, numerical limits, gates or implementation are approved.
+
+Proposed design: all ten schools are selectable as a single primary affinity at character creation (C). Every school offers a viable introductory kit without a rarity-based power premium. The remaining nine schools may be discovered and learned through optional world quests, trials and mentors (B + D); this is not a six/four restriction on initial choice. Distinguish discovery (knowledge), school access (permission), mastery (earned progression), and equipped abilities (active build). Preserve learned knowledge on respec; exact respec and equip rules remain open. A player can remain a primary-school specialist without mandatory multi-school grind.
+
+| Stage | Proposed result |
+| --- | --- |
+| Creation | Choose one of all ten primary schools; receive a viable basic kit |
+| Early journey | Learn core spells and school mechanics; encounter other schools |
+| Discovery | Optional school-specific trial or mentor unlocks secondary study |
+| Mastery | Earn advanced abilities through existing-style mastery web and meaningful challenges |
+| Resonance | Discover eligible curated techniques separately; FQ-001 and owner kit approval remain required |
+
+Illustrative Water path: choose Water, learn basic spells, optionally discover Metal in a forge trial, study Metal, qualify for a separately earned Rust recipe. No auto-unlock from school ownership, no mandatory dual-active creatures, no automatic fusion species. A second affinity does not automatically change the primary damage/resistance type. This does not establish an actual Metal quest, Rust kit or spell costs.
+
+Related existing proposals: [mastery feasibility](skill-tree-feasibility-2026-11-18.md) and [Fusion Library](fusion-system-revamp-proposal.md). Keep point allocations separate from permanent discovery; no race-exclusive mandatory access, duplicate point grants, or permanent rarity power advantage in the recommended model. Existing legacy rare tiers and unlocks require migration rather than direct promotion.
+
+Open owner choices: one vs multiple learned secondary schools; one vs multiple equipped secondary schools; whether primary can switch; exact unlock trials, point schedule and respec cost; whether race changes access; how cross-school spells are gated and balanced. Recommend learning all ten eventually while limiting active secondary loadout to one initially; this is a proposal, not a lock.
+
+Future acceptance tests: all ten selectable with viable decks; no invalid ID or unauthorized secondary access; unlock/retry idempotence and save/reload; primary-only completion; legal loadout and unchanged primary matchup; separate resonance discovery and equip checks; no legacy save loss. No gameplay changes until authorized.
