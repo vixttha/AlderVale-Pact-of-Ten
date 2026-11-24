@@ -3,6 +3,8 @@ name: Element HQ documents
 on:
   push:
     branches: [element-hq-v1]
+  pull_request:
+    branches: [element-hq-v1]
 
 permissions:
   contents: read
@@ -115,6 +117,14 @@ jobs:
           print("Verified second Water screenshot audit document and illustrative point math; no pixel/DOM test")
           print("Verified screenshot audit checklist + conditional level-12 arithmetic; no image pixels tested")
           print("Verified FQ-001: all four owner-required quality gates")
+          foundation = "element-hq/designs/element-foundation-confirmation-2026-11-24.md"
+          if foundation in tracked:
+              if f"]({foundation})" not in guide:
+                  raise SystemExit("Foundation is not indexed")
+              proposal = Path(foundation).read_text(encoding="utf-8")
+              for clause in ("No final hybrid", "single primary affinity", "FQ-001", "No gameplay changes until authorized"):
+                  if clause not in proposal:
+                      raise SystemExit(f"Foundation decision boundary missing: {clause}")
           print(f"Verified Element HQ documents at {head}")
           PY
       - name: Verify Fusion Name Atlas
