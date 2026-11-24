@@ -81,6 +81,42 @@ test('transaction foundation: aborted and quota-failed writes never report succe
     expect(rejected).toBe(true);
     expect(await read(page, 'breeze')).toEqual({kind: 'found', record: seeded.record});
   }
+  // A request success is not a committed transaction. Observe both events
+  // so a setup failure cannot accidentally satisfy the rejection assertion.
+  const lateAbort = await page.evaluate(async () => {
+    const put = IDBObjectStore.prototype.put;
+    let requestSucceeded = false;
+    let aborted = false;
+    let outcome;
+    let abortObserved;
+    IDBObjectStore.prototype.put = function(...args) {
+      const tx = this.transaction;
+      const request = put.apply(this, args);
+      abortObserved = new Promise(resolve => {
+        tx.addEventListener('abort', () => { aborted = true; resolve(); }, {once: true});
+        tx.addEventListener('complete', resolve, {once: true});
+      });
+      request.addEventListener('success', () => {
+        requestSucceeded = true;
+        tx.abort();
+      }, {once: true});
+      return request;
+    };
+    try {
+      try {
+        await window.store.compareAndSwap('breeze', 1, 'must not commit after request success');
+        outcome = 'resolved';
+      } catch {
+        outcome = 'rejected';
+      }
+      if (abortObserved) await abortObserved;
+      return {requestSucceeded, aborted, outcome};
+    } finally {
+      IDBObjectStore.prototype.put = put;
+    }
+  });
+  expect(lateAbort).toEqual({requestSucceeded: true, aborted: true, outcome: 'rejected'});
+  expect(await read(page, 'breeze')).toEqual({kind: 'found', record: seeded.record});
   const retry = await save(page, 'breeze', 1, '{"retry":true}');
   expect(retry.kind).toBe('committed');
   expect(retry.record.revision).toBe(2);
