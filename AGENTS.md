@@ -1,35 +1,19 @@
-# AlderVale agent instructions
+# VIB installed-branch agent entry point
 
-Read [PROJECT_RULES.md](PROJECT_RULES.md) before project work. These are the solo owner's standing rules, not a proposal.
+This is the owner-approved standalone Version-Issues-Hub workflow, not a product source branch and not Provenistem.
 
-## Authority and roles
+1. Confirm the owner-authorized target repository, its exact dedicated branch `Version-Issues-Hub`, and the current branch SHA. Read vib-install.json, WORKFLOW.md, ledger/issue-versions.json, and ledger/handoff.json at that SHA. Verify package provenance and identity; if the manifest or branch is wrong, stop.
+2. Read the actual GitHub issue (not a PR). Head must accept scope and acceptance criteria before assignment. Never allocate another issue while a handoff is active. Never change historical issue mappings.
+3. Follow Head → Worker → Validate → Internal Auditor → Head, one active Worker. Only edit product code on the authorized product work branch, not the VIB branch. Do not merge the VIB branch into the product.
+4. Use the cooperative handoff commands in WORKFLOW.md. Re-read the branch after a stale write; no force updates. Record candidate/fix SHAs, exact public-runner attempts and acceptance results. A green VIB schema test is not product acceptance.
+5. Owner approval controls integration and release. Instructions are cooperative; only a separately enabled and proven GitHub gate can enforce a merge rule. Never claim the gate is active based on this file.
 
-- The project owner is the sole project lead and final authority for priorities, scope, acceptance, merge, and release. Agents are workers; no tool or agent may promote itself to owner authority.
-- ChatGPT.com is the main developer and project manager, within its actual repository access. This does not transfer final acceptance authority from the owner.
-- Codex CLI is reserved for rare, especially complex work. Roughly one task in 40 is an owner guideline, not a quota.
-- Grokbot / Glitchwarden and Muse provide on-request issue reviews and independent AI audits. Muse may also implement game fixes when directed. Never claim an audit or review happened without its actual evidence.
-- Google AI Studio is an optional implementation environment when the owner chooses; it is not the assumed lead.
-- Notion coordinates private context, plans, decisions, and handoffs when asked. Do not assume continuous monitoring or automatic cross-app execution.
+If the host has no shell, use its GitHub read tools to open the exact branch and the files above. Read the current handoff first. A host without authorized GitHub write capability cannot claim or advance work. Do not ask for secrets in chat.
 
-## Source of truth and startup
+## Owner-locked interoperability
 
-- GitHub is the public source of truth for code, engineering rules, issues, pull requests, branches, and Actions receipts. Notion holds private context and handoffs. Keep private Notion content, personal data, credentials, and secrets out of public GitHub.
-- At the start of a task, resolve the current GitHub `main` SHA and read `AGENTS.md`, `PROJECT_RULES.md`, and the [agent operations guide](docs/AGENT_OPERATIONS.md) at that exact commit. Record the worker ID, actual host/harness, reported model or `unverified`, session/task ID when available, authenticated GitHub actor when verifiable, baseline SHA, task scope, and working ref.
-- If a host cannot access GitHub, use owner-provided copies pinned to one exact SHA and mark the source as supplied context. Do not imply that the host independently verified the repository.
-- Before editing, check the active PR/issue and handoff so workers do not overlap or overwrite uncommitted work. Preserve user changes and use a scoped branch/PR.
+**VIB remains independent of Provenistem. They are designed to work together as complementary parts of the same puzzle.** See [owner decision](https://github.com/vixttha/Version-Issues-Hub/issues/9). VIB owns issue-version assignments, workflow, revision-bound verification and integration decisions; Provenistem owns its ideas/features and progress records. Optional read-only references may connect them; either must operate independently. Never infer write authorization, install one from the other, merge template branches, or require the other as a dependency. Changes to interoperability require explicit owner approval.
 
-## Execution and acceptance
+## Default operating mode
 
-- Keep this GitHub repository public and the Notion project private. Do not automatically change either visibility.
-- Do not incur additional project spending, enable billing, consume paid API credits, or use paid runners/services without specific owner authorization.
-- Use standard GitHub-hosted public runners for useful validation. Do not expose self-hosted runners to untrusted public pull requests or use paid larger/GPU runners.
-- No agent may merge to `main`, declare a release, or claim owner acceptance without explicit owner authorization. Green CI is evidence for the tested scenarios, not proof of production readiness or gameplay acceptance.
-- Use connected plugins when they materially help and fit the free-project budget. Do not claim a tool is connected or a task has run without direct evidence.
-- Verify claims against exact commit SHAs and actual test receipts. Report limitations and unresolved gaps plainly.
-
-Apply the project workflow guidance available in the current host. See the
-[ChatGPT Project Instructions](docs/CHATGPT_PROJECT_INSTRUCTIONS.md) for setup.
-
-## Bug and conflict work
-
-Resolve the separate [Bug Library branch](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/bug-library) to one full commit SHA before reading its operating guidance. Use the entry point from the version on that branch or from an exact candidate SHA the owner assigned. Resolve game `main` independently for changes to the game. GitHub Issues remains canonical; the owner retains acceptance, issue closure, merge, and release authority.
+Use Standard VIB and [STANDARD.md](STANDARD.md). Never require a GitHub App, branch protection or a separate repository to adopt VIB. Stop on invalid or stale evidence, return to Head, and require owner review of exact checkout logs and acceptance results before integration. Standard validation cannot prevent GitHub merges. Optional hard enforcement requires a separate owner decision and live proof.
