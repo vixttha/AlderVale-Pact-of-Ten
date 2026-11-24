@@ -21,7 +21,7 @@ pins=json.loads((root/'canon/source-pins.json').read_text())
 assert (root/'VERSION').read_text().strip()==pins['workspace_version']=='0.0.2-candidate'
 element=pins['element_hq']
 assert set(element['schools'])=={r['school'] for r in cities}
-assert len(element['oppositions'])==5 and sorted(x for pair in element['oppositions'] for x in pair)==sorted(element['schools'])
+assert len(element['oppositions'])==5 and {frozenset(p) for p in element['oppositions']}=={frozenset(p) for p in [('Fire','Water'),('Lightning','Frost'),('Wind','Earth'),('Light','Dark'),('Metal','Plant')]}
 assert {r['id']:set(r['parents']) for r in element['selected_recipes']}=={'fusion.rust':{'Water','Metal'},'fusion.sugar':{'Light','Plant'},'fusion.magnetism':{'Earth','Metal'}}
 assert not element['merged'] and not element['playable_recipes'] and set(element['laws'])=={'EA-001','FQ-001'}
 assert all(re.fullmatch('[0-9a-f]{40}',s) for s in [pins['game_main'],element['canonical_base'],element['reviewed_candidate']])

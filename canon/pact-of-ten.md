@@ -13,7 +13,7 @@ Three proposed founding obligations:
 
 The treaty's material enforcement comes from institutions, mutual aid, inspections, teaching agreements and ordinary interdependent infrastructure, not a supernatural lock that disables unauthorized magic. Its failure is understandable: neglect, extraction, hoarded knowledge, incompatible interests and weakening trust. There is no eleventh school, prophecy-exclusive affinity or automatic godly power.
 
-## Historical causal sequence
+## AV-ERA-001 — Historical causal sequence
 
 | ID | Period or event | Cause and consequence |
 | --- | --- | --- |
