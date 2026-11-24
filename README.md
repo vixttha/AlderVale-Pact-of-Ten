@@ -24,6 +24,8 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 
 ## Combat and hybrid design candidate
 
+[World and creature direction v2](element-hq/designs/world-and-creature-direction-v2.md) records AV-3D-001, city naming audit, creature customization/trading, mastery UI revision and tool adoption audit. New design details remain candidates.
+
 [Combat identities and expandable hybrid architecture v1](element-hq/designs/combat-identities-and-hybrid-extension-v1.md) defines ten combat identities, 40 initial ability concepts, a coherent EA-001 loadout model and extensible FQ-001 recipe records. New details are for review, not gameplay locks.
 
 ## Start here
