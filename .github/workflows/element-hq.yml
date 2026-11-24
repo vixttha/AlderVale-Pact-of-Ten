@@ -57,7 +57,7 @@ jobs:
           missing = (documents | {"README.md", workflow, "element-hq/fusions/build_atlas.py"}) - tracked
           unexpected = {
               path for path in tracked
-              if path not in {"README.md", workflow, "element-hq/fusions/build_atlas.py"}
+              if path not in {"README.md", workflow, "element-hq/fusions/build_atlas.py", "element-hq/fusions/registry.schema.json", "element-hq/fusions/registry.json", "element-hq/fusions/validate_registry.py"}
               and (not path.startswith("element-hq/") or not path.endswith(".md")
                    or not Path(path).is_file() or Path(path).is_symlink())
           }
