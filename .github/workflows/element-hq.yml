@@ -176,3 +176,6 @@ jobs:
           PY
       - name: Verify Fusion Name Atlas
         run: python3 element-hq/fusions/build_atlas.py --check
+
+      - name: Verify candidate fusion registry and negative cases
+        run: python3 element-hq/fusions/validate_registry.py
