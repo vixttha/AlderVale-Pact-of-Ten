@@ -1,0 +1,91 @@
+{
+  "runId": 45427228815,
+  "latestAttempt": 1,
+  "attempts": [
+    {
+      "number": 1,
+      "results": [
+        {
+          "name": "Guest browser (firefox)",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "Core (windows-latest)",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "Core (macos-latest)",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "Guest browser (chromium)",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "Firestore emulator permissions",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "Guest browser (webkit)",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "Core (ubuntu-latest)",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "chromium: transaction foundation: two tabs allow one same-revision writer and preserve original and other realm",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "chromium: transaction foundation: aborted and quota-failed writes never report success or replace a record",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "chromium: transaction foundation: unreadable revision records and unavailable storage fail closed",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "firefox: transaction foundation: two tabs allow one same-revision writer and preserve original and other realm",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "firefox: transaction foundation: aborted and quota-failed writes never report success or replace a record",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "firefox: transaction foundation: unreadable revision records and unavailable storage fail closed",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "webkit: transaction foundation: two tabs allow one same-revision writer and preserve original and other realm",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "webkit: transaction foundation: aborted and quota-failed writes never report success or replace a record",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        },
+        {
+          "name": "webkit: transaction foundation: unreadable revision records and unavailable storage fail closed",
+          "outcome": "success",
+          "checkoutSha": "628d070260c0f61d2508140c6a27793e4fb9e92f"
+        }
+      ]
+    }
+  ]
+}

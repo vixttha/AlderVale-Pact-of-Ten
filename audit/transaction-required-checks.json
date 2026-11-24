@@ -1,0 +1,18 @@
+[
+  "Guest browser (firefox)",
+  "Core (windows-latest)",
+  "Core (macos-latest)",
+  "Guest browser (chromium)",
+  "Firestore emulator permissions",
+  "Guest browser (webkit)",
+  "Core (ubuntu-latest)",
+  "chromium: transaction foundation: two tabs allow one same-revision writer and preserve original and other realm",
+  "chromium: transaction foundation: aborted and quota-failed writes never report success or replace a record",
+  "chromium: transaction foundation: unreadable revision records and unavailable storage fail closed",
+  "firefox: transaction foundation: two tabs allow one same-revision writer and preserve original and other realm",
+  "firefox: transaction foundation: aborted and quota-failed writes never report success or replace a record",
+  "firefox: transaction foundation: unreadable revision records and unavailable storage fail closed",
+  "webkit: transaction foundation: two tabs allow one same-revision writer and preserve original and other realm",
+  "webkit: transaction foundation: aborted and quota-failed writes never report success or replace a record",
+  "webkit: transaction foundation: unreadable revision records and unavailable storage fail closed"
+]

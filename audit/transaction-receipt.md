@@ -1,0 +1,3 @@
+# Exact transaction evidence — audit branch only
+
+Run 45427228815 attempt 1 completed seven game jobs. All three browsers passed all three named transaction tests, including the late-abort assertion inside the second test. Logs inspected on exact checkout 628d070260c0f61d2508140c6a27793e4fb9e92f. Required checks: seven jobs and nine named browser cases; no fabricated individual test entries. Core 176 passed/7 skipped per OS. Earlier candidates' failed/cancelled jobs are separate checkouts, preserved in PR #190. The checker validates normalized evidence, not independent reproduction. Graphify already completed 45427534978, not rerun. No merge or publication.
