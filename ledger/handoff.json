@@ -3,12 +3,18 @@
   "active": {
     "issue": 70,
     "version": "v0.0.0.1",
-    "phase": "Validate",
-    "next_action": "Verify exact updated PR checkout: unit, real socket fusion, browser, emulator, Graphify and Test Vault. Return to Head only after reviewing evidence.",
+    "phase": "Internal Auditor",
+    "next_action": "Audit PR #185 candidate bdf82c0859a2d7511bc643f270e4612a94ef6727; tested merge c7eae7fa8ec5b4bdaffae9cbbe51900e540d19e9 has identical tree. G09-003 eight unit cases and real PvP/co-op sockets passed; 7 game jobs, Graphify build/readback, Vault, Semgrep and runner policy succeeded. Graph publication skipped; targeted guest/signed-in solo UI acceptance and live production not demonstrated. Review scope and remaining gaps before owner decision; do not merge.",
     "fix_sha": "bdf82c0859a2d7511bc643f270e4612a94ef6727",
     "candidate_sha": "bdf82c0859a2d7511bc643f270e4612a94ef6727",
     "pull_request": 185,
-    "evidence": []
+    "evidence": [
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509636/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509615/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509688/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509647/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509914/attempts/1"
+    ]
   },
   "history": [
     {
