@@ -67,3 +67,5 @@ AV-CLASS-001 wildlife: habitat and migration predate treaty. AV-CLASS-002 magica
 ## Campaign implications
 
 Each stronghold has a civic problem, regional history, ecology and optional school discovery. Earth builders and Wind couriers can cooperate without forcing dual school access. Primary-only player viable with allies or ordinary tools. Mythical beings appear via rare encounters, artifacts, stories and voluntary dialogue; not ten required boss kills. The three ideological positions remain candidate; private antagonist identity, reveal sequence and endings are withheld. More regions and civilizations can join. No new species, stats, model or runtime approval. AV-3D-001 applies when production authorized. 
+
+Relationship elaboration: [founding covenants and derived schools](covenants-and-derived-schools.md). The ten seed relationships, titles, symbols and biographies remain candidates.

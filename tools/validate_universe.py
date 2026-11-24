@@ -99,3 +99,8 @@ for mode in ('wrong_school','ownership','access_grant','duplicate_pair'):
     except AssertionError: pass
     else: raise AssertionError('covenant negative fixture passed: '+mode)
 print('Covenant alignment: ten voluntary candidate pairs; four negative fixtures rejected; no ownership or affinity grant.')
+
+assert f"/blob/{element['reviewed_candidate']}/element-hq/designs/derived-schools-and-sovereigns.md" in (root/'canon/covenants-and-derived-schools.md').read_text()
+assert pins['game_main'] in (root/'README.md').read_text()
+assert 'canon/covenants-and-derived-schools.md' in (root/'README.md').read_text()
+print('Source-pin and documentation cross-reference checks passed.')
