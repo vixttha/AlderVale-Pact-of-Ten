@@ -17,3 +17,7 @@ Owner explicitly accepts meaning of Pact of Ten and requests conflict audit. AV-
 ## Covenant and derived school exploration — 2026-11-24
 
 Owner requests relationship refinement, deliberate meaningful biographies, exploration of fusion-derived schools and territories, documentation and conflict audit. No additional approval or law change inferred. See [candidate design](canon/covenants-and-derived-schools.md). Preserve accepted Pact meaning, EA-001 and FQ-001. Individual biographies and institutions remain candidate.
+
+## Founding Covenant and Foundational/Derived School acceptance — 2026-11-24
+
+Owner explicitly accepts both architecture decisions and authorizes development of the Fire magician and Sovereign together as the first complete historical partnership. AV-COVMODEL-001 and AV-ARCH-001 approved direction; individual historical details, names, dates, titles, gameplay, art, other pairs and institutions not approved. Preserve EA-001/FQ-001, Pact meaning, no new playable recipes. [Fire candidate](canon/fire-founding-partnership.md). No merge/release authority.

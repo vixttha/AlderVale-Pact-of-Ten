@@ -1,6 +1,6 @@
-# Founding covenants and derived schools — v0.0.4 candidate
+# Founding covenants and derived schools — accepted architecture, candidate histories
 
-Owner requests deeper, meaningful development of each magician and Sovereign, and exploration of fusion schools descended from original schools and possible distinct territories. No new law, name, character, fusion, city, symbol or gameplay approved by this request. The accepted Pact meaning, EA-001 and FQ-001 remain unchanged. Public non-spoiler design; private plot details excluded.
+Owner requests deeper, meaningful development of each magician and Sovereign, and exploration of fusion schools descended from original schools and possible distinct territories. Historical exploration request did not approve individual characters, cities, symbols, fusions or gameplay. Subsequent explicit approval is recorded below. The accepted Pact meaning, EA-001 and FQ-001 remain unchanged. Public non-spoiler design; private plot details excluded.
 
 ## AV-COVENANT model
 
@@ -27,7 +27,7 @@ These are prompts for development, not ten finished biographies. Public legends 
 
 For each pair preserve stable founder, mythic, city and coalition IDs. Require: (1) original name and in-world linguistic rationale; distinguish invented meaning from real etymology; (2) formative experience and personal desire, fear, flaw and moral limit for each individual; (3) creature anatomy, habitat, motion, material, sensory behavior and independent motives, with AV-3D-001 feasibility before asset production; (4) first meeting, disagreement, reason for voluntary cooperation, cost or sacrifice and treaty contribution; (5) ties to other founders, races, settlements, economy and present-day quest implications; (6) symbolism derived from events rather than arbitrary decoration; (7) distinguish documented event, disputed legend, present truth and private reveal; (8) continuity review against Pact, timeline, EA-001/FQ-001 and existing NPC/quest IDs, then explicit owner acceptance. No mass promotion of seed rows. Name clearance, timeline dates, language system, origin myths, power limits, biographies and models remain unverified. Begin Fire pair as a paper design, then review before developing next pair.
 
-## Derived schools: decision candidate
+## Derived schools: owner-approved architecture
 
 A school of study is an educational/cultural institution, distinct from a fundamental elemental affinity or a combat recipe. Preserve exactly ten permanent base elements, five opposition pairs, maximum two equipped affinities, all ten selectable at creation and separately earned fusion techniques. A derived tradition can emerge from practitioners of two schools, organize a guild/academy, develop a local material culture or settle a region. Descent means intellectual/cultural lineage by default, not literal divine reproduction or mandatory bloodlines. Independent societies can share a recipe or have no recipe; a new recipe need not create a city, tradition or being. Additional base-school damage/resistance types, recursive/triple fusions, or a third equipped affinity would change existing architecture and require explicit owner decision and migration assessment.
 
@@ -39,10 +39,10 @@ Illustrative Rust tradition: Water movement and moisture plus Metal surfaces mot
 
 | ID | Severity | Finding | Disposition |
 | --- | --- | --- | --- |
-| COV-01 | High | Treating derived school as eleventh base affinity contradicts FQ-001 and existing ten-school matrix | Proposed institution/affinity distinction; owner decision pending |
+| COV-01 | High | Treating derived school as eleventh base affinity contradicts FQ-001 and existing ten-school matrix | Institution/affinity distinction owner-approved; runtime migration pending |
 | COV-02 | High | Fusion school as extra equipped affinity bypasses EA-001 | Keep max two, separate technique discovery; runtime acceptance pending |
 | COV-03 | High | Literal divine inheritance makes magic exclusive or automatic | Cultural lineage default; biological descent open; no access grant |
-| COV-04 | High | Sovereign authority could make treaty dependent on one being or enforce magical ownership | Voluntary independent covenant, no veto or access grant; proposed |
+| COV-04 | High | Sovereign authority could make treaty dependent on one being or enforce magical ownership | Voluntary independent covenant, no veto or access grant; owner-approved architecture |
 | COV-05 | Medium | Absolute strongest conflicts with counters, rarity and balance | Domain recognition only; distinct lore and gameplay; actual stats open |
 | COV-06 | Medium | One city and deity per fusion becomes unbounded content obligation | Optional links, no quotas |
 | COV-07 | Medium | Existing Universe validator checks exactly ten candidate cities, despite expandable world | Treat existing ten as initial cohort; later schema/validator must distinguish founding strongholds from additional settlements before adding them; not changed here |
@@ -52,14 +52,18 @@ Illustrative Rust tradition: Water movement and moisture plus Metal surfaces mot
 | COV-11 | Medium | Old game main contains legacy roster while design uses ten schools | Existing #187 migration; do not remap or implement from lore |
 | COV-12 | Medium | Timeline/race lifespan and founder succession unknown | No assumption founders alive in current era; resolve during biography review |
 
-This is design analysis, not a claim that all conflicts are resolved. No merge, release or gameplay implementation. Milestone fit unverified for new features. Source Element HQ draft PR #186 head 2e6ce3fdd1f44f963afe50624ff88d140cac6542 and canonical base recorded in source-pins.json; FQ-001 remains controlling.
+This is design analysis, not a claim that all conflicts are resolved. No merge, release or gameplay implementation. Milestone fit unverified for new features. Source Element HQ draft PR #186 head 57cec3d7c7f7d241e50c5a07c97621522655f3de and canonical base recorded in source-pins.json; FQ-001 remains controlling.
 
 ## Synchronized follow-up — 2026-11-24
 
-[Element HQ derived discipline candidate](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/2e6ce3fdd1f44f963afe50624ff88d140cac6542/element-hq/designs/derived-schools-and-sovereigns.md) now separates affinity, teaching institution, recipe, geography and optional mythical exemplar. No new playable entries. Candidate settings: Rust (Water + Metal) coastal preservation workshop, Sugar (Light + Plant) orchard and food-preservation academy, Magnetism (Earth + Metal) mineral survey and transport guild. These have purposes, not locked names, sites or compulsory territories. Multiple institutions can share recipes; the same institution can teach multiple approved techniques. A lore-only institution must not promise playable content.
+[Element HQ derived discipline candidate](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/57cec3d7c7f7d241e50c5a07c97621522655f3de/element-hq/designs/derived-schools-and-sovereigns.md) now separates affinity, teaching institution, recipe, geography and optional mythical exemplar. No new playable entries. Candidate settings: Rust (Water + Metal) coastal preservation workshop, Sugar (Light + Plant) orchard and food-preservation academy, Magnetism (Earth + Metal) mineral survey and transport guild. These have purposes, not locked names, sites or compulsory territories. Multiple institutions can share recipes; the same institution can teach multiple approved techniques. A lore-only institution must not promise playable content.
 
 COV-13 (Medium, open): earlier city origin proposals sometimes imply a named founder (e.g. Veyrath); the new magician names do not establish that person as the city's literal eponym. Resolve each city etymology and chronology with the individual dossier, not by automatic substitution. COV-14 (Medium, open): "Sovereign" can imply political rule. Keep it a provisional lore title; title choice, power limits, longevity and succession require owner review. Existing ten pair seeds are preserved, not ten identical friendships.
 
 First Fire dossier questions: who taught Maren Voss, why did he initially prioritize kilns, whose needs were overlooked, what personal stake motivated him to change, what limits Avarn's aid, what did both give up, what source verifies the historical bargain, and how does the open furnace ring become a meaningful artifact or ritual? Establish the answers together before writing a final biography, determining an etymology, creating models or beginning the next pair. Avarn does not replace ordinary labor or grant exclusive magic. Fire/Water cooperation is important; no requirement that a player learn Fire or Water to complete the story.
 
 Main advanced to 3f8fc59317cca811f2958b6871737cc68e167376 through test-only PR #129; no runtime changes in the comparison. Exact-main Graphify receipt has 1395 nodes and 3499 edges (code only), not a lore validation. Current design candidate v0.0.4 is unchanged in version designation; source pins refreshed. The earlier concurrent covenant document and its tests are preserved.
+
+## Owner acceptance — 2026-11-24
+
+AV-ARCH-001: Foundational/Derived School architecture approved. AV-COVMODEL-001: Founding Covenant relationship approved. Accepted scope is the model only: ten fundamental affinities, independent voluntary partners, optional expandable educational traditions; no new playable element, region, recipe, character, art or individual covenant approved. First complete candidate [Fire dossier](fire-founding-partnership.md). COV-01 and COV-04 resolved at design-model level; COV-02/03 constrained by accepted architecture, implementation and biology remain open. COV-05–14 remain subject to individual or engineering review. No merge authorized.

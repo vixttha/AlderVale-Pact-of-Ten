@@ -1,3 +1,3 @@
 # Single design queue
 
-Current: review covenant relationship architecture and derived school distinction; develop first Fire magician/Sovereign pair in depth after owner direction. Review each pair before proceeding to next; calendar, cities and other canon still candidate. Existing gameplay acceptance lane remains separate. No new feature authorization.
+Current: owner review [Fire partnership dossier](canon/fire-founding-partnership.md). Founding Covenant and Foundational/Derived School architecture accepted; preserve ten candidate pairs, review Fire name, history, symbol, anatomy, city and limits before beginning Water. Other biography and gameplay development remain held. Existing gameplay acceptance lane separate.

@@ -16,9 +16,9 @@ assert 'Rowan is rejected' in (root/'DECISIONS.md').read_text()
 assert 'every designated special accessory' in (root/'DECISIONS.md').read_text()
 assert 'FQ-001' in (root/'DECISIONS.md').read_text()
 tracked=set(subprocess.check_output(['git','ls-files'],cwd=root,text=True).splitlines())
-assert tracked=={'README.md','DECISIONS.md','WORK-QUEUE.md','canon/registry.json','canon/world-and-story.md','tools/validate_universe.py','.github/workflows/universe-validate.yml','canon/pact-of-ten.md','canon/source-pins.json','VERSION','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md'}
+assert tracked=={'README.md','DECISIONS.md','WORK-QUEUE.md','canon/registry.json','canon/world-and-story.md','tools/validate_universe.py','.github/workflows/universe-validate.yml','canon/pact-of-ten.md','canon/source-pins.json','VERSION','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md','canon/fire-founding-partnership.md'}
 pins=json.loads((root/'canon/source-pins.json').read_text())
-assert (root/'VERSION').read_text().strip()==pins['workspace_version']=='0.0.4-candidate'
+assert (root/'VERSION').read_text().strip()==pins['workspace_version']=='0.0.5-candidate'
 element=pins['element_hq']
 assert set(element['schools'])=={r['school'] for r in cities}
 assert len(element['oppositions'])==5 and {frozenset(p) for p in element['oppositions']}=={frozenset(p) for p in [('Fire','Water'),('Lightning','Frost'),('Wind','Earth'),('Light','Dark'),('Metal','Plant')]}
@@ -32,8 +32,8 @@ def graph_check(records):
         for target in graph[r['id']]:
             assert target in graph and target!=r['id']
         if 'document' in r:
-            assert r['status']==('approved_direction' if r['id']=='AV-PACT-001' else 'candidate')
-            assert r['document'] in {'canon/pact-of-ten.md','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md'} and (root/r['document']).is_file()
+            assert r['status']==('approved_direction' if r['id'] in {'AV-PACT-001','AV-ARCH-001','AV-COVMODEL-001'} else 'candidate')
+            assert r['document'] in {'canon/pact-of-ten.md','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md','canon/fire-founding-partnership.md'} and (root/r['document']).is_file()
             assert r['id'] in (root/r['document']).read_text()
     visiting=set(); done=set()
     def visit(node):
@@ -73,7 +73,7 @@ for r in rows:
     if r['kind']=='mythic_representative': assert r['domain']=='base' and r['playable'] is False and byid[r['creature_class_id']]['name']=='Divine being'
     if r['kind']=='city': assert any(byid[d]['kind']=='founding_civilization' and byid[d]['school']==r['school'] for d in r['depends_on'])
 assert sum(r['kind']=='founder' for r in (byid[d] for d in byid['AV-EVENT-002']['depends_on']))==10
-print('Founding alignment: ten magician delegates, ten non-playable mythical representatives, ten coalitions, ten linked cities; meaning-only acceptance.')
+print('Founding alignment: ten magician delegates, ten non-playable mythical representatives, ten coalitions, ten linked cities; individual biographies remain candidate.')
 
 def covenant_check(records):
     idx={r['id']:r for r in records}
@@ -84,14 +84,14 @@ def covenant_check(records):
         a,b=idx[r['founder_id']],idx[r['sovereign_id']]
         assert a['kind']=='founder' and b['kind']=='mythic_representative' and a['school']==b['school']==r['school']
         assert r['status']=='candidate' and r['voluntary'] is True and r['ownership'] is False and r['grants_school_access'] is False
-        assert set(r['depends_on'])=={a['id'],b['id'],'AV-PACT-001'}
+        assert set(r['depends_on'])=={a['id'],b['id'],'AV-PACT-001','AV-COVMODEL-001'}
 covenant_check(rows)
 for mode in ('wrong_school','ownership','access_grant','duplicate_pair'):
     fixture=copy.deepcopy(rows)
     a,b=[r for r in fixture if r['kind']=='founding_covenant'][:2]
     if mode=='wrong_school':
         a['sovereign_id'],b['sovereign_id']=b['sovereign_id'],a['sovereign_id']
-        for pair in (a,b): pair['depends_on']=[pair['founder_id'],pair['sovereign_id'],'AV-PACT-001']
+        for pair in (a,b): pair['depends_on']=[pair['founder_id'],pair['sovereign_id'],'AV-PACT-001','AV-COVMODEL-001']
     elif mode=='ownership': a['ownership']=True
     elif mode=='access_grant': a['grants_school_access']=True
     else: a['founder_id']=b['founder_id']; a['sovereign_id']=b['sovereign_id']
@@ -104,3 +104,33 @@ assert f"/blob/{element['reviewed_candidate']}/element-hq/designs/derived-school
 assert pins['game_main'] in (root/'README.md').read_text()
 assert 'canon/covenants-and-derived-schools.md' in (root/'README.md').read_text()
 print('Source-pin and documentation cross-reference checks passed.')
+
+def decision_check(records):
+    idx={r['id']:r for r in records}
+    approved={r['id'] for r in records if r['status']=='approved_direction' and 'document' in r}
+    assert approved=={'AV-PACT-001','AV-ARCH-001','AV-COVMODEL-001'}
+    a,c=idx['AV-ARCH-001'],idx['AV-COVMODEL-001']
+    assert a['approved_scope']=='ten_base_affinities_expandable_derived_traditions_only' and a['base_affinity_count']==10 and a['max_equipped_affinities']==2 and a['derived_affinity_slots'] is False
+    assert c['approved_scope']=='independent_voluntary_partnership_only' and c['voluntary'] is True and c['ownership'] is False and c['grants_school_access'] is False and c['divine_veto'] is False
+    dossiers=[r for r in records if r['kind']=='partnership_dossier']
+    assert len(dossiers)==1
+    d=dossiers[0]
+    assert d['id']=='AV-DOSSIER-001' and d['school']=='Fire' and d['status']=='candidate'
+    for field,kind in [('founder_id','founder'),('sovereign_id','mythic_representative'),('covenant_id','founding_covenant'),('city_id','city'),('civilization_id','founding_civilization')]:
+        target=idx[d[field]]
+        assert target['kind']==kind and target['school']==d['school'] and target['status']=='candidate'
+    assert idx[d['covenant_id']]['founder_id']==d['founder_id'] and idx[d['covenant_id']]['sovereign_id']==d['sovereign_id']
+    assert {'AV-ARCH-001','AV-COVMODEL-001',d['covenant_id'],d['city_id'],d['civilization_id']}<=set(d['depends_on'])
+    assert d['document']=='canon/fire-founding-partnership.md'
+decision_check(rows)
+for record,field,value in [('AV-ARCH-001','base_affinity_count',11),('AV-ARCH-001','derived_affinity_slots',True),('AV-COVMODEL-001','divine_veto',True),('AV-DOSSIER-001','status','approved_direction'),('AV-DOSSIER-001','sovereign_id','AV-MYTHIC-002')]:
+    fixture=copy.deepcopy(rows)
+    next(r for r in fixture if r['id']==record)[field]=value
+    try: decision_check(fixture)
+    except AssertionError: pass
+    else: raise AssertionError('negative decision fixture accepted: '+field)
+doc=(root/'canon/fire-founding-partnership.md').read_text()
+for h in ('## Identity and language','## Maren Voss','## Avarn','## Shared chronology','## What both gave up','## Civilization','## Symbols and historical evidence','## Present-day relevance','## Review disposition'):
+    assert h in doc
+assert 'AV-3D-001' in doc and 'No new Fire fusion' in doc and 'awaiting owner review' in doc
+print('Owner decisions: two architecture approvals, ten candidate covenants, one Fire dossier; five negative fixtures rejected.')

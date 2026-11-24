@@ -776,7 +776,8 @@
       "depends_on": [
         "AV-FOUNDER-001",
         "AV-MYTHIC-001",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -795,7 +796,8 @@
       "depends_on": [
         "AV-FOUNDER-002",
         "AV-MYTHIC-002",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -814,7 +816,8 @@
       "depends_on": [
         "AV-FOUNDER-003",
         "AV-MYTHIC-003",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -833,7 +836,8 @@
       "depends_on": [
         "AV-FOUNDER-004",
         "AV-MYTHIC-004",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -852,7 +856,8 @@
       "depends_on": [
         "AV-FOUNDER-005",
         "AV-MYTHIC-005",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -871,7 +876,8 @@
       "depends_on": [
         "AV-FOUNDER-006",
         "AV-MYTHIC-006",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -890,7 +896,8 @@
       "depends_on": [
         "AV-FOUNDER-007",
         "AV-MYTHIC-007",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -909,7 +916,8 @@
       "depends_on": [
         "AV-FOUNDER-008",
         "AV-MYTHIC-008",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -928,7 +936,8 @@
       "depends_on": [
         "AV-FOUNDER-009",
         "AV-MYTHIC-009",
-        "AV-PACT-001"
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
       ]
     },
     {
@@ -947,7 +956,59 @@
       "depends_on": [
         "AV-FOUNDER-010",
         "AV-MYTHIC-010",
+        "AV-PACT-001",
+        "AV-COVMODEL-001"
+      ]
+    },
+    {
+      "id": "AV-ARCH-001",
+      "kind": "school_architecture",
+      "name": "Foundational and Derived School architecture",
+      "status": "approved_direction",
+      "approved_scope": "ten_base_affinities_expandable_derived_traditions_only",
+      "base_affinity_count": 10,
+      "max_equipped_affinities": 2,
+      "derived_affinity_slots": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
         "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVMODEL-001",
+      "kind": "covenant_model",
+      "name": "Founding Covenant relationship",
+      "status": "approved_direction",
+      "approved_scope": "independent_voluntary_partnership_only",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "divine_veto": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-DOSSIER-001",
+      "kind": "partnership_dossier",
+      "name": "Fire — the Open Hearth",
+      "school": "Fire",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-001",
+      "sovereign_id": "AV-MYTHIC-001",
+      "covenant_id": "AV-COVENANT-001",
+      "city_id": "AV-CITY-001",
+      "civilization_id": "AV-CIV-001",
+      "document": "canon/fire-founding-partnership.md",
+      "depends_on": [
+        "AV-ARCH-001",
+        "AV-COVMODEL-001",
+        "AV-COVENANT-001",
+        "AV-CITY-001",
+        "AV-CIV-001",
+        "AV-EVENT-001",
+        "AV-EVENT-002"
       ]
     }
   ]

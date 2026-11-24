@@ -6,8 +6,10 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 
 ## Current candidate
 
-[Version](VERSION): 0.0.4-candidate. [Pact and campaign foundation](canon/pact-of-ten.md) has owner-approved meaning; history and campaign remain proposed. [Source pins](canon/source-pins.json) distinguish canonical Element HQ and its latest draft candidate. No private template installed; no release claimed.
+[Version](VERSION): 0.0.5-candidate. [Pact and campaign foundation](canon/pact-of-ten.md) has owner-approved meaning; history and campaign remain proposed. [Source pins](canon/source-pins.json) distinguish canonical Element HQ and its latest draft candidate. No private template installed; no release claimed.
 
 [Founders, mythical representatives and historical connections](canon/founders-and-mythology.md) — candidate.
 
-[Founding covenants and derived schools](canon/covenants-and-derived-schools.md) — proposed relationship architecture, ten seeds, biography worksheet, fusion expansion and conflict register.
+[Founding covenants and derived schools](canon/covenants-and-derived-schools.md) — owner-approved relationship and derived school architecture, ten candidate seeds, biography worksheet, fusion expansion and conflict register.
+
+[Fire — The Open Hearth](canon/fire-founding-partnership.md) — first complete candidate dossier, awaiting owner review.

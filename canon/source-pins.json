@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "workspace_version": "0.0.4-candidate",
+  "workspace_version": "0.0.5-candidate",
   "game_main": "3f8fc59317cca811f2958b6871737cc68e167376",
   "element_hq": {
     "canonical_base": "6fd35f2076b75830d10d7131fb15a9eda4483745",
-    "reviewed_candidate": "2e6ce3fdd1f44f963afe50624ff88d140cac6542",
+    "reviewed_candidate": "57cec3d7c7f7d241e50c5a07c97621522655f3de",
     "pr": 186,
     "merged": false,
     "schools": [
