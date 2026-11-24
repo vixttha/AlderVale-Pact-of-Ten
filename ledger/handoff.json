@@ -3,11 +3,11 @@
   "active": {
     "issue": 70,
     "version": "v0.0.0.1",
-    "phase": "Worker",
-    "next_action": "Repair solo starter enchant reachability and add targeted browser and emulator regression; preserve unrelated work.",
-    "fix_sha": null,
-    "candidate_sha": null,
-    "pull_request": null,
+    "phase": "Validate",
+    "next_action": "Run exact candidate public game matrix, Graphify, Vault, Semgrep and runner policy; check G09-003 guest browser, authenticated emulator, live sockets and shared regressions. Preserve existing saved loadout and card count. No merge or issue closure without owner authority.",
+    "fix_sha": "5acf7f376af6135572819f1762713e14a6967ea3",
+    "candidate_sha": "5acf7f376af6135572819f1762713e14a6967ea3",
+    "pull_request": 185,
     "evidence": []
   },
   "history": [
