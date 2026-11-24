@@ -44,6 +44,24 @@ No all-ten-school requirement, mandatory rare companion, forced allegiance, sing
 
 Source: [pinned design candidate](https://github.com/vixttha/AlderVale-Pact-of-Ten/tree/39852a5f10ebd2ac07a8c1673d47bb1e027a2791), [FQ-001](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/39852a5f10ebd2ac07a8c1673d47bb1e027a2791/element-hq/FUSION_QUALITY_LAW.md). Keep the ten permanent schools Fire, Water, Lightning, Frost, Wind, Earth, Light, Dark, Metal, Plant; opposition pairs Fire/Water, Lightning/Frost, Wind/Earth, Light/Dark, Metal/Plant are affinities, not political factions. No time/space school. EA-001 access, progression and two-active-affinity boundary remain as previously recorded; one primary at creation and additional learning through world trials, advanced mastery earned, exact point costs/slots mechanics remain open. Creature ownership is not school access; six origin classes remain independent. Rust (Water + Metal), Sugar (Light + Plant), Magnetism (Earth + Metal) remain selected recipes only, not additional base damage/resistance schools, playable abilities or approved creature species. FQ-001 requires all four gates and separate approvals. Story does not bypass these rules. Additional hybrid techniques use the expandable registry and discovery structure; no fixed total. The Pact cannot automatically activate a recipe or alter progression saves.
 
+## Concrete story and gameplay connections — candidate elaboration
+
+The neutral Academy on floating islands can be the living result of the Pact, not its political capital. Its training brings different traditions together; existing campus geography stays intact. The central threat is cumulative failure of cooperation rather than a new magic school. An ordinary incident involving a disrupted shipment, failing civic safeguard or distressed habitat can expose the problem before the player understands its scale. The player's significance comes from relationships and demonstrated competence, not an exclusive bloodline. Existing spellcasting, turn-based duels, companion care, local trade and discovery can each carry part of the story.
+
+| Reciprocal schools | Example of civic interdependence (not new combat rules) |
+| --- | --- |
+| Fire / Water | Heating, sanitation, irrigation and managing heat safely |
+| Lightning / Frost | Energy regulation and preservation |
+| Wind / Earth | Transport, shelter and structural stability |
+| Light / Dark | Public knowledge and protected memory |
+| Metal / Plant | Craftsmanship and ecological renewal |
+
+Neither side is intrinsically good or evil. Each example is an illustrative local tradition, not a universal city identity or required two-school spell. Allies and NPCs may contribute skills the player does not possess.
+
+The three ideological positions above should have real consequences: restoration preserves emergency services but may protect entrenched authority; reform broadens participation but takes negotiation; unrestricted access challenges exploitation but must address shared risks. No rigid faction assignment or final ending has been approved. Campaign challenges should be achievable by a primary-only player, with neutral tools, NPC cooperation and multiple ways to help. Creature distress is not universal hostility; rescue, observation and bonding remain species-dependent. No forced transfer, divine capture or ownership prerequisite.
+
+Story expansion: optional quests and secrets should reveal regional histories, relationships and practical traditions. New settlements may be outside the treaty, and the ten strongholds are not the entire world. A later arc may explore a different interpretation of the Pact without changing the elemental taxonomy. Private plot specifics, exact culprit, chronology, named founders and endings remain unapproved.
+
 ## Next owner decisions
 
 Approve or revise meaning, historical cause, era names, conflict positions and campaign framing. Then develop founders, calendar, regional founding histories and one quest slice. Keep antagonist identities, final reveals and secret solutions in private planning. No new feature authorization implied.
