@@ -759,6 +759,196 @@
         "AV-MYTHIC-010",
         "AV-EVENT-001"
       ]
+    },
+    {
+      "id": "AV-COVENANT-001",
+      "kind": "founding_covenant",
+      "name": "Fire founding covenant",
+      "school": "Fire",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-001",
+      "sovereign_id": "AV-MYTHIC-001",
+      "relationship_kind": "Reciprocal restraint",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-001",
+        "AV-MYTHIC-001",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-002",
+      "kind": "founding_covenant",
+      "name": "Water founding covenant",
+      "school": "Water",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-002",
+      "sovereign_id": "AV-MYTHIC-002",
+      "relationship_kind": "Negotiation",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-002",
+        "AV-MYTHIC-002",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-003",
+      "kind": "founding_covenant",
+      "name": "Lightning founding covenant",
+      "school": "Lightning",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-003",
+      "sovereign_id": "AV-MYTHIC-003",
+      "relationship_kind": "Rivalry",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-003",
+        "AV-MYTHIC-003",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-004",
+      "kind": "founding_covenant",
+      "name": "Frost founding covenant",
+      "school": "Frost",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-004",
+      "sovereign_id": "AV-MYTHIC-004",
+      "relationship_kind": "Reciprocal preservation",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-004",
+        "AV-MYTHIC-004",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-005",
+      "kind": "founding_covenant",
+      "name": "Wind founding covenant",
+      "school": "Wind",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-005",
+      "sovereign_id": "AV-MYTHIC-005",
+      "relationship_kind": "Freedom with duty",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-005",
+        "AV-MYTHIC-005",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-006",
+      "kind": "founding_covenant",
+      "name": "Earth founding covenant",
+      "school": "Earth",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-006",
+      "sovereign_id": "AV-MYTHIC-006",
+      "relationship_kind": "Negotiated limits",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-006",
+        "AV-MYTHIC-006",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-007",
+      "kind": "founding_covenant",
+      "name": "Light founding covenant",
+      "school": "Light",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-007",
+      "sovereign_id": "AV-MYTHIC-007",
+      "relationship_kind": "Accountability",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-007",
+        "AV-MYTHIC-007",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-008",
+      "kind": "founding_covenant",
+      "name": "Dark founding covenant",
+      "school": "Dark",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-008",
+      "sovereign_id": "AV-MYTHIC-008",
+      "relationship_kind": "Guarded trust",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-008",
+        "AV-MYTHIC-008",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-009",
+      "kind": "founding_covenant",
+      "name": "Metal founding covenant",
+      "school": "Metal",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-009",
+      "sovereign_id": "AV-MYTHIC-009",
+      "relationship_kind": "Repair and independence",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-009",
+        "AV-MYTHIC-009",
+        "AV-PACT-001"
+      ]
+    },
+    {
+      "id": "AV-COVENANT-010",
+      "kind": "founding_covenant",
+      "name": "Plant founding covenant",
+      "school": "Plant",
+      "status": "candidate",
+      "founder_id": "AV-FOUNDER-010",
+      "sovereign_id": "AV-MYTHIC-010",
+      "relationship_kind": "Stewardship across generations",
+      "voluntary": true,
+      "ownership": false,
+      "grants_school_access": false,
+      "document": "canon/covenants-and-derived-schools.md",
+      "depends_on": [
+        "AV-FOUNDER-010",
+        "AV-MYTHIC-010",
+        "AV-PACT-001"
+      ]
     }
   ]
 }

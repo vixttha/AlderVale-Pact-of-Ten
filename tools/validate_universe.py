@@ -16,9 +16,9 @@ assert 'Rowan is rejected' in (root/'DECISIONS.md').read_text()
 assert 'every designated special accessory' in (root/'DECISIONS.md').read_text()
 assert 'FQ-001' in (root/'DECISIONS.md').read_text()
 tracked=set(subprocess.check_output(['git','ls-files'],cwd=root,text=True).splitlines())
-assert tracked=={'README.md','DECISIONS.md','WORK-QUEUE.md','canon/registry.json','canon/world-and-story.md','tools/validate_universe.py','.github/workflows/universe-validate.yml','canon/pact-of-ten.md','canon/source-pins.json','VERSION','canon/founders-and-mythology.md'}
+assert tracked=={'README.md','DECISIONS.md','WORK-QUEUE.md','canon/registry.json','canon/world-and-story.md','tools/validate_universe.py','.github/workflows/universe-validate.yml','canon/pact-of-ten.md','canon/source-pins.json','VERSION','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md'}
 pins=json.loads((root/'canon/source-pins.json').read_text())
-assert (root/'VERSION').read_text().strip()==pins['workspace_version']=='0.0.3-candidate'
+assert (root/'VERSION').read_text().strip()==pins['workspace_version']=='0.0.4-candidate'
 element=pins['element_hq']
 assert set(element['schools'])=={r['school'] for r in cities}
 assert len(element['oppositions'])==5 and {frozenset(p) for p in element['oppositions']}=={frozenset(p) for p in [('Fire','Water'),('Lightning','Frost'),('Wind','Earth'),('Light','Dark'),('Metal','Plant')]}
@@ -74,3 +74,26 @@ for r in rows:
     if r['kind']=='city': assert any(byid[d]['kind']=='founding_civilization' and byid[d]['school']==r['school'] for d in r['depends_on'])
 assert sum(r['kind']=='founder' for r in (byid[d] for d in byid['AV-EVENT-002']['depends_on']))==10
 print('Founding alignment: ten magician delegates, ten non-playable mythical representatives, ten coalitions, ten linked cities; meaning-only acceptance.')
+
+def covenant_check(records):
+    idx={r['id']:r for r in records}
+    cov=[r for r in records if r['kind']=='founding_covenant']
+    assert len(cov)==10 and {r['school'] for r in cov}==set(element['schools'])
+    assert len({r['founder_id'] for r in cov})==len({r['sovereign_id'] for r in cov})==10
+    for r in cov:
+        a,b=idx[r['founder_id']],idx[r['sovereign_id']]
+        assert a['kind']=='founder' and b['kind']=='mythic_representative' and a['school']==b['school']==r['school']
+        assert r['status']=='candidate' and r['voluntary'] is True and r['ownership'] is False and r['grants_school_access'] is False
+        assert set(r['depends_on'])=={a['id'],b['id'],'AV-PACT-001'}
+covenant_check(rows)
+for mode in ('wrong_school','ownership','access_grant','duplicate_pair'):
+    fixture=copy.deepcopy(rows)
+    a,b=[r for r in fixture if r['kind']=='founding_covenant'][:2]
+    if mode=='wrong_school': a['sovereign_id']=b['sovereign_id']; a['depends_on']=[a['founder_id'],a['sovereign_id'],'AV-PACT-001']
+    elif mode=='ownership': a['ownership']=True
+    elif mode=='access_grant': a['grants_school_access']=True
+    else: a['founder_id']=b['founder_id']; a['sovereign_id']=b['sovereign_id']
+    try: covenant_check(fixture)
+    except AssertionError: pass
+    else: raise AssertionError('covenant negative fixture passed: '+mode)
+print('Covenant alignment: ten voluntary candidate pairs; four negative fixtures rejected; no ownership or affinity grant.')

@@ -1,3 +1,3 @@
 # Single design queue
 
-Current: review [founding peoples and mythology](canon/founders-and-mythology.md), calendar and historical links. Pact meaning accepted; other canon awaits owner approval. Then one regional quest paper prototype, ecosystem, economy, mastery and 3D production. Preserve active gameplay acceptance lane. No new gameplay feature authorization.
+Current: review covenant relationship architecture and derived school distinction; develop first Fire magician/Sovereign pair in depth after owner direction. Review each pair before proceeding to next; calendar, cities and other canon still candidate. Existing gameplay acceptance lane remains separate. No new feature authorization.

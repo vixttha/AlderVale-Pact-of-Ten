@@ -13,3 +13,7 @@ No final city name, new species, story chronology, stat formula, release or game
 ## Pact meaning acceptance — 2026-11-24
 
 Owner explicitly accepts meaning of Pact of Ten and requests conflict audit. AV-PACT-001 accepted scope: meaning and three founding obligations only. Original signatories, calendar, civilizations, mythical apex model and antagonist are candidate. User requests magician leaders alongside mythical representatives and potential fusion exemplars. No new implementation or merge authority.
+
+## Covenant and derived school exploration — 2026-11-24
+
+Owner requests relationship refinement, deliberate meaningful biographies, exploration of fusion-derived schools and territories, documentation and conflict audit. No additional approval or law change inferred. See [candidate design](canon/covenants-and-derived-schools.md). Preserve accepted Pact meaning, EA-001 and FQ-001. Individual biographies and institutions remain candidate.

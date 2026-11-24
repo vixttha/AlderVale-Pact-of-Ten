@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "workspace_version": "0.0.3-candidate",
+  "workspace_version": "0.0.4-candidate",
   "game_main": "914dee182df5dea37476b9b0eaf71d7a32190e06",
   "element_hq": {
     "canonical_base": "6fd35f2076b75830d10d7131fb15a9eda4483745",
