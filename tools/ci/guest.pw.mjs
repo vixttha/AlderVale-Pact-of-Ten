@@ -165,6 +165,7 @@ test('a direct guest read cannot rebase stale wizard updates onto newer progress
     localStorage.setItem(key, raw);
     return raw;
   }, breezeSaveKey);
+  await page.getByRole('button', { name: 'Campus', exact: true }).click();
   await page.getByRole('button', { name: 'Quests, Term & Codex', exact: true }).click();
   const claim = page.getByRole('button', { name: 'Claim Free', exact: true });
   await expect(claim).toBeEnabled();
