@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "recipes": [
+    {
+      "id": "fusion.rust",
+      "name": "Rust",
+      "parents": [
+        "water",
+        "metal"
+      ],
+      "revision": 1,
+      "status": "selected",
+      "gates": {
+        "Q1": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q2": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q3": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q4": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        }
+      },
+      "kit": null,
+      "gameplay_approved": false,
+      "implementation_verified": false
+    },
+    {
+      "id": "fusion.sugar",
+      "name": "Sugar",
+      "parents": [
+        "light",
+        "plant"
+      ],
+      "revision": 1,
+      "status": "selected",
+      "gates": {
+        "Q1": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q2": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q3": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q4": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        }
+      },
+      "kit": null,
+      "gameplay_approved": false,
+      "implementation_verified": false
+    },
+    {
+      "id": "fusion.magnetism",
+      "name": "Magnetism",
+      "parents": [
+        "earth",
+        "metal"
+      ],
+      "revision": 1,
+      "status": "selected",
+      "gates": {
+        "Q1": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q2": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q3": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        },
+        "Q4": {
+          "status": "UNVERIFIED",
+          "evidence": []
+        }
+      },
+      "kit": null,
+      "gameplay_approved": false,
+      "implementation_verified": false
+    }
+  ]
+}

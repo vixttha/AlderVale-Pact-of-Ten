@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AlderVale fusion registry candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "recipes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "recipes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "parents",
+          "revision",
+          "status",
+          "gates",
+          "kit",
+          "gameplay_approved",
+          "implementation_verified"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^fusion\\.[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parents": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "fire",
+                "water",
+                "lightning",
+                "frost",
+                "wind",
+                "earth",
+                "light",
+                "dark",
+                "metal",
+                "plant"
+              ]
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "enum": [
+              "exploratory",
+              "selected",
+              "paused",
+              "retired",
+              "playable"
+            ]
+          },
+          "gates": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4"
+            ],
+            "properties": {
+              "Q1": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "status",
+                  "evidence"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "PASS",
+                      "FAIL",
+                      "UNVERIFIED"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              },
+              "Q2": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "status",
+                  "evidence"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "PASS",
+                      "FAIL",
+                      "UNVERIFIED"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              },
+              "Q3": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "status",
+                  "evidence"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "PASS",
+                      "FAIL",
+                      "UNVERIFIED"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              },
+              "Q4": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "status",
+                  "evidence"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "PASS",
+                      "FAIL",
+                      "UNVERIFIED"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "kit": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "prerequisite_node_ids",
+              "discovery_id",
+              "effect_id",
+              "pip_cost"
+            ],
+            "properties": {
+              "prerequisite_node_ids": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "discovery_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "effect_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pip_cost": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "gameplay_approved": {
+            "type": "boolean"
+          },
+          "implementation_verified": {
+            "type": "boolean"
+          },
+          "approval_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "implementation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "playable"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "approval_ref",
+                "implementation_ref"
+              ],
+              "properties": {
+                "gameplay_approved": {
+                  "const": true
+                },
+                "implementation_verified": {
+                  "const": true
+                },
+                "kit": {
+                  "type": "object"
+                },
+                "gates": {
+                  "properties": {
+                    "Q1": {
+                      "properties": {
+                        "status": {
+                          "const": "PASS"
+                        },
+                        "evidence": {
+                          "minItems": 1
+                        }
+                      }
+                    },
+                    "Q2": {
+                      "properties": {
+                        "status": {
+                          "const": "PASS"
+                        },
+                        "evidence": {
+                          "minItems": 1
+                        }
+                      }
+                    },
+                    "Q3": {
+                      "properties": {
+                        "status": {
+                          "const": "PASS"
+                        },
+                        "evidence": {
+                          "minItems": 1
+                        }
+                      }
+                    },
+                    "Q4": {
+                      "properties": {
+                        "status": {
+                          "const": "PASS"
+                        },
+                        "evidence": {
+                          "minItems": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

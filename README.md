@@ -18,6 +18,16 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 
 **Fusion architecture decision:** retain exactly ten elemental schools. Fusion results are **named resonance techniques, not additional elemental damage/resistance schools**. Collectible fusion creatures are a possible later feature; no new creature pipeline, combat behavior or implementation is approved by these recipe locks.
 
+## Confirmed creature design boundary
+
+[Elemental foundation reaffirmed 2026-11-24](element-hq/designs/element-foundation-confirmation-2026-11-24.md) records the ten-school roster, creature design boundary and migration questions. Consult Element HQ before new elemental, creature, spell, fusion or progression recommendations. Acorn Sprout is exploratory; selected fusion recipes do not approve creature species.
+
+## Combat and hybrid design candidate
+
+[World and creature direction v2](element-hq/designs/world-and-creature-direction-v2.md) records AV-3D-001, city naming audit, creature customization/trading, mastery UI revision and tool adoption audit. New design details remain candidates.
+
+[Combat identities and expandable hybrid architecture v1](element-hq/designs/combat-identities-and-hybrid-extension-v1.md) defines ten combat identities, 40 initial ability concepts, a coherent EA-001 loadout model and extensible FQ-001 recipe records. New details are for review, not gameplay locks.
+
 ## Start here
 
 **Owner law:** [Fusion Quality Law FQ-001](element-hq/FUSION_QUALITY_LAW.md) requires strong two-parent logic, a distinct visual identity, a unique combat purpose and meaningful counterplay before any fusion becomes playable. Recipes are curated, not a fixed quota.
@@ -51,3 +61,7 @@ The five opposition pairs are **Fire ↔ Water**, **Lightning ↔ Frost**, **Win
 The original workspace notes, registry, and fusion proposal are preserved as snapshots from `a57f92c349ecc7cc39cc2e7b23cb7a9e8a5517dd`. For example, their open-PR note about [#84](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/84) describes that snapshot. GitHub records that PR as merged in [the main baseline used for this cleanup](https://github.com/vixttha/AlderVale-Pact-of-Ten/commit/295a25c7facabf7d350c951817ba0a1af7b1612a). The fusion proposal retains its proposed status.
 
 This branch lives alongside `main`. Bring selected design documents into the game branch through a separately scoped change when needed. The **Element HQ documents** Actions check verifies the documentation checkout on a standard GitHub-hosted Ubuntu runner.
+
+[Owner decision addendum and expandable fusion schema](element-hq/designs/owner-decisions-2026-11-24.md) — approved directions, proposed data contract, no playable activation.
+
+[Derived disciplines and Sovereigns](element-hq/designs/derived-schools-and-sovereigns.md) — candidate institution model, no new fundamental school.

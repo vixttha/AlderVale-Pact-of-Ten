@@ -3,6 +3,8 @@ name: Element HQ documents
 on:
   push:
     branches: [element-hq-v1]
+  pull_request:
+    branches: [element-hq-v1]
 
 permissions:
   contents: read
@@ -55,7 +57,7 @@ jobs:
           missing = (documents | {"README.md", workflow, "element-hq/fusions/build_atlas.py"}) - tracked
           unexpected = {
               path for path in tracked
-              if path not in {"README.md", workflow, "element-hq/fusions/build_atlas.py"}
+              if path not in {"README.md", workflow, "element-hq/fusions/build_atlas.py", "element-hq/fusions/registry.schema.json", "element-hq/fusions/registry.json", "element-hq/fusions/validate_registry.py"}
               and (not path.startswith("element-hq/") or not path.endswith(".md")
                    or not Path(path).is_file() or Path(path).is_symlink())
           }
@@ -115,7 +117,65 @@ jobs:
           print("Verified second Water screenshot audit document and illustrative point math; no pixel/DOM test")
           print("Verified screenshot audit checklist + conditional level-12 arithmetic; no image pixels tested")
           print("Verified FQ-001: all four owner-required quality gates")
+          foundation = "element-hq/designs/element-foundation-confirmation-2026-11-24.md"
+          if foundation in tracked:
+              if f"]({foundation})" not in guide:
+                  raise SystemExit("Foundation is not indexed")
+              proposal = Path(foundation).read_text(encoding="utf-8")
+              for clause in ("Owner-approved — LOCKED (EA-001)",
+                             "All ten elements selectable at character creation.",
+                             "Additional elements discovered through exploration and trials.",
+                             "Advanced power earned through mastery.",
+                             "Potentially all ten schools learnable, with two equipped affinities at a time.",
+                             "Fusion techniques earned separately.",
+                             "single primary affinity", "FQ-001", "No gameplay changes until authorized"):
+                  if clause not in proposal:
+                      raise SystemExit(f"Foundation decision boundary missing: {clause}")
+          combat = "element-hq/designs/combat-identities-and-hybrid-extension-v1.md"
+          if combat in tracked:
+              assert f"]({combat})" in guide, "Combat design not indexed"
+              rows = [line.strip("|").split("|") for line in Path(combat).read_text(encoding="utf-8").splitlines() if line.startswith("| ")]
+              schools = {"Fire", "Water", "Lightning", "Frost", "Wind", "Earth", "Light", "Dark", "Metal", "Plant"}
+              school_rows = [[cell.strip() for cell in row] for row in rows if row[0].strip() in schools]
+              assert len(school_rows) == 10 and {row[0] for row in school_rows} == schools
+              assert all(len(row) == 9 and all(row) for row in school_rows)
+              assert len({row[1] for row in school_rows}) == len({row[2] for row in school_rows}) == 10
+              assert len({name for row in school_rows for name in row[5:9]}) == 40
+              hybrid_rows = {row[0].strip(): row[1].strip() for row in rows if row[0].strip() in {"Rust", "Sugar", "Magnetism"}}
+              assert hybrid_rows == {"Rust": "Water + Metal", "Sugar": "Light + Plant", "Magnetism": "Earth + Metal"}
+              print("Verified design table: 10 schools, 40 distinct ability concepts, three selected recipes (document structure only)")
+              doc = Path(combat).read_text(encoding="utf-8")
+              region_text = doc.split("### Ten elemental territories (working names)", 1)[1].split("### Creature ontology", 1)[0]
+              region_rows = [[cell.strip() for cell in line.strip("|").split("|")] for line in region_text.splitlines() if line.startswith("| ") and not line.startswith("| ---")][1:]
+              assert len(region_rows) == 10 and all(len(row) == 5 and all(row) for row in region_rows)
+              assert {row[1] for row in region_rows} == schools and len({row[0] for row in region_rows}) == 10
+              types_text = doc.split("### Creature ontology and bond system", 1)[1].split("### Prototype and audit order", 1)[0]
+              types_rows = [[cell.strip() for cell in line.strip("|").split("|")] for line in types_text.splitlines() if line.startswith("| ") and not line.startswith("| ---")][1:]
+              assert len(types_rows) == 6 and {row[0] for row in types_rows} == {"Wildlife", "Magical beast", "Elemental", "Spirit", "Construct", "Divine being"}
+              assert all(len(row) == 3 and all(row) for row in types_rows)
+              assert "6 earned, 4 spent, 2 available" in doc and "maximum two distinct equipped" in doc
+              print("Verified territory and creature classification design coverage (not gameplay or balance)")
+          world = "element-hq/designs/world-and-creature-direction-v2.md"
+          if world in tracked:
+              assert f"]({world})" in guide
+              design = Path(world).read_text(encoding="utf-8")
+              cities = design.split("## City identity audit and candidate names", 1)[1].split("## Six creature classes", 1)[0]
+              rows = [[c.strip() for c in line.strip("|").split("|")] for line in cities.splitlines() if line.startswith("| ") and not line.startswith("| ---")][1:]
+              assert len(rows) == 10 and all(len(row) == 6 and all(row) for row in rows)
+              assert {row[0] for row in rows} == {"Fire","Water","Lightning","Frost","Wind","Earth","Light","Dark","Metal","Plant"}
+              assert len({row[3].casefold() for row in rows}) == 10
+              assert all(row[0].casefold() not in row[3].casefold() for row in rows)
+              creatures = design.split("## Six creature classes", 1)[1].split("## Progression, rarity and power", 1)[0]
+              rows = [[c.strip() for c in line.strip("|").split("|")] for line in creatures.splitlines() if line.startswith("| ") and not line.startswith("| ---")][1:]
+              assert len(rows) == 6 and all(len(row) == 4 and all(row) for row in rows)
+              assert {row[0] for row in rows} == {"Wildlife","Magical beast","Elemental","Spirit","Construct","Divine being"}
+              for clause in ("AV-3D-001", "GLB/glTF", "BART", "No real money", "atomically debit/credit", "previous visual rejected", "No new base element"):
+                  assert clause in design, clause
+              print("Verified world v2: ten city concepts, six acquisition/transfer classes, 3D law and design boundaries; not gameplay or asset validation")
           print(f"Verified Element HQ documents at {head}")
           PY
       - name: Verify Fusion Name Atlas
         run: python3 element-hq/fusions/build_atlas.py --check
+
+      - name: Verify candidate fusion registry and negative cases
+        run: python3 element-hq/fusions/validate_registry.py
