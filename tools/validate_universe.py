@@ -33,7 +33,7 @@ def graph_check(records):
             assert target in graph and target!=r['id']
         if 'document' in r:
             assert r['status']==('approved_direction' if r['id']=='AV-PACT-001' else 'candidate')
-            assert r['document'] in {'canon/pact-of-ten.md','canon/founders-and-mythology.md'} and (root/r['document']).is_file()
+            assert r['document'] in {'canon/pact-of-ten.md','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md'} and (root/r['document']).is_file()
             assert r['id'] in (root/r['document']).read_text()
     visiting=set(); done=set()
     def visit(node):
@@ -89,7 +89,9 @@ covenant_check(rows)
 for mode in ('wrong_school','ownership','access_grant','duplicate_pair'):
     fixture=copy.deepcopy(rows)
     a,b=[r for r in fixture if r['kind']=='founding_covenant'][:2]
-    if mode=='wrong_school': a['sovereign_id']=b['sovereign_id']; a['depends_on']=[a['founder_id'],a['sovereign_id'],'AV-PACT-001']
+    if mode=='wrong_school':
+        a['sovereign_id'],b['sovereign_id']=b['sovereign_id'],a['sovereign_id']
+        for pair in (a,b): pair['depends_on']=[pair['founder_id'],pair['sovereign_id'],'AV-PACT-001']
     elif mode=='ownership': a['ownership']=True
     elif mode=='access_grant': a['grants_school_access']=True
     else: a['founder_id']=b['founder_id']; a['sovereign_id']=b['sovereign_id']
