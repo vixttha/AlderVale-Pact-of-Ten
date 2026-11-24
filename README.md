@@ -1,79 +1,85 @@
-# AlderVale: Pact of Ten
+# Veraphify
 
-![AlderVale Workmark v1 with a green leaf wreath and gold lettering](assets/aldervale-workmark-v1.webp)
+**Code memory for each project version.** Archive a project’s evidence graph and look up the exact Git commit, file, and line that implemented a feature in a selected version.
 
-AlderVale is a 3D browser RPG set at a spellcasting academy among floating islands. Create a wizard, explore the campus, and build a deck for turn-based duels.
+**v0.0.9 preview** · [Try the two-version walkthrough](https://github.com/vixttha/Veraphify/blob/66e822b56528c5f3e7b7730709d4b472ae2d5f1e/docs/adopter-walkthrough.md) · [Verification evidence](docs/verification.md) · [Release tracker](https://github.com/vixttha/Veraphify/issues/21)
 
-**In development · Local guest play.** Start in Breeze and earn your first quest rewards in a solo duel. You can play as a guest without a Google account or API key.
+## Quickstart
 
-[Play on Windows](#play-on-windows) · [Run from source](#run-from-source) · [First playthrough](#first-playthrough) · [Bazaar](#bazaar) · [Report a bug](#report-a-bug)
-
-## Play on Windows
-
-In your local copy of the repository, open **AlderVale Play** and double-click **Play AlderVale.cmd**. Install Git and Node.js **24.12.0 or later** first. The launcher builds the game and opens it at [http://127.0.0.1:4178](http://127.0.0.1:4178). Keep the launcher window open while you play. [Windows launcher guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/AlderVale%20Play/README.md)
-
-## Run from source
-
-Install Git, Node.js **24.12.0 or later**, and Bun **1.4.4**. The 3D campus requires WebGL 2.
+Use Git, Bash, and Node.js 24 to open the CLI at the tested preview commit.
 
 ```bash
-git clone https://github.com/vixttha/AlderVale-Pact-of-Ten.git
-cd AlderVale-Pact-of-Ten
-bun install --frozen-lockfile
-bun run dev
+git clone --no-checkout https://github.com/vixttha/Veraphify.git Veraphify-preview
+cd Veraphify-preview
+git checkout --detach 66e822b56528c5f3e7b7730709d4b472ae2d5f1e
+node veraphifiy.mjs --help
 ```
 
-Keep the terminal open and visit [http://localhost:3000](http://localhost:3000). Guest saves are stored by browser profile and address. Stick with the launcher address or the source address to resume the same save.
+The help output lists `import`, `verify`, and `lookup`. The CLI filename retains its original spelling.
 
-![Rowan stands before the fountain in Breeze’s Central Academy Commons, surrounded by academy characters. The First Spark quest is visible in the HUD.](assets/breeze-campus.webp)
+To see an archive in use, follow the [two-version walkthrough](https://github.com/vixttha/Veraphify/blob/66e822b56528c5f3e7b7730709d4b472ae2d5f1e/docs/adopter-walkthrough.md) from that checkout. The walkthrough uses Linux x86-64 and CPython 3.12 with `venv`, in addition to the tools above. It builds disposable fixture evidence with the pinned Graphify producer and looks up the same feature twice.
 
-*Breeze’s Central Academy Commons. In-game capture from build `3fa20bc`.*
-
-## First playthrough
-
-1. **Create your wizard.** Choose **Breeze**, enter a wizard name, and pick **Alder Human** with the **Rowan** appearance. Select **Begin Academy Journey**.
-2. **Enter a duel.** On campus, open **Duel** and select **Frost** under **Solo Academy Skirmishes**. Pick an affordable spell and select **Cast Turn**, or use **Pass (+Gain Pip)** to build pips.
-3. **Claim First Spark.** After winning, select **Claim Rewards & Return**. Open **Active Saga Quest** and check that **First Spark in the Ring** shows **Completed**.
-4. **Resume your wizard.** Reload the page, select the same wizard in Breeze, and choose **Enter Aldervale**. Check that the quest is still complete and your Florin and Spell Shard totals match what you saw before reloading.
-
-![Round one of Rowan’s solo duel in Breeze. Rowan faces a Frost Sky-Duelist, with both fighters’ health and pips shown above the available spell cards.](assets/breeze-first-spark-duel.webp)
-
-*First Spark in Breeze. In-game capture from build `3fa20bc`.*
-
-### Choose a realm
-
-| Realm | In-game pacing label |
+| Fixture version | Implementation citation for `feature:export` |
 | --- | --- |
-| **Breeze** | ~25-Min Fast Path |
-| **Horizon** | ~1-Hr Balanced Path |
-| **Everpeak** | ~3-Hr Classic Saga |
+| `v1.0.0` | `src/feature.py:3` |
+| `v1.1.0` | `src/feature.py:4` |
 
-The labels describe progression tuning. Actual playtime varies.
+Each result identifies a different source commit. Importing `v1.1.0` leaves the earlier archive entry byte-for-byte identical.
 
-## Bazaar
+## Archive your own project
 
-Sign in to buy and sell gear in your wizard’s realm. The Bazaar uses the Florins in that realm’s Bazaar wallet. Academy shops use your wizard’s Florins.
+Before building the evidence, keep the combined size of inventoried and cited Git files within the [8 MiB source budget](docs/adopter-walkthrough.md).
 
-- **Buy gear.** Select **Buy** on a listing you can afford. The item becomes available in **Tailor → Equip Gear**.
-- **Sell gear.** If the item is equipped, equip a different piece in the same slot in **Tailor**. In the Bazaar, select the item and choose **List for Florins**. One copy is reserved until it sells or you choose **Cancel listing**. When it sells, your Bazaar wallet updates automatically if you’re still connected in that realm.
+1. **Import** a `graph.json` and `receipt.json` pair from the [pinned Graphify producer](https://github.com/vixttha/Blender-Agent-Refinement-Toolkit/tree/6af3c2025be3f51e02dca4e4502088c526aae6d1/versions/v0.0.8), using the project identity and source commit declared by the receipt.
+2. **Verify** the entry for that project and version. Store the source commit and archive SHA-256 from a trusted import separately. Pass them as `--source` and `--archive-sha256` to verify the exact entry.
+3. **Look up** a feature in that version. Pass the same trusted `--source` and `--archive-sha256` pins to `lookup`. Citations give one-based physical line numbers in the pinned Git source.
 
-## Troubleshooting
+Archive entries preserve the graph, receipt, and verified source bytes. Keep archives built from private repositories in private storage.
 
-- **3D world unavailable.** Try **Retry 3D**. You can still access your wizard and menus.
-- **Guest save failed.** Allow browser site storage, then select **Retry save** before reloading or closing the tab.
-- **Wizard missing after reload.** Use the same browser profile, local address, and realm. Clearing site data removes local guest saves.
+## Verification
 
-## Development and testing
+The public Test Vault ran the documented walkthrough on Ubuntu. Separate Ubuntu and Windows jobs independently replayed both versions from the retained archive handoff. [Exact push run, attempt 1](https://github.com/vixttha/Veraphify/actions/runs/44644119066/attempts/1) · [Evidence and rerun instructions](docs/verification.md) · [Test Vault](https://github.com/vixttha/Veraphify/blob/66e822b56528c5f3e7b7730709d4b472ae2d5f1e/test-vault/README.md)
 
-Run `bun run validate:core` for type checking, rules lint, tests, the production build, and HTTP and WebSocket checks. GitHub Actions also runs guest journeys in Chromium, Firefox, and WebKit and checks Firestore rules in an emulator.
+## License and attribution
 
-- [Validation guide](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/VALIDATION.md) · [GitHub Actions](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions)
-- [First-playable test coverage and desktop checklist](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/aldervale/README.md) · [Test Vault](https://github.com/vixttha/AlderVale-Pact-of-Ten/blob/main/docs/test-vault/README.md)
+Veraphify-authored code and tests are available under the [MIT license](https://github.com/vixttha/Veraphify/blob/66e822b56528c5f3e7b7730709d4b472ae2d5f1e/LICENSE). The [reuse and attribution guide](https://github.com/vixttha/Veraphify/blob/66e822b56528c5f3e7b7730709d4b472ae2d5f1e/docs/reuse.md) identifies the separate notices for imported Lydite and Brand Identity material.
 
-### AI-assisted development
+## Project links
 
-AI assists with implementation, debugging, and test design. The First Spark browser test uses the game controls to win a duel, claim the payout, and verify the quest and rewards after reload. [Test changes](https://github.com/vixttha/AlderVale-Pact-of-Ten/pull/61) · [Build validation](https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/43917481646)
+[Report an issue](https://github.com/vixttha/Veraphify/issues/new/choose) · [Release tracker](https://github.com/vixttha/Veraphify/issues/21)
 
-## Report a bug
+We use and support the open-source [Graphify project](https://github.com/Graphify-Labs/graphify). Veraphify is developed and maintained independently of Graphify Labs.
 
-Search [GitHub Issues](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues) first. Include the build or commit, browser, operating system, and realm. List the steps to reproduce the bug, what you expected, and what actually happened.
+## Engineering ecosystem
+
+[Owner-approved six architectural laws](ENGINEERING-LAWS.md) apply to this product. Standalone operation and owner authority remain unchanged. The product has no mandatory coordination-tool dependency.
+
+
+## Owner-approved engineering ecosystem laws
+
+Decision ENGINEERING-ECOSYSTEM-LAWS-001 (2026-11-24). Mission: Build a toolkit that gives compatible LLM agents a structured engineering environment, rather than building another AI model.
+
+<!-- engineering-laws:start -->
+1. **Independence:** Every tool must remain independently installable, usable, versioned and maintained.
+2. **Composability:** Installing additional tools expands the agent's capabilities without creating mandatory dependencies.
+3. **Portability:** No mandatory AI provider, model, agent harness or paid execution service.
+4. **Persistence:** Project knowledge, decisions, progress and evidence survive the termination of an AI session.
+5. **Verification:** Development claims must be supported by reproducible, revision-bound evidence.
+6. **Owner authority:** The human retains control over scope, architectural decisions, integration and releases.
+<!-- engineering-laws:end -->
+
+Remain standalone. Other tools are optional; their absence must not block normal operation. Preserve project-local authority and evidence; never automatically install, merge, synchronize or write to another tool's branch. No mandatory seventh coordinator, paid service or AI provider. Existing product scope remains authoritative. Change these laws only by explicit owner approval.
+
+## Agent capability discovery — v1
+
+<!-- agent-capability:v1
+{"schema_version":1,"id":"veraphify","branch":"Veraphify","entrypoint":"README.md","scope":"Version archive and exact-source citations","required_ecosystem_tools":[],"authority":"owner","discovery":"read-only","versioning":"independent"}
+-->
+
+A compatible agent may enumerate the target repository's branch refs, resolve this branch to a commit, and read its entry point at that exact commit. Read-only discovery confers no execution, write, integration or release authority. If this branch or marker is absent, the tool is absent or legacy/unverified; continue independently. Check the target's own instructions and owner scope before any action. The marker describes a capability, not a required registry or package version.
+
+Installation convention: human or agent selects a reviewed exact source SHA, checks the dedicated target branch and collisions, follows this product's own installation guide, and records source/target SHA and preserved product state. Never merge a template workspace wholesale into product source. Existing installations require explicit reviewed upgrades; preserve local records and prior receipts. Optional evidence links do not authorize writes. No mandatory coordinator or other ecosystem tool.
+
+## AlderVale standalone runtime
+
+Installed CLI and runtime dependency files from add4a029312c958a5e126990fc49e802c0112c27. The upstream development Vault and brand workspace are not imported; full source and licenses are linked above. This dedicated checkout is not the game or a release. Existing Graphify HQ adoption remains separate. Use `node veraphifiy.mjs --help` here; archive game evidence from a separately pinned game checkout.
