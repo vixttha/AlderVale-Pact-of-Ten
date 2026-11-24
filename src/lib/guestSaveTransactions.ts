@@ -92,7 +92,7 @@ export class GuestSaveTransactions {
       if (expectedRevision !== currentRevision) return { kind: 'conflict', currentRevision };
       if (currentRevision === Number.MAX_SAFE_INTEGER) throw new Error('Guest save revision exhausted');
       const record: GuestSaveRevision = {
-        format: FORMAT, realmId, revision: (currentRevision ?? 0) + 1,
+        format: FORMAT, realmId: realm, revision: (currentRevision ?? 0) + 1,
         raw, originalRaw: current?.originalRaw ?? raw,
       };
       if (current) store.put(record);
