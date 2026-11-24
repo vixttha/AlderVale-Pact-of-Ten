@@ -122,7 +122,13 @@ jobs:
               if f"]({foundation})" not in guide:
                   raise SystemExit("Foundation is not indexed")
               proposal = Path(foundation).read_text(encoding="utf-8")
-              for clause in ("No final hybrid", "single primary affinity", "FQ-001", "No gameplay changes until authorized"):
+              for clause in ("Owner-approved — LOCKED (EA-001)",
+                             "All ten elements selectable at character creation.",
+                             "Additional elements discovered through exploration and trials.",
+                             "Advanced power earned through mastery.",
+                             "Potentially all ten schools learnable, with two equipped affinities at a time.",
+                             "Fusion techniques earned separately.",
+                             "single primary affinity", "FQ-001", "No gameplay changes until authorized"):
                   if clause not in proposal:
                       raise SystemExit(f"Foundation decision boundary missing: {clause}")
           print(f"Verified Element HQ documents at {head}")
