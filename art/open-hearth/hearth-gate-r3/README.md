@@ -1,0 +1,9 @@
+# Hearth Gate R3 — Eternal Ember (candidate)
+
+Owner authorizes preserving R2, refining R3 and evaluating world surfaces before any lock. Exact R2 baseline 0636d773864784635b4cfd20f4a3d612f6eb56d6. R1/R2 and all alternatives retained. Manual vector design, not image generation. No new lore facts or game assets.
+
+Wider open interior; narrower, rising asymmetrical flame and single returning ember. The continuous form suggests heat under restraint; negative space is civic access, not a magical barrier. Heavier keystone, legible structural joints and contrast-adjusted antique gold. One identity: hero, simplified icon, true one-ink monochrome and dark hero. No arbitrary runes, extra schools or claims about Avarn's anatomy.
+
+Surface proofs are original stylized 2D digital mockups, not screenshots, game-ready 3D assets or physical material tests. Stone relief: one-color recessed shape on a communal shelter monument; forged bronze: raised one-color plaque; cloth: ceremonial full-color embroidery composition. All use the exact variant geometry. The central opening must remain recognizable in each. Relief shadows and materials belong only to proofs, not the master. These uses and the name Eternal Ember are proposals. Not a perpetual heat source, universal Fire icon, city flag, or locked game wordmark.
+
+Validation: existing runner exports 4 transparent 1024-square PNGs, SVG masters and 32/48/96px proofs; verifies full flame-to-gate clearance with conservative 256px mask dilation (16 units square radius), negative control, open passage, mono cutout, consistent geometry and contrast. Three 600px surface proofs rendered from SVG. Physical fabrication, actual scene lighting, visual acceptance, original-name/art clearance and final Maren/Avarn history remain pending. No Water, main edits, spending or release.

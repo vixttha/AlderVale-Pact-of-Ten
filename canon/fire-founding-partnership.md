@@ -112,3 +112,7 @@ Review findings and proposed refinements (not final canon):
 ## Fourth visual review — Hearth Gate R2
 
 Owner requests a stronger flame and ancient civic emblem feeling, not final lock. [R2](../art/open-hearth/hearth-gate-r2/README.md) proposes a carved gate, restrained masonry joints, a keystone and one asymmetric flame with two tongues and an inner ember. The two tongues may recall controlled heat and thermal recovery, not dual Fire affinities, literal divine anatomy or a mechanically active rune. The open passage remains the original civic promise; visible details must derive from construction rather than decorative pseudo-language. Maren's precision and accountability, Avarn's independent thermal agency and both parties' limits remain candidate history. No biography changes, new deity powers, final etymology, school icon or Water work.
+
+## Fifth visual review — R3 candidate
+
+[Hearth Gate R3](../art/open-hearth/hearth-gate-r3/README.md) preserves the architectural sanctuary and depicts a single sweeping ember with more clearance. Proposed stone shelter monument, forged bronze civic plaque and ceremonial banner show different historical uses of the same covenant emblem. These are studies, not confirmed events, locations, surviving artifacts or production assets. No perpetual flame, divine ownership, new powers, icon or biography lock. Maren's accountable stewardship and Avarn's voluntary, bounded assistance remain candidate history. No Water work.

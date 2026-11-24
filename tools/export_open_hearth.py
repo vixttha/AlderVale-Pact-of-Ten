@@ -154,3 +154,82 @@ assert mono2[-1].attrib['fill-rule']=='evenodd' and {el.attrib['fill'] for el in
 assert hero2[-2].attrib['d']!=ET.parse(r1/'01-hero.svg').getroot()[-2].attrib['d']
 shutil.copyfile(r2/'README.md',r2out/'README.md')
 print('Hearth Gate R2: four SVG/PNG pairs; shared arch/flame, true monochrome cutout, hero/dark geometry and prior sets verified; visual approval pending.')
+
+# R3: validate unchanged source geometry across variants and context proofs.
+from PIL import ImageFilter, ImageChops
+from io import BytesIO
+import math
+r3=source/'hearth-gate-r3'
+r3out=out/'hearth-gate-r3'
+r3out.mkdir(parents=True,exist_ok=True)
+names=r1names+['05-stone-relief','06-forged-metal','07-ceremonial-banner']
+assert sorted(p.stem for p in r3.glob('*.svg'))==names
+shapes3={}
+def render_mask(paths):
+    svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">'+''.join('<path d="'+d+'" fill="black"/>' for d in paths)+'</svg>'
+    return Image.open(BytesIO(cairosvg.svg2png(bytestring=svg.encode(),output_width=256,output_height=256))).getchannel('A').point(lambda v:255 if v>0 else 0)
+def separation(gate, flame):
+    return ImageChops.multiply(gate,flame.filter(ImageFilter.MaxFilter(33))).getbbox() is None
+for name in r1names:
+    raw=(r3/(name+'.svg')).read_bytes()
+    svg=ET.fromstring(raw)
+    assert svg.tag==ns+'svg' and svg.attrib['viewBox']=='0 0 256 256'
+    assert all(el.tag in {ns+'svg',ns+'path'} for el in svg.iter())
+    assert all(not any(k.lower().startswith('on') or 'href' in k.lower() or 'url(' in v for k,v in el.attrib.items()) for el in svg.iter())
+    shapes3[name]=list(svg)
+    (r3out/(name+'.svg')).write_bytes(raw)
+    for size in (32,48,96,1024):
+        png=cairosvg.svg2png(bytestring=raw,output_width=size,output_height=size)
+        with Image.open(BytesIO(png)) as im:
+            assert im.mode=='RGBA' and im.size==(size,size)
+            alpha=im.getchannel('A')
+            assert alpha.getextrema()==(0,255)
+            assert alpha.crop((int(size*.45),int(size*.78),int(size*.55),size)).getbbox() is None
+            if name=='03-monochrome':
+                assert alpha.getpixel((int(size*128/256),int(size*166/256)))==0
+            if size==1024:
+                (r3out/(name+'.png')).write_bytes(png)
+            else:
+                proof=Image.new('RGBA',(size*2+24,size+16),(243,238,228,255))
+                proof.paste((34,38,34,255),(size+12,0,size*2+24,size+16))
+                proof.alpha_composite(im,(6,8));proof.alpha_composite(im,(size+18,8))
+                proof.convert('RGB').save(r3out/(name+'-'+str(size)+'-proof.png'))
+    print('Hearth Gate R3:',name,hashlib.sha256(raw).hexdigest(),'32/48/96/1024 RGBA; open threshold')
+h,i,m,dark=[shapes3[n] for n in r1names]
+assert [e.attrib['d'] for e in h]==[e.attrib['d'] for e in dark]
+assert len({s[0].attrib['d'] for s in shapes3.values()})==1
+assert [e.attrib['d'] for e in h[-2:]]==[e.attrib['d'] for e in i[-2:]]
+assert m[-1].attrib['d']==' '.join(e.attrib['d'] for e in h[-2:])
+assert m[-1].attrib['fill-rule']=='evenodd' and len({e.attrib['fill'] for e in m})==1
+gate=render_mask([e.attrib['d'] for e in h[:-2]])
+fire=render_mask([h[-2].attrib['d']])
+assert separation(gate,fire),'R3 flame clearance below conservative 16-unit square radius'
+assert not separation(render_mask([e.attrib['d'] for e in hero2[:-2]]),render_mask([hero2[-2].attrib['d']])),'R2 known-close negative fixture unexpectedly passed'
+print('R3 clearance: 16-unit conservative mask separation PASS; R2 negative fixture rejected')
+def luminance(color):
+    v=[int(color[j:j+2],16)/255 for j in (1,3,5)]
+    return sum(w*(x/12.92 if x<=.04045 else ((x+.055)/1.055)**2.4) for w,x in zip((.2126,.7152,.0722),v))
+def contrast(a,b):
+    x,y=sorted((luminance(a),luminance(b)))
+    return (y+.05)/(x+.05)
+for shape,bg in ((h,'#F3EEE4'),(dark,'#222622')):
+    for e in (shape[0],shape[-2]):
+        ratio=contrast(e.attrib['fill'],bg)
+        assert ratio>=3
+        print('R3 flat silhouette contrast',e.attrib['fill'],bg,round(ratio,2))
+for name in names[4:]:
+    raw=(r3/(name+'.svg')).read_bytes()
+    svg=ET.fromstring(raw)
+    ds=[e.attrib.get('d') for e in svg.iter(ns+'path')]
+    expected=[e.attrib['d'] for e in (dark if name=='07-ceremonial-banner' else m)]
+    assert all(v in ds for v in expected),name+' emblem geometry drift'
+    assert svg.attrib['viewBox']=='0 0 600 600'
+    png=cairosvg.svg2png(bytestring=raw,output_width=600,output_height=600)
+    with Image.open(BytesIO(png)) as im:
+        assert im.size==(600,600)
+        assert len(im.convert('RGB').getcolors(360001))>64,name+' blank surface'
+    (r3out/(name+'.svg')).write_bytes(raw)
+    (r3out/(name+'.png')).write_bytes(png)
+    print('R3 surface:',name,'600x600 rendered; exact geometry')
+shutil.copyfile(r3/'README.md',r3out/'README.md')
+print('R3: four coordinated masters, three digital surface proofs; owner visual acceptance pending.')

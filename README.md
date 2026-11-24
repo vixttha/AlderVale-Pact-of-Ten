@@ -21,3 +21,5 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 [Hearth Gate R1](art/open-hearth/hearth-gate-r1/README.md) — current preferred direction, four coordinated variants; final approval pending.
 
 [Hearth Gate R2 — carved sanctuary](art/open-hearth/hearth-gate-r2/README.md) — four refinement candidates; R1 preserved.
+
+[Hearth Gate R3 — Eternal Ember](art/open-hearth/hearth-gate-r3/README.md) — candidate variants and three world-surface studies, R2 preserved, owner acceptance pending.

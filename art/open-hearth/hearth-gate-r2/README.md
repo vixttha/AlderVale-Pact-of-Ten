@@ -17,3 +17,5 @@ Owner requests a further refinement of R1, specifically a distinctive flame and 
 | 04 Dark background | Transparent brighter palette for dark surfaces |
 
 SVG 256-square path-only editable masters, transparent RGBA 1024 PNGs, 32/48/96px rendering and light/dark proofs. Hero/dark geometry equality, all variants share core arch/flame, transparent threshold, monochrome cutout and preserved R1 verified by public runner when completed. Visual design approval, similarity clearance, actual physical fabrication, in-game contrast and lore acceptance remain separate. No artificial aging texture on master geometry. No main/runtime change, universal Fire icon, brand replacement or Water work.
+
+R2 preserved as prior candidate. [R3 and world-surface studies](../hearth-gate-r3/README.md) are separate, not final.
