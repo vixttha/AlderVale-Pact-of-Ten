@@ -1,0 +1,136 @@
+{
+  "runId": 45415636245,
+  "latestAttempt": 1,
+  "attempts": [
+    {
+      "number": 1,
+      "results": [
+        {
+          "name": "Core (ubuntu-latest)",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (windows-latest)",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (macos-latest)",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Firestore emulator permissions",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Guest browser (chromium)",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "chromium: protects a corrupt Breeze guest save without changing Horizon",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "chromium: a direct guest read cannot rebase stale wizard updates onto newer progress",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Guest browser (firefox)",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "firefox: protects a corrupt Breeze guest save without changing Horizon",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "firefox: a direct guest read cannot rebase stale wizard updates onto newer progress",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Guest browser (webkit)",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "webkit: protects a corrupt Breeze guest save without changing Horizon",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "webkit: a direct guest read cannot rebase stale wizard updates onto newer progress",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (ubuntu-latest): G28-003 corrupt data preserved",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (ubuntu-latest): storage denial distinguished from absence",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (ubuntu-latest): changed source rejected",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (ubuntu-latest): G28-005 last good save preserved",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (windows-latest): G28-003 corrupt data preserved",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (windows-latest): storage denial distinguished from absence",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (windows-latest): changed source rejected",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (windows-latest): G28-005 last good save preserved",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (macos-latest): G28-003 corrupt data preserved",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (macos-latest): storage denial distinguished from absence",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (macos-latest): changed source rejected",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        },
+        {
+          "name": "Core (macos-latest): G28-005 last good save preserved",
+          "outcome": "success",
+          "checkoutSha": "6ce2a69443017c4c8f3ae7a8ecb7251a0406d412"
+        }
+      ]
+    }
+  ]
+}
