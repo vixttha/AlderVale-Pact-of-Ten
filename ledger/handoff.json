@@ -3,12 +3,18 @@
   "active": {
     "issue": 70,
     "version": "v0.0.0.1",
-    "phase": "Validate",
-    "next_action": "Run exact candidate public game matrix, Graphify, Vault, Semgrep and runner policy; check G09-003 guest browser, authenticated emulator, live sockets and shared regressions. Preserve existing saved loadout and card count. No merge or issue closure without owner authority.",
+    "phase": "Internal Auditor",
+    "next_action": "Audit exact candidate 5acf7f376af6135572819f1762713e14a6967ea3, PR merge checkout 05b156ff48e8849ae445859448c046f0ba4e4e80, identical tree a06d010ee585734d3a7785b554b64e81468d91b0. All seven game jobs passed; 131 unit passes, 7 skipped, nine G09-003 cases and both live sockets passed, 20/20 per browser, authenticated endpoint passed. Graphify build/readback passed (publication skipped); Vault 4/4, Semgrep zero findings, policy passed. Check overlaps, CodeRabbit and owner acceptance; no merge authority inferred.",
     "fix_sha": "5acf7f376af6135572819f1762713e14a6967ea3",
     "candidate_sha": "5acf7f376af6135572819f1762713e14a6967ea3",
     "pull_request": 185,
-    "evidence": []
+    "evidence": [
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885406/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885270/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885348/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885375/attempts/1",
+      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45379885539/attempts/1"
+    ]
   },
   "history": [
     {
