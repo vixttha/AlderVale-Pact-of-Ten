@@ -1,0 +1,20 @@
+name: Brand Identity isolated adoption
+on:
+  push:
+    branches: [Brand-Identity]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - run: |
+          git rev-parse HEAD
+          python3 brand-identity/verify.py
+          python3 -m unittest discover -s brand-identity -p 'test_*.py' -v
