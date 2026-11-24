@@ -25,3 +25,5 @@ Start with [registry](canon/registry.json), [world and story](canon/world-and-st
 [Hearth Gate R3 — Eternal Ember](art/open-hearth/hearth-gate-r3/README.md) — candidate variants and three world-surface studies, R2 preserved, owner acceptance pending.
 
 R3 is now the owner-approved leading candidate; final lock requires separate BART 3D evaluation and owner visual acceptance. Current writing focus: [The Cold Hearth historical treatment](canon/fire-founding-partnership.md#sixth-review--historical-treatment-the-cold-hearth), candidate history only.
+
+Fire historical foundation accepted by owner; [acceptance scope](canon/fire-founding-partnership.md#ninth-review--owner-acceptance-of-historical-foundation-2026-11-24). BART 3D evaluation and final emblem acceptance remain separate.

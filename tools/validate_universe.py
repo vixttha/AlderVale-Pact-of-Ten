@@ -32,7 +32,7 @@ def graph_check(records):
         for target in graph[r['id']]:
             assert target in graph and target!=r['id']
         if 'document' in r:
-            assert r['status']==('approved_direction' if r['id'] in {'AV-PACT-001','AV-ARCH-001','AV-COVMODEL-001'} else 'candidate')
+            assert r['status']==('approved_direction' if r['id'] in {'AV-PACT-001','AV-ARCH-001','AV-COVMODEL-001','AV-DOSSIER-001'} else 'candidate')
             assert r['document'] in {'canon/pact-of-ten.md','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md','canon/fire-founding-partnership.md'} and (root/r['document']).is_file()
             assert r['id'] in (root/r['document']).read_text()
     visiting=set(); done=set()
@@ -73,7 +73,7 @@ for r in rows:
     if r['kind']=='mythic_representative': assert r['domain']=='base' and r['playable'] is False and byid[r['creature_class_id']]['name']=='Divine being'
     if r['kind']=='city': assert any(byid[d]['kind']=='founding_civilization' and byid[d]['school']==r['school'] for d in r['depends_on'])
 assert sum(r['kind']=='founder' for r in (byid[d] for d in byid['AV-EVENT-002']['depends_on']))==10
-print('Founding alignment: ten magician delegates, ten non-playable mythical representatives, ten coalitions, ten linked cities; individual biographies remain candidate.')
+print('Founding alignment: ten magician delegates, ten non-playable mythical representatives, ten coalitions, ten linked cities; standalone production specifications remain candidate; Fire historical foundation tracked separately.')
 
 def covenant_check(records):
     idx={r['id']:r for r in records}
@@ -108,14 +108,14 @@ print('Source-pin and documentation cross-reference checks passed.')
 def decision_check(records):
     idx={r['id']:r for r in records}
     approved={r['id'] for r in records if r['status']=='approved_direction' and 'document' in r}
-    assert approved=={'AV-PACT-001','AV-ARCH-001','AV-COVMODEL-001'}
+    assert approved=={'AV-PACT-001','AV-ARCH-001','AV-COVMODEL-001','AV-DOSSIER-001'}
     a,c=idx['AV-ARCH-001'],idx['AV-COVMODEL-001']
     assert a['approved_scope']=='ten_base_affinities_expandable_derived_traditions_only' and a['base_affinity_count']==10 and a['max_equipped_affinities']==2 and a['derived_affinity_slots'] is False
     assert c['approved_scope']=='independent_voluntary_partnership_only' and c['voluntary'] is True and c['ownership'] is False and c['grants_school_access'] is False and c['divine_veto'] is False
     dossiers=[r for r in records if r['kind']=='partnership_dossier']
     assert len(dossiers)==1
     d=dossiers[0]
-    assert d['id']=='AV-DOSSIER-001' and d['school']=='Fire' and d['status']=='candidate'
+    assert d['id']=='AV-DOSSIER-001' and d['school']=='Fire' and d['status']=='approved_direction' and d['approved_scope']=='historical_foundation_only' and d['approved_source_sha']=='6e523bc81c263b489f61485f77fa61c49fe6149d'
     for field,kind in [('founder_id','founder'),('sovereign_id','mythic_representative'),('covenant_id','founding_covenant'),('city_id','city'),('civilization_id','founding_civilization')]:
         target=idx[d[field]]
         assert target['kind']==kind and target['school']==d['school'] and target['status']=='candidate'
@@ -123,7 +123,7 @@ def decision_check(records):
     assert {'AV-ARCH-001','AV-COVMODEL-001',d['covenant_id'],d['city_id'],d['civilization_id']}<=set(d['depends_on'])
     assert d['document']=='canon/fire-founding-partnership.md'
 decision_check(rows)
-for record,field,value in [('AV-ARCH-001','base_affinity_count',11),('AV-ARCH-001','derived_affinity_slots',True),('AV-COVMODEL-001','divine_veto',True),('AV-DOSSIER-001','status','approved_direction'),('AV-DOSSIER-001','sovereign_id','AV-MYTHIC-002')]:
+for record,field,value in [('AV-ARCH-001','base_affinity_count',11),('AV-ARCH-001','derived_affinity_slots',True),('AV-COVMODEL-001','divine_veto',True),('AV-DOSSIER-001','approved_scope','all_art_and_gameplay'),('AV-DOSSIER-001','sovereign_id','AV-MYTHIC-002')]:
     fixture=copy.deepcopy(rows)
     next(r for r in fixture if r['id']==record)[field]=value
     try: decision_check(fixture)
@@ -133,4 +133,4 @@ doc=(root/'canon/fire-founding-partnership.md').read_text()
 for h in ('## Identity and language','## Maren Voss','## Avarn','## Shared chronology','## What both gave up','## Civilization','## Symbols and historical evidence','## Present-day relevance','## Review disposition'):
     assert h in doc
 assert 'AV-3D-001' in doc and 'No new Fire fusion' in doc and 'awaiting owner review' in doc
-print('Owner decisions: two architecture approvals, ten candidate covenants, one Fire dossier; five negative fixtures rejected.')
+print('Owner decisions: two architecture approvals, ten standalone candidate covenants, Fire historical foundation accepted only; five negative fixtures rejected.')

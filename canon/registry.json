@@ -994,7 +994,7 @@
       "kind": "partnership_dossier",
       "name": "Fire — the Open Hearth",
       "school": "Fire",
-      "status": "candidate",
+      "status": "approved_direction",
       "founder_id": "AV-FOUNDER-001",
       "sovereign_id": "AV-MYTHIC-001",
       "covenant_id": "AV-COVENANT-001",
@@ -1009,7 +1009,9 @@
         "AV-CIV-001",
         "AV-EVENT-001",
         "AV-EVENT-002"
-      ]
+      ],
+      "approved_scope": "historical_foundation_only",
+      "approved_source_sha": "6e523bc81c263b489f61485f77fa61c49fe6149d"
     }
   ]
 }

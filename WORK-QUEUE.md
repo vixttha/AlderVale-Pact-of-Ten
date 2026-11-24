@@ -15,3 +15,5 @@ Current focus: [Fire historical treatment — The Cold Hearth](canon/fire-foundi
 Current focus: [Seventh review — ancient origins and childhood](canon/fire-founding-partnership.md#seventh-review--before-the-open-hearth-ancient-origins-and-childhood). Candidate three Avarn legends, historical evidence limits, Maren's formative scenes and shared cultural practices; owner review before naming/biography lock. Preserve Cold Hearth chronology, R3 and prior artwork. BART evaluation pending; Water held.
 
 Current focus: [Eighth review — complete Fire history candidate](canon/fire-founding-partnership.md#eighth-review--complete-fire-history-candidate). Stages 1–5 developed, stage 6 worker review prepared; owner narrative acceptance pending. Separate R3 BART 3D surface tests and final visual approval pending. Water held.
+
+Owner accepted the eighth-review historical foundation at 6e523bc81c263b489f61485f77fa61c49fe6149d. Current action: BART 3D stone monument, bronze plaque and cloth banner evaluation using unchanged R3; final visual acceptance remains pending. No Water work.
