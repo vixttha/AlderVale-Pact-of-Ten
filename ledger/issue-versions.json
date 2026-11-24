@@ -1,5 +1,16 @@
 {
   "schema_version": 1,
   "repository": "vixttha/AlderVale-Pact-of-Ten",
-  "issues": []
+  "issues": [
+    {
+      "issue": 70,
+      "version": "v0.0.0.1",
+      "state": "in_progress",
+      "acceptance": [
+        "A valid live in-hand Keen Ink fusion reaches the authoritative shared resolver, with original hand indices preserved.",
+        "Standalone enchant casts from hand or sideboard are rejected or conserved without consuming the card; invalid fusion pairs cannot mutate combat state.",
+        "Guest and signed-in solo fusion remain functional; targeted regressions, existing game CI, Graphify and applicable Test Vault checks run on the exact candidate."
+      ]
+    }
+  ]
 }

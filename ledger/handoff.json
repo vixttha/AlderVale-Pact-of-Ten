@@ -1,5 +1,14 @@
 {
   "schema_version": 1,
-  "active": null,
+  "active": {
+    "issue": 70,
+    "version": "v0.0.0.1",
+    "phase": "Worker",
+    "next_action": "Repair existing Keen Ink fusion and standalone cast bug #70; isolated branch ci/vib-issue-70-keen-ink; preserve owner merge authority.",
+    "fix_sha": null,
+    "candidate_sha": null,
+    "pull_request": null,
+    "evidence": []
+  },
   "history": []
 }
