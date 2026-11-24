@@ -3,18 +3,12 @@
   "active": {
     "issue": 70,
     "version": "v0.0.0.1",
-    "phase": "Internal Auditor",
-    "next_action": "Audit PR #185 candidate bdf82c0859a2d7511bc643f270e4612a94ef6727; tested merge c7eae7fa8ec5b4bdaffae9cbbe51900e540d19e9 has identical tree. G09-003 eight unit cases and real PvP/co-op sockets passed; 7 game jobs, Graphify build/readback, Vault, Semgrep and runner policy succeeded. Graph publication skipped; targeted guest/signed-in solo UI acceptance and live production not demonstrated. Review scope and remaining gaps before owner decision; do not merge.",
-    "fix_sha": "bdf82c0859a2d7511bc643f270e4612a94ef6727",
-    "candidate_sha": "bdf82c0859a2d7511bc643f270e4612a94ef6727",
-    "pull_request": 185,
-    "evidence": [
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509636/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509615/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509688/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509647/attempts/1",
-      "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509914/attempts/1"
-    ]
+    "phase": "Worker",
+    "next_action": "Repair solo starter enchant reachability and add targeted browser and emulator regression; preserve unrelated work.",
+    "fix_sha": null,
+    "candidate_sha": null,
+    "pull_request": null,
+    "evidence": []
   },
   "history": [
     {
@@ -30,6 +24,27 @@
       },
       "disposition": "rework",
       "decision": "Internal review found live starter cards excluded Keen Ink from hand; move the already granted copy into the opening hand and cover both real PvP and co-op WebSocket rounds. Retain prior candidate evidence.",
+      "merged_sha": null
+    },
+    {
+      "handoff": {
+        "issue": 70,
+        "version": "v0.0.0.1",
+        "phase": "Internal Auditor",
+        "next_action": "Audit PR #185 candidate bdf82c0859a2d7511bc643f270e4612a94ef6727; tested merge c7eae7fa8ec5b4bdaffae9cbbe51900e540d19e9 has identical tree. G09-003 eight unit cases and real PvP/co-op sockets passed; 7 game jobs, Graphify build/readback, Vault, Semgrep and runner policy succeeded. Graph publication skipped; targeted guest/signed-in solo UI acceptance and live production not demonstrated. Review scope and remaining gaps before owner decision; do not merge.",
+        "fix_sha": "bdf82c0859a2d7511bc643f270e4612a94ef6727",
+        "candidate_sha": "bdf82c0859a2d7511bc643f270e4612a94ef6727",
+        "pull_request": 185,
+        "evidence": [
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509636/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509615/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509688/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509647/attempts/1",
+          "https://github.com/vixttha/AlderVale-Pact-of-Ten/actions/runs/45369509914/attempts/1"
+        ]
+      },
+      "disposition": "rework",
+      "decision": "Internal audit found starter Keen Ink remains stranded in solo sideboard (shared/soloDuel.ts); move existing copies to drawable deck without modifying saved loadout; exercise actual guest UI and emulator enchant endpoint. Preserve prior evidence.",
       "merged_sha": null
     }
   ]
