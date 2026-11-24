@@ -143,6 +143,96 @@ test('a signed-in solo win settles once and earns one Term claim', { timeout: 55
   assert.deepEqual(preserved.get('claimedTermTiers'), [2]);
 });
 
+
+test('Campus quest rewards (#13): two eligible lead wins and Rare Trial settle once in authenticated progression', { timeout: 90000 }, async () => {
+  const player = await createPlayer();
+  const { wizardId, wizardRef } = player;
+  const { xpRequiredForLevel } = await import('../../shared/realms.ts');
+  const totalXp = (wizard) => {
+    let xp = wizard.xp;
+    for (let level = 1; level < wizard.level; level++) xp += xpRequiredForLevel(level);
+    return xp;
+  };
+  const roomRef = cloudDb.collection('worldRealms').doc('breeze').collection('soloDuels').doc(wizardId);
+  async function win(mode, element, expected, completed, arborWins) {
+    const before = (await wizardRef.get()).data();
+    const start = await call(player, 'solo/start', { wizardId, mode, element });
+    const { duelId } = start.duel;
+    // Seed only the final-round fixture in the demo emulator. The real round
+    // and settlement endpoints must compute victory and all reward changes.
+    const state = (await roomRef.get()).get('state');
+    assert.equal(state.playerTeam[0].creatures[state.playerTeam[0].activeCreatureIdx].id, before.activeCreatureId);
+    state.enemyTeam[0].hp = 1;
+    await roomRef.update({ state });
+    const turn = await call(player, 'solo/round', {
+      wizardId, duelId, revision: start.revision,
+      action: { cardIndex: null, creatureAction: 'skill' },
+    });
+    assert.equal(turn.duel.phase, 'victory');
+    const results = await Promise.all([call(player, 'solo/finish', { wizardId, duelId }), call(player, 'solo/finish', { wizardId, duelId })]);
+    for (const result of results) {
+      assert.deepEqual(result.wizard.progression.completedQuests, completed);
+      assert.equal(result.wizard.progression.questWins.q_bond_arbor, arborWins);
+      assert.equal(totalXp(result.wizard) - totalXp(before), expected.xp);
+      assert.equal(result.wizard.currencies.florins - before.currencies.florins, expected.florins);
+      assert.equal(result.wizard.currencies.spellShards - before.currencies.spellShards, expected.shards);
+    }
+    const persisted = (await wizardRef.get()).data();
+    assert.deepEqual(persisted.progression.completedQuests, completed);
+    assert.equal(persisted.progression.questWins.q_bond_arbor, arborWins);
+    assert.equal(totalXp(persisted) - totalXp(before), expected.xp);
+    assert.equal(persisted.currencies.florins - before.currencies.florins, expected.florins);
+    assert.equal(persisted.currencies.spellShards - before.currencies.spellShards, expected.shards);
+    return duelId;
+  }
+  const first = await win('solo', 'ember', { xp: 388, florins: 273, shards: 5 }, ['q_first_duel'], 1);
+  await win('solo', 'ember', { xp: 438, florins: 323, shards: 6 }, ['q_first_duel', 'q_bond_arbor'], 2);
+  // A new win earns ordinary rewards only; an old receipt also cannot pay again.
+  await win('solo', 'ember', { xp: 298, florins: 163, shards: 2 }, ['q_first_duel', 'q_bond_arbor'], 2);
+  const afterWins = (await wizardRef.get()).data();
+  const old = await call(player, 'solo/finish', { wizardId, duelId: first });
+  assert.deepEqual(old.wizard.currencies, afterWins.currencies);
+  assert.equal(totalXp(old.wizard), totalXp(afterWins));
+  assert.deepEqual(old.wizard.progression.completedQuests, afterWins.progression.completedQuests);
+  // Synthetic late-game rank allows a Rare Trial without bypassing its route.
+  await wizardRef.update({ level: 39, rank: 20, xp: 0 });
+  await win('trial', 'verdigris', { xp: 890, florins: 670, shards: 10 }, ['q_first_duel', 'q_bond_arbor', 'q_rare_trial'], 2);
+  await win('trial', 'verdigris', { xp: 630, florins: 350, shards: 2 }, ['q_first_duel', 'q_bond_arbor', 'q_rare_trial'], 2);
+});
+
+test('G09-003 signed-in solo moves existing Keen Ink into hand and fuses through the authenticated endpoint', { timeout: 55000 }, async () => {
+  const player = await createPlayer();
+  const { wizardId } = player;
+  const ink = 'uni_enchant_keen';
+  const attack = 'ember_cinder_dart';
+  const start = await call(player, 'solo/start', { wizardId, mode: 'solo', element: 'ember' });
+  const { duelId } = start.duel;
+  const actor = start.duel.playerTeam[0];
+  assert.equal(actor.hand.filter(id => id === ink).length, 1);
+  assert.equal(actor.sideboard.includes(ink), false);
+  const source = actor.hand.indexOf(ink);
+  const roomRef = cloudDb.collection('worldRealms').doc('breeze').collection('soloDuels').doc(wizardId);
+  const initial = (await roomRef.get()).data();
+  // Reject a real standalone cast without consuming the card or advancing revision.
+  await call(player, 'solo/round', { wizardId, duelId, revision: start.revision, action: { cardIndex: source, creatureAction: 'none' } }, 400);
+  assert.deepEqual((await roomRef.get()).data(), initial);
+  // Controlled hand after real start avoids random draw assumptions.
+  const state = initial.state;
+  state.playerTeam[0].hand = [ink, attack];
+  await roomRef.update({ state });
+  await call(player, 'solo/enchant', { wizardId, duelId, revision: start.revision, source: 0, target: 0 }, 400);
+  const fused = await call(player, 'solo/enchant', { wizardId, duelId, revision: start.revision, source: 0, target: 1 });
+  assert.equal(fused.revision, start.revision + 1);
+  assert.deepEqual(fused.duel.playerTeam[0].hand, [attack + '+keen']);
+  const replay = await call(player, 'solo/enchant', { wizardId, duelId, revision: start.revision, source: 0, target: 1 });
+  assert.equal(replay.revision, fused.revision);
+  assert.deepEqual(replay.duel.playerTeam[0].hand, [attack + '+keen']);
+  const round = await call(player, 'solo/round', { wizardId, duelId, revision: fused.revision, action: { cardIndex: 0, creatureAction: 'none' } });
+  assert.equal(round.revision, fused.revision + 1);
+  assert.ok(round.duel.playerTeam[0].discard.includes(attack) || round.duel.playerTeam[0].hand.includes(attack + '+keen'));
+  await call(player, 'solo/finish', { wizardId, duelId });
+});
+
 test('leaving an unfinished signed-in duel creates no earned rewards', { timeout: 45000 }, async () => {
   const player = await createPlayer();
   const { wizardId } = player;
