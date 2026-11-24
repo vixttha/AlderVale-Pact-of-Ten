@@ -402,6 +402,7 @@ export function resolveDuelRound(state: DuelState, actions: TurnActionInput[], r
 
     const originalIndices = actor.hand.map((_, index) => index);
     if (isValidInHandEnchantPair(actor.hand, act.enchantPair) &&
+        act.cardIndex === act.enchantPair.targetCardIdx &&
         act.useSideboardIndex == null &&
         !act.discardIndices?.some(index =>
           index === act.enchantPair!.enchantCardIdx || index === act.enchantPair!.targetCardIdx)) {

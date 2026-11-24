@@ -121,6 +121,13 @@ describe('G09-003 Keen Ink fusion and cast safety (#70)', () => {
     expect(resolved.enemyTeam[0].hp).toBe(state.enemyTeam[0].hp);
     expect(resolved.logs.some(log => log.includes('cannot cast'))).toBe(true);
   });
+  it('does not fuse an attack other than the selected card in the resolver', () => {
+    const state = scenario([INK, ATTACK, 'ember_hearth_blade']);
+    const result = resolveDuelRound(state, [action(2, { enchantPair: { enchantCardIdx: 0, targetCardIdx: 1 } })], () => 0.1);
+    expect(result.playerTeam[0].hand).toContain(INK);
+    expect(result.playerTeam[0].hand).toContain(ATTACK);
+    expect(result.logs.some(log => log.includes('fused Keen Ink'))).toBe(false);
+  });
   it('does not select an enchant as an AI spell', () => {
     const state = scenario([INK]);
     expect(chooseAiAction(state.playerTeam[0], state.enemyTeam).cardIndex).toBeNull();
