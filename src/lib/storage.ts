@@ -17,6 +17,7 @@ import type { WizardDocument } from '../../shared/economy.ts';
 import type { ChromaticVariant } from '../../shared/creatures.ts';
 import { PROGRESSION_VERSION } from '../../shared/gameplayActions.ts';
 import type { ElementId } from '../../shared/elements.ts';
+import { readLegacyGuestSave } from '../../shared/legacyGuestSave.ts';
 
 export interface OwnedCreature {
   serverProgressionVersion?: number;
@@ -98,13 +99,7 @@ export interface GuestRealmBundle {
   gallery?: Record<string, string[]>;
 }
 
-export function loadGuestRealm(realmId: RealmId): GuestRealmBundle {
-  try {
-    const raw = localStorage.getItem(guestStorageKey(realmId));
-    if (raw) return JSON.parse(raw) as GuestRealmBundle;
-  } catch {
-    // ignore corrupted local storage
-  }
+export function emptyGuestRealm(realmId: RealmId): GuestRealmBundle {
   return {
     account: {
       uid: 'guest_local',
@@ -121,13 +116,56 @@ export function loadGuestRealm(realmId: RealmId): GuestRealmBundle {
   };
 }
 
-export function saveGuestRealm(realmId: RealmId, bundle: GuestRealmBundle) {
+export type GuestRecovery = { kind: 'recovery-required'; raw: string } | { kind: 'storage-unavailable' };
+export type GuestRealmInspection =
+  | { kind: 'missing' | 'readable'; raw: string | null; bundle: GuestRealmBundle }
+  | GuestRecovery;
+
+export function inspectGuestRealm(realmId: RealmId): GuestRealmInspection {
+  let raw: string | null;
   try {
+    raw = localStorage.getItem(guestStorageKey(realmId));
+  } catch {
+    return { kind: 'storage-unavailable' };
+  }
+  const inspection = readLegacyGuestSave(raw, realmId);
+  if (inspection.kind === 'missing') return { kind: 'missing', raw: null, bundle: emptyGuestRealm(realmId) };
+  // Retired in the proposed registry is not invalid in the currently shipped prototype.
+  // This deliberately retains the existing legacy play path until migration is approved.
+  if (inspection.kind === 'recovery-required' && inspection.diagnostics.some(d => d.code !== 'retired-element')) {
+    return { kind: 'recovery-required', raw: inspection.raw };
+  }
+  const bundle = (inspection.kind === 'recognized' ? inspection.envelope : JSON.parse(inspection.raw)) as GuestRealmBundle;
+  // Guard essential account fields used at the title screen. This is not full nested validation.
+  if (!Array.isArray(bundle.account.unlockedRaces) || !Array.isArray(bundle.account.sharedVault)
+    || !Array.isArray(bundle.account.claimedTermTiers) || !Number.isFinite(bundle.account.termXp)) {
+    return { kind: 'recovery-required', raw: inspection.raw };
+  }
+  return { kind: 'readable', raw: inspection.raw, bundle };
+}
+
+export function loadGuestRealm(realmId: RealmId): GuestRealmBundle {
+  const inspection = inspectGuestRealm(realmId);
+  if (!('bundle' in inspection)) throw new Error('Guest save needs recovery; original data has not been replaced.');
+  return inspection.bundle;
+}
+
+// An optional source comparison detects already-observed changes. localStorage is NOT
+// an atomic cross-tab compare-and-swap; this is not a migration or concurrency solution.
+export function saveGuestRealm(realmId: RealmId, bundle: GuestRealmBundle, expectedRaw?: string | null) {
+  try {
+    const current = inspectGuestRealm(realmId);
+    if (!('bundle' in current) || (expectedRaw !== undefined && current.raw !== expectedRaw)) return false;
     localStorage.setItem(guestStorageKey(realmId), JSON.stringify(bundle));
     return true;
   } catch {
     return false;
   }
+}
+
+export function guestRecoveryExport(realmId: RealmId, raw: string): string {
+  // JSON escaping preserves the complete original storage string, even empty or malformed text.
+  return JSON.stringify({ format: 'aldervale-guest-recovery-v1', realmId, raw });
 }
 
 const guestSettingsKey = 'aldervale_player_settings_v1';

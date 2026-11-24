@@ -114,38 +114,33 @@ test('failed guest progress remains visible until retry saves both wizard and re
   await expect(page.getByRole('button', { name: 'Claim to Wizard' })).toHaveCount(0);
 });
 
-test('recovers a corrupt Breeze guest save in the browser without changing Horizon', async ({ page }) => {
+test('protects a corrupt Breeze guest save without changing Horizon', async ({ page }) => {
   const errors = [];
-  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('pageerror', error => errors.push(error.message));
   const horizonSaveKey = 'aldervale_guest_horizon_v1';
-
-  // This check exercises storage and the enrollment UI without relying on software WebGL.
+  const corrupt = '{"account":';
   await installGuestSaveFailure(page);
   await page.goto('/');
   await page.getByRole('button', { name: /Horizon Realm/ }).click();
   await page.getByRole('textbox').first().fill('Horizon Keeper');
   await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
   await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
-  const horizonSave = await page.evaluate((key) => localStorage.getItem(key), horizonSaveKey);
-  expect(JSON.parse(horizonSave).wizards[0]).toMatchObject({ name: 'Horizon Keeper', realmId: 'horizon' });
+  const horizon = await page.evaluate(key => localStorage.getItem(key), horizonSaveKey);
+  expect(JSON.parse(horizon).wizards[0]).toMatchObject({ name: 'Horizon Keeper', realmId: 'horizon' });
 
-  await page.evaluate((key) => localStorage.setItem(key, '{"account":'), breezeSaveKey);
+  await page.evaluate(({ key, corrupt }) => localStorage.setItem(key, corrupt), { key: breezeSaveKey, corrupt });
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await page.getByRole('textbox').first().fill('Recovered Breeze');
-  await page.getByRole('button', { name: 'Begin Academy Journey' }).click();
-  await expect(page.getByRole('heading', { name: '3D world unavailable' })).toBeVisible();
-
+  await expect(page.getByRole('heading', { name: 'Guest save recovery — Breeze' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Begin Academy Journey' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Export original save' })).toBeVisible();
+  await page.getByRole('button', { name: 'Retry read' }).click();
+  expect(await page.evaluate(key => localStorage.getItem(key), breezeSaveKey)).toBe(corrupt);
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await expect(page.getByRole('heading', { name: /Your Wizards in Breeze/ })).toBeVisible();
-  await expect(page.getByText('Recovered Breeze', { exact: true })).toBeVisible();
-  const breeze = await readBreezeSave(page);
-  expect(breeze.wizards).toHaveLength(1);
-  expect(breeze.wizards[0]).toMatchObject({ name: 'Recovered Breeze', realmId: 'breeze' });
-
-  await page.getByRole('button', { name: /Horizon Realm/ }).click();
+  await expect(page.getByRole('heading', { name: 'Guest save recovery — Breeze' })).toBeVisible();
+  await page.getByRole('button', { name: 'Horizon Realm' }).click();
   await expect(page.getByText('Horizon Keeper', { exact: true })).toBeVisible();
-  await expect(page.getByText('Recovered Breeze', { exact: true })).toHaveCount(0);
-  expect(await page.evaluate((key) => localStorage.getItem(key), horizonSaveKey)).toBe(horizonSave);
+  expect(await page.evaluate(key => localStorage.getItem(key), horizonSaveKey)).toBe(horizon);
+  expect(await page.evaluate(key => localStorage.getItem(key), breezeSaveKey)).toBe(corrupt);
   expect(errors).toEqual([]);
 });
 

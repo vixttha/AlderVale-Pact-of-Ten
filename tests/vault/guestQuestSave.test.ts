@@ -3,7 +3,7 @@ import { createStarterWizard } from '../../shared/economy.ts';
 import { applySagaEvent } from '../../shared/quests.ts';
 import { xpRequiredForLevel, type RealmId } from '../../shared/realms.ts';
 import { CAMPUS_QUESTS } from '../../shared/world.ts';
-import { loadGuestRealm, saveGuestRealm } from '../../src/lib/storage.ts';
+import { emptyGuestRealm, guestRecoveryExport, inspectGuestRealm, loadGuestRealm, saveGuestRealm } from '../../src/lib/storage.ts';
 
 vi.mock('../../src/lib/firebase.ts', () => ({
   auth: {},
@@ -190,37 +190,43 @@ describe('Vault: guest quest rewards and realm saves', () => {
     expect(applySagaEvent(reloaded, 'solo-win')).toBe(reloaded);
     expect(loadGuestRealm('horizon').wizards).toEqual([]);
   });
-  it('G28-003 recovers with first-run defaults after corrupt guest JSON and preserves another realm', () => {
+  it.each(['{"account":', '', 'null', '[]', '{}', '{"version":2}'])('G28-003 protects unreadable guest data %j and preserves another realm', raw => {
     const horizon = loadGuestRealm('horizon');
-    const wizard = createGuestWizard('horizon');
-    const horizonSave = {
-      ...horizon,
-      account: { ...horizon.account, wizardIds: [wizard.id], termXp: 42 },
-      wizards: [wizard],
-    };
-    expect(saveGuestRealm('horizon', horizonSave)).toBe(true);
-    localStorage.setItem('aldervale_guest_breeze_v1', '{"account":');
+    expect(saveGuestRealm('horizon', horizon)).toBe(true);
+    const horizonRaw = localStorage.getItem('aldervale_guest_horizon_v1');
+    localStorage.setItem('aldervale_guest_breeze_v1', raw);
+    expect(inspectGuestRealm('breeze')).toEqual({ kind: 'recovery-required', raw });
+    expect(() => loadGuestRealm('breeze')).toThrow('Guest save needs recovery');
+    expect(saveGuestRealm('breeze', emptyGuestRealm('breeze'))).toBe(false);
+    expect(localStorage.getItem('aldervale_guest_breeze_v1')).toBe(raw);
+    expect(localStorage.getItem('aldervale_guest_horizon_v1')).toBe(horizonRaw);
+    expect(JSON.parse(guestRecoveryExport('breeze', raw))).toEqual({ format: 'aldervale-guest-recovery-v1', realmId: 'breeze', raw });
+  });
 
-    const recovered = loadGuestRealm('breeze');
-    expect(recovered.account).toMatchObject({
-      realmId: 'breeze', wizardIds: [], termXp: 0, claimedTermTiers: [],
-    });
-    expect(recovered.wizards).toEqual([]);
-    expect(recovered.creatures).toEqual({});
-    expect(recovered.sanctuaries).toEqual({});
-    expect(loadGuestRealm('horizon')).toMatchObject({
-      account: horizonSave.account,
-      wizards: [{ id: wizard.id, realmId: 'horizon' }],
-    });
+  it('preserves an unpaired code unit in the recovery export', () => {
+    const raw = '\uD800';
+    expect(JSON.parse(guestRecoveryExport('breeze', raw)).raw).toBe(raw);
+  });
 
-    const replacement = createGuestWizard();
-    expect(saveGuestRealm('breeze', {
-      ...recovered,
-      account: { ...recovered.account, wizardIds: [replacement.id] },
-      wizards: [replacement],
-    })).toBe(true);
-    expect(loadGuestRealm('breeze').wizards.map(({ id }) => id)).toEqual([replacement.id]);
-    expect(loadGuestRealm('horizon').account).toEqual(horizonSave.account);
+  it('distinguishes storage denial from absence and refuses writes', () => {
+    const read = vi.spyOn(localStorage, 'getItem').mockImplementation(() => { throw new Error('denied'); });
+    const write = vi.spyOn(localStorage, 'setItem');
+    try {
+      expect(inspectGuestRealm('breeze')).toEqual({ kind: 'storage-unavailable' });
+      expect(saveGuestRealm('breeze', emptyGuestRealm('breeze'))).toBe(false);
+      expect(write).not.toHaveBeenCalled();
+    } finally { read.mockRestore(); write.mockRestore(); }
+  });
+
+  it('rejects a changed source observed before a save', () => {
+    const original = emptyGuestRealm('breeze');
+    expect(saveGuestRealm('breeze', original)).toBe(true);
+    const old = localStorage.getItem('aldervale_guest_breeze_v1');
+    const newer = { ...original, account: { ...original.account, termXp: 60 } };
+    expect(saveGuestRealm('breeze', newer)).toBe(true);
+    const newRaw = localStorage.getItem('aldervale_guest_breeze_v1');
+    expect(saveGuestRealm('breeze', original, old)).toBe(false);
+    expect(localStorage.getItem('aldervale_guest_breeze_v1')).toBe(newRaw);
   });
 
   it('G28-005 preserves the last good save when replacing it fails', () => {
