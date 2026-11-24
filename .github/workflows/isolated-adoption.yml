@@ -15,6 +15,9 @@ jobs:
         with:
           persist-credentials: false
       - run: |
+          set -euo pipefail
           git rev-parse HEAD
           python3 tools/library.py check
-          python3 -m unittest discover -s tests -v
+          package=$(mktemp -d)
+          git archive HEAD -- LIBRARY-AGENT-GUIDE.md LICENSE README.md docs features ideas templates tests tools | tar -x -C "$package"
+          (cd "$package" && python3 -m unittest discover -s tests -v)
