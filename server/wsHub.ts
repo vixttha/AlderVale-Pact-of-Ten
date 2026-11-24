@@ -682,9 +682,11 @@ export function attachAldervaleWebSocketServer(httpServer: Server, reconnectGrac
                   dots: [],
                   statusEffects: [],
                   hand: [],
-                  deck: getStarterDeckForElement(duelElement),
+                  // Move the existing Keen Ink from the sideboard into the opening hand.
+                  // Both live fighters keep the same total cards; no bonus copy or stat change.
+                  deck: ['uni_enchant_keen', ...getStarterDeckForElement(duelElement)],
                   discard: [],
-                  sideboard: ['uni_enchant_keen', 'frost_tower_ward'],
+                  sideboard: ['frost_tower_ward'],
                   spellwrighting: {},
                   creatures: [creature],
                   activeCreatureIdx: 0,

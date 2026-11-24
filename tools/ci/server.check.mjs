@@ -149,7 +149,44 @@ const selectionB = {
   activeCreatureTalents: ['tal_spellproof'],
 };
 
-test('live PvP builds each fighter from its validated selected creature', async () => {
+
+// G09-003: exercise actual WebSocket messages and authoritative resolution in a live room.
+async function verifyLiveKeenInk(a, b, aState, bState) {
+  const ink = 'uni_enchant_keen';
+  const me = aState.playerTeam.find(actor => actor.id === a.wizardId);
+  const other = bState.playerTeam.find(actor => actor.id === b.wizardId);
+  assert.ok(me && other);
+  assert.equal(me.hand.filter(id => id === ink).length, 1);
+  assert.equal(other.hand.filter(id => id === ink).length, 1);
+  assert.equal(me.sideboard.includes(ink), false);
+  const source = me.hand.indexOf(ink);
+  const target = me.hand.indexOf('ember_cinder_dart');
+  assert.ok(target >= 0);
+  const message = (state, actorId, cardIndex, extra = {}) => ({
+    type: 'duel_action', duelId: state.duelId, round: state.round,
+    action: { actorId, cardIndex, targetId: state.enemyTeam[0].id, creatureAction: 'none', ...extra },
+  });
+  // An invalid direct cast must not occupy the player's pending action slot.
+  a.socket.send(JSON.stringify(message(aState, me.id, source)));
+  a.socket.send(JSON.stringify(message(aState, me.id, target, {
+    enchantPair: { enchantCardIdx: source, targetCardIdx: target },
+  })));
+  b.socket.send(JSON.stringify(message(bState, other.id, null)));
+  const [nextA, nextB] = await Promise.all([waitFor(a, 'duel_state'), waitFor(b, 'duel_state')]);
+  assert.ok(nextA.state.round > aState.round || nextA.state.phase !== 'planning');
+  assert.ok(nextA.state.logs.some(line => line.includes('fused Keen Ink')));
+  assert.ok(nextB.state.logs.some(line => line.includes('fused Keen Ink')));
+  const updated = nextA.state.playerTeam.find(actor => actor.id === me.id);
+  assert.ok(updated);
+  assert.equal(updated.hand.includes(ink), false);
+  assert.equal(updated.sideboard.includes(ink), false);
+  // Accuracy RNG may fizzle the boosted cast; the valid fusion still applies.
+  assert.ok(updated.discard.includes('ember_cinder_dart') || updated.hand.includes('ember_cinder_dart+keen'));
+  a.socket.close();
+  b.socket.close();
+}
+
+test('live PvP builds each fighter from its validated selected creature and resolves Keen Ink (G09-003)', async () => {
   const a = await connect();
   const b = await connect();
   await join(a, 'pvp-creature-a', 'breeze', selectionA);
@@ -165,9 +202,10 @@ test('live PvP builds each fighter from its validated selected creature', async 
     speciesId: 'zephyr_owl', element: 'gale', stage: 2, chromatic: 'dusk', branchChoice: 'A',
     talents: ['tal_spellproof'],
   });
+  await verifyLiveKeenInk(a, b, aDuel.state, bDuel.state);
 });
 
-test('live co-op builds both player fighters from their selected creatures', async () => {
+test('live co-op builds both player fighters from their selected creatures and resolves Keen Ink (G09-003)', async () => {
   const a = await connect();
   const b = await connect();
   await join(a, 'coop-creature-a', 'horizon', selectionA);
@@ -183,4 +221,5 @@ test('live co-op builds both player fighters from their selected creatures', asy
     speciesId: 'zephyr_owl', element: 'gale', stage: 2, chromatic: 'dusk', branchChoice: 'A',
     talents: ['tal_spellproof'],
   });
+  await verifyLiveKeenInk(a, b, aDuel.state, bDuel.state);
 });
