@@ -78,3 +78,7 @@ Related existing proposals: [mastery feasibility](skill-tree-feasibility-2026-11
 Open owner choices: exact attainable school unlocks within the potentially ten-school architecture; whether primary can switch; timing and rules of equipping a secondary within the two-affinity cap; exact unlock trials, point schedule and respec cost; how race flavor and cross-school spells interact with universal initial selection. Worked examples and suggested guarantees outside the five locked clauses remain proposals. No mandatory two-affinity loadout.
 
 Future acceptance tests: all ten selectable with viable decks; no invalid ID or unauthorized secondary access; unlock/retry idempotence and save/reload; primary-only completion; legal loadout and unchanged primary matchup; separate resonance discovery and equip checks; no legacy save loss. No gameplay changes until authorized.
+
+## Owner-approved foundational/derived architecture — 2026-11-24
+
+See [derived disciplines and Sovereigns](derived-schools-and-sovereigns.md). AV-ARCH-001 and AV-COVMODEL-001 accepted as design direction; ten base affinities, voluntary independent covenants, expandable teaching traditions. No new playable fusion or affinity. Individual Fire biography is a Universe HQ candidate.

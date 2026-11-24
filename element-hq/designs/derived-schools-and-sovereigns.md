@@ -1,6 +1,6 @@
-# Derived disciplines and Sovereigns — decision candidate
+# Derived disciplines and Sovereigns — owner-approved architecture
 
-Owner requests exploring fusion schools as descendants of the founding schools, possibly with regions of their own, and deliberate character development. No amendment to EA-001 or FQ-001 approved. The term school has two meanings: fundamental elemental affinity (exactly ten) and a teaching institution/tradition (expandable). Recommended: ten foundational schools; optional derived disciplines taught by independent or jointly chartered institutions. A derived discipline is not an ElementId, damage/resistance type, additional equip slot, mandatory starting choice, new Pact seat, race entitlement or biological descent. A sovereign does not grant exclusive access or own magic.
+Owner requests exploring fusion schools as descendants of the founding schools, possibly with regions of their own, and deliberate character development. No amendment to EA-001 or FQ-001 approved. The term school has two meanings: fundamental elemental affinity (exactly ten) and a teaching institution/tradition (expandable). Owner-approved 2026-11-24: ten foundational schools; optional derived disciplines taught by independent or jointly chartered institutions. The independent voluntary Founding Covenant relationship is also accepted; no divine ownership, veto or exclusive magical access. A derived discipline is not an ElementId, damage/resistance type, additional equip slot, mandatory starting choice, new Pact seat, race entitlement or biological descent. A sovereign does not grant exclusive access or own magic.
 
 ## Admission stages
 
@@ -20,6 +20,10 @@ Owner requests exploring fusion schools as descendants of the founding schools, 
 
 Names and locations not final. These are institution concepts, not approved regions, schools of damage or usable spells. A primary-only player can visit and finish story with NPC help; study and discovery stay optional. Both parents matter; no subordinate or superior school hierarchy. Expand by stable IDs with separate status and references, not hardcoded number. Legacy #187 remains separate. Current game code not changed.
 
-## Conflicts held for owner
+## Architecture boundaries and remaining decisions
 
 Literal promotion into new fundamental schools contradicts locked ten, 100 directed matchups, EA-001 and FQ-001; requires explicit architecture revision, migration and test plan. Existing legacy fusion identifiers do not authorize it. One area per recipe risks content explosion; joint institutions, districts, landmarks or traveling mentors preferred. No mandatory birth genealogy, sovereignty titles implying political authority, mandatory bond or legendary power advantage. Sovereign relationship framework owned by Universe HQ. Individual names, powers, backgrounds and regional map await review. No gameplay or merge authorization.
+
+## Owner acceptance — 2026-11-24
+
+AV-ARCH-001: Foundational/Derived School architecture accepted explicitly. AV-COVMODEL-001: Founding Covenant relationship accepted explicitly. Both are design direction only; no institution, territory, title, biography, recipe kit, art or gameplay approved by this acceptance. Existing EA-001 and FQ-001 remain unchanged. Universe HQ develops Fire first; no other biography promotion. No merge authority.
