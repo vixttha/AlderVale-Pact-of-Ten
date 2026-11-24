@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "issueNumber": 13,
-  "claimId": "AV-CLAIM-13-2026-11-17T01:24:49.421Z",
-  "status": "released",
-  "worker": "ChatGPT",
+  "claimId": "AV-CLAIM-13-2026-11-24T12:44:04Z",
+  "status": "active",
+  "worker": "chatgpt-vib-worker",
   "host": "chatgpt.com",
-  "model": "unverified",
+  "model": "GPT-6.2",
   "sessionId": "unavailable",
   "githubActor": "vixttha",
-  "baseSha": "fced4038c1dfa655c223d1bcbbdf3c18593b1e1f",
+  "baseSha": "914dee182df5dea37476b9b0eaf71d7a32190e06",
   "workBranch": "ci/issue-13-campus-quests",
-  "claimedAt": "2026-11-17T01:24:49.421Z",
-  "expiresAt": "2026-11-17T01:58:10.591Z",
-  "note": "Published draft PR #129 and verified 7/7 public-runner jobs on eeea0b4fcbeb2a4b80a3491b13d7710225737235. Issue #13 remains open for review and owner playthrough."
+  "claimedAt": "2026-11-24T12:44:04Z",
+  "expiresAt": "2026-11-24T13:44:04Z",
+  "note": "Owner requested #70 then #13 completion. #70 integrated and closed. Prior #13 claim released; resume existing draft PR #129 only. Remaining reward-path verification and repairs within established behavior; no merge or closure authorization inferred."
 }
