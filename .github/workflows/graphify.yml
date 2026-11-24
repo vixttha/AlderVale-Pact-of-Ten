@@ -1,29 +1,8 @@
-name: AlderVale Graphify
+name: AlderVale Graphify scoped transaction evidence
 
 on:
   push:
-    branches: [main]
-    tags: ['v[0-9]*']
-  pull_request:
-    paths:
-      - '.github/workflows/graphify.yml'
-      - 'tools/graphify/**'
-      - 'shared/combat.ts'
-      - 'shared/soloDuel.ts'
-      - 'server/soloProgress.ts'
-      - 'tools/ci/keen-ink.pw.mjs'
-      - 'tools/ci/authenticated-progression.check.mjs'
-      - 'server/duelView.ts'
-      - 'server/wsHub.ts'
-      - 'tools/ci/server.check.mjs'
-      - 'src/features/duel/DuelArenaModal.tsx'
-      - 'tests/vault/keenInk.test.ts'
-  workflow_dispatch:
-    inputs:
-      publish_commit_snapshot:
-        description: Store this commit graph at commits/<sha> on graphify-snapshots
-        type: boolean
-        default: false
+    branches: [audit/190-transaction-evidence]
 
 permissions:
   contents: read
@@ -49,6 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: 417fe170088890d6bbaeda7ec774c20acaccb0db
           persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -90,6 +70,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: 417fe170088890d6bbaeda7ec774c20acaccb0db
           persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -109,35 +90,3 @@ jobs:
           python tools/graphify/transfer.py unpack "$RUNNER_TEMP/snapshot"
           python tools/graphify/mcp_readback.py "$RUNNER_TEMP/snapshot/graph.json" | tee -a "$GITHUB_STEP_SUMMARY"
           cat "$RUNNER_TEMP/snapshot/receipt.json" >> "$GITHUB_STEP_SUMMARY"
-
-  publish:
-    name: Publish verified graph to Git
-    needs: [graph, verify-transfer]
-    if: >-
-      github.event.repository.private == false &&
-      (
-        github.ref == 'refs/heads/main' ||
-        github.ref_type == 'tag' ||
-        (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_commit_snapshot == 'true')
-      )
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Restore graph and receipt without storing an Actions artifact
-        env:
-          SNAPSHOT_0: ${{ needs.graph.outputs.snapshot_0 }}
-          SNAPSHOT_1: ${{ needs.graph.outputs.snapshot_1 }}
-          SNAPSHOT_2: ${{ needs.graph.outputs.snapshot_2 }}
-          SNAPSHOT_3: ${{ needs.graph.outputs.snapshot_3 }}
-        run: python3 tools/graphify/transfer.py unpack "$RUNNER_TEMP/snapshot"
-      - name: Publish without replacing history
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GRAPHIFY_PUBLISH_COMMIT: ${{ (github.ref != 'refs/heads/main' && github.ref_type != 'tag') && '1' || '0' }}
-        run: bash tools/graphify/publish.sh "$RUNNER_TEMP/snapshot"
