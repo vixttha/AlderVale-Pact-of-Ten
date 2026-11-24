@@ -1,6 +1,6 @@
 # AlderVale Test Vault v0.0.2
 
-Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [38 project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
+Use this as AlderVale's testing and acceptance record for the guest first-playable loop. Start with the [project cases](cases.md) for title, guest wizard creation, realm entry, one solo duel, and persistence after reload. The [game catalog](../game-catalog.md) and [engineering catalog](../engineering-catalog.md) cover the broader backlog. The [reusable starter](../public-template/README.md) is the template behind this project instance. The [language and test backlog](language-test-backlog.md) maps additional test ideas to AlderVale.
 
 ## What runs on AlderVale's public GitHub runners
 
@@ -11,6 +11,7 @@ The [AlderVale validation workflow](../../../.github/workflows/validate.yml) sup
 | G01-001, G09-001, G13-001 | [#13][issue13] | Guest enrollment, First Spark victory, and reward persistence | [Browser journey][human], [save tests][save] | Browser, Core | Owner desktop result |
 | G01-002, G02-001, G28-001 | | Enrollment retry, realm separation, and failed saves | [Guest browser suite][guest] | Browser | |
 | G04-001 to G04-003 | | XP thresholds, rollover, rank, and caps | [Vitest][xp], [Python reference][python] | Core, Vault catalog | |
+| G09-003 | [#70](https://github.com/vixttha/AlderVale-Pact-of-Ten/issues/70) | Authoritative enchant fusion, invalid input, no standalone card consumption | [Vitest](../../../tests/vault/keenInk.test.ts) | Core | Manual live-duel UI acceptance |
 | G13-002 | [#13][issue13] | Harmony and Rare Trial quest award logic | [Quest reducer tests][reducer] | Core | In-game Arbor and Rare Trial completion |
 | G13-003, G13-004 | [#13][issue13] | First Spark replay and the three published payout schedules | [Python reference][python], [Ruby catalog][ruby] | Vault catalog | Arbor and Rare Trial in-game completion |
 | G13-005 to G13-009 | [#13][issue13] | Harmony's two paths, mixed events, Rare Trial victory, and one-time payouts across saves | [Guest quest save tests][save] | Core | In-game event eligibility and delivery |

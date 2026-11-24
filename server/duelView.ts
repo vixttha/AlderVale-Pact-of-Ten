@@ -1,5 +1,7 @@
 import type { CombatantState, DuelState, TurnActionInput } from '../shared/combat.ts';
 import { ELEMENTS } from '../shared/elements.ts';
+import { isValidInHandEnchantPair } from '../shared/combat.ts';
+import { SPELL_BY_ID } from '../shared/spells.ts';
 
 export function duelView(state: DuelState, actorId?: string): DuelState {
   const onEnemySide = state.enemyTeam.some((actor) => actor.id === actorId);
@@ -31,6 +33,17 @@ export function readDuelAction(value: unknown, actor: CombatantState, foes: Comb
   if (discard !== undefined && (!Array.isArray(discard) || discard.length > actor.hand.length || discard.some((entry) => !index(entry, actor.hand.length)))) return null;
   if (action.creatureAction !== undefined && !['none', 'skill', 'swap'].includes(action.creatureAction)) return null;
   if (action.creatureAction === 'swap' && !index(action.swapCreatureIdx, actor.creatures.length)) return null;
+  const pair = action.enchantPair;
+  if (pair !== undefined && (
+    !isValidInHandEnchantPair(actor.hand, pair) ||
+    action.cardIndex !== pair.targetCardIdx ||
+    action.useSideboardIndex != null ||
+    discard?.some(entry => entry === pair.enchantCardIdx || entry === pair.targetCardIdx)
+  )) return null;
+  const selected = action.useSideboardIndex != null
+    ? actor.sideboard[action.useSideboardIndex]
+    : action.cardIndex == null ? undefined : actor.hand[action.cardIndex];
+  if (selected && SPELL_BY_ID[selected.replace('+keen', '')]?.kind === 'enchant') return null;
   const target = foes.find((foe) => foe.id === action.targetId && foe.hp > 0) ?? foes.find((foe) => foe.hp > 0);
   if (!target) return null;
   return {
@@ -38,5 +51,6 @@ export function readDuelAction(value: unknown, actor: CombatantState, foes: Comb
     useSideboardIndex: action.useSideboardIndex, archmasteryElement: action.archmasteryElement,
     discardIndices: discard ? [...new Set(discard)] : undefined,
     creatureAction: action.creatureAction ?? 'none', swapCreatureIdx: action.swapCreatureIdx,
+    ...(pair ? { enchantPair: { enchantCardIdx: pair.enchantCardIdx, targetCardIdx: pair.targetCardIdx } } : {}),
   };
 }

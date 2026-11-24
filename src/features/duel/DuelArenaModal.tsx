@@ -24,6 +24,7 @@ import {
   chooseAiAction,
   isDuelComplete,
   totalAvailablePipsForSchool,
+  isValidInHandEnchantPair,
   leadCreatureQualifiedForArborWin,
   STATUS_EFFECT_META,
   type CombatantState,
@@ -167,6 +168,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   const [discardMode, setDiscardMode] = useState(false);
   const [discardSet, setDiscardSet] = useState<number[]>([]);
   const [enchantModeIdx, setEnchantModeIdx] = useState<number | null>(null);
+  const [liveEnchantPair, setLiveEnchantPair] = useState<TurnActionInput['enchantPair']>();
   const [archmastery, setArchmastery] = useState<ElementId>(wizard.elementId);
   const [trialTargetElement, setTrialTargetElement] = useState<ElementId | undefined>(undefined);
   const [rewardClaimed, setRewardClaimed] = useState(false);
@@ -179,7 +181,15 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   useEffect(() => {
     turnInFlight.current = false;
     setTurnPending(false);
-  }, [duel?.duelId, duel?.round, duel?.phase, worldConnected]);
+    setEnchantModeIdx(null);
+    setLiveEnchantPair(undefined);
+    if (liveDuelState) {
+      setSelectedCardIdx(null);
+      setSelectedSideIdx(null);
+      setDiscardSet([]);
+      setDiscardMode(false);
+    }
+  }, [duel?.duelId, duel?.round, duel?.phase, worldConnected, Boolean(liveDuelState)]);
 
   useEffect(() => () => {
     if (localTimer.current) clearTimeout(localTimer.current);
@@ -232,6 +242,13 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     if (!duel || duel.phase !== 'planning' || spectating || turnInFlight.current || cloudPending.current) return;
     const me = duel.playerTeam[0];
     if (!me) return;
+    const chosen = selectedSideIdx !== null ? me.sideboard[selectedSideIdx]
+      : selectedCardIdx !== null ? me.hand[selectedCardIdx] : undefined;
+    if (!pass && chosen && SPELL_BY_ID[chosen.replace('+keen', '')]?.kind === 'enchant') return;
+    if (!pass && liveEnchantPair && (
+      !isValidInHandEnchantPair(me.hand, liveEnchantPair) ||
+      selectedCardIdx !== liveEnchantPair.targetCardIdx || selectedSideIdx !== null
+    )) return;
 
     const action: TurnActionInput = {
       actorId: me.id,
@@ -242,6 +259,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
       swapCreatureIdx: creatureMode === 'swap' ? swapIdx : undefined,
       discardIndices: discardSet.length > 0 ? discardSet : undefined,
       archmasteryElement: archmastery,
+      ...(liveDuelState && !pass && liveEnchantPair ? { enchantPair: liveEnchantPair } : {}),
     };
 
     if (signedInSolo && !liveDuelState) {
@@ -250,6 +268,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
         showCloudDuel(result);
         setSelectedCardIdx(null);
         setSelectedSideIdx(null);
+        setLiveEnchantPair(undefined);
+        setEnchantModeIdx(null);
         setDiscardSet([]);
         setDiscardMode(false);
         setCreatureMode('skill');
@@ -264,6 +284,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     academyAudio.playChime('cast');
     setSelectedCardIdx(null);
     setSelectedSideIdx(null);
+    setLiveEnchantPair(undefined);
+    setEnchantModeIdx(null);
     setDiscardSet([]);
     setDiscardMode(false);
     setCreatureMode('skill');
@@ -288,11 +310,25 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
   };
 
   const handleInHandEnchant = (targetIdx: number) => {
-    if (enchantModeIdx === null || !duel || liveDuelState) return;
+    if (enchantModeIdx === null || !duel || turnInFlight.current || cloudPending.current) return;
     const me = duel.playerTeam[0];
-    const enchId = me.hand[enchantModeIdx];
+    const pair = { enchantCardIdx: enchantModeIdx, targetCardIdx: targetIdx };
+    if (!isValidInHandEnchantPair(me.hand, pair)) {
+      setEnchantModeIdx(null);
+      return;
+    }
     const tgtId = me.hand[targetIdx];
-    if (!enchId || !tgtId || targetIdx === enchantModeIdx || !['attack', 'drain', 'aoe'].includes(SPELL_BY_ID[tgtId]?.kind)) {
+    if (liveDuelState) {
+      // Do not mutate the server-owned hand. Bind the pair to the selected attack.
+      const spell = SPELL_BY_ID[tgtId];
+      if (totalAvailablePipsForSchool(me, spell.element) < spell.pipCost) {
+        setEnchantModeIdx(null);
+        return;
+      }
+      setLiveEnchantPair(pair);
+      setSelectedCardIdx(targetIdx);
+      setSelectedSideIdx(null);
+      setDiscardSet([]);
       setEnchantModeIdx(null);
       return;
     }
@@ -301,6 +337,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
       runCloudSolo(async () => {
         showCloudDuel(await signedInSolo.enchant(duel.duelId, cloudRevision.current, source, targetIdx));
         setSelectedCardIdx(null);
+        setSelectedSideIdx(null);
         setDiscardSet([]);
         setEnchantModeIdx(null);
       });
@@ -311,6 +348,10 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
     copy.playerTeam[0].hand.splice(enchantModeIdx, 1);
     copy.logs.push(`In-Hand Fusion: Keen Ink boosted ${SPELL_BY_ID[tgtId]?.name ?? tgtId} (+65 Power, +8% Acc)!`);
     setLocalDuel(copy);
+    onUpdateLocalDuel(copy);
+    setSelectedCardIdx(null);
+    setSelectedSideIdx(null);
+    setDiscardSet([]);
     setEnchantModeIdx(null);
   };
 
@@ -708,6 +749,8 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                 onClick={() => {
                   setDiscardMode((v) => !v);
                   setEnchantModeIdx(null);
+                  if (liveEnchantPair) setSelectedCardIdx(null);
+                  setLiveEnchantPair(undefined);
                 }}
                 className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 font-bold border ${
                   discardMode ? 'border-rose-400 bg-rose-900/60' : 'border-white/20 bg-[#27314d]'
@@ -715,6 +758,9 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
               >
                 <RefreshCw className="h-3.5 w-3.5" /> {discardMode ? `Cycle (${discardSet.length})` : 'Discard Cycle'}
               </button>
+              {liveEnchantPair && (
+                <span className="rounded-lg bg-amber-500/20 border border-amber-400 px-2.5 py-1 text-amber-200 font-bold">Keen Ink queued for this attack</span>
+              )}
               {enchantModeIdx !== null && (
                 <span className="rounded-lg bg-amber-500/20 border border-amber-400 px-2.5 py-1 text-amber-200 font-bold">
                   Click an Attack card to fuse Keen Ink (+65 Power)!
@@ -731,7 +777,11 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                 return (
                   <button
                     key={`${sid}_${idx}`}
+                    disabled={sp.kind === 'enchant'}
+                    title={sp.kind === 'enchant' ? 'Keen Ink can only fuse from your hand' : undefined}
                     onClick={() => {
+                      setLiveEnchantPair(undefined);
+                      setEnchantModeIdx(null);
                       setSelectedSideIdx(selectedSideIdx === idx ? null : idx);
                       setSelectedCardIdx(null);
                     }}
@@ -739,7 +789,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                       selectedSideIdx === idx ? 'border-[#f4c98b] bg-[#3b4b75]' : 'border-white/15 bg-[#141a2b]'
                     }`}
                   >
-                    {sp.name} ({sp.pipCost})
+                    {sp.name} {sp.kind === 'enchant' ? '(hand only)' : `(${sp.pipCost})`}
                   </button>
                 );
               })}
@@ -750,7 +800,7 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
             {/* 7-Card Hand */}
             <div className="flex flex-1 gap-2 overflow-x-auto py-1">
               {me.hand.map((rawId, idx) => {
-                const enchanted = rawId.endsWith('+keen');
+                const enchanted = rawId.endsWith('+keen') || liveEnchantPair?.targetCardIdx === idx;
                 const sp = SPELL_BY_ID[rawId.replace('+keen', '')];
                 if (!sp) return null;
                 const affordable = totalAvailablePipsForSchool(me, sp.element) >= sp.pipCost;
@@ -769,11 +819,16 @@ export const DuelArenaModal: React.FC<DuelArenaModalProps> = ({
                         handleInHandEnchant(idx);
                         return;
                       }
-                      if (sp.kind === 'enchant' && !liveDuelState) {
+                      if (sp.kind === 'enchant') {
+                        setLiveEnchantPair(undefined);
+                        setSelectedCardIdx(null);
+                        setSelectedSideIdx(null);
+                        setDiscardSet([]);
                         setEnchantModeIdx(idx);
                         return;
                       }
                       if (!affordable) return;
+                      setLiveEnchantPair(undefined);
                       setSelectedCardIdx(isSelected ? null : idx);
                       setSelectedSideIdx(null);
                     }}
