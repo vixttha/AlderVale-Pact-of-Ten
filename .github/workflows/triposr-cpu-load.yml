@@ -1,0 +1,75 @@
+name: AAGP checkpoint 02 - TripoSR CPU load
+on:
+  push:
+    branches: [AlderVale-Asset-Generation]
+    paths:
+      - '.github/workflows/triposr-cpu-load.yml'
+      - 'generators/triposr/**'
+permissions:
+  contents: read
+concurrency:
+  group: aagp-cpu-load-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  cpu-load:
+    if: github.event.repository.private == false && github.repository == 'vixttha/AlderVale-Pact-of-Ten'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: '1'
+      HF_HOME: ${{ runner.temp }}/aagp-hf
+      OMP_NUM_THREADS: '4'
+      MKL_NUM_THREADS: '4'
+      CMAKE_BUILD_PARALLEL_LEVEL: '2'
+      PIP_NO_CACHE_DIR: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      TORCH_FORCE_WEIGHTS_ONLY_LOAD: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.11'
+      - name: Verify checkout, runner and receipt contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$RUNNER_OS" = Linux
+          test "$RUNNER_ARCH" = X64
+          python -m unittest discover -s generators/triposr -p 'test_*.py' -v
+          nproc
+          free -h
+          df -h "$RUNNER_TEMP"
+      - name: Install isolated pinned CPU dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v bash generators/triposr/install_cpu.sh
+      - name: Fetch and verify official model files
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v "$RUNNER_TEMP/aagp-venv/bin/python" generators/triposr/cpu_load.py download
+      - name: Strictly load actual pretrained model on CPU
+        shell: bash
+        env:
+          HF_HUB_OFFLINE: '1'
+          TRANSFORMERS_OFFLINE: '1'
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$RUNNER_TEMP/aagp-triposr"
+          /usr/bin/time -v "$RUNNER_TEMP/aagp-venv/bin/python" generators/triposr/cpu_load.py load | tee "$RUNNER_TEMP/aagp-load.json"
+          cat "$RUNNER_TEMP/aagp-load.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Record environment and remaining resources
+        if: always()
+        shell: bash
+        run: |
+          df -h "$RUNNER_TEMP"
+          free -h
+          if test -x "$RUNNER_TEMP/aagp-venv/bin/python"; then
+            "$RUNNER_TEMP/aagp-venv/bin/python" -m pip freeze
+          fi
