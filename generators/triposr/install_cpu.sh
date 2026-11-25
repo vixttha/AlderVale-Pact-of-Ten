@@ -22,7 +22,9 @@ fetch_exact https://github.com/tatsy/torchmcubes.git 3381600ddc3d2e4d74222f84958
 # A CPU PyTorch install does not expose CUDA libraries. Prevent CMake from
 # opportunistically using the runner's CUDA compiler.
 prefix="$("$py" -c 'import torch; print(torch.utils.cmake_prefix_path)')"
-CMAKE_ARGS="-DCMAKE_CUDA_COMPILER=NOTFOUND -DCMAKE_PREFIX_PATH=$prefix" \
+pybind_dir="$("$py" -m pybind11 --cmakedir)"
+test -f "$pybind_dir/pybind11Config.cmake"
+CMAKE_ARGS="-DCMAKE_CUDA_COMPILER=NOTFOUND -DCMAKE_PREFIX_PATH=$prefix -Dpybind11_DIR=$pybind_dir" \
   "$py" -m pip install --no-deps --no-build-isolation "$RUNNER_TEMP/aagp-torchmcubes"
 "$py" -m pip check
 "$py" -c 'import torch, torchvision, torchmcubes; assert torch.version.cuda is None; assert not torch.cuda.is_available(); print("CPU native imports OK", torch.__version__, torchvision.__version__)'
