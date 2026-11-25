@@ -1,0 +1,2 @@
+# AAGP 04 — UV and texture bake
+Tracked in #194. Reuses checkpoint 03 synthetic fixture and pinned upstream model; upstream xatlas + ModernGL bake using headless EGL software rendering. Export explicit OBJ vertex/UV indices and MTL/PNG, not upstream GLB path. Original geometry preserved, watertightness diagnosed. Verify separate import and texture contents. 512px texture is a feasibility setting, not a quality target. No artifact upload or GLB yet. VIB phase sequence applied to this issue; installed VIB manifest is main-only, official game ledger is untouched.
