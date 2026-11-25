@@ -17,7 +17,7 @@ def bake(out, mesh, model, scene, measure, metrics, source):
     original = moderngl.create_context
     renderers = []
     def software_context(*args, **kwargs):
-        ctx = original(*args, **kwargs, backend="egl")
+        ctx = original(*args, **kwargs, backend="egl", libegl="libEGL.so.1", libgl="libGL.so.1")
         renderer = ctx.info["GL_RENDERER"]
         require("llvmpipe" in renderer.lower() or "softpipe" in renderer.lower(),
                 "not a software renderer: " + renderer)

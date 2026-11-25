@@ -48,6 +48,13 @@ jobs:
           nproc
           free -h
           df -h "$RUNNER_TEMP"
+      - name: Install Mesa software EGL system libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libegl-mesa0 libgl1 libgl1-mesa-dri libegl-dev
+          dpkg-query -W libegl1 libegl-mesa0 libgl1 libgl1-mesa-dri libegl-dev
       - name: Install checkpoint 02 CPU dependencies unchanged
         shell: bash
         run: |
@@ -59,6 +66,7 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/aagp-venv/bin/python" -m pip install --no-deps --only-binary=:all: --index-url https://pypi.org/simple xatlas==0.0.9 moderngl==5.12.0 glcontext==3.0.0
           "$RUNNER_TEMP/aagp-venv/bin/python" -m pip check
+          "$RUNNER_TEMP/aagp-venv/bin/python" -c 'import moderngl; c=moderngl.create_context(standalone=True, backend="egl", libegl="libEGL.so.1", libgl="libGL.so.1"); r=c.info["GL_RENDERER"]; print(r); assert "llvmpipe" in r.lower() or "softpipe" in r.lower(); c.release()'
       - name: Download pinned verified weights
         shell: bash
         run: |
