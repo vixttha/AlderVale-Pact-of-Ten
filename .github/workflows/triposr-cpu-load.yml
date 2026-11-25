@@ -19,7 +19,6 @@ jobs:
       CUDA_VISIBLE_DEVICES: ''
       HF_HUB_DISABLE_TELEMETRY: '1'
       HF_HUB_DISABLE_IMPLICIT_TOKEN: '1'
-      HF_HOME: ${{ runner.temp }}/aagp-hf
       OMP_NUM_THREADS: '4'
       MKL_NUM_THREADS: '4'
       CMAKE_BUILD_PARALLEL_LEVEL: '2'
@@ -40,6 +39,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$RUNNER_OS" = Linux
           test "$RUNNER_ARCH" = X64
+          echo "HF_HOME=$RUNNER_TEMP/aagp-hf" >> "$GITHUB_ENV"
           python -m unittest discover -s generators/triposr -p 'test_*.py' -v
           nproc
           free -h
