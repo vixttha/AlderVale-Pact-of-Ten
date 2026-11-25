@@ -1,0 +1,78 @@
+name: AAGP checkpoint 03 - CPU geometry
+on:
+  push:
+    branches: [AlderVale-Asset-Generation]
+    paths:
+      - '.github/workflows/triposr-cpu-geometry.yml'
+      - 'geometry/**'
+permissions:
+  contents: read
+concurrency:
+  group: aagp-cpu-geometry-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  cpu-geometry:
+    if: github.event.repository.private == false && github.repository == 'vixttha/AlderVale-Pact-of-Ten'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: '1'
+      OMP_NUM_THREADS: '4'
+      MKL_NUM_THREADS: '4'
+      CMAKE_BUILD_PARALLEL_LEVEL: '2'
+      PIP_NO_CACHE_DIR: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      TORCH_FORCE_WEIGHTS_ONLY_LOAD: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.11'
+      - name: Verify checkout and geometry contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$RUNNER_OS" = Linux
+          test "$RUNNER_ARCH" = X64
+          echo "HF_HOME=$RUNNER_TEMP/aagp-hf" >> "$GITHUB_ENV"
+          python -m unittest discover -s generators/triposr -p 'test_*.py' -v
+          python -m unittest discover -s geometry -p 'test_*.py' -v
+          nproc
+          free -h
+          df -h "$RUNNER_TEMP"
+      - name: Install checkpoint 02 CPU dependencies unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v bash generators/triposr/install_cpu.sh
+      - name: Download pinned verified weights
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v "$RUNNER_TEMP/aagp-venv/bin/python" generators/triposr/cpu_load.py download
+      - name: Generate synthetic reference and actual CPU mesh
+        shell: bash
+        env:
+          HF_HUB_OFFLINE: '1'
+          TRANSFORMERS_OFFLINE: '1'
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$RUNNER_TEMP/aagp-triposr:$GITHUB_WORKSPACE/generators/triposr"
+          /usr/bin/time -v "$RUNNER_TEMP/aagp-venv/bin/python" geometry/generate.py "$RUNNER_TEMP/aagp-geometry"
+      - name: Independent OBJ readback and receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/aagp-venv/bin/python" geometry/validate_obj.py "$RUNNER_TEMP/aagp-geometry" | tee "$RUNNER_TEMP/aagp-geometry-validation.json"
+          cat "$RUNNER_TEMP/aagp-geometry-validation.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Record resources
+        if: always()
+        shell: bash
+        run: |
+          free -h
+          df -h "$RUNNER_TEMP"
