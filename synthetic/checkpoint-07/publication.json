@@ -1,0 +1,148 @@
+{
+  "source_commit": "c5a0143738469835a4d09ade39292bc111f4fafe",
+  "run_id": "45897215855",
+  "run_attempt": "1",
+  "input_kind": "synthetic sphere",
+  "quality_accepted": false,
+  "files": {
+    "candidate.glb": {
+      "sha256": "c797f1f875500d97c7769caa99898d4d9b52fbbc48a4be5d00a804fe3bcebb8e",
+      "bytes": 3216532
+    },
+    "viewer.html": {
+      "sha256": "d480a9f7a2859186841c52c1e3fbb2c445f7a0477d2873431e4ba2a596a37b89",
+      "bytes": 4880859
+    },
+    "viewer-LICENSE.txt": {
+      "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+      "bytes": 1081
+    },
+    "all-angles.png": {
+      "sha256": "e83b5bcde464abb0ca44043f7f1e17f1144953557e5f42df010d8cf132c258f9",
+      "bytes": 369624
+    },
+    "front.png": {
+      "sha256": "55de409ff83b939ca7f904026d07e52b7c81148ca3640f594fc055c7d27c30d1",
+      "bytes": 284239
+    },
+    "rear.png": {
+      "sha256": "534d940dfc6cfb0b4b6a6b48b45927cfcba4cb480c494201efdaffc0c34cde0f",
+      "bytes": 299126
+    },
+    "left.png": {
+      "sha256": "5504d754eaff239aeaa384f247b5c8674531e3f4b071e478cc26678de2c3eecf",
+      "bytes": 278563
+    },
+    "right.png": {
+      "sha256": "e0f73df2153b9ae2af1ece41783b0195cd71f2cdbc1cf51f2dbc1f048e5f90c4",
+      "bytes": 273249
+    },
+    "top.png": {
+      "sha256": "ba936bac6a57f7a23b04eb9b4c2656ff7b5385dca0d397a97c30975bc3d1e47d",
+      "bytes": 284679
+    },
+    "underside.png": {
+      "sha256": "aefccad8fa126dc2173bfb6bd061a0f969b6ed5d07ee8a1cad52cd7bfffd73eb",
+      "bytes": 262231
+    },
+    "three-quarter.png": {
+      "sha256": "ff1173ae5603e1966c5cd12c6581ae893f641ee1d30fd3d2c4fd29bee58da6e1",
+      "bytes": 267338
+    },
+    "inspection.zip": {
+      "sha256": "726a4fefe0c57b12185c1d75069d4587375f508c5b132daf8246ccacc48003d1",
+      "bytes": 6757264
+    }
+  },
+  "views": {
+    "status": "pass",
+    "source_commit": "c5a0143738469835a4d09ade39292bc111f4fafe",
+    "glb_sha256": "c797f1f875500d97c7769caa99898d4d9b52fbbc48a4be5d00a804fe3bcebb8e",
+    "device": "CPU",
+    "engine": "CYCLES",
+    "views": {
+      "front": {
+        "sha256": "55de409ff83b939ca7f904026d07e52b7c81148ca3640f594fc055c7d27c30d1",
+        "seconds": 3.557,
+        "direction": [
+          0,
+          -1,
+          0
+        ],
+        "projection": "ORTHO"
+      },
+      "rear": {
+        "sha256": "534d940dfc6cfb0b4b6a6b48b45927cfcba4cb480c494201efdaffc0c34cde0f",
+        "seconds": 3.649,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "projection": "ORTHO"
+      },
+      "left": {
+        "sha256": "5504d754eaff239aeaa384f247b5c8674531e3f4b071e478cc26678de2c3eecf",
+        "seconds": 3.63,
+        "direction": [
+          -1,
+          0,
+          0
+        ],
+        "projection": "ORTHO"
+      },
+      "right": {
+        "sha256": "e0f73df2153b9ae2af1ece41783b0195cd71f2cdbc1cf51f2dbc1f048e5f90c4",
+        "seconds": 3.403,
+        "direction": [
+          1,
+          0,
+          0
+        ],
+        "projection": "ORTHO"
+      },
+      "top": {
+        "sha256": "ba936bac6a57f7a23b04eb9b4c2656ff7b5385dca0d397a97c30975bc3d1e47d",
+        "seconds": 3.448,
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "projection": "ORTHO"
+      },
+      "underside": {
+        "sha256": "aefccad8fa126dc2173bfb6bd061a0f969b6ed5d07ee8a1cad52cd7bfffd73eb",
+        "seconds": 3.325,
+        "direction": [
+          0,
+          0,
+          -1
+        ],
+        "projection": "ORTHO"
+      },
+      "three-quarter": {
+        "sha256": "ff1173ae5603e1966c5cd12c6581ae893f641ee1d30fd3d2c4fd29bee58da6e1",
+        "seconds": 3.176,
+        "direction": [
+          2.8,
+          -4,
+          2
+        ],
+        "projection": "PERSP"
+      }
+    }
+  },
+  "viewer": {
+    "status": "pass",
+    "source_commit": "c5a0143738469835a4d09ade39292bc111f4fafe",
+    "glb_sha256": "c797f1f875500d97c7769caa99898d4d9b52fbbc48a4be5d00a804fe3bcebb8e",
+    "viewer_sha256": "d480a9f7a2859186841c52c1e3fbb2c445f7a0477d2873431e4ba2a596a37b89",
+    "triangles": 27092,
+    "textured_meshes": 1,
+    "view_button": true,
+    "orbit_drag": true,
+    "external_requests": 0,
+    "chromium": "140.0.7339.186"
+  }
+}
