@@ -1,0 +1,3 @@
+# AAGP checkpoint 07 — inspection delivery
+
+Issue #198. Repeat the full synthetic CPU pipeline and Khronos validation, render the reimported GLB with CPU Cycles, generate a bounded ZIP with source and receipts, verify its exact contents and digests. Artifact delivery is fail-closed: only when verified no-cost storage is documented and the owner sets `AAGP_STORAGE_VERIFIED_SHA` to the exact candidate SHA may the one-day upload step execute. No credentials, permission expansion, private source, game integration or release. ZIP generation and readback do not prove external delivery; independently download and verify the archive before accepting checkpoint 07. No fallback to storing binaries in logs.
