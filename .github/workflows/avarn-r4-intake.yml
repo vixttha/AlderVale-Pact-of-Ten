@@ -1,0 +1,80 @@
+name: Avarn R4 - exact source and limb screening
+on:
+  push:
+    branches: [avarn-3d-development]
+    paths:
+      - 'art/avarn/3d/source/avarn-r4.glb'
+      - 'tools/avarn_r4_intake.py'
+      - 'tools/test_avarn_r4_intake.py'
+      - 'tools/avarn_intake.py'
+      - 'tools/validate_universe.py'
+      - '.github/workflows/avarn-r4-intake.yml'
+permissions:
+  contents: read
+concurrency:
+  group: avarn-r4-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  r4-contract:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Exact checkout and strict inventory
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 tools/validate_universe.py
+      - name: Synthetic positive and negative cases
+        run: python3 -m unittest discover -s tools -p test_avarn_r4_intake.py -v
+  r4-source-intake:
+    needs: r4-contract
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify exact R4 binary and region connectivity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          source=art/avarn/3d/source/avarn-r4.glb
+          if [[ ! -f "$source" ]]; then
+            echo "::error::R4 source not transferred; actual R4 qualification blocked."
+            exit 1
+          fi
+          python3 tools/avarn_r4_intake.py "$source" | tee "$RUNNER_TEMP/avarn-r4-intake.txt"
+          cat "$RUNNER_TEMP/avarn-r4-intake.txt" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.12'
+      - name: Pin BART and Blender using existing Hearth Gate toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-checkout https://github.com/vixttha/Blender-Agent-Refinement-Toolkit.git "$RUNNER_TEMP/bart"
+          git -C "$RUNNER_TEMP/bart" checkout --detach 392d8d7a1c262227cba3c08d5577af38c74b4e25
+          test "$(git -C "$RUNNER_TEMP/bart" rev-parse HEAD)" = "392d8d7a1c262227cba3c08d5577af38c74b4e25"
+          echo "PYTHONPATH=$RUNNER_TEMP/bart/src" >> "$GITHUB_ENV"
+          release=release/Blender4.5/blender-4.5.0-linux-x64.tar.xz
+          curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://download.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz" ||
+            curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://mirror.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz"
+          printf '%s  %s\n' 1188b95cc12321c770b631939f7c25a096910b6f884a990bf9c0f62d52b38aec "$RUNNER_TEMP/blender.tar.xz" | sha256sum --check -
+          mkdir "$RUNNER_TEMP/blender"
+          tar -xf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP/blender" --strip-components=1
+          echo "BLENDER_BIN=$RUNNER_TEMP/blender/blender" >> "$GITHUB_ENV"
+      - name: BART inspection and independent Blender import
+        shell: bash
+        run: |
+          set -euo pipefail
+          source=art/avarn/3d/source/avarn-r4.glb
+          python -m blender_agent version
+          python -m blender_agent --workspace "$GITHUB_WORKSPACE" --blender "$BLENDER_BIN" --timeout 180 inspect "$source"
+          "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python-expr 'import bpy, sys; bpy.ops.wm.read_factory_settings(use_empty=True); bpy.ops.import_scene.gltf(filepath=sys.argv[-1]); meshes=[o for o in bpy.context.scene.objects if o.type=="MESH"]; assert len(meshes)==1; assert not any(o.type=="ARMATURE" for o in bpy.context.scene.objects); meshes[0].data.calc_loop_triangles(); assert len(meshes[0].data.loop_triangles)==476403; print("Independent Blender import: 476403 triangles, static mesh")' -- "$GITHUB_WORKSPACE/$source"
+          printf '%s  %s\n' 35d0e764ca72cb6044da2d9d3f7053772bcef8f037cdc159a2246e3a7aa16d3d "$source" | sha256sum --check -
+          echo "Original source unchanged. No geometry surgery or model acceptance performed."
