@@ -49,7 +49,7 @@ with zipfile.ZipFile(dest/"inspection.zip") as z:
     require(z.testzip() is None and set(z.namelist())==set(payload)|{"manifest.json"} and len(z.namelist())==len(payload)+1,"ZIP integrity")
     for n,b in payload.items():require(z.read(n)==b,"ZIP byte mismatch")
 public+=["inspection.zip"]
-publication={"source_commit":os.environ["GITHUB_SHA"],"run_id":os.environ["GITHUB_RUN_ID"],"run_attempt":os.environ["GITHUB_RUN_ATTEMPT"],"input_kind":"hearthkip-r1-approved","quality_accepted":False,"files":{n:{"sha256":sha(dest/n),"bytes":(dest/n).stat().st_size} for n in public},"views":rec,"viewer":viewer}
+publication={"source_commit":os.environ["GITHUB_SHA"],"run_id":os.environ["GITHUB_RUN_ID"],"run_attempt":os.environ["GITHUB_RUN_ATTEMPT"],"input_kind":"hearthkip-r1-approved","quality_accepted":False,"files":{n:{"sha256":sha(dest/n),"bytes":(dest/n).stat().st_size} for n in public},"views":rec,"viewer":viewer,"cleanup":old["cleanup"]}
 (dest/"publication.json").write_text(json.dumps(publication,indent=2)+"\n")
 require(sum(p.stat().st_size for p in dest.iterdir())<=32*1024*1024,"public delivery limit")
 print(json.dumps(publication,indent=2))

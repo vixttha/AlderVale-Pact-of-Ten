@@ -103,7 +103,7 @@ jobs:
         run: |
           set -euo pipefail
           /usr/bin/time -v "$RUNNER_TEMP/aagp-venv/bin/python" generators/triposr/cpu_load.py download
-      - name: Generate actual Hearthkip mesh and baked texture on CPU
+      - name: Generate, repair and independently validate Hearthkip mesh before baking
         shell: bash
         env:
           HF_HUB_OFFLINE: '1'
@@ -118,6 +118,12 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/aagp-venv/bin/python" geometry/validate_obj.py "$RUNNER_TEMP/aagp-geometry" | tee "$RUNNER_TEMP/aagp-geometry-validation.json"
           cat "$RUNNER_TEMP/aagp-geometry-validation.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Independent cleanup readback after baking
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH="$GITHUB_WORKSPACE/geometry" "$RUNNER_TEMP/aagp-venv/bin/python" hearthkip/verify_cleanup.py "$RUNNER_TEMP/aagp-geometry" | tee "$RUNNER_TEMP/aagp-cleanup-validation.json"
+          cat "$RUNNER_TEMP/aagp-cleanup-validation.json" >> "$GITHUB_STEP_SUMMARY"
       - name: Independent UV and texture readback
         shell: bash
         run: |

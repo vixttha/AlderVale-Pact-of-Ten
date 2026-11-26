@@ -103,14 +103,26 @@ def main(out):
             "invalid or tiny vertex array")
     require(f.ndim == 2 and f.shape[1] == 3 and len(f) >= 100 and f.min() >= 0 and f.max() < len(v),
             "invalid or tiny triangle array")
-    # Serialize only the actual reconstructed geometry, no colors, UVs or materials.
-    obj = out / "mesh.obj"
-    with obj.open("x", encoding="ascii") as stream:
-        stream.write("# AAGP Hearthkip R1: actual CPU TripoSR reconstruction\n")
-        for x, y, z in v:
-            stream.write(f"v {x:.12g} {y:.12g} {z:.12g}\n")
-        for a, b, c in f:
-            stream.write(f"f {a+1} {b+1} {c+1}\n")
+    from cleanup import clean_mesh
+    import trimesh
+    def write_obj(path, vertices, faces):
+        with path.open("x", encoding="ascii") as stream:
+            stream.write("# AAGP Hearthkip R1 actual CPU TripoSR geometry\n")
+            for x,y,z in vertices: stream.write(f"v {x:.12g} {y:.12g} {z:.12g}\n")
+            for a,b,c in faces: stream.write(f"f {a+1} {b+1} {c+1}\n")
+    raw=out/"pre-cleanup.obj"
+    write_obj(raw,v,f)
+    # Use serialized coordinates for the predicate, so the independent reader can reproduce it.
+    rounded=[tuple(float(f"{x:.12g}") for x in row) for row in v]
+    cleanv,cleanf,repair=measure("cleanup",lambda:clean_mesh(rounded,f),metrics)
+    v,f=np.asarray(cleanv,dtype=np.float64),np.asarray(cleanf,dtype=np.int64)
+    mesh=trimesh.Trimesh(vertices=v,faces=f,process=False,validate=False)
+    require(np.array_equal(mesh.vertices,v) and np.array_equal(mesh.faces,f),"cleanup mesh changed")
+    obj=out/"mesh.obj"
+    write_obj(obj,v,f)
+    repair.update({"source_commit":os.environ["GITHUB_SHA"],"reference_sha256":sha256(reference),"raw_sha256":sha256(raw),"clean_sha256":sha256(obj)})
+    (out/"cleanup-receipt.json").write_text(json.dumps(repair,indent=2)+"\n")
+    print(json.dumps(repair,indent=2),flush=True)
     receipt = {
         "scope": "checkpoint-03-geometry-only",
         "asset_id": "hearthkip-r1", "input_kind": "hearthkip-r1-approved",
@@ -127,6 +139,11 @@ def main(out):
     }
     (out / "generation.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps(receipt, indent=2), flush=True)
+    # Strict readback and independent repair audit BEFORE texture mapping.
+    import subprocess
+    root=Path(__file__).resolve().parents[1]
+    subprocess.run([sys.executable,str(root/"geometry/validate_obj.py"),str(out)],check=True)
+    subprocess.run([sys.executable,str(root/"hearthkip/verify_cleanup.py"),str(out)],check=True,env=dict(os.environ,PYTHONPATH=str(root/"geometry")))
     from bake import bake
     bake(out, mesh, model, scene, measure, metrics, receipt)
 
