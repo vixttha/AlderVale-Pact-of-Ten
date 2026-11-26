@@ -1,0 +1,167 @@
+{
+  "source_commit": "1bd25ae81874308d59f9e57ab89201febe0ff356",
+  "run_id": "45907479598",
+  "run_attempt": "1",
+  "input_kind": "hearthkip-r1-approved",
+  "quality_accepted": false,
+  "files": {
+    "candidate.glb": {
+      "sha256": "bbaf6b04baad6400dad4ecafabe7f975d6f156f7e828e23b0ecbe39b824987af",
+      "bytes": 4069000
+    },
+    "viewer.html": {
+      "sha256": "97eea74986606c1ef7e339f301a5c6e621c0b97a003388cfc60d4b0b0abfdfe0",
+      "bytes": 6017478
+    },
+    "viewer-LICENSE.txt": {
+      "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+      "bytes": 1081
+    },
+    "all-angles.png": {
+      "sha256": "50f3969b8a6b2be48a6f9eb28e7b78ade3572247fdccd09a398bc4b0c96d06a1",
+      "bytes": 280339
+    },
+    "front.png": {
+      "sha256": "b40a5797882b7c42f6be3e2032fd3a56ce2c4abb6c0aac3b8db042f7db278bea",
+      "bytes": 268927
+    },
+    "rear.png": {
+      "sha256": "f066d8a1d5476e8b4802fd5f91a89291cbbf21046a81fd9e19db35f5920e2f87",
+      "bytes": 263540
+    },
+    "left.png": {
+      "sha256": "198ee214c3a1d62fda11225d61b4b3087e2440b39471495553b2cc71f349f00b",
+      "bytes": 285835
+    },
+    "right.png": {
+      "sha256": "a97eda67df0a4b57df43f35583361427fd1b26e0266bbb73d9425d28d6a10ac5",
+      "bytes": 285443
+    },
+    "top.png": {
+      "sha256": "29425fcfc1d8b18eabd1b0ee80251ad8520d86a9c23e5bad09c38bd33c92ab22",
+      "bytes": 279175
+    },
+    "underside.png": {
+      "sha256": "ff7a98d7799a21a7e303295dfe14482d5b6c6945dbbcf6ce35b01676c531b8f7",
+      "bytes": 274346
+    },
+    "three-quarter.png": {
+      "sha256": "53d7420290860a020ac05c43d96d04ace7cd0813ad227825cfc900b58e93a9c9",
+      "bytes": 257795
+    },
+    "inspection.zip": {
+      "sha256": "eca17312c70e0c8b7f750ea1f37e3f015a44b5e291cf9662e4c3215e5d501605",
+      "bytes": 8424954
+    }
+  },
+  "views": {
+    "status": "pass",
+    "source_commit": "1bd25ae81874308d59f9e57ab89201febe0ff356",
+    "glb_sha256": "bbaf6b04baad6400dad4ecafabe7f975d6f156f7e828e23b0ecbe39b824987af",
+    "device": "CPU",
+    "engine": "CYCLES",
+    "views": {
+      "front": {
+        "sha256": "b40a5797882b7c42f6be3e2032fd3a56ce2c4abb6c0aac3b8db042f7db278bea",
+        "seconds": 3.936,
+        "direction": [
+          0,
+          -1,
+          0
+        ],
+        "projection": "ORTHO"
+      },
+      "rear": {
+        "sha256": "f066d8a1d5476e8b4802fd5f91a89291cbbf21046a81fd9e19db35f5920e2f87",
+        "seconds": 3.839,
+        "direction": [
+          0,
+          1,
+          0
+        ],
+        "projection": "ORTHO"
+      },
+      "left": {
+        "sha256": "198ee214c3a1d62fda11225d61b4b3087e2440b39471495553b2cc71f349f00b",
+        "seconds": 3.767,
+        "direction": [
+          -1,
+          0,
+          0
+        ],
+        "projection": "ORTHO"
+      },
+      "right": {
+        "sha256": "a97eda67df0a4b57df43f35583361427fd1b26e0266bbb73d9425d28d6a10ac5",
+        "seconds": 3.633,
+        "direction": [
+          1,
+          0,
+          0
+        ],
+        "projection": "ORTHO"
+      },
+      "top": {
+        "sha256": "29425fcfc1d8b18eabd1b0ee80251ad8520d86a9c23e5bad09c38bd33c92ab22",
+        "seconds": 3.588,
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "projection": "ORTHO"
+      },
+      "underside": {
+        "sha256": "ff7a98d7799a21a7e303295dfe14482d5b6c6945dbbcf6ce35b01676c531b8f7",
+        "seconds": 3.566,
+        "direction": [
+          0,
+          0,
+          -1
+        ],
+        "projection": "ORTHO"
+      },
+      "three-quarter": {
+        "sha256": "53d7420290860a020ac05c43d96d04ace7cd0813ad227825cfc900b58e93a9c9",
+        "seconds": 3.333,
+        "direction": [
+          2.8,
+          -4,
+          2
+        ],
+        "projection": "PERSP"
+      }
+    }
+  },
+  "viewer": {
+    "status": "pass",
+    "source_commit": "1bd25ae81874308d59f9e57ab89201febe0ff356",
+    "glb_sha256": "bbaf6b04baad6400dad4ecafabe7f975d6f156f7e828e23b0ecbe39b824987af",
+    "viewer_sha256": "97eea74986606c1ef7e339f301a5c6e621c0b97a003388cfc60d4b0b0abfdfe0",
+    "triangles": 33830,
+    "textured_meshes": 1,
+    "view_button": true,
+    "orbit_drag": true,
+    "external_requests": 0,
+    "chromium": "140.0.7339.186"
+  },
+  "cleanup": {
+    "status": "pass",
+    "source_commit": "1bd25ae81874308d59f9e57ab89201febe0ff356",
+    "raw_sha256": "f7b68531d633bc601d44e622f072fcfdb0eb8542d3ba870fa7de9075d5f2300d",
+    "clean_sha256": "46a503d53956f5e6fcf6d22cb506eeac84d866cc5c258bbcb8ac9e81019d01d3",
+    "cleanup_receipt_sha256": "9f37464e0ea14efc6cfd051d6570f650ce7cd4a4a8040e0ada925e92f60c63cb",
+    "removed_faces": {
+      "repeated_index": 2,
+      "zero_or_tiny_area": 0,
+      "duplicate_face": 0
+    },
+    "removed_vertices": 0,
+    "remaining_vertices": 16981,
+    "remaining_triangles": 33830,
+    "remaining_degenerate_faces": 0,
+    "retained_positions_and_face_order_exact": true,
+    "watertight": false,
+    "quality_accepted": false
+  }
+}
