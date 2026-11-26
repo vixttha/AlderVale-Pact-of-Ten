@@ -1,0 +1,3 @@
+# One-time synthetic public inspection
+
+Issue #198. Owner authorized one bounded publication to AAGP-Asset-Output only. Standard Ubuntu CPU. Reuses checkpoint 07 package and validation; seven actual camera renders and self-contained Three.js viewer tested in headless Chromium (no network). Ordinary Git, no LFS, Actions artifact storage, Pages deployment or release. Job-level contents:write is repository-scoped; token explicitly passed only to final publisher, source checkout credentials not persisted. Publisher uses hard-coded output ref, fixed empty seed, exact allowlist, non-force push and remote immutable byte readback. No private input. A second publication requires a separately reviewed seed/ref change. Technical output is not owner-accepted or game-ready.

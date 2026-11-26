@@ -1,0 +1,204 @@
+name: AAGP checkpoint 07 - public synthetic inspection
+on:
+  push:
+    branches: [AlderVale-Asset-Generation]
+    paths:
+      - '.github/workflows/triposr-cpu-public-inspection.yml'
+      - 'delivery/public/**'
+permissions:
+  contents: read
+concurrency:
+  group: aagp-public-inspection-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  cpu-public-inspection:
+    permissions:
+      contents: write
+    if: github.event.repository.private == false && github.repository == 'vixttha/AlderVale-Pact-of-Ten'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: '1'
+      OMP_NUM_THREADS: '4'
+      MKL_NUM_THREADS: '4'
+      CMAKE_BUILD_PARALLEL_LEVEL: '2'
+      PIP_NO_CACHE_DIR: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      TORCH_FORCE_WEIGHTS_ONLY_LOAD: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.11'
+      - name: Verify checkout and geometry contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$RUNNER_OS" = Linux
+          test "$RUNNER_ARCH" = X64
+          echo "HF_HOME=$RUNNER_TEMP/aagp-hf" >> "$GITHUB_ENV"
+          python -m unittest discover -s generators/triposr -p 'test_*.py' -v
+          python -m unittest discover -s geometry -p 'test_*.py' -v
+          python -m unittest discover -s texture -p 'test_*.py' -v
+          python -m unittest discover -s packaging -p 'test_*.py' -v
+          python -m unittest discover -s delivery -p 'test_*.py' -v
+          nproc
+          free -h
+          df -h "$RUNNER_TEMP"
+      - name: Install Mesa software EGL system libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libegl-mesa0 libgl1 libgl1-mesa-dri libegl-dev
+          dpkg-query -W libegl1 libegl-mesa0 libgl1 libgl1-mesa-dri libegl-dev
+      - name: Install checkpoint 02 CPU dependencies unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v bash generators/triposr/install_cpu.sh
+      - name: Install pinned texture dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/aagp-venv/bin/python" -m pip install --no-deps --only-binary=:all: --index-url https://pypi.org/simple xatlas==0.0.9 moderngl==5.12.0 glcontext==3.0.0
+          "$RUNNER_TEMP/aagp-venv/bin/python" -m pip check
+          "$RUNNER_TEMP/aagp-venv/bin/python" -c 'import moderngl; c=moderngl.create_context(standalone=True, backend="egl", libegl="libEGL.so.1", libgl="libGL.so.1"); r=c.info["GL_RENDERER"]; print(r); assert "llvmpipe" in r.lower() or "softpipe" in r.lower(); c.release()'
+      - name: Download pinned verified weights
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v "$RUNNER_TEMP/aagp-venv/bin/python" generators/triposr/cpu_load.py download
+      - name: Generate actual mesh and baked texture on CPU
+        shell: bash
+        env:
+          HF_HUB_OFFLINE: '1'
+          TRANSFORMERS_OFFLINE: '1'
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$RUNNER_TEMP/aagp-triposr:$GITHUB_WORKSPACE/generators/triposr"
+          /usr/bin/time -v "$RUNNER_TEMP/aagp-venv/bin/python" texture/generate.py "$RUNNER_TEMP/aagp-geometry"
+      - name: Independent OBJ readback and receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/aagp-venv/bin/python" geometry/validate_obj.py "$RUNNER_TEMP/aagp-geometry" | tee "$RUNNER_TEMP/aagp-geometry-validation.json"
+          cat "$RUNNER_TEMP/aagp-geometry-validation.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Independent UV and texture readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/aagp-venv/bin/python" texture/validate.py "$RUNNER_TEMP/aagp-geometry" | tee "$RUNNER_TEMP/aagp-texture-validation.json"
+          cat "$RUNNER_TEMP/aagp-texture-validation.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Install pinned BART and Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-checkout https://github.com/vixttha/Blender-Agent-Refinement-Toolkit.git "$RUNNER_TEMP/bart"
+          git -C "$RUNNER_TEMP/bart" checkout --detach 392d8d7a1c262227cba3c08d5577af38c74b4e25
+          test "$(git -C "$RUNNER_TEMP/bart" rev-parse HEAD)" = "392d8d7a1c262227cba3c08d5577af38c74b4e25"
+          release=release/Blender4.5/blender-4.5.0-linux-x64.tar.xz
+          curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://download.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz" ||
+            curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://mirror.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz"
+          printf '%s  %s\n' 1188b95cc12321c770b631939f7c25a096910b6f884a990bf9c0f62d52b38aec "$RUNNER_TEMP/blender.tar.xz" | sha256sum --check -
+          mkdir "$RUNNER_TEMP/blender"
+          tar -xf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP/blender" --strip-components=1
+          echo "BLENDER_BIN=$RUNNER_TEMP/blender/blender" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/blender/blender" --version
+      - name: BART actual textured OBJ to GLB conversion
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$RUNNER_TEMP/bart/src"
+          python -m blender_agent version
+          python -m blender_agent --workspace "$RUNNER_TEMP/aagp-geometry" inspect textured.obj
+          /usr/bin/time -v python -m blender_agent --workspace "$RUNNER_TEMP/aagp-geometry" --blender "$BLENDER_BIN" --timeout 180 convert textured.obj candidate.glb | tee "$RUNNER_TEMP/bart-convert.json"
+          python -m blender_agent --workspace "$RUNNER_TEMP/aagp-geometry" inspect candidate.glb
+      - name: Independent GLB structure and embedded image readback
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/aagp-venv/bin/python" packaging/validate_glb.py "$RUNNER_TEMP/aagp-geometry" | tee "$RUNNER_TEMP/aagp-glb-validation.json"
+          cat "$RUNNER_TEMP/aagp-glb-validation.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Independent Blender material and geometry reimport
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python packaging/reimport.py -- "$RUNNER_TEMP/aagp-geometry" | tee "$RUNNER_TEMP/aagp-blender-reimport.txt"
+          cat "$RUNNER_TEMP/aagp-blender-reimport.txt" >> "$GITHUB_STEP_SUMMARY"
+      - name: Install pinned Khronos validator
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/aagp-validator" --ignore-scripts --no-audit --no-fund --save-exact gltf-validator@2.0.0-dev.3.10
+          node --version
+      - name: Khronos positive and negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          node validation/validate.cjs "$RUNNER_TEMP/aagp-geometry" "$RUNNER_TEMP/aagp-validator" | tee "$RUNNER_TEMP/aagp-khronos-validation.json"
+          cat "$RUNNER_TEMP/aagp-khronos-validation.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Independent raw topology diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/aagp-venv/bin/python" validation/topology.py "$RUNNER_TEMP/aagp-geometry" | tee "$RUNNER_TEMP/aagp-topology.json"
+          cat "$RUNNER_TEMP/aagp-topology.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Render actual reimported GLB with CPU Cycles
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python delivery/preview.py -- "$RUNNER_TEMP/aagp-geometry"
+      - name: Assemble and independently read back inspection ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "$RUNNER_TEMP/aagp-blender-reimport.txt" "$RUNNER_TEMP/aagp-geometry/blender-reimport.txt"
+          "$RUNNER_TEMP/aagp-venv/bin/python" delivery/package.py "$RUNNER_TEMP/aagp-geometry" "$RUNNER_TEMP/aagp-inspection.zip" | tee "$RUNNER_TEMP/aagp-package-receipt.json"
+          cat "$RUNNER_TEMP/aagp-package-receipt.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Render seven actual orthographic and perspective views
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python delivery/public/views.py -- "$RUNNER_TEMP/aagp-geometry"
+      - name: Install pinned viewer build and browser tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/aagp-viewer" --ignore-scripts --no-audit --no-fund --save-exact three@0.180.0 esbuild@0.25.10 playwright@1.55.1
+          "$RUNNER_TEMP/aagp-viewer/node_modules/.bin/playwright" install chromium
+      - name: Build offline interactive viewer and verify actual browser rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp delivery/public/viewer.js "$RUNNER_TEMP/aagp-viewer/viewer.js"
+          "$RUNNER_TEMP/aagp-viewer/node_modules/.bin/esbuild" "$RUNNER_TEMP/aagp-viewer/viewer.js" --bundle --minify --format=iife --outfile="$RUNNER_TEMP/aagp-viewer/bundle.js"
+          cp "$RUNNER_TEMP/aagp-viewer/node_modules/three/LICENSE" "$RUNNER_TEMP/aagp-geometry/viewer-LICENSE.txt"
+          python delivery/public/build_viewer.py "$RUNNER_TEMP/aagp-geometry" "$RUNNER_TEMP/aagp-viewer/bundle.js"
+          cp delivery/public/smoke.cjs "$RUNNER_TEMP/aagp-viewer/smoke.cjs"
+          node "$RUNNER_TEMP/aagp-viewer/smoke.cjs" "$RUNNER_TEMP/aagp-geometry"
+      - name: Assemble public-only bounded delivery
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/aagp-venv/bin/python" delivery/public/prepare.py "$RUNNER_TEMP/aagp-geometry" "$RUNNER_TEMP/aagp-inspection.zip" "$RUNNER_TEMP/aagp-public"
+      - name: Publish only synthetic outputs and verify remote bytes
+        shell: bash
+        env:
+          AAGP_PUSH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python delivery/public/publish.py "$RUNNER_TEMP/aagp-public"
+      - name: Record resources
+        if: always()
+        shell: bash
+        run: |
+          free -h
+          df -h "$RUNNER_TEMP"
