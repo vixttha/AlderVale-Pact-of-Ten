@@ -1,0 +1,101 @@
+name: Avarn R5.8 - dental and seam qualification
+on:
+  push:
+    branches: [avarn-3d-development]
+    paths:
+      - 'art/avarn/3d/candidates/avarn-r5.8.glb'
+      - 'tools/avarn_r58_blender_audit.py'
+      - '.github/workflows/avarn-r58-audit.yml'
+permissions:
+  contents: read
+concurrency:
+  group: avarn-r58-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  bart-blender-fixture:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify exact checkout and inventory
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 tools/validate_universe.py
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.12'
+      - name: Pin BART and Blender using existing Hearth Gate toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-checkout https://github.com/vixttha/Blender-Agent-Refinement-Toolkit.git "$RUNNER_TEMP/bart"
+          git -C "$RUNNER_TEMP/bart" checkout --detach 392d8d7a1c262227cba3c08d5577af38c74b4e25
+          test "$(git -C "$RUNNER_TEMP/bart" rev-parse HEAD)" = "392d8d7a1c262227cba3c08d5577af38c74b4e25"
+          echo "PYTHONPATH=$RUNNER_TEMP/bart/src" >> "$GITHUB_ENV"
+          release=release/Blender4.5/blender-4.5.0-linux-x64.tar.xz
+          curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://download.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz" ||
+            curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://mirror.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz"
+          printf '%s  %s\n' 1188b95cc12321c770b631939f7c25a096910b6f884a990bf9c0f62d52b38aec "$RUNNER_TEMP/blender.tar.xz" | sha256sum --check -
+          mkdir "$RUNNER_TEMP/blender"
+          tar -xf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP/blender" --strip-components=1
+          echo "BLENDER_BIN=$RUNNER_TEMP/blender/blender" >> "$GITHUB_ENV"
+      - name: BART real Blender fixture and independent collision controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m blender_agent version
+          mkdir "$RUNNER_TEMP/r58-fixture"
+          python -m blender_agent --workspace "$RUNNER_TEMP/r58-fixture" --blender "$BLENDER_BIN" create cube cube.glb
+          python -m blender_agent --workspace "$RUNNER_TEMP/r58-fixture" inspect cube.glb
+          "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python tools/avarn_r58_blender_audit.py -- fixture "$RUNNER_TEMP/r58-fixture/cube.glb"
+          echo "Synthetic fixture only; no R5.8 candidate qualification."
+  exact-r58-candidate:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Require exact R5.8 GLB before provisioning
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          source=art/avarn/3d/candidates/avarn-r5.8.glb
+          if [[ ! -f "$source" ]]; then
+            echo "::error::Exact R5.8 binary not transferred; candidate qualification blocked."
+            exit 1
+          fi
+          test "$(wc -c < "$source")" -eq 85383096
+          printf '%s  %s\n' c4936438d21b0c545aedff98e7ef50047f6d2965eff080d5fe43f09dee8a277f "$source" | sha256sum --check -
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.12'
+      - name: Pin BART and Blender using existing Hearth Gate toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --no-checkout https://github.com/vixttha/Blender-Agent-Refinement-Toolkit.git "$RUNNER_TEMP/bart"
+          git -C "$RUNNER_TEMP/bart" checkout --detach 392d8d7a1c262227cba3c08d5577af38c74b4e25
+          test "$(git -C "$RUNNER_TEMP/bart" rev-parse HEAD)" = "392d8d7a1c262227cba3c08d5577af38c74b4e25"
+          echo "PYTHONPATH=$RUNNER_TEMP/bart/src" >> "$GITHUB_ENV"
+          release=release/Blender4.5/blender-4.5.0-linux-x64.tar.xz
+          curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://download.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz" ||
+            curl --fail --location --connect-timeout 10 --max-time 100 --retry 2 --silent --show-error "https://mirror.blender.org/$release" -o "$RUNNER_TEMP/blender.tar.xz"
+          printf '%s  %s\n' 1188b95cc12321c770b631939f7c25a096910b6f884a990bf9c0f62d52b38aec "$RUNNER_TEMP/blender.tar.xz" | sha256sum --check -
+          mkdir "$RUNNER_TEMP/blender"
+          tar -xf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP/blender" --strip-components=1
+          echo "BLENDER_BIN=$RUNNER_TEMP/blender/blender" >> "$GITHUB_ENV"
+      - name: BART and independent Blender candidate audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          source=art/avarn/3d/candidates/avarn-r5.8.glb
+          python -m blender_agent version
+          python -m blender_agent --workspace "$GITHUB_WORKSPACE" inspect "$source"
+          "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python tools/avarn_r58_blender_audit.py -- candidate "$GITHUB_WORKSPACE/$source" | tee "$RUNNER_TEMP/r58-audit.txt"
+          cat "$RUNNER_TEMP/r58-audit.txt" >> "$GITHUB_STEP_SUMMARY"

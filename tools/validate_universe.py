@@ -16,7 +16,33 @@ assert 'Rowan is rejected' in (root/'DECISIONS.md').read_text()
 assert 'every designated special accessory' in (root/'DECISIONS.md').read_text()
 assert 'FQ-001' in (root/'DECISIONS.md').read_text()
 tracked=set(subprocess.check_output(['git','ls-files'],cwd=root,text=True).splitlines())
-assert tracked=={'README.md','DECISIONS.md','WORK-QUEUE.md','canon/registry.json','canon/world-and-story.md','tools/validate_universe.py','.github/workflows/universe-validate.yml','canon/pact-of-ten.md','canon/source-pins.json','VERSION','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md','canon/fire-founding-partnership.md','art/open-hearth/01-hearthstone.svg','art/open-hearth/02-forged-ring.svg','art/open-hearth/03-ember-gate.svg','art/open-hearth/04-shared-flame.svg','art/open-hearth/05-kilnback-seal.svg','art/open-hearth/README.md','tools/open_hearth_requirements.txt','tools/export_open_hearth.py','art/open-hearth/review-b/01-open-circlet.svg','art/open-hearth/review-b/02-hearth-gate.svg','art/open-hearth/review-b/03-oath-of-embers.svg','art/open-hearth/review-b/04-kilnback-seal.svg','art/open-hearth/review-b/05-keeper-of-warmth.svg','art/open-hearth/review-b/README.md','art/open-hearth/hearth-gate-r1/01-hero.svg','art/open-hearth/hearth-gate-r1/02-simple-icon.svg','art/open-hearth/hearth-gate-r1/03-monochrome.svg','art/open-hearth/hearth-gate-r1/04-dark-background.svg','art/open-hearth/hearth-gate-r1/README.md','art/open-hearth/hearth-gate-r2/01-hero.svg','art/open-hearth/hearth-gate-r2/02-simple-icon.svg','art/open-hearth/hearth-gate-r2/03-monochrome.svg','art/open-hearth/hearth-gate-r2/04-dark-background.svg','art/open-hearth/hearth-gate-r2/README.md','art/open-hearth/hearth-gate-r3/01-hero.svg','art/open-hearth/hearth-gate-r3/02-simple-icon.svg','art/open-hearth/hearth-gate-r3/03-monochrome.svg','art/open-hearth/hearth-gate-r3/04-dark-background.svg','art/open-hearth/hearth-gate-r3/05-stone-relief.svg','art/open-hearth/hearth-gate-r3/06-forged-metal.svg','art/open-hearth/hearth-gate-r3/07-ceremonial-banner.svg','art/open-hearth/hearth-gate-r3/README.md','tools/hearth_gate_3d.py','tools/prepare_hearth_gate_3d.py','tools/validate_hearth_gate_3d.py','.github/workflows/hearth-gate-3d.yml','art/open-hearth/hearth-gate-r3/3D-EVALUATION.md','art/avarn/concepts-a/01-kilnback-colossus.svg','art/avarn/concepts-a/02-cinder-crowned.svg','art/avarn/concepts-a/03-ember-vault.svg','art/avarn/concepts-a/04-caldera-warden.svg','art/avarn/concepts-a/05-ashveil-pilgrim.svg','art/avarn/concepts-a/README.md','tools/export_avarn_concepts.py','art/avarn/hybrid-r2/README.md'}
+source_path='art/avarn/3d/source/avarn-v1.glb'
+if source_path in tracked:
+    import hashlib
+    from avarn_intake import SOURCE_SHA, SOURCE_SIZE
+    source=root/source_path
+    assert source.stat().st_size==SOURCE_SIZE, 'Avarn source size mismatch'
+    with source.open('rb') as stream:
+        assert hashlib.file_digest(stream,'sha256').hexdigest()==SOURCE_SHA, 'Avarn source digest mismatch'
+    tracked.remove(source_path)
+r4_path='art/avarn/3d/source/avarn-r4.glb'
+if r4_path in tracked:
+    import hashlib
+    from avarn_r4_intake import SOURCE_SHA as R4_SHA, SOURCE_SIZE as R4_SIZE
+    source=root/r4_path
+    assert source.stat().st_size==R4_SIZE, 'Avarn R4 source size mismatch'
+    with source.open('rb') as stream:
+        assert hashlib.file_digest(stream,'sha256').hexdigest()==R4_SHA, 'Avarn R4 source digest mismatch'
+    tracked.remove(r4_path)
+r58_path='art/avarn/3d/candidates/avarn-r5.8.glb'
+if r58_path in tracked:
+    import hashlib
+    source=root/r58_path
+    assert source.stat().st_size==85383096, 'R5.8 size mismatch'
+    with source.open('rb') as stream:
+        assert hashlib.file_digest(stream,'sha256').hexdigest()=='c4936438d21b0c545aedff98e7ef50047f6d2965eff080d5fe43f09dee8a277f', 'R5.8 digest mismatch'
+    tracked.remove(r58_path)
+assert tracked=={'tools/avarn_r58_blender_audit.py','.github/workflows/avarn-r58-audit.yml','tools/avarn_r4_intake.py','tools/test_avarn_r4_intake.py','.github/workflows/avarn-r4-intake.yml','README.md','DECISIONS.md','WORK-QUEUE.md','canon/registry.json','canon/world-and-story.md','tools/validate_universe.py','.github/workflows/universe-validate.yml','canon/pact-of-ten.md','canon/source-pins.json','VERSION','canon/founders-and-mythology.md','canon/covenants-and-derived-schools.md','canon/fire-founding-partnership.md','art/open-hearth/01-hearthstone.svg','art/open-hearth/02-forged-ring.svg','art/open-hearth/03-ember-gate.svg','art/open-hearth/04-shared-flame.svg','art/open-hearth/05-kilnback-seal.svg','art/open-hearth/README.md','tools/open_hearth_requirements.txt','tools/export_open_hearth.py','art/open-hearth/review-b/01-open-circlet.svg','art/open-hearth/review-b/02-hearth-gate.svg','art/open-hearth/review-b/03-oath-of-embers.svg','art/open-hearth/review-b/04-kilnback-seal.svg','art/open-hearth/review-b/05-keeper-of-warmth.svg','art/open-hearth/review-b/README.md','art/open-hearth/hearth-gate-r1/01-hero.svg','art/open-hearth/hearth-gate-r1/02-simple-icon.svg','art/open-hearth/hearth-gate-r1/03-monochrome.svg','art/open-hearth/hearth-gate-r1/04-dark-background.svg','art/open-hearth/hearth-gate-r1/README.md','art/open-hearth/hearth-gate-r2/01-hero.svg','art/open-hearth/hearth-gate-r2/02-simple-icon.svg','art/open-hearth/hearth-gate-r2/03-monochrome.svg','art/open-hearth/hearth-gate-r2/04-dark-background.svg','art/open-hearth/hearth-gate-r2/README.md','art/open-hearth/hearth-gate-r3/01-hero.svg','art/open-hearth/hearth-gate-r3/02-simple-icon.svg','art/open-hearth/hearth-gate-r3/03-monochrome.svg','art/open-hearth/hearth-gate-r3/04-dark-background.svg','art/open-hearth/hearth-gate-r3/05-stone-relief.svg','art/open-hearth/hearth-gate-r3/06-forged-metal.svg','art/open-hearth/hearth-gate-r3/07-ceremonial-banner.svg','art/open-hearth/hearth-gate-r3/README.md','tools/hearth_gate_3d.py','tools/prepare_hearth_gate_3d.py','tools/validate_hearth_gate_3d.py','.github/workflows/hearth-gate-3d.yml','art/open-hearth/hearth-gate-r3/3D-EVALUATION.md','art/avarn/concepts-a/01-kilnback-colossus.svg','art/avarn/concepts-a/02-cinder-crowned.svg','art/avarn/concepts-a/03-ember-vault.svg','art/avarn/concepts-a/04-caldera-warden.svg','art/avarn/concepts-a/05-ashveil-pilgrim.svg','art/avarn/concepts-a/README.md','tools/export_avarn_concepts.py','art/avarn/hybrid-r2/README.md','art/avarn/3d/README.md','tools/avarn_intake.py','tools/test_avarn_intake.py','.github/workflows/avarn-3d.yml','tools/avarn_blender_trial.py'}
 pins=json.loads((root/'canon/source-pins.json').read_text())
 assert (root/'VERSION').read_text().strip()==pins['workspace_version']=='0.0.5-candidate'
 element=pins['element_hq']
