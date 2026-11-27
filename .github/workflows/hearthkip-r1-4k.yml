@@ -1,0 +1,53 @@
+name: Hearthkip R1 native 4K inspection
+on:
+  push:
+    branches: [assets/hearthkip-r1-4k]
+    paths: ['hearthkip/inspection-4k/render.py', '.github/workflows/hearthkip-r1-4k.yml']
+permissions:
+  contents: read
+concurrency:
+  group: hearthkip-r1-4k
+  cancel-in-progress: true
+jobs:
+  render:
+    if: github.event.repository.private == false && github.repository == 'vixttha/AlderVale-Pact-of-Ten'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify unchanged published GLB and install Blender
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo 'bbaf6b04baad6400dad4ecafabe7f975d6f156f7e828e23b0ecbe39b824987af  hearthkip/r1/candidate.glb' | sha256sum -c -
+          curl -fLsS --retry 2 --connect-timeout 15 --max-time 180 https://download.blender.org/release/Blender4.5/blender-4.5.17-linux-x64.tar.xz -o "$RUNNER_TEMP/blender.tar.xz"
+          echo "b7d09d1aa7c346fed1e56390e815dbf1589d47324734fbad9e2007fe75ca0b8d  $RUNNER_TEMP/blender.tar.xz" | sha256sum -c -
+          mkdir "$RUNNER_TEMP/blender"
+          tar -xf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP/blender" --strip-components=1
+      - name: Render seven native UHD images
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/blender/blender" --background --factory-startup --disable-autoexec --python-exit-code 1 --python hearthkip/inspection-4k/render.py -- hearthkip/r1/candidate.glb "$RUNNER_TEMP/hearthkip-4k"
+      - name: Retain verified images only on isolated branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/assets/hearthkip-r1-4k
+          test ! -e hearthkip/inspection-4k/output
+          mkdir hearthkip/inspection-4k/output
+          for f in front rear left right top underside three-quarter; do cp "$RUNNER_TEMP/hearthkip-4k/$f.png" hearthkip/inspection-4k/output/; done
+          cp "$RUNNER_TEMP/hearthkip-4k/receipt.json" hearthkip/inspection-4k/output/
+          test "$(du -sb hearthkip/inspection-4k/output | cut -f1)" -le 33554432
+          git add hearthkip/inspection-4k/output
+          git -c user.name=github-actions -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -m "Retain native 4K inspection renders of unchanged Hearthkip R1 [skip ci]"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          test "$(git -c http.extraheader="AUTHORIZATION: basic $auth" ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+          git -c http.extraheader="AUTHORIZATION: basic $auth" push origin HEAD:"$GITHUB_REF"
+          test "$(git -c http.extraheader="AUTHORIZATION: basic $auth" ls-remote origin "$GITHUB_REF" | cut -f1)" = "$(git rev-parse HEAD)"
+          cat hearthkip/inspection-4k/output/receipt.json >> "$GITHUB_STEP_SUMMARY"
