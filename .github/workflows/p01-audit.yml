@@ -1,0 +1,33 @@
+name: 3D Gen P01 exact foundation audit
+on:
+  pull_request:
+    branches: [3d-gen]
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+concurrency:
+  group: 3d-gen-p01-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  verify-foundation:
+    if: github.repository == 'vixttha/AlderVale-Pact-of-Ten' && github.event.repository.private == false && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'audit/3d-gen-p01' && github.event.pull_request.base.sha == '10e85e9e88ac955ae87d4558ce9afe93b8b8d792'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: '10e85e9e88ac955ae87d4558ce9afe93b8b8d792'
+          persist-credentials: false
+      - name: Test original P01 checkout
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '10e85e9e88ac955ae87d4558ce9afe93b8b8d792'
+          printf 'Tested checkout: %s\nPR event SHA: %s\nRun: %s / %s\n' "$(git rev-parse HEAD)" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 --version
+          python3 -m unittest discover -s tests -v
+          python3 scripts/preflight.py templates/asset.json --template
+          test "$(git ls-files .github/workflows | wc -l)" -eq 1
+          test "$(git ls-files | wc -l)" -eq 16
+          test ! -e package.json
+          test -z "$(git status --porcelain)"
+          printf 'P01 foundation only. No inference executed.\n' >> "$GITHUB_STEP_SUMMARY"
