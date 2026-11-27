@@ -1,0 +1,28 @@
+name: 3D Gen foundation qualification
+on:
+  push:
+    branches: [3d-gen]
+permissions:
+  contents: read
+concurrency:
+  group: 3d-gen-foundation
+  cancel-in-progress: true
+jobs:
+  foundation:
+    if: github.repository == 'vixttha/AlderVale-Pact-of-Ten' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Exact checkout and intake contract
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 --version
+          python3 -m unittest discover -s tests -v
+          python3 scripts/preflight.py templates/asset.json --template
+          test "$(git ls-files .github/workflows | wc -l)" -eq 1
+          test ! -e package.json
+          printf 'Foundation intake checks only; inference NOT RUN. SHA: %s\n' "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
