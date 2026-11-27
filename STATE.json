@@ -1,16 +1,23 @@
 {
   "schema": 1,
   "version": "0.0.1-draft",
-  "status": "foundation_candidate",
+  "status": "p02_blocked",
   "branch": "3d-gen",
   "game_main_baseline": "3f8fc59317cca811f2958b6871737cc68e167376",
-  "active": "P01",
-  "model_qualification": "not_run",
+  "active": "P02",
+  "model_qualification": "blocked_pending_p02",
   "generation": "not_run",
   "master_acceptance": "not_run",
   "runtime_acceptance": "not_run",
   "owner_branch_acceptance": "pending",
   "publication": "not_authorized",
-  "upstream_pins": "pending",
-  "next": "P01 exact public runner validation then P02 license and dependency lock"
+  "upstream_pins": "partial_source_pins_only",
+  "next": "Obtain authorized gated model access, review license suitability and lock weights/dependencies; then P03 CPU fixture qualification",
+  "foundation_qualification": {
+    "status": "passed",
+    "tested_sha": "10e85e9e88ac955ae87d4558ce9afe93b8b8d792",
+    "run_id": 45937898501,
+    "job_id": 140305231608,
+    "tests_passed": 11
+  }
 }

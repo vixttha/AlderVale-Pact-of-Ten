@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "status": "partial_blocked_do_not_execute",
+  "platform": "ubuntu-24.04-x64-cpu",
+  "sources": {
+    "spar3d": {
+      "repository": "https://github.com/Stability-AI/stable-point-aware-3d",
+      "commit": "fdc311b16809e6a8adc2f5a3407ebb3db1a95bd1",
+      "requirements_git_blob": "a3f1bec9e80b511f72b63f54888a4ae808f25500",
+      "license_git_blob": "a889fd6b2adf60bbbe8d687e011803892b828eab",
+      "runner_git_blob": "7054323ee3c60e3a63ccfd3f13549ba0f6352899",
+      "model_repo": "stabilityai/stable-point-aware-3d",
+      "weight_revision": null,
+      "weights_sha256": null,
+      "access": "gated_unverified",
+      "cpu_env": "SPAR3D_USE_CPU=1",
+      "cpu_flag": "--device cpu",
+      "dependency_lock": null
+    },
+    "sf3d": {
+      "repository": "https://github.com/Stability-AI/stable-fast-3d",
+      "commit": "ff21fc491b4dc5314bf6734c7c0dabd86b5f5bb2",
+      "requirements_git_blob": "78bac25396d9f1aaf679aad00749d6582e2d6298",
+      "license_git_blob": "a303d61fdc5b091ff9d21ed0811e83416a163812",
+      "runner_git_blob": "49d4c8780641ff0da1a310e901c0187c89a5cabf",
+      "model_repo": "stabilityai/stable-fast-3d",
+      "weight_revision": null,
+      "weights_sha256": null,
+      "access": "gated_unverified",
+      "cpu_env": "SF3D_USE_CPU=1",
+      "cpu_flag": "--device cpu",
+      "dependency_lock": null
+    },
+    "bart": {
+      "repository": "https://github.com/vixttha/Blender-Agent-Refinement-Toolkit",
+      "commit": "e0e887a5e991a7a6ed7597e4a36dd47a49cd8ccb",
+      "license": "MIT",
+      "license_git_blob": "3a31b6b1dcedea9bb0ca27243d3d7b0cb504a4f5",
+      "pyproject_git_blob": "c8552510aedc9b25ecd81aded969b1cb09138eb9"
+    },
+    "blender": {
+      "version": "4.5.17",
+      "url": "https://download.blender.org/release/Blender4.5/blender-4.5.17-linux-x64.tar.xz",
+      "sha256": "b7d09d1aa7c346fed1e56390e815dbf1589d47324734fbad9e2007fe75ca0b8d",
+      "evidence": "historical R2 runner 45914661217 install success; current upstream checksum not independently retrieved",
+      "license": "GPL-2.0-or-later; distribution obligations review pending"
+    }
+  },
+  "provisional_dependency_candidates": {
+    "clip": {
+      "url": "https://github.com/openai/CLIP",
+      "observed_main": "d05afc436d78f1c48dc0dbf8e5980a9d471f35f6",
+      "qualified": false
+    },
+    "alphaclip": {
+      "url": "https://github.com/SunzeY/AlphaCLIP",
+      "observed_main": "ef9262bc539728bf8ef2dfe9c402ae12bbfcd9ff",
+      "qualified": false
+    }
+  },
+  "authorization": {
+    "model_terms_accepted": "unverified",
+    "commercial_registration": "unverified",
+    "authenticated_weight_access": "unverified",
+    "new_credentials_authorized": false
+  },
+  "inference_enabled": false
+}
