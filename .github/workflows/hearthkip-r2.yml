@@ -1,0 +1,86 @@
+name: Hearthkip R2 - art-directed candidate
+on:
+  push:
+    branches: [assets/hearthkip-r2]
+    paths: ['hearthkip/r2/**', '.github/workflows/hearthkip-r2.yml']
+permissions:
+  contents: read
+concurrency:
+  group: hearthkip-r2
+  cancel-in-progress: true
+jobs:
+  build:
+    if: github.event.repository.private == false && github.repository == 'vixttha/AlderVale-Pact-of-Ten'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.11'
+      - name: Exact source and approved input
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo '230c3a5cda2bf06697a345fa4e3b142c53824cb47c76af8ee3ff72fa7e8d47eb  hearthkip/Hearthkip-R1-TripoSR-input.png' | sha256sum -c -
+          python -m compileall -q hearthkip/r2
+      - name: Install pinned BART and patched Blender
+        run: |
+          set -euo pipefail
+          git clone --no-checkout https://github.com/vixttha/Blender-Agent-Refinement-Toolkit.git "$RUNNER_TEMP/bart"
+          git -C "$RUNNER_TEMP/bart" checkout --detach e0e887a5e991a7a6ed7597e4a36dd47a49cd8ccb
+          test "$(git -C "$RUNNER_TEMP/bart" rev-parse HEAD)" = e0e887a5e991a7a6ed7597e4a36dd47a49cd8ccb
+          curl -fLsS --retry 2 --connect-timeout 15 --max-time 180 https://download.blender.org/release/Blender4.5/blender-4.5.17-linux-x64.tar.xz -o "$RUNNER_TEMP/blender.tar.xz"
+          echo "b7d09d1aa7c346fed1e56390e815dbf1589d47324734fbad9e2007fe75ca0b8d  $RUNNER_TEMP/blender.tar.xz" | sha256sum -c -
+          mkdir "$RUNNER_TEMP/blender"
+          tar -xf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP/blender" --strip-components=1
+          echo "BLENDER_BIN=$RUNNER_TEMP/blender/blender" >> "$GITHUB_ENV"
+          echo "PYTHONPATH=$RUNNER_TEMP/bart/src" >> "$GITHUB_ENV"
+      - name: Build model, rig and candidate clips
+        run: |
+          set -euo pipefail
+          "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python hearthkip/r2/build.py -- "$RUNNER_TEMP/hearthkip-r2"
+      - name: Actual BART BLEND to GLB
+        run: |
+          set -euo pipefail
+          python -m blender_agent version
+          python -m blender_agent --workspace "$RUNNER_TEMP/hearthkip-r2" --blender "$BLENDER_BIN" --timeout 180 convert Hearthkip-R2.blend Hearthkip-R2.glb | tee "$RUNNER_TEMP/hearthkip-r2/bart-conversion.json"
+          python -m blender_agent --workspace "$RUNNER_TEMP/hearthkip-r2" inspect Hearthkip-R2.glb
+      - name: Independent GLB reimport, animation and seven views
+        run: |
+          set -euo pipefail
+          "$BLENDER_BIN" --background --factory-startup --disable-autoexec --python-exit-code 1 --python hearthkip/r2/validate.py -- "$RUNNER_TEMP/hearthkip-r2"
+      - name: Khronos structural validation
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/validator" --ignore-scripts --no-audit --no-fund --save-exact gltf-validator@2.0.0-dev.3.10
+          node - "$RUNNER_TEMP" <<'NODE'
+          const fs=require('fs'), path=require('path'); const temp=process.argv[2], out=path.join(temp,'hearthkip-r2');
+          const validator=require(path.join(temp,'validator/node_modules/gltf-validator'));
+          validator.validateBytes(new Uint8Array(fs.readFileSync(path.join(out,'Hearthkip-R2.glb'))),{uri:'Hearthkip-R2.glb',maxIssues:1000}).then(r=>{fs.writeFileSync(path.join(out,'khronos.json'),JSON.stringify(r,null,2)); console.log(r.issues); if(r.issues.numErrors) process.exitCode=1;}).catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Publish candidate only to exact work branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/assets/hearthkip-r2
+          test ! -e hearthkip/r2/output
+          mkdir hearthkip/r2/output
+          for file in Hearthkip-R2.blend Hearthkip-R2.glb modeling.json bart-conversion.json validation.json khronos.json three-quarter.png front.png rear.png left.png right.png top.png underside.png; do
+            cp "$RUNNER_TEMP/hearthkip-r2/$file" hearthkip/r2/output/
+          done
+          test "$(du -sb hearthkip/r2/output | cut -f1)" -le 33554432
+          (cd hearthkip/r2/output && sha256sum * > SHA256SUMS)
+          git add hearthkip/r2/output
+          git -c user.name=github-actions -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -m "Retain Hearthkip R2 candidate and exact validation receipts [skip ci]"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          test "$(git -c http.extraheader="AUTHORIZATION: basic $auth" ls-remote origin refs/heads/assets/hearthkip-r2 | cut -f1)" = "$GITHUB_SHA"
+          git -c http.extraheader="AUTHORIZATION: basic $auth" push origin HEAD:refs/heads/assets/hearthkip-r2
+          test "$(git -c http.extraheader="AUTHORIZATION: basic $auth" ls-remote origin refs/heads/assets/hearthkip-r2 | cut -f1)" = "$(git rev-parse HEAD)"
+          cat hearthkip/r2/output/validation.json >> "$GITHUB_STEP_SUMMARY"
