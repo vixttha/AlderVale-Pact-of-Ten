@@ -1,0 +1,31 @@
+name: Hearthkip R3 - reference engineering
+on:
+  push:
+    branches: [assets/hearthkip-r3]
+    paths: ['hearthkip/r3/reference.json', 'hearthkip/r3/reference_analysis.py', 'hearthkip/r3/test_reference_analysis.py', '.github/workflows/hearthkip-r3-reference.yml']
+permissions:
+  contents: read
+concurrency:
+  group: hearthkip-r3-reference
+  cancel-in-progress: true
+jobs:
+  reference:
+    if: github.repository == 'vixttha/AlderVale-Pact-of-Ten' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.11'
+      - name: Exact reference and regression checks
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo '230c3a5cda2bf06697a345fa4e3b142c53824cb47c76af8ee3ff72fa7e8d47eb  hearthkip/Hearthkip-R1-TripoSR-input.png' | sha256sum -c -
+          python -m unittest discover -s hearthkip/r3 -p 'test_reference_analysis.py' -v
+          python hearthkip/r3/reference_analysis.py "$RUNNER_TEMP/reference"
+          (cd "$RUNNER_TEMP/reference" && sha256sum *)
+          cat "$RUNNER_TEMP/reference/measurements.json" >> "$GITHUB_STEP_SUMMARY"

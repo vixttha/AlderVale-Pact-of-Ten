@@ -1,0 +1,285 @@
+{
+  "reference": {
+    "path": "hearthkip/Hearthkip-R1-TripoSR-input.png",
+    "sha256": "230c3a5cda2bf06697a345fa4e3b142c53824cb47c76af8ee3ff72fa7e8d47eb",
+    "bytes": 213733,
+    "width": 512,
+    "height": 512
+  },
+  "coordinates": "pixel centers, origin top-left; landmarks manually estimated from locked prepared image, not 3D measurements",
+  "landmarks": [
+    {
+      "id": "near_ear_tip",
+      "x": 184,
+      "y": 48,
+      "visibility": "visible"
+    },
+    {
+      "id": "far_ear_tip",
+      "x": 377,
+      "y": 57,
+      "visibility": "visible"
+    },
+    {
+      "id": "near_ear_outer_left",
+      "x": 151,
+      "y": 94,
+      "visibility": "visible"
+    },
+    {
+      "id": "near_ear_inner_glow",
+      "x": 194,
+      "y": 125,
+      "visibility": "visible"
+    },
+    {
+      "id": "far_ear_inner_glow",
+      "x": 383,
+      "y": 127,
+      "visibility": "visible"
+    },
+    {
+      "id": "near_ear_root",
+      "x": 260,
+      "y": 147,
+      "visibility": "estimated_visible"
+    },
+    {
+      "id": "far_ear_root",
+      "x": 365,
+      "y": 158,
+      "visibility": "estimated_visible"
+    },
+    {
+      "id": "near_eye",
+      "x": 311,
+      "y": 151,
+      "visibility": "visible"
+    },
+    {
+      "id": "nose",
+      "x": 357,
+      "y": 157,
+      "visibility": "visible"
+    },
+    {
+      "id": "muzzle_tip",
+      "x": 379,
+      "y": 171,
+      "visibility": "visible"
+    },
+    {
+      "id": "chin",
+      "x": 344,
+      "y": 210,
+      "visibility": "visible"
+    },
+    {
+      "id": "crown",
+      "x": 298,
+      "y": 115,
+      "visibility": "visible"
+    },
+    {
+      "id": "mane_left",
+      "x": 221,
+      "y": 210,
+      "visibility": "visible"
+    },
+    {
+      "id": "chest_crescent_apex",
+      "x": 337,
+      "y": 269,
+      "visibility": "visible"
+    },
+    {
+      "id": "chest_crescent_left",
+      "x": 306,
+      "y": 300,
+      "visibility": "visible"
+    },
+    {
+      "id": "chest_crescent_right",
+      "x": 368,
+      "y": 299,
+      "visibility": "visible"
+    },
+    {
+      "id": "cream_bib_lower",
+      "x": 315,
+      "y": 378,
+      "visibility": "estimated_visible"
+    },
+    {
+      "id": "tail_tip",
+      "x": 103,
+      "y": 221,
+      "visibility": "visible"
+    },
+    {
+      "id": "tail_upper",
+      "x": 146,
+      "y": 197,
+      "visibility": "visible"
+    },
+    {
+      "id": "tail_root",
+      "x": 188,
+      "y": 253,
+      "visibility": "estimated_visible"
+    },
+    {
+      "id": "back_ridge",
+      "x": 218,
+      "y": 226,
+      "visibility": "visible"
+    },
+    {
+      "id": "near_hind_paw",
+      "x": 139,
+      "y": 437,
+      "visibility": "visible"
+    },
+    {
+      "id": "far_hind_paw",
+      "x": 221,
+      "y": 428,
+      "visibility": "partially_occluded"
+    },
+    {
+      "id": "near_fore_paw",
+      "x": 280,
+      "y": 452,
+      "visibility": "visible"
+    },
+    {
+      "id": "far_fore_paw",
+      "x": 367,
+      "y": 443,
+      "visibility": "visible"
+    },
+    {
+      "id": "near_fore_toe_base",
+      "x": 280,
+      "y": 468,
+      "visibility": "visible"
+    },
+    {
+      "id": "far_fore_toe_base",
+      "x": 366,
+      "y": 459,
+      "visibility": "visible"
+    },
+    {
+      "id": "near_hind_toe_base",
+      "x": 139,
+      "y": 450,
+      "visibility": "visible"
+    },
+    {
+      "id": "shoulder",
+      "x": 274,
+      "y": 319,
+      "visibility": "estimated_visible"
+    },
+    {
+      "id": "hip",
+      "x": 166,
+      "y": 320,
+      "visibility": "estimated_visible"
+    }
+  ],
+  "regions": [
+    {
+      "name": "charcoal_dorsal_fur",
+      "box": [
+        178,
+        252,
+        224,
+        284
+      ]
+    },
+    {
+      "name": "copper_flank",
+      "box": [
+        150,
+        318,
+        177,
+        348
+      ]
+    },
+    {
+      "name": "cream_muzzle",
+      "box": [
+        321,
+        172,
+        349,
+        187
+      ]
+    },
+    {
+      "name": "cream_bib",
+      "box": [
+        323,
+        313,
+        344,
+        337
+      ]
+    },
+    {
+      "name": "near_ear_ember",
+      "box": [
+        183,
+        115,
+        206,
+        134
+      ]
+    },
+    {
+      "name": "crescent_gold",
+      "box": [
+        326,
+        271,
+        344,
+        279
+      ]
+    },
+    {
+      "name": "near_paw",
+      "box": [
+        264,
+        443,
+        289,
+        457
+      ]
+    }
+  ],
+  "hidden_anatomy": {
+    "far_eye": "not reliably visible; infer only in proposed reference sheet",
+    "rear_surface": "unknown",
+    "underside": "unknown",
+    "joint_centers": "unknown; projected surface landmarks only",
+    "tail_attachment": "partially obscured",
+    "camera": "uncalibrated single view; yaw/pitch/focal length cannot be uniquely recovered"
+  },
+  "identity": {
+    "legs": 4,
+    "ears": 2,
+    "tail": 1,
+    "signature": [
+      "amber eye expression",
+      "large volcanic ears",
+      "dark dorsal fur",
+      "copper coat",
+      "cream muzzle and bib",
+      "golden chest crescent",
+      "broad rounded paws",
+      "leaf-shaped ember tail"
+    ]
+  },
+  "approval": {
+    "reference_sheet": false,
+    "master": false,
+    "game": false
+  }
+}
